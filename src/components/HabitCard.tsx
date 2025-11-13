@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Plus, Minus, Trash, Fire, Drop, BookOpen, Barbell, AppleLogo, MoonStars, HeartStraight } from '@phosphor-icons/react'
+import { Trash, Fire, Drop, BookOpen, Barbell, AppleLogo, MoonStars, HeartStraight } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -30,23 +30,23 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, className, style 
   const progressPercent = (habit.currentProgress / habit.targetCount) * 100
   const isComplete = habit.currentProgress >= habit.targetCount
 
-  const handleIncrement = () => {
-    if (habit.currentProgress < habit.targetCount) {
-      onUpdateProgress(habit.id, habit.currentProgress + 1)
-    }
-  }
-
-  const handleDecrement = () => {
-    if (habit.currentProgress > 0) {
-      onUpdateProgress(habit.id, habit.currentProgress - 1)
-      toast.success('Progress decreased')
-    }
-  }
-
   const handleDelete = () => {
     if (confirm(`Delete "${habit.name}"?`)) {
       onDelete(habit.id)
       toast.success('Habit deleted')
+    }
+  }
+
+  const handleIconClick = (index: number) => {
+    const isFilled = index < habit.currentProgress
+    
+    if (isFilled) {
+      onUpdateProgress(habit.id, index)
+      if (index > 0) {
+        toast.success('Progress decreased')
+      }
+    } else {
+      onUpdateProgress(habit.id, index + 1)
     }
   }
 
@@ -55,20 +55,22 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, className, style 
     for (let i = 0; i < habit.targetCount; i++) {
       const isFilled = i < habit.currentProgress
       icons.push(
-        <div
+        <button
           key={i}
+          onClick={() => handleIconClick(i)}
           className={cn(
             'w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center transition-all duration-300',
+            'hover:scale-105 active:scale-95 cursor-pointer',
             isFilled
               ? 'bg-primary text-primary-foreground shadow-lg animate-fill-icon'
-              : 'bg-muted text-muted-foreground border-2 border-dashed border-border'
+              : 'bg-muted text-muted-foreground border-2 border-dashed border-border hover:border-primary/50'
           )}
         >
           <IconComponent
             weight={isFilled ? 'fill' : 'regular'}
             className={cn('w-8 h-8 md:w-10 md:h-10', isFilled && 'drop-shadow-sm')}
           />
-        </div>
+        </button>
       )
     }
     return icons
@@ -105,35 +107,12 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, className, style 
         <Progress value={progressPercent} className="h-2" />
       </div>
 
-      <div className="grid grid-cols-4 md:grid-cols-6 gap-3 md:gap-4 mb-6">{renderIconGrid()}</div>
-
-      <div className="flex gap-3">
-        <Button
-          onClick={handleDecrement}
-          variant="outline"
-          size="lg"
-          disabled={habit.currentProgress === 0}
-          className="flex-1"
-        >
-          <Minus size={20} weight="bold" className="mr-2" />
-          Undo
-        </Button>
-        <Button
-          onClick={handleIncrement}
-          size="lg"
-          disabled={isComplete}
-          className={cn(
-            'flex-1',
-            !isComplete && 'animate-pulse-button'
-          )}
-        >
-          <Plus size={20} weight="bold" className="mr-2" />
-          {isComplete ? 'Complete!' : 'Add One'}
-        </Button>
+      <div className="grid grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
+        {renderIconGrid()}
       </div>
 
       {isComplete && (
-        <div className="mt-4 p-4 bg-success/10 border border-success/20 rounded-lg text-center">
+        <div className="mt-6 p-4 bg-success/10 border border-success/20 rounded-lg text-center">
           <p className="text-success-foreground font-medium">🎉 Goal achieved for today!</p>
         </div>
       )}

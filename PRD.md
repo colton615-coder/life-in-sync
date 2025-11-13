@@ -13,11 +13,11 @@ A visual habit tracking application where users set daily goals (like drinking 8
 ## Essential Features
 
 ### Visual Progress Tracking
-- **Functionality**: Display a grid of icon representations (glasses for water, checkmarks for habits, etc.) that fill/highlight as user taps a plus button to log progress toward daily goal
-- **Purpose**: Create satisfying visual feedback that motivates completion through seeing progress accumulate
+- **Functionality**: Display a grid of icon representations (glasses for water, checkmarks for habits, etc.) that fill/highlight as user directly taps individual icons to log progress toward daily goal
+- **Purpose**: Create satisfying visual feedback that motivates completion through seeing progress accumulate with direct icon interaction
 - **Trigger**: User sets daily goal (e.g., "8 glasses of water")
-- **Progression**: User opens app → Sees grid of 8 empty glass icons → Taps plus button throughout day → Each tap fills one glass with animated color transition → Final glass triggers celebration animation → Completion logged to history
-- **Success criteria**: Icons animate smoothly on tap (< 200ms), celebration fires on final completion, daily progress persists
+- **Progression**: User opens app → Sees grid of 8 empty glass icons → Taps individual icons throughout day → Each tapped icon fills with animated color transition → Final icon triggers celebration animation → Completion logged to history
+- **Success criteria**: Icons animate smoothly on tap (< 200ms), celebration fires on final completion, daily progress persists, clicking filled icons allows adjusting progress backwards
 
 ### Goal Setting
 - **Functionality**: Simple interface to set habit name, choose icon type, and set daily target number
@@ -29,8 +29,8 @@ A visual habit tracking application where users set daily goals (like drinking 8
 ### Celebration Animation
 - **Functionality**: Confetti or particle animation with sound/haptic feedback when daily goal is completed
 - **Purpose**: Provide dopamine reward for completing goal, reinforcing positive behavior
-- **Trigger**: User completes final increment of daily goal
-- **Progression**: User taps plus on final remaining icon → Icon fills → Screen-wide celebration animation plays → Success message appears → Completion recorded with timestamp
+- **Trigger**: User completes final increment of daily goal by tapping the last empty icon
+- **Progression**: User taps final empty icon → Icon fills → Screen-wide celebration animation plays → Success message appears → Completion recorded with timestamp
 - **Success criteria**: Animation plays within 100ms of completion, feels rewarding without being excessive (2-3 seconds), doesn't block continued interaction
 
 ### History & Streaks
@@ -42,10 +42,10 @@ A visual habit tracking application where users set daily goals (like drinking 8
 
 ## Edge Case Handling
 - **Empty States**: Show welcoming prompt "Start your first habit!" with animated icon when no habits exist
-- **Goal Already Complete**: Disable plus button and show success state when daily goal is reached
+- **Goal Already Complete**: Show success state when daily goal is reached; icons remain clickable to adjust progress
 - **Date Boundaries**: Progress resets at midnight local time; completed days logged to history
 - **Multiple Habits**: Support tracking multiple different habits simultaneously with separate progress for each
-- **Accidental Taps**: Provide undo button to decrement progress if user accidentally taps too many times
+- **Accidental Taps**: Clicking filled icons adjusts progress backwards to that point, allowing easy corrections
 - **Long Streaks**: Special milestone celebrations at 7, 30, 100 days with different animations
 - **Data Loss Prevention**: Confirm before deleting habits; show toast with undo option
 
@@ -92,7 +92,6 @@ Animations should create a sense of progress and achievement, with icons that bo
 
 - **Components**:
   - **Card**: Primary container for each habit with elevated shadow
-  - **Button**: Plus/minus controls, action buttons with scale animations on press
   - **Dialog**: Add/edit habit forms, history calendar view
   - **Progress**: Linear progress bar showing overall completion percentage
   - **Badge**: Streak counter with flame icon, milestone indicators
@@ -103,14 +102,13 @@ Animations should create a sense of progress and achievement, with icons that bo
   - **Separator**: Visual dividers between habits
 
 - **Customizations**:
-  - **Habit Icon Grid**: Custom component displaying icon array that fills progressively (e.g., 8 glasses)
+  - **Habit Icon Grid**: Custom component displaying clickable icon array that fills progressively (e.g., 8 glasses)—each icon is an interactive button
   - **Celebration Overlay**: Full-screen confetti animation with success message
   - **Streak Badge**: Animated counter with flame icon and glow effect
-  - **Progress Icon**: Individual tappable icon that animates fill state (empty → filled)
+  - **Progress Icon**: Individual tappable icon button that animates fill state (empty → filled) with hover and active states
 
 - **States**:
-  - **Icons**: Empty (outlined gray), Partial (gradient fill animating), Filled (solid color with checkmark), Completed (all filled with celebration)
-  - **Plus Button**: Default (pulse animation), Pressed (scale down), Disabled (grayed when goal complete)
+  - **Icons**: Empty (outlined gray with hover effect), Filled (solid color with checkmark), Hover (scale up, highlighted border), Active (scale down), Completed (all filled with celebration)
   - **Cards**: Default (elevated shadow), Hover (increased shadow), Completed Today (success border glow)
 
 - **Icon Selection**:
@@ -122,7 +120,7 @@ Animations should create a sense of progress and achievement, with icons that bo
 
 - **Mobile**: 
   - Stacked habit cards with full-width layout
-  - Large, easily tappable plus buttons (min 60px)
+  - Large, easily tappable icon buttons (min 60px)
   - Bottom sheet for add/edit forms
   - Celebration animation optimized for portrait orientation
   - Icon grid wraps responsively (2-3 columns on mobile, 4-6 on tablet/desktop)
