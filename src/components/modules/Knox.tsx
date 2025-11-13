@@ -17,6 +17,7 @@ export function Knox() {
     if (!input.trim()) return
 
     const userMessage: ChatMessage = {
+      id: Date.now().toString(),
       role: 'user',
       content: input,
       timestamp: new Date().toISOString()
@@ -42,6 +43,7 @@ Respond as Knox:`
       const response = await window.spark.llm(promptText, 'gpt-4o-mini', false)
 
       const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: response,
         timestamp: new Date().toISOString()

@@ -28,9 +28,9 @@ const iconComponents: Record<HabitIcon, any> = {
 }
 
 export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog, className, style }: HabitCardProps) {
-  const IconComponent = iconComponents[habit.icon]
-  const progressPercent = (habit.currentProgress / habit.targetCount) * 100
-  const isComplete = habit.currentProgress >= habit.targetCount
+  const IconComponent = habit.icon ? iconComponents[habit.icon] : Drop
+  const progressPercent = ((habit.currentProgress || 0) / (habit.targetCount || 1)) * 100
+  const isComplete = (habit.currentProgress || 0) >= (habit.targetCount || 1)
 
   const handleDelete = () => {
     if (confirm(`Delete "${habit.name}"?`)) {
@@ -44,7 +44,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
   }
 
   const handleIconClick = (index: number) => {
-    const isFilled = index < habit.currentProgress
+    const isFilled = index < (habit.currentProgress || 0)
     
     if (isFilled) {
       onUpdateProgress(habit.id, index)
@@ -58,8 +58,8 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
 
   const renderIconGrid = () => {
     const icons: React.ReactElement[] = []
-    for (let i = 0; i < habit.targetCount; i++) {
-      const isFilled = i < habit.currentProgress
+    for (let i = 0; i < (habit.targetCount || 1); i++) {
+      const isFilled = i < (habit.currentProgress || 0)
       icons.push(
         <motion.button
           key={i}
@@ -114,9 +114,9 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
               )}
             </div>
             <p className="text-muted-foreground text-base">
-              <span className="text-primary font-semibold text-lg">{habit.currentProgress}</span>
+              <span className="text-primary font-semibold text-lg">{habit.currentProgress || 0}</span>
               <span className="text-muted-foreground/60 mx-1">/</span>
-              <span className="text-foreground/80">{habit.targetCount}</span>
+              <span className="text-foreground/80">{habit.targetCount || 1}</span>
             </p>
           </div>
           <div className="flex gap-2">

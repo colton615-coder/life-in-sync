@@ -32,6 +32,7 @@ Only return the JSON, nothing else.`
         id: Date.now().toString(),
         name: data.name,
         exercises: data.exercises,
+        duration: 45,
         date: new Date().toISOString().split('T')[0]
       }
 

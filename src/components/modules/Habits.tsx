@@ -452,7 +452,7 @@ export function Habits() {
                           <div className={`w-9 h-9 rounded-xl flex items-center justify-center border-2 transition-all ${
                             completed ? 'bg-primary border-primary text-white' : 'border-muted-foreground text-muted-foreground'
                           }`}>
-                            {getTrackingIcon(habit.trackingType)}
+                            {getTrackingIcon(habit.trackingType || 'boolean')}
                           </div>
                         )}
                       </motion.div>
@@ -461,8 +461,8 @@ export function Habits() {
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <h3 className="font-semibold text-lg">{habit.name}</h3>
                         <Badge variant="secondary" className="flex items-center gap-1.5 text-xs font-medium">
-                          {getTrackingIcon(habit.trackingType)}
-                          {getTrackingLabel(habit.trackingType)}
+                          {getTrackingIcon(habit.trackingType || 'boolean')}
+                          {getTrackingLabel(habit.trackingType || 'boolean')}
                         </Badge>
                       </div>
                       {habit.description && (

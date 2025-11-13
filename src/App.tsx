@@ -46,7 +46,7 @@ function App() {
         if (habit.id === habitId) {
           const updatedHabit = { ...habit, currentProgress: newProgress }
           
-          if (newProgress === habit.targetCount && habit.currentProgress < habit.targetCount) {
+          if (newProgress === habit.targetCount && (habit.currentProgress || 0) < (habit.targetCount || 0)) {
             setCelebratingHabit(habitId)
             logCompletion(habitId)
             

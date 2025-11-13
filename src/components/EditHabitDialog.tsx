@@ -32,8 +32,8 @@ export function EditHabitDialog({ open, onOpenChange, habit, onEditHabit }: Edit
   useEffect(() => {
     if (habit) {
       setName(habit.name)
-      setSelectedIcon(habit.icon)
-      setTargetCount(habit.targetCount)
+      setSelectedIcon(habit.icon || 'droplet')
+      setTargetCount(habit.targetCount || 8)
     }
   }, [habit])
 
