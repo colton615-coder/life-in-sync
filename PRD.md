@@ -1,182 +1,128 @@
-# LiFE-iN-SYNC PRD
+# Habit Tracker PRD
 
-A comprehensive life management platform that combines habit tracking, finance management, task organization, AI coaching, and wellness tools in a unified, intelligent dashboard with a distinctive neumorphic dark aesthetic.
+A visual habit tracking application where users set daily goals (like drinking 8 glasses of water) and tap interactive icons throughout the day to mark progress, with celebration animations upon completion to reinforce positive behavior.
 
 **Experience Qualities**:
-1. **Empowering** - Users feel in control of every aspect of their life with centralized command and real-time insights
-2. **Intelligent** - AI-powered coaching provides personalized guidance and proactive suggestions without being intrusive
-3. **Cohesive** - Despite multiple complex features, the interface feels unified through consistent neumorphic design language and smooth transitions
+1. **Satisfying** - Each tap provides immediate visual feedback with icons filling up, creating a dopamine-rewarding experience
+2. **Motivating** - Visual progress bars and celebration animations encourage users to complete their daily goals
+3. **Simple** - No complex menus or settings—just set a goal, tap throughout the day, and watch progress
 
-**Complexity Level**: Complex Application (advanced functionality, multiple interconnected features, AI integration, persistent user data)
-  - This is a full-featured life management system with 8+ distinct modules, AI coaching across multiple domains, real-time data visualization, and sophisticated state management
+**Complexity Level**: Light Application (focused feature set with visual feedback and daily state tracking)
+  - Single-purpose habit tracking tool with visual icon-based progress, celebration animations, and daily completion history
 
 ## Essential Features
 
-### Dashboard Hub
-- **Functionality**: Central command center displaying aggregated metrics from all modules (habit streaks, budget status, task completion, workout progress)
-- **Purpose**: Provides at-a-glance life overview and quick access to all features
-- **Trigger**: Default landing view on app load
-- **Progression**: App loads → Dashboard displays with animated metric cards → User scans quick stats → Clicks module card or quick action → Navigate to detailed view
-- **Success criteria**: All module stats update in real-time, navigation is instant, animations complete within 300ms
+### Visual Progress Tracking
+- **Functionality**: Display a grid of icon representations (glasses for water, checkmarks for habits, etc.) that fill/highlight as user taps a plus button to log progress toward daily goal
+- **Purpose**: Create satisfying visual feedback that motivates completion through seeing progress accumulate
+- **Trigger**: User sets daily goal (e.g., "8 glasses of water")
+- **Progression**: User opens app → Sees grid of 8 empty glass icons → Taps plus button throughout day → Each tap fills one glass with animated color transition → Final glass triggers celebration animation → Completion logged to history
+- **Success criteria**: Icons animate smoothly on tap (< 200ms), celebration fires on final completion, daily progress persists
 
-### Habit Tracker
-- **Functionality**: Flexible habit tracking with three tracking types: simple check-off (boolean), numerical targets (pages, reps, cups, etc.), and time-based goals (minutes). Includes streak tracking and target progress visualization
-- **Purpose**: Build consistency through visual progress tracking with flexible measurement methods that match the behavior type
-- **Trigger**: User clicks "Habits" from dashboard or adds new habit
-- **Progression**: Create habit with tracking type → Set target (if numerical/time) → Daily: Log progress via input dialog or simple check-off → View streak counter and progress toward target → Celebrate milestone streaks (7, 30, 100 days)
-- **Success criteria**: Streaks calculate accurately based on target achievement, different tracking types display appropriate input methods, progress shows current vs. target values
+### Goal Setting
+- **Functionality**: Simple interface to set habit name, choose icon type, and set daily target number
+- **Purpose**: Allow users to customize tracking for different habit types (water, steps, pages read, etc.)
+- **Trigger**: User taps "Add Habit" or edits existing habit
+- **Progression**: Tap add habit → Enter habit name → Select icon type from preset options → Set target number (1-20) → Habit appears in list
+- **Success criteria**: Changes save immediately, icon selection is intuitive, reasonable numeric limits prevent errors
 
-### Finance Manager
-- **Functionality**: Budget creation, expense logging with categories, visual spending breakdown via charts, AI financial coaching
-- **Purpose**: Maintain financial awareness and receive guidance on spending patterns
-- **Trigger**: Add expense button, view budget dashboard, request AI advice
-- **Progression**: Create budget categories → Log expenses with amount/category → View Recharts visualization → Request AI analysis → Receive actionable financial advice
-- **Success criteria**: Charts render instantly, calculations are accurate, AI provides specific savings strategies
+### Celebration Animation
+- **Functionality**: Confetti or particle animation with sound/haptic feedback when daily goal is completed
+- **Purpose**: Provide dopamine reward for completing goal, reinforcing positive behavior
+- **Trigger**: User completes final increment of daily goal
+- **Progression**: User taps plus on final remaining icon → Icon fills → Screen-wide celebration animation plays → Success message appears → Completion recorded with timestamp
+- **Success criteria**: Animation plays within 100ms of completion, feels rewarding without being excessive (2-3 seconds), doesn't block continued interaction
 
-### Task Manager
-- **Functionality**: To-do list with priority levels (high/medium/low), completion tracking, haptic feedback on interactions
-- **Purpose**: Organize daily responsibilities with clear prioritization
-- **Trigger**: Add task button, click task to complete/edit
-- **Progression**: Create task with priority → Task appears in sorted list → Click to complete (haptic feedback) → Task moves to completed section
-- **Success criteria**: Tasks sort by priority automatically, haptic feedback fires within 50ms, completed tasks are visually distinct
-
-### AI Knox (Therapeutic Chatbot)
-- **Functionality**: Conversational AI with tough-love coaching persona, private journal entry storage
-- **Purpose**: Provide mental wellness support through direct, honest guidance
-- **Trigger**: Open Knox chat interface or create journal entry
-- **Progression**: User types concern/question → AI Knox responds with empathetic but direct advice → User can save as journal entry → Entries stored privately
-- **Success criteria**: Responses feel conversational and consistent with persona, journal entries persist securely
-
-### Workout System
-- **Functionality**: AI-generated custom workout routines, active workout timer with exercise tracking, personal record (PR) logging
-- **Purpose**: Enable structured fitness progression with intelligent routine generation
-- **Trigger**: Request new workout routine, start workout session, log PR
-- **Progression**: Request workout type → AI generates routine → Start session → Timer displays current exercise → Complete set → Log weights/reps → Save PR
-- **Success criteria**: Workouts are varied and appropriate for fitness level, timer is accurate, PRs are tracked over time
-
-### Shopping List
-- **Functionality**: Simple list management with add/remove/check-off items
-- **Purpose**: Quick grocery and shopping organization
-- **Trigger**: Add item button
-- **Progression**: Add item → Item appears in list → Check off when purchased → Remove completed items
-- **Success criteria**: List persists across sessions, operations are instant
-
-### Calendar
-- **Functionality**: Event creation with date/time, visual monthly view
-- **Purpose**: Track important dates and scheduled activities
-- **Trigger**: Add event or navigate months
-- **Progression**: View current month → Click date → Add event details → Event appears on calendar → Navigate months to view upcoming
-- **Success criteria**: Events display on correct dates, month navigation is smooth
-
-### Secure Vault
-- **Functionality**: Encrypted storage for sensitive information (passwords, notes, documents)
-- **Purpose**: Centralized secure storage for confidential data
-- **Trigger**: Add vault entry with title and content
-- **Progression**: Create entry → Content stored → View entry requires interaction → Edit or delete as needed
-- **Success criteria**: All data persists securely, entries are clearly organized
+### History & Streaks
+- **Functionality**: Calendar view showing which days goals were completed, current streak counter
+- **Purpose**: Provide long-term motivation through streak building and visual history
+- **Trigger**: User views history tab or sees streak badge on main screen
+- **Progression**: User completes daily goal → Completion logged with date → Calendar marks day as complete → Streak counter increments if consecutive → User can view past days
+- **Success criteria**: Streak calculates correctly across day boundaries, history persists indefinitely, missed days clearly visible
 
 ## Edge Case Handling
-- **Empty States**: Each module displays helpful onboarding prompts when no data exists (e.g., "Start your first habit" with visual icon)
-- **AI Unavailable**: Show cached suggestions or encouraging static messages if AI fails to respond
-- **Long Streaks**: Celebrate milestone streaks (7, 30, 100 days) with special animations
-- **Budget Overspending**: Visual warning indicators when expenses exceed budget categories
-- **Concurrent Workouts**: Prevent starting multiple workout sessions simultaneously
-- **Date Boundaries**: Habits reset daily at midnight, weekly AI reviews trigger on Sundays
-- **Data Loss Prevention**: Confirm before deleting items with undo option via toast notifications
+- **Empty States**: Show welcoming prompt "Start your first habit!" with animated icon when no habits exist
+- **Goal Already Complete**: Disable plus button and show success state when daily goal is reached
+- **Date Boundaries**: Progress resets at midnight local time; completed days logged to history
+- **Multiple Habits**: Support tracking multiple different habits simultaneously with separate progress for each
+- **Accidental Taps**: Provide undo button to decrement progress if user accidentally taps too many times
+- **Long Streaks**: Special milestone celebrations at 7, 30, 100 days with different animations
+- **Data Loss Prevention**: Confirm before deleting habits; show toast with undo option
 
 ## Design Direction
-The interface should evoke a sense of modern sophistication and clarity through a clean, elevated design system with refined glassmorphic elements and subtle depth. The design should feel premium and effortless—like a high-end iOS/macOS app with beautiful transitions, smooth animations, and purposeful interactions. A minimal approach with generous whitespace and clear visual hierarchy serves the complexity best, using subtle shadows and smooth surfaces to create depth without distraction.
+The interface should feel playful yet focused, with clean modern aesthetics that emphasize the visual progress indicators. The design should evoke a sense of accomplishment and momentum through vibrant colors, smooth animations, and satisfying micro-interactions. A minimal interface with generous whitespace keeps the focus on the habit icons, while delightful animations reward progress.
 
 ## Color Selection
-Modern light theme with vibrant blue accents and subtle gradients for a fresh, sophisticated aesthetic inspired by modern productivity apps.
+Triadic color scheme with energetic blues and complementary warm accents to create a vibrant, motivating atmosphere that celebrates progress.
 
-- **Primary Color**: Vibrant Blue (oklch(0.55 0.22 250)) - Communicates trust, clarity, and action; used for primary actions and key interactions
+- **Primary Color**: Bright Cyan Blue (oklch(0.65 0.20 220)) - Energetic and refreshing, perfect for water/hydration themes and primary actions
 - **Secondary Colors**: 
-  - Clean Background (oklch(0.98 0.002 270)) - Main background with subtle warm tint
-  - Elevated Surface (oklch(1.00 0 0)) - Cards and elevated elements (pure white)
-  - Soft Blue (oklch(0.75 0.12 250)) - Secondary actions and subtle accents
-- **Accent Color**: Electric Blue (oklch(0.60 0.25 245)) - Highlights active states, CTAs, and interactive elements
+  - Warm Coral (oklch(0.70 0.18 25)) - Supporting color for celebration states and secondary actions
+  - Fresh Green (oklch(0.72 0.16 145)) - Success states and completed progress indicators
+- **Accent Color**: Electric Purple (oklch(0.62 0.25 295)) - Highlight color for active states, streaks, and milestone celebrations
 - **Foreground/Background Pairings**:
-  - Background (Clean Background oklch(0.98 0.002 270)): Dark Text (oklch(0.15 0.01 270)) - Ratio 16.2:1 ✓
-  - Card (White oklch(1.00 0 0)): Dark Text (oklch(0.15 0.01 270)) - Ratio 18.5:1 ✓
-  - Primary (Vibrant Blue oklch(0.55 0.22 250)): White (oklch(1.00 0 0)) - Ratio 5.8:1 ✓
-  - Secondary (Soft Blue oklch(0.75 0.12 250)): Dark Text (oklch(0.25 0.02 270)) - Ratio 6.2:1 ✓
-  - Accent (Electric Blue oklch(0.60 0.25 245)): White (oklch(1.00 0 0)) - Ratio 5.5:1 ✓
-  - Muted (oklch(0.92 0.005 270)): Medium Text (oklch(0.45 0.01 270)) - Ratio 6.8:1 ✓
+  - Background (Light Gray oklch(0.97 0.005 240)): Dark Text (oklch(0.20 0.01 240)) - Ratio 14.8:1 ✓
+  - Card (White oklch(1.00 0 0)): Dark Text (oklch(0.20 0.01 240)) - Ratio 16.5:1 ✓
+  - Primary (Bright Cyan Blue oklch(0.65 0.20 220)): White (oklch(1.00 0 0)) - Ratio 4.9:1 ✓
+  - Secondary (Warm Coral oklch(0.70 0.18 25)): Dark Text (oklch(0.20 0.01 240)) - Ratio 6.5:1 ✓
+  - Accent (Electric Purple oklch(0.62 0.25 295)): White (oklch(1.00 0 0)) - Ratio 5.2:1 ✓
+  - Success (Fresh Green oklch(0.72 0.16 145)): Dark Text (oklch(0.20 0.01 240)) - Ratio 7.2:1 ✓
 
 ## Font Selection
-Typography should convey modern professionalism with a warm, friendly character through the Inter font family with refined spacing and clear hierarchy.
+Typography should convey friendly approachability with clear readability through the Poppins font family for headings (personality) and Inter for body text (clarity).
 
 - **Typographic Hierarchy**:
-  - H1 (Page Titles): Inter Bold / 36px / -0.02em letter spacing / 1.2 line height
-  - H2 (Module Headers): Inter SemiBold / 28px / -0.01em / 1.3
-  - H3 (Section Headers): Inter SemiBold / 20px / normal / 1.4
-  - Body (Primary Content): Inter Regular / 15px / normal / 1.6
-  - Body Small (Descriptions): Inter Regular / 14px / normal / 1.5
-  - Captions (Labels, Metadata): Inter Medium / 13px / normal / 1.4
-  - Numbers (Stats, Metrics): Inter SemiBold / varies / tabular-nums
+  - H1 (Habit Names): Poppins SemiBold / 32px / normal letter spacing / 1.2 line height
+  - H2 (Section Headers): Poppins Medium / 24px / normal / 1.3
+  - Body (Descriptions): Inter Regular / 16px / normal / 1.5
+  - Stats (Progress Numbers): Poppins SemiBold / 48px / tight / 1.1 / tabular-nums
+  - Labels: Inter Medium / 14px / normal / 1.4
+  - Captions: Inter Regular / 13px / normal / 1.4
 
 ## Animations
-Animations should enhance the neumorphic depth illusion through subtle shadow shifts and elevation changes, creating a tactile, responsive feel. Motion should be purposeful—celebrating achievements, guiding attention to AI insights, and providing satisfying haptic-style feedback for interactions. The balance leans toward functional with moments of delight during milestones.
+Animations should create a sense of progress and achievement, with icons that bounce and fill with color when tapped, and celebration animations that feel rewarding without being overwhelming. The balance leans toward delight—every interaction should feel satisfying.
 
-- **Purposeful Meaning**: Neumorphic depth shifts communicate interactivity; AI response typing effect adds personality; streak celebration confetti rewards consistency
+- **Purposeful Meaning**: Icon fill animations communicate progress; bounce effects provide tactile feedback; confetti celebrates achievements; pulse effects draw attention to actionable buttons
 - **Hierarchy of Movement**: 
-  - Primary: Button press inset effect, card hover elevation increase, AI response typing
-  - Secondary: Metric counter animations, chart entrance transitions, page navigation slides
-  - Tertiary: Ambient background gradient shifts, subtle pulse on active timers
+  - Primary: Icon fill animation (scale + color transition), celebration confetti on completion
+  - Secondary: Plus button pulse when tappable, card entrance animations, progress bar fills
+  - Tertiary: Subtle hover states, streak badge glow, tab transitions
 
 ## Component Selection
 
 - **Components**:
-  - **Card**: Primary container for all modules with neumorphic shadow customization (inset shadows for pressed state, elevated for hover)
-  - **Button**: Primary actions with neumorphic pressed effect, variants for priority levels
-  - **Dialog**: AI Knox chat interface, add/edit forms for all modules
-  - **Tabs**: Navigation within complex modules (Finance categories, Workout history)
-  - **Progress**: Habit completion percentages, budget usage bars
-  - **Calendar**: Date picker for events and historical data views
-  - **Switch/Checkbox**: Habit completion toggles, task checkoffs with haptic feedback
-  - **Input/Textarea**: Data entry across all modules, Knox chat input
-  - **Select**: Category selection (expenses, workout types)
-  - **Sheet**: Mobile drawer for module navigation
-  - **Badge**: Priority indicators, streak counters, status labels
-  - **Separator**: Visual dividers maintaining neumorphic aesthetic
-  - **ScrollArea**: Long lists of tasks, habits, expenses
-  - **Tooltip**: Contextual help for advanced features
+  - **Card**: Primary container for each habit with elevated shadow
+  - **Button**: Plus/minus controls, action buttons with scale animations on press
+  - **Dialog**: Add/edit habit forms, history calendar view
+  - **Progress**: Linear progress bar showing overall completion percentage
+  - **Badge**: Streak counter with flame icon, milestone indicators
+  - **Tabs**: Switch between active habits and history view
+  - **Input**: Habit name and target number entry
+  - **Select**: Icon type selection dropdown
+  - **ScrollArea**: List of multiple habits
+  - **Separator**: Visual dividers between habits
 
 - **Customizations**:
-  - **Neumorphic Card Component**: Custom card variant with dual box-shadow (light + dark) and pressed state with inset shadow
-  - **Stat Metric Component**: Animated counter with large typography and icon
-  - **AI Response Bubble**: Chat-style component with typing indicator and distinctive Knox styling
-  - **Workout Timer Card**: Specialized component with large timer display and control buttons
-  - **Streak Badge**: Visual indicator with flame icon and celebration animation at milestones
+  - **Habit Icon Grid**: Custom component displaying icon array that fills progressively (e.g., 8 glasses)
+  - **Celebration Overlay**: Full-screen confetti animation with success message
+  - **Streak Badge**: Animated counter with flame icon and glow effect
+  - **Progress Icon**: Individual tappable icon that animates fill state (empty → filled)
 
 - **States**:
-  - **Buttons**: Default (elevated neumorphic), Hover (increased elevation), Active (inset shadow pressed effect), Disabled (reduced contrast)
-  - **Inputs**: Default (subtle inset), Focus (purple ring glow), Error (red tint with icon), Success (subtle green glow)
-  - **Cards**: Rest (base neumorphic), Hover (elevated with subtle glow), Active/Selected (inset with accent border)
+  - **Icons**: Empty (outlined gray), Partial (gradient fill animating), Filled (solid color with checkmark), Completed (all filled with celebration)
+  - **Plus Button**: Default (pulse animation), Pressed (scale down), Disabled (grayed when goal complete)
+  - **Cards**: Default (elevated shadow), Hover (increased shadow), Completed Today (success border glow)
 
 - **Icon Selection**:
-  - Dashboard: House
-  - Habits: CheckCircle / Target
-  - Finance: CurrencyDollar / ChartBar
-  - Tasks: ListChecks
-  - Knox: BrainCircuit / ChatCircle
-  - Workouts: Barbell / Timer
-  - Shopping: ShoppingCart / ListBullets
-  - Calendar: Calendar / CalendarDots
-  - Vault: Lock / ShieldCheck
-  - Add Actions: Plus / PlusCircle
-  - Priority: ArrowUp (high) / ArrowRight (medium) / ArrowDown (low)
-  - Streaks: Fire / Flame
-  - Success: CheckCircle
-  - AI Generating: Sparkle / Pulse
+  - Habit Types: Droplet (water), Book (reading), Dumbbell (exercise), Apple (nutrition), Moon (sleep), Heart (meditation)
+  - Actions: Plus (increment), Minus (decrement), Fire (streak), Calendar (history), Settings (configure)
+  - Status: CheckCircle (complete), Clock (in progress), Sparkles (celebration)
 
-- **Spacing**: Consistent 4-based scale (4px, 8px, 16px, 24px, 32px, 48px) with cards using p-6, lists using gap-4, sections using gap-8, page margins using px-4 md:px-8
+- **Spacing**: Generous 8-based scale (8px, 16px, 24px, 32px, 48px) with large icon grids using gap-6, cards using p-8, comfortable tap targets of 60px minimum
 
 - **Mobile**: 
-  - Bottom navigation bar for primary modules on mobile (<768px)
-  - Sheet component for auxiliary navigation and settings
-  - Stacked layouts for dashboard metrics (grid on desktop)
-  - Full-screen dialogs on mobile for add/edit forms
-  - Larger touch targets (min 44x44px) for all interactive elements
-  - Simplified charts on mobile with horizontal scroll for detailed data
+  - Stacked habit cards with full-width layout
+  - Large, easily tappable plus buttons (min 60px)
+  - Bottom sheet for add/edit forms
+  - Celebration animation optimized for portrait orientation
+  - Icon grid wraps responsively (2-3 columns on mobile, 4-6 on tablet/desktop)
