@@ -5,7 +5,8 @@ import { AddHabitDialog } from '@/components/AddHabitDialog'
 import { EditHabitDialog } from '@/components/EditHabitDialog'
 import { HistoryDialog } from '@/components/HistoryDialog'
 import { CelebrationOverlay } from '@/components/CelebrationOverlay'
-import { BottomNav } from '@/components/BottomNav'
+import { NavigationDrawer } from '@/components/NavigationDrawer'
+import { NavigationButton } from '@/components/NavigationButton'
 import { AbstractBackground } from '@/components/AbstractBackground'
 import { Button } from '@/components/ui/button'
 import { Plus } from '@phosphor-icons/react'
@@ -23,7 +24,8 @@ function App() {
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [celebratingHabit, setCelebratingHabit] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState('home')
+  const [activeModule, setActiveModule] = useState('habits')
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   const handleAddHabit = (habit: Omit<Habit, 'id' | 'currentProgress' | 'streak'>) => {
     const newHabit: Habit = {
@@ -122,12 +124,23 @@ function App() {
   }
 
   const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId)
     if (tabId === 'history') {
       setHistoryDialogOpen(true)
     } else if (tabId === 'analytics' || tabId === 'settings') {
       toast.info('Coming soon', {
         description: `${tabId.charAt(0).toUpperCase() + tabId.slice(1)} feature is under development`,
+      })
+    }
+  }
+
+  const handleModuleChange = (moduleId: string) => {
+    setActiveModule(moduleId)
+    
+    if (moduleId === 'history') {
+      setHistoryDialogOpen(true)
+    } else if (['dashboard', 'finance', 'tasks', 'workouts', 'knox', 'shopping', 'calendar', 'vault', 'settings'].includes(moduleId)) {
+      toast.info('Coming soon', {
+        description: `${moduleId.charAt(0).toUpperCase() + moduleId.slice(1)} module is under development`,
       })
     }
   }
@@ -235,7 +248,17 @@ function App() {
         </AnimatePresence>
       </div>
 
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      <NavigationButton 
+        onClick={() => setDrawerOpen(!drawerOpen)}
+        isOpen={drawerOpen}
+      />
+
+      <NavigationDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        activeModule={activeModule}
+        onModuleChange={handleModuleChange}
+      />
 
       <AddHabitDialog
         open={addDialogOpen}
@@ -254,7 +277,7 @@ function App() {
         open={historyDialogOpen}
         onOpenChange={(open) => {
           setHistoryDialogOpen(open)
-          if (!open) setActiveTab('home')
+          if (!open) setActiveModule('habits')
         }}
         habits={habits || []}
         completionHistory={completionHistory || {}}
