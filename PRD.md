@@ -85,35 +85,35 @@ A comprehensive life management platform that combines habit tracking, finance m
 - **Data Loss Prevention**: Confirm before deleting items with undo option via toast notifications
 
 ## Design Direction
-The interface should evoke a sense of sophisticated control and digital craftsmanship through a unique neumorphic dark theme with purple-tinted accents. The design should feel modern and premium—like a high-end dashboard for life management—with subtle ambient animations that breathe life into the interface without distraction. A minimal approach serves the complexity best, using the distinctive neumorphic effect to create tactile depth while maintaining visual cleanliness.
+The interface should evoke a sense of modern sophistication and clarity through a clean, elevated design system with refined glassmorphic elements and subtle depth. The design should feel premium and effortless—like a high-end iOS/macOS app with beautiful transitions, smooth animations, and purposeful interactions. A minimal approach with generous whitespace and clear visual hierarchy serves the complexity best, using subtle shadows and smooth surfaces to create depth without distraction.
 
 ## Color Selection
-Custom palette with neumorphic dark theme featuring purple-tinted shadows and highlights for a unique, premium aesthetic.
+Modern light theme with vibrant blue accents and subtle gradients for a fresh, sophisticated aesthetic inspired by modern productivity apps.
 
-- **Primary Color**: Deep Purple (oklch(0.45 0.15 290)) - Communicates intelligence, creativity, and premium quality; used for primary actions and AI features
+- **Primary Color**: Vibrant Blue (oklch(0.55 0.22 250)) - Communicates trust, clarity, and action; used for primary actions and key interactions
 - **Secondary Colors**: 
-  - Dark Surface (oklch(0.18 0.02 280)) - Main background with subtle purple tint
-  - Elevated Surface (oklch(0.22 0.03 285)) - Cards and elevated elements
-  - Soft Purple (oklch(0.35 0.12 295)) - Secondary actions and accents
-- **Accent Color**: Vibrant Purple (oklch(0.60 0.20 295)) - Highlights active states, CTAs, and AI interaction points
+  - Clean Background (oklch(0.98 0.002 270)) - Main background with subtle warm tint
+  - Elevated Surface (oklch(1.00 0 0)) - Cards and elevated elements (pure white)
+  - Soft Blue (oklch(0.75 0.12 250)) - Secondary actions and subtle accents
+- **Accent Color**: Electric Blue (oklch(0.60 0.25 245)) - Highlights active states, CTAs, and interactive elements
 - **Foreground/Background Pairings**:
-  - Background (Dark Surface oklch(0.18 0.02 280)): Light Text (oklch(0.95 0.01 290)) - Ratio 12.8:1 ✓
-  - Card (Elevated Surface oklch(0.22 0.03 285)): Light Text (oklch(0.95 0.01 290)) - Ratio 10.5:1 ✓
-  - Primary (Deep Purple oklch(0.45 0.15 290)): White (oklch(0.99 0 0)) - Ratio 5.2:1 ✓
-  - Secondary (Soft Purple oklch(0.35 0.12 295)): White (oklch(0.99 0 0)) - Ratio 7.1:1 ✓
-  - Accent (Vibrant Purple oklch(0.60 0.20 295)): Dark Surface (oklch(0.18 0.02 280)) - Ratio 6.8:1 ✓
-  - Muted (oklch(0.28 0.04 285)): Light Muted Text (oklch(0.65 0.05 290)) - Ratio 4.6:1 ✓
+  - Background (Clean Background oklch(0.98 0.002 270)): Dark Text (oklch(0.15 0.01 270)) - Ratio 16.2:1 ✓
+  - Card (White oklch(1.00 0 0)): Dark Text (oklch(0.15 0.01 270)) - Ratio 18.5:1 ✓
+  - Primary (Vibrant Blue oklch(0.55 0.22 250)): White (oklch(1.00 0 0)) - Ratio 5.8:1 ✓
+  - Secondary (Soft Blue oklch(0.75 0.12 250)): Dark Text (oklch(0.25 0.02 270)) - Ratio 6.2:1 ✓
+  - Accent (Electric Blue oklch(0.60 0.25 245)): White (oklch(1.00 0 0)) - Ratio 5.5:1 ✓
+  - Muted (oklch(0.92 0.005 270)): Medium Text (oklch(0.45 0.01 270)) - Ratio 6.8:1 ✓
 
 ## Font Selection
-Typography should convey modern professionalism and exceptional clarity, supporting the data-heavy interface while maintaining the premium aesthetic through Inter's excellent legibility at all sizes.
+Typography should convey modern professionalism with a warm, friendly character through the Inter font family with refined spacing and clear hierarchy.
 
 - **Typographic Hierarchy**:
-  - H1 (Page Titles): Inter Bold / 32px / -0.02em letter spacing / 1.2 line height
-  - H2 (Module Headers): Inter SemiBold / 24px / -0.01em / 1.3
-  - H3 (Section Headers): Inter SemiBold / 18px / normal / 1.4
-  - Body (Primary Content): Inter Regular / 16px / normal / 1.6
+  - H1 (Page Titles): Inter Bold / 36px / -0.02em letter spacing / 1.2 line height
+  - H2 (Module Headers): Inter SemiBold / 28px / -0.01em / 1.3
+  - H3 (Section Headers): Inter SemiBold / 20px / normal / 1.4
+  - Body (Primary Content): Inter Regular / 15px / normal / 1.6
   - Body Small (Descriptions): Inter Regular / 14px / normal / 1.5
-  - Captions (Labels, Metadata): Inter Medium / 12px / 0.01em / 1.4
+  - Captions (Labels, Metadata): Inter Medium / 13px / normal / 1.4
   - Numbers (Stats, Metrics): Inter SemiBold / varies / tabular-nums
 
 ## Animations

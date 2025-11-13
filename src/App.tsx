@@ -34,12 +34,21 @@ function App() {
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <Navigation currentModule={currentModule} onNavigate={setCurrentModule} />
-      <main className="flex-1 p-4 md:p-8 pb-24 md:pb-8 overflow-auto">
+      <main className="flex-1 p-6 md:p-10 pb-28 md:pb-10 overflow-auto">
         <div className="max-w-7xl mx-auto">
           {renderModule()}
         </div>
       </main>
-      <Toaster position="top-right" />
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: 'white',
+            border: '1px solid oklch(0.92 0.005 270)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          },
+        }}
+      />
     </div>
   )
 }

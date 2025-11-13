@@ -1,15 +1,18 @@
-import { NeumorphicCard } from '../NeumorphicCard'
+import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Minus } from '@phosphor-icons/react'
+import { TabGroup } from '@/components/TabGroup'
+import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { Habit, TrackingType, HabitEntry } from '@/lib/types'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
+import { Badge } from '@/components/ui/badge'
 
 export function Habits() {
   const [habits, setHabits] = useKV<Habit[]>('habits', [])
@@ -17,6 +20,7 @@ export function Habits() {
   const [trackDialogOpen, setTrackDialogOpen] = useState(false)
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null)
   const [trackValue, setTrackValue] = useState<string>('')
+  const [filterTab, setFilterTab] = useState('all')
   const [newHabit, setNewHabit] = useState({
     name: '',
     description: '',
@@ -230,187 +234,290 @@ export function Habits() {
 
   const getTrackingIcon = (type: TrackingType) => {
     switch (type) {
-      case 'boolean': return <Check size={20} />
-      case 'numerical': return <Hash size={20} />
-      case 'time': return <Clock size={20} />
+      case 'boolean': return <Check size={18} />
+      case 'numerical': return <Hash size={18} />
+      case 'time': return <Clock size={18} />
     }
   }
 
+  const getTrackingLabel = (type: TrackingType) => {
+    switch (type) {
+      case 'boolean': return 'Check-off'
+      case 'numerical': return 'Numerical'
+      case 'time': return 'Time-based'
+    }
+  }
+
+  const filteredHabits = habits?.filter(habit => {
+    if (filterTab === 'all') return true
+    if (filterTab === 'active') return habit.streak > 0
+    if (filterTab === 'pending') return !isCompletedToday(habit)
+    return true
+  }) || []
+
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05
+      }
+    }
+  }
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 }
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Habits</h1>
-          <p className="text-muted-foreground mt-2">Track behaviors numerically, by time, or simple completion</p>
+          <h1 className="text-4xl font-bold tracking-tight">Habits</h1>
+          <p className="text-muted-foreground mt-2 text-[15px]">Track behaviors numerically, by time, or simple completion</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus size={20} />
+            <Button className="gap-2 shadow-lg shadow-primary/20">
+              <Plus size={20} weight="bold" />
               Add Habit
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[500px] modal-content">
             <DialogHeader>
-              <DialogTitle>Create New Habit</DialogTitle>
+              <DialogTitle className="text-2xl">Create New Habit</DialogTitle>
+              <DialogDescription>
+                Build consistency by tracking your daily behaviors
+              </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Habit Name</label>
+            <div className="space-y-5 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="habit-name" className="text-sm font-semibold">Habit Name</Label>
                 <Input
+                  id="habit-name"
                   placeholder="e.g., Morning meditation, Read pages, Exercise"
                   value={newHabit.name}
                   onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
+                  className="h-11"
                 />
               </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Description (Optional)</label>
+              <div className="space-y-2">
+                <Label htmlFor="habit-description" className="text-sm font-semibold">Description (Optional)</Label>
                 <Textarea
+                  id="habit-description"
                   placeholder="Why this habit matters..."
                   value={newHabit.description}
                   onChange={(e) => setNewHabit({ ...newHabit, description: e.target.value })}
                   rows={2}
+                  className="resize-none"
                 />
               </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Tracking Type</label>
+              <div className="space-y-2">
+                <Label htmlFor="tracking-type" className="text-sm font-semibold">Tracking Type</Label>
                 <Select 
                   value={newHabit.trackingType} 
                   onValueChange={(value) => setNewHabit({ ...newHabit, trackingType: value as TrackingType })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="tracking-type" className="h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="boolean">Simple Check-off</SelectItem>
-                    <SelectItem value="numerical">Numerical (reps, pages, etc.)</SelectItem>
-                    <SelectItem value="time">Time-based (minutes)</SelectItem>
+                    <SelectItem value="boolean">
+                      <div className="flex items-center gap-2">
+                        <Check size={16} />
+                        Simple Check-off
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="numerical">
+                      <div className="flex items-center gap-2">
+                        <Hash size={16} />
+                        Numerical (reps, pages, etc.)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="time">
+                      <div className="flex items-center gap-2">
+                        <Clock size={16} />
+                        Time-based (minutes)
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {newHabit.trackingType === 'numerical' && (
-                <>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Target Value</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="target-value" className="text-sm font-semibold">Target Value</Label>
                     <Input
+                      id="target-value"
                       type="number"
                       placeholder="e.g., 50"
                       value={newHabit.target}
                       onChange={(e) => setNewHabit({ ...newHabit, target: e.target.value })}
+                      className="h-11"
                     />
                   </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Unit</label>
+                  <div className="space-y-2">
+                    <Label htmlFor="unit" className="text-sm font-semibold">Unit</Label>
                     <Input
-                      placeholder="e.g., reps, pages, cups, km"
+                      id="unit"
+                      placeholder="e.g., reps, pages"
                       value={newHabit.unit}
                       onChange={(e) => setNewHabit({ ...newHabit, unit: e.target.value })}
+                      className="h-11"
                     />
                   </div>
-                </>
+                </div>
               )}
               {newHabit.trackingType === 'time' && (
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Target (minutes)</label>
+                <div className="space-y-2">
+                  <Label htmlFor="target-minutes" className="text-sm font-semibold">Target (minutes)</Label>
                   <Input
+                    id="target-minutes"
                     type="number"
                     placeholder="e.g., 30"
                     value={newHabit.target}
                     onChange={(e) => setNewHabit({ ...newHabit, target: e.target.value })}
+                    className="h-11"
                   />
                 </div>
               )}
-              <Button onClick={addHabit} className="w-full">Create Habit</Button>
+              <div className="flex gap-3 pt-2">
+                <Button onClick={addHabit} className="flex-1 h-11 shadow-md">Create Habit</Button>
+                <Button variant="outline" onClick={() => setDialogOpen(false)} className="h-11">Cancel</Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
+      <TabGroup
+        tabs={[
+          { id: 'all', label: 'All Habits' },
+          { id: 'active', label: 'Active Streaks' },
+          { id: 'pending', label: 'Pending Today' },
+        ]}
+        activeTab={filterTab}
+        onChange={setFilterTab}
+      />
+
       {!habits || habits.length === 0 ? (
-        <NeumorphicCard className="text-center py-12">
-          <Fire size={48} weight="duotone" className="text-accent mx-auto mb-4" />
-          <h3 className="font-semibold text-lg mb-2">No habits yet</h3>
-          <p className="text-muted-foreground">Start your first habit and build a streak!</p>
-        </NeumorphicCard>
+        <Card className="text-center py-16">
+          <Fire size={56} weight="duotone" className="text-primary mx-auto mb-4" />
+          <h3 className="font-semibold text-xl mb-2">No habits yet</h3>
+          <p className="text-muted-foreground text-[15px]">Start your first habit and build a streak!</p>
+        </Card>
+      ) : filteredHabits.length === 0 ? (
+        <Card className="text-center py-16">
+          <CheckCircle size={56} weight="duotone" className="text-primary mx-auto mb-4" />
+          <h3 className="font-semibold text-xl mb-2">No habits in this filter</h3>
+          <p className="text-muted-foreground text-[15px]">Try a different filter to see your habits</p>
+        </Card>
       ) : (
-        <div className="grid gap-4">
-          {habits.map((habit) => {
+        <motion.div 
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="grid gap-4"
+        >
+          {filteredHabits.map((habit) => {
             const completed = isCompletedToday(habit)
             const progress = getTodayProgress(habit)
             
             return (
-              <NeumorphicCard key={habit.id} className="relative">
-                <div className="flex items-start gap-4">
-                  <button
-                    onClick={() => {
-                      if (habit.trackingType === 'boolean') {
-                        toggleBooleanHabit(habit.id)
-                      } else {
-                        openTrackDialog(habit)
-                      }
-                    }}
-                    className="flex-shrink-0 mt-1"
-                  >
-                    <motion.div
-                      whileTap={{ scale: 0.9 }}
-                      whileHover={{ scale: 1.1 }}
+              <motion.div key={habit.id} variants={item}>
+                <Card className="relative">
+                  <div className="flex items-start gap-4">
+                    <button
+                      onClick={() => {
+                        if (habit.trackingType === 'boolean') {
+                          toggleBooleanHabit(habit.id)
+                        } else {
+                          openTrackDialog(habit)
+                        }
+                      }}
+                      className="flex-shrink-0 mt-1"
                     >
-                      {habit.trackingType === 'boolean' ? (
-                        <CheckCircle
-                          size={32}
-                          weight={completed ? 'fill' : 'regular'}
-                          className={completed ? 'text-accent' : 'text-muted-foreground'}
-                        />
-                      ) : (
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                          completed ? 'bg-accent border-accent text-white' : 'border-muted-foreground text-muted-foreground'
-                        }`}>
+                      <motion.div
+                        whileTap={{ scale: 0.85 }}
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        {habit.trackingType === 'boolean' ? (
+                          <CheckCircle
+                            size={36}
+                            weight={completed ? 'fill' : 'regular'}
+                            className={completed ? 'text-primary' : 'text-muted-foreground'}
+                          />
+                        ) : (
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center border-2 transition-all ${
+                            completed ? 'bg-primary border-primary text-white' : 'border-muted-foreground text-muted-foreground'
+                          }`}>
+                            {getTrackingIcon(habit.trackingType)}
+                          </div>
+                        )}
+                      </motion.div>
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <h3 className="font-semibold text-lg">{habit.name}</h3>
+                        <Badge variant="secondary" className="flex items-center gap-1.5 text-xs font-medium">
                           {getTrackingIcon(habit.trackingType)}
+                          {getTrackingLabel(habit.trackingType)}
+                        </Badge>
+                      </div>
+                      {habit.description && (
+                        <p className="text-sm text-muted-foreground mb-3">{habit.description}</p>
+                      )}
+                      {progress && (
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-sm font-semibold mb-3">
+                          {progress}
                         </div>
                       )}
-                    </motion.div>
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg">{habit.name}</h3>
-                    {habit.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{habit.description}</p>
-                    )}
-                    {progress && (
-                      <p className="text-sm font-medium mt-2 text-accent">{progress}</p>
-                    )}
-                    <div className="flex items-center gap-2 mt-3">
-                      <Fire weight="fill" className="text-orange-500" />
-                      <span className="font-semibold">{habit.streak} day streak</span>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <Fire weight="fill" className="text-orange-500" size={20} />
+                          <span className="font-semibold text-sm">{habit.streak} day streak</span>
+                        </div>
+                        {completed && (
+                          <Badge variant="outline" className="text-xs border-primary/30 text-primary">
+                            ✓ Done today
+                          </Badge>
+                        )}
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteHabit(habit.id)}
+                      className="flex-shrink-0 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash size={20} />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteHabit(habit.id)}
-                    className="flex-shrink-0"
-                  >
-                    <Trash size={20} />
-                  </Button>
-                </div>
-              </NeumorphicCard>
+                </Card>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
       )}
 
       <Dialog open={trackDialogOpen} onOpenChange={setTrackDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[420px] modal-content">
           <DialogHeader>
-            <DialogTitle>Track {selectedHabit?.name}</DialogTitle>
+            <DialogTitle className="text-2xl">Track {selectedHabit?.name}</DialogTitle>
+            <DialogDescription>
+              Log your progress for today
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">
+          <div className="space-y-5 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="track-value" className="text-sm font-semibold">
                 {selectedHabit?.trackingType === 'numerical' 
                   ? `Enter value (${selectedHabit.unit})` 
                   : 'Enter minutes'}
-              </label>
+              </Label>
               <Input
+                id="track-value"
                 type="number"
                 placeholder={selectedHabit?.trackingType === 'numerical' 
                   ? `Target: ${selectedHabit.target} ${selectedHabit.unit}` 
@@ -418,11 +525,12 @@ export function Habits() {
                 value={trackValue}
                 onChange={(e) => setTrackValue(e.target.value)}
                 autoFocus
+                className="h-12 text-lg"
               />
             </div>
-            <div className="flex gap-2">
-              <Button onClick={trackHabit} className="flex-1">Save Progress</Button>
-              <Button variant="outline" onClick={() => setTrackDialogOpen(false)}>Cancel</Button>
+            <div className="flex gap-3">
+              <Button onClick={trackHabit} className="flex-1 h-11 shadow-md">Save Progress</Button>
+              <Button variant="outline" onClick={() => setTrackDialogOpen(false)} className="h-11">Cancel</Button>
             </div>
           </div>
         </DialogContent>

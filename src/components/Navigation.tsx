@@ -6,9 +6,6 @@ import {
   CheckCircle,
   Brain,
   Barbell,
-  ShoppingCart,
-  Calendar,
-  Lock
 } from '@phosphor-icons/react'
 import { Module } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -30,41 +27,48 @@ const navItems = [
 export function Navigation({ currentModule, onNavigate }: NavigationProps) {
   return (
     <>
-      <nav className="hidden md:flex flex-col gap-2 p-4 w-64 border-r border-border bg-card/50">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
+      <nav className="hidden md:flex flex-col gap-2 p-6 w-72 border-r border-border/50 bg-white/60 backdrop-blur-xl">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
             LiFE-iN-SYNC
           </h2>
+          <p className="text-xs text-muted-foreground mt-1 font-medium">Your Life Dashboard</p>
         </div>
-        {navItems.map((item) => (
-          <Button
-            key={item.id}
-            variant={currentModule === item.id ? 'default' : 'ghost'}
-            className={cn(
-              'justify-start gap-3',
-              currentModule === item.id && 'bg-accent text-accent-foreground'
-            )}
-            onClick={() => onNavigate(item.id)}
-          >
-            <item.icon size={20} />
-            {item.label}
-          </Button>
-        ))}
+        <div className="flex flex-col gap-1">
+          {navItems.map((item) => (
+            <Button
+              key={item.id}
+              variant={currentModule === item.id ? 'default' : 'ghost'}
+              className={cn(
+                'justify-start gap-3 h-11 text-[15px] font-medium transition-all',
+                currentModule === item.id 
+                  ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+              )}
+              onClick={() => onNavigate(item.id)}
+            >
+              <item.icon size={22} weight={currentModule === item.id ? 'fill' : 'regular'} />
+              {item.label}
+            </Button>
+          ))}
+        </div>
       </nav>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-card/95 backdrop-blur-sm z-50">
-        <div className="flex items-center justify-around p-2">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border/50 bg-white/95 backdrop-blur-xl z-50 shadow-2xl">
+        <div className="flex items-center justify-around px-2 py-3 max-w-lg mx-auto">
           {navItems.slice(0, 5).map((item) => (
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
               className={cn(
-                'flex flex-col items-center gap-1 p-2 rounded-lg min-w-[60px]',
-                currentModule === item.id && 'bg-accent/20 text-accent'
+                'flex flex-col items-center gap-1.5 px-3 py-2 rounded-xl min-w-[64px] transition-all',
+                currentModule === item.id 
+                  ? 'bg-primary/10 text-primary scale-105' 
+                  : 'text-muted-foreground active:scale-95'
               )}
             >
               <item.icon size={24} weight={currentModule === item.id ? 'fill' : 'regular'} />
-              <span className="text-xs">{item.label}</span>
+              <span className="text-xs font-medium">{item.label}</span>
             </button>
           ))}
         </div>

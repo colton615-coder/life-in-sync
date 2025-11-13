@@ -1,7 +1,8 @@
-import { NeumorphicCard } from '../NeumorphicCard'
+import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, CurrencyDollar, Trash, ChartPie } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
@@ -9,9 +10,11 @@ import { Expense, Budget } from '@/lib/types'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
+import { motion } from 'framer-motion'
+import { Badge } from '@/components/ui/badge'
 
 const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Other']
-const COLORS = ['oklch(0.646 0.222 41.116)', 'oklch(0.6 0.118 184.704)', 'oklch(0.60 0.20 295)', 'oklch(0.828 0.189 84.429)', 'oklch(0.769 0.188 70.08)', 'oklch(0.577 0.245 27.325)', 'oklch(0.556 0 0)']
+const COLORS = ['#3b82f6', '#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#6b7280']
 
 export function Finance() {
   const [expenses, setExpenses] = useKV<Expense[]>('expenses', [])
@@ -61,41 +64,61 @@ export function Finance() {
     return { name: category, value: total }
   }).filter(d => d.value > 0)
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05
+      }
+    }
+  }
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 }
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Finance</h1>
-          <p className="text-muted-foreground mt-2">Track expenses and manage budget</p>
+          <h1 className="text-4xl font-bold tracking-tight">Finance</h1>
+          <p className="text-muted-foreground mt-2 text-[15px]">Track expenses and manage budget</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus size={20} />
+            <Button className="gap-2 shadow-lg shadow-primary/20">
+              <Plus size={20} weight="bold" />
               Add Expense
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[500px] modal-content">
             <DialogHeader>
-              <DialogTitle>Log New Expense</DialogTitle>
+              <DialogTitle className="text-2xl">Log New Expense</DialogTitle>
+              <DialogDescription>
+                Track your spending and stay on budget
+              </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Amount</label>
+            <div className="space-y-5 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="expense-amount" className="text-sm font-semibold">Amount</Label>
                 <Input
+                  id="expense-amount"
                   type="number"
                   placeholder="0.00"
                   value={newExpense.amount}
                   onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
+                  className="h-11"
                 />
               </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Category</label>
+              <div className="space-y-2">
+                <Label htmlFor="expense-category" className="text-sm font-semibold">Category</Label>
                 <Select
                   value={newExpense.category}
                   onValueChange={(value) => setNewExpense({ ...newExpense, category: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="expense-category" className="h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -105,36 +128,43 @@ export function Finance() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Description (Optional)</label>
+              <div className="space-y-2">
+                <Label htmlFor="expense-description" className="text-sm font-semibold">Description (Optional)</Label>
                 <Input
+                  id="expense-description"
                   placeholder="What was this for?"
                   value={newExpense.description}
                   onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
+                  className="h-11"
                 />
               </div>
-              <Button onClick={addExpense} className="w-full">Log Expense</Button>
+              <div className="flex gap-3 pt-2">
+                <Button onClick={addExpense} className="flex-1 h-11 shadow-md">Log Expense</Button>
+                <Button variant="outline" onClick={() => setDialogOpen(false)} className="h-11">Cancel</Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <NeumorphicCard>
-          <div className="flex items-center gap-3 mb-4">
-            <CurrencyDollar size={32} weight="duotone" className="text-accent" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <Card>
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <CurrencyDollar size={28} weight="fill" className="text-primary" />
+            </div>
             <div>
-              <div className="text-3xl font-bold">${totalSpent.toFixed(2)}</div>
-              <div className="text-sm text-muted-foreground">Total this month</div>
+              <div className="text-4xl font-bold tabular-nums">${totalSpent.toFixed(2)}</div>
+              <div className="text-sm text-muted-foreground font-medium mt-1">Total this month</div>
             </div>
           </div>
-        </NeumorphicCard>
+        </Card>
 
         {categoryData.length > 0 && (
-          <NeumorphicCard>
+          <Card>
             <div className="flex items-center gap-2 mb-4">
-              <ChartPie size={24} className="text-accent" />
-              <h3 className="font-semibold">Spending by Category</h3>
+              <ChartPie size={22} className="text-primary" />
+              <h3 className="font-semibold text-lg">Spending by Category</h3>
             </div>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -153,55 +183,64 @@ export function Finance() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'oklch(0.22 0.03 285)',
-                    border: '1px solid oklch(0.28 0.04 285)',
-                    borderRadius: '0.5rem'
+                    backgroundColor: 'white',
+                    border: '1px solid oklch(0.92 0.005 270)',
+                    borderRadius: '0.75rem',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                   }}
                   formatter={(value: number) => `$${value.toFixed(2)}`}
                 />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
-          </NeumorphicCard>
+          </Card>
         )}
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold mb-4">Recent Expenses</h2>
+        <h2 className="text-xl font-semibold mb-5">Recent Expenses</h2>
         {!expenses || expenses.length === 0 ? (
-          <NeumorphicCard className="text-center py-12">
-            <CurrencyDollar size={48} weight="duotone" className="text-accent mx-auto mb-4" />
-            <h3 className="font-semibold text-lg mb-2">No expenses yet</h3>
-            <p className="text-muted-foreground">Start tracking your spending!</p>
-          </NeumorphicCard>
+          <Card className="text-center py-16">
+            <CurrencyDollar size={56} weight="duotone" className="text-primary mx-auto mb-4" />
+            <h3 className="font-semibold text-xl mb-2">No expenses yet</h3>
+            <p className="text-muted-foreground text-[15px]">Start tracking your spending!</p>
+          </Card>
         ) : (
-          <div className="grid gap-3">
+          <motion.div 
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="grid gap-4"
+          >
             {[...(expenses || [])].reverse().slice(0, 10).map((expense) => (
-              <NeumorphicCard key={expense.id}>
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl font-bold">${expense.amount.toFixed(2)}</span>
-                      <span className="text-sm px-2 py-1 rounded-md bg-muted text-muted-foreground">
-                        {expense.category}
-                      </span>
+              <motion.div key={expense.id} variants={item}>
+                <Card>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl font-bold tabular-nums">${expense.amount.toFixed(2)}</span>
+                        <Badge variant="secondary">
+                          {expense.category}
+                        </Badge>
+                      </div>
+                      {expense.description && (
+                        <p className="text-sm text-muted-foreground mb-2">{expense.description}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground font-medium">{new Date(expense.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                     </div>
-                    {expense.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{expense.description}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-1">{expense.date}</p>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteExpense(expense.id)}
+                      className="flex-shrink-0 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash size={20} />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteExpense(expense.id)}
-                  >
-                    <Trash size={20} />
-                  </Button>
-                </div>
-              </NeumorphicCard>
+                </Card>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
     </div>

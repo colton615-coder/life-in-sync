@@ -1,4 +1,4 @@
-import { NeumorphicCard } from '../NeumorphicCard'
+import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -62,12 +62,12 @@ Respond as Knox:`
         <p className="text-muted-foreground mt-2">Your therapeutic AI coach with tough love</p>
       </div>
 
-      <NeumorphicCard className="flex flex-col h-[calc(100%-8rem)]">
+      <Card className="flex flex-col h-[calc(100%-8rem)]">
         <ScrollArea className="flex-1 pr-4">
           <div className="space-y-4">
             {(!messages || messages.length === 0) && (
               <div className="text-center py-12">
-                <Brain size={48} weight="duotone" className="text-accent mx-auto mb-4" />
+                <Brain size={48} weight="duotone" className="text-primary mx-auto mb-4" />
                 <h3 className="font-semibold text-lg mb-2">Talk to Knox</h3>
                 <p className="text-muted-foreground">Share what's on your mind. Knox is here to help.</p>
               </div>
@@ -121,7 +121,7 @@ Respond as Knox:`
             <PaperPlaneTilt size={20} />
           </Button>
         </div>
-      </NeumorphicCard>
+      </Card>
     </div>
   )
 }

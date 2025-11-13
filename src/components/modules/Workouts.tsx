@@ -1,4 +1,4 @@
-import { NeumorphicCard } from '../NeumorphicCard'
+import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Plus, Barbell, Trophy, Sparkle } from '@phosphor-icons/react'
@@ -81,39 +81,39 @@ Only return the JSON, nothing else.`
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <NeumorphicCard>
+        <Card>
           <div className="flex items-center gap-3 mb-2">
-            <Barbell size={32} weight="duotone" className="text-accent" />
+            <Barbell size={32} weight="duotone" className="text-primary" />
             <div>
               <div className="text-3xl font-bold">{(workouts || []).length}</div>
               <div className="text-sm text-muted-foreground">Total Workouts</div>
             </div>
           </div>
-        </NeumorphicCard>
+        </Card>
 
-        <NeumorphicCard>
+        <Card>
           <div className="flex items-center gap-3 mb-2">
-            <Trophy size={32} weight="duotone" className="text-accent" />
+            <Trophy size={32} weight="duotone" className="text-primary" />
             <div>
               <div className="text-3xl font-bold">{(prs || []).length}</div>
               <div className="text-sm text-muted-foreground">Personal Records</div>
             </div>
           </div>
-        </NeumorphicCard>
+        </Card>
       </div>
 
       <div>
         <h2 className="text-xl font-semibold mb-4">Recent Workouts</h2>
         {!workouts || workouts.length === 0 ? (
-          <NeumorphicCard className="text-center py-12">
-            <Barbell size={48} weight="duotone" className="text-accent mx-auto mb-4" />
+          <Card className="text-center py-12">
+            <Barbell size={48} weight="duotone" className="text-primary mx-auto mb-4" />
             <h3 className="font-semibold text-lg mb-2">No workouts yet</h3>
             <p className="text-muted-foreground">Generate your first AI-powered workout!</p>
-          </NeumorphicCard>
+          </Card>
         ) : (
           <div className="grid gap-4">
             {[...(workouts || [])].reverse().map((workout) => (
-              <NeumorphicCard key={workout.id}>
+              <Card key={workout.id}>
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="font-semibold text-lg">{workout.name}</h3>
@@ -141,7 +141,7 @@ Only return the JSON, nothing else.`
                     </div>
                   ))}
                 </div>
-              </NeumorphicCard>
+              </Card>
             ))}
           </div>
         )}
