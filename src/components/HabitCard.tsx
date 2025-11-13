@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Trash, Fire, Drop, BookOpen, Barbell, AppleLogo, MoonStars, HeartStraight } from '@phosphor-icons/react'
+import { Trash, PencilSimple, Fire, Drop, BookOpen, Barbell, AppleLogo, MoonStars, HeartStraight } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -12,6 +12,7 @@ interface HabitCardProps {
   onUpdateProgress: (habitId: string, newProgress: number) => void
   onDelete: (habitId: string) => void
   onEdit: (habitId: string, updates: Partial<Habit>) => void
+  onOpenEditDialog: (habit: Habit) => void
   className?: string
   style?: React.CSSProperties
 }
@@ -25,7 +26,7 @@ const iconComponents: Record<HabitIcon, React.ComponentType<{ weight?: string; c
   heart: HeartStraight,
 }
 
-export function HabitCard({ habit, onUpdateProgress, onDelete, className, style }: HabitCardProps) {
+export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog, className, style }: HabitCardProps) {
   const IconComponent = iconComponents[habit.icon]
   const progressPercent = (habit.currentProgress / habit.targetCount) * 100
   const isComplete = habit.currentProgress >= habit.targetCount
@@ -35,6 +36,10 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, className, style 
       onDelete(habit.id)
       toast.success('Habit deleted')
     }
+  }
+
+  const handleEdit = () => {
+    onOpenEditDialog(habit)
   }
 
   const handleIconClick = (index: number) => {
@@ -93,14 +98,24 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, className, style 
             {habit.currentProgress} / {habit.targetCount} completed
           </p>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleDelete}
-          className="text-muted-foreground hover:text-destructive"
-        >
-          <Trash size={20} />
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleEdit}
+            className="text-muted-foreground hover:text-primary"
+          >
+            <PencilSimple size={20} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleDelete}
+            className="text-muted-foreground hover:text-destructive"
+          >
+            <Trash size={20} />
+          </Button>
+        </div>
       </div>
 
       <div className="mb-6">

@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { HabitCard } from '@/components/HabitCard'
 import { AddHabitDialog } from '@/components/AddHabitDialog'
+import { EditHabitDialog } from '@/components/EditHabitDialog'
 import { HistoryDialog } from '@/components/HistoryDialog'
 import { CelebrationOverlay } from '@/components/CelebrationOverlay'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, CalendarDots } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
+import { toast } from 'sonner'
 import { Habit } from '@/lib/types'
 import { getTodayKey } from '@/lib/utils'
 
@@ -15,6 +17,8 @@ function App() {
   const [habits, setHabits] = useKV<Habit[]>('habits', [])
   const [completionHistory, setCompletionHistory] = useKV<Record<string, string[]>>('completion-history', {})
   const [addDialogOpen, setAddDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [celebratingHabit, setCelebratingHabit] = useState<string | null>(null)
 
@@ -103,6 +107,12 @@ function App() {
     setHabits((current) =>
       (current || []).map((habit) => (habit.id === habitId ? { ...habit, ...updates } : habit))
     )
+    toast.success('Habit updated')
+  }
+
+  const handleOpenEditDialog = (habit: Habit) => {
+    setEditingHabit(habit)
+    setEditDialogOpen(true)
   }
 
   return (
@@ -153,6 +163,7 @@ function App() {
                       onUpdateProgress={handleUpdateProgress}
                       onDelete={handleDeleteHabit}
                       onEdit={handleEditHabit}
+                      onOpenEditDialog={handleOpenEditDialog}
                       style={{ animationDelay: `${index * 100}ms` }}
                       className="animate-slide-up"
                     />
@@ -176,6 +187,13 @@ function App() {
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         onAddHabit={handleAddHabit}
+      />
+
+      <EditHabitDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        habit={editingHabit}
+        onEditHabit={handleEditHabit}
       />
 
       <HistoryDialog
