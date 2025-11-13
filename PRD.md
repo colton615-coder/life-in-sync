@@ -20,11 +20,11 @@ A comprehensive life management platform that combines habit tracking, finance m
 - **Success criteria**: All module stats update in real-time, navigation is instant, animations complete within 300ms
 
 ### Habit Tracker
-- **Functionality**: Daily habit logging with streak tracking, completion percentage, and AI-powered weekly reviews
-- **Purpose**: Build consistency through visual progress tracking and intelligent accountability
+- **Functionality**: Flexible habit tracking with three tracking types: simple check-off (boolean), numerical targets (pages, reps, cups, etc.), and time-based goals (minutes). Includes streak tracking and target progress visualization
+- **Purpose**: Build consistency through visual progress tracking with flexible measurement methods that match the behavior type
 - **Trigger**: User clicks "Habits" from dashboard or adds new habit
-- **Progression**: View habits list → Check off completed habits (haptic feedback) → View streak counter increment → Weekly: Receive AI review with insights and suggestions
-- **Success criteria**: Streaks persist accurately, AI provides contextual encouragement and pattern recognition
+- **Progression**: Create habit with tracking type → Set target (if numerical/time) → Daily: Log progress via input dialog or simple check-off → View streak counter and progress toward target → Celebrate milestone streaks (7, 30, 100 days)
+- **Success criteria**: Streaks calculate accurately based on target achievement, different tracking types display appropriate input methods, progress shows current vs. target values
 
 ### Finance Manager
 - **Functionality**: Budget creation, expense logging with categories, visual spending breakdown via charts, AI financial coaching

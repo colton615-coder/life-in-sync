@@ -1,9 +1,21 @@
+export type TrackingType = 'boolean' | 'numerical' | 'time'
+
+export interface HabitEntry {
+  date: string
+  completed?: boolean
+  value?: number
+  minutes?: number
+}
+
 export interface Habit {
   id: string
   name: string
   description?: string
+  trackingType: TrackingType
+  target?: number
+  unit?: string
   streak: number
-  completedDates: string[]
+  entries: HabitEntry[]
   createdAt: string
 }
 
