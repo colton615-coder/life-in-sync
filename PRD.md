@@ -12,6 +12,13 @@ A visual habit tracking application where users set daily goals (like drinking 8
 
 ## Essential Features
 
+### Loading Screen with Daily Affirmations
+- **Functionality**: Display an animated loading screen with inspirational quotes or Bible verses while the app initializes, using AI to generate fresh content
+- **Purpose**: Create positive user experience on app launch while masking load time, set motivational tone for the session
+- **Trigger**: User opens or refreshes the app
+- **Progression**: App loads → Loading screen appears with animated background → AI fetches daily affirmation → Quote/verse animates in with elegant typography → App content loads in background → Smooth fade transition to main interface
+- **Success criteria**: Loading screen displays within 100ms, affirmation appears smoothly, transitions feel seamless, fallback quotes available if AI fails, total experience under 3 seconds
+
 ### Visual Progress Tracking
 - **Functionality**: Display a grid of icon representations (glasses for water, checkmarks for habits, etc.) that fill/highlight as user directly taps individual icons to log progress toward daily goal
 - **Purpose**: Create satisfying visual feedback that motivates completion through seeing progress accumulate with direct icon interaction

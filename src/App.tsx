@@ -8,6 +8,7 @@ import { CelebrationOverlay } from '@/components/CelebrationOverlay'
 import { NavigationDrawer } from '@/components/NavigationDrawer'
 import { NavigationButton } from '@/components/NavigationButton'
 import { AbstractBackground } from '@/components/AbstractBackground'
+import { LoadingScreen } from '@/components/LoadingScreen'
 import { Button } from '@/components/ui/button'
 import { Plus } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
@@ -26,6 +27,7 @@ function App() {
   const [celebratingHabit, setCelebratingHabit] = useState<string | null>(null)
   const [activeModule, setActiveModule] = useState('habits')
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [isAppReady, setIsAppReady] = useState(false)
 
   const handleAddHabit = (habit: Omit<Habit, 'id' | 'currentProgress' | 'streak'>) => {
     const newHabit: Habit = {
@@ -146,8 +148,11 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background relative">
-      <AbstractBackground />
+    <>
+      {!isAppReady && <LoadingScreen onLoadComplete={() => setIsAppReady(true)} />}
+      
+      <div className="min-h-screen bg-background relative">
+        <AbstractBackground />
       
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-8 md:px-8 md:py-16 pb-32">
         <motion.header 
@@ -292,6 +297,7 @@ function App() {
 
       <Toaster position="top-right" theme="dark" />
     </div>
+    </>
   )
 }
 
