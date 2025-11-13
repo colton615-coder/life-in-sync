@@ -50,23 +50,23 @@ A visual habit tracking application where users set daily goals (like drinking 8
 - **Data Loss Prevention**: Confirm before deleting habits; show toast with undo option
 
 ## Design Direction
-The interface should feel playful yet focused, with clean modern aesthetics that emphasize the visual progress indicators. The design should evoke a sense of accomplishment and momentum through vibrant colors, smooth animations, and satisfying micro-interactions. A minimal interface with generous whitespace keeps the focus on the habit icons, while delightful animations reward progress.
+The interface should feel sleek, powerful, and high-functioning with an abstract, premium aesthetic. The design should evoke a sense of sophistication and control through bold geometric elements, subtle gradients, glass-morphic surfaces, and purposeful animations. A dark, rich interface with strategic use of color creates depth and dimension, while abstract background patterns and floating elements convey technical prowess and modern design.
 
 ## Color Selection
-Triadic color scheme with energetic blues and complementary warm accents to create a vibrant, motivating atmosphere that celebrates progress.
+Dark, sophisticated color scheme with vibrant neon accents and deep backgrounds to create a premium, high-tech atmosphere that feels powerful and abstract.
 
-- **Primary Color**: Bright Cyan Blue (oklch(0.65 0.20 220)) - Energetic and refreshing, perfect for water/hydration themes and primary actions
+- **Primary Color**: Electric Cyan (oklch(0.75 0.20 195)) - High-tech, powerful accent for primary actions and key interactive elements
 - **Secondary Colors**: 
-  - Warm Coral (oklch(0.70 0.18 25)) - Supporting color for celebration states and secondary actions
-  - Fresh Green (oklch(0.72 0.16 145)) - Success states and completed progress indicators
-- **Accent Color**: Electric Purple (oklch(0.62 0.25 295)) - Highlight color for active states, streaks, and milestone celebrations
+  - Deep Purple (oklch(0.55 0.25 285)) - Premium, abstract feel for secondary surfaces and accents
+  - Neon Pink (oklch(0.70 0.25 350)) - Bold highlight for critical actions and special states
+- **Accent Color**: Lime Green (oklch(0.80 0.22 130)) - Success and completion states with high contrast
 - **Foreground/Background Pairings**:
-  - Background (Light Gray oklch(0.97 0.005 240)): Dark Text (oklch(0.20 0.01 240)) - Ratio 14.8:1 ✓
-  - Card (White oklch(1.00 0 0)): Dark Text (oklch(0.20 0.01 240)) - Ratio 16.5:1 ✓
-  - Primary (Bright Cyan Blue oklch(0.65 0.20 220)): White (oklch(1.00 0 0)) - Ratio 4.9:1 ✓
-  - Secondary (Warm Coral oklch(0.70 0.18 25)): Dark Text (oklch(0.20 0.01 240)) - Ratio 6.5:1 ✓
-  - Accent (Electric Purple oklch(0.62 0.25 295)): White (oklch(1.00 0 0)) - Ratio 5.2:1 ✓
-  - Success (Fresh Green oklch(0.72 0.16 145)): Dark Text (oklch(0.20 0.01 240)) - Ratio 7.2:1 ✓
+  - Background (Deep Dark oklch(0.15 0.02 265)): Light Text (oklch(0.95 0.01 265)) - Ratio 11.2:1 ✓
+  - Card (Dark Surface oklch(0.22 0.03 265)): Light Text (oklch(0.95 0.01 265)) - Ratio 8.5:1 ✓
+  - Primary (Electric Cyan oklch(0.75 0.20 195)): Dark Background (oklch(0.15 0.02 265)) - Ratio 7.1:1 ✓
+  - Secondary (Deep Purple oklch(0.55 0.25 285)): Light Text (oklch(0.95 0.01 265)) - Ratio 5.8:1 ✓
+  - Accent (Lime Green oklch(0.80 0.22 130)): Dark Background (oklch(0.15 0.02 265)) - Ratio 9.2:1 ✓
+  - Muted (Subtle Gray oklch(0.40 0.02 265)): Light Text (oklch(0.95 0.01 265)) - Ratio 4.8:1 ✓
 
 ## Font Selection
 Typography should convey friendly approachability with clear readability through the Poppins font family for headings (personality) and Inter for body text (clarity).
@@ -80,13 +80,13 @@ Typography should convey friendly approachability with clear readability through
   - Captions: Inter Regular / 13px / normal / 1.4
 
 ## Animations
-Animations should create a sense of progress and achievement, with icons that bounce and fill with color when tapped, and celebration animations that feel rewarding without being overwhelming. The balance leans toward delight—every interaction should feel satisfying.
+Animations should create a sense of power and precision, with smooth, purposeful movements that emphasize the app's high-functioning nature. Glass-morphic transitions, subtle particle effects, and geometric transformations convey technical sophistication. The balance is restrained elegance—every animation serves a purpose and reinforces the premium, abstract aesthetic.
 
-- **Purposeful Meaning**: Icon fill animations communicate progress; bounce effects provide tactile feedback; confetti celebrates achievements; pulse effects draw attention to actionable buttons
+- **Purposeful Meaning**: Glass-morphic transitions communicate depth and layering; geometric animations provide sophisticated feedback; ambient particles suggest technical complexity; glow effects emphasize interactive states
 - **Hierarchy of Movement**: 
-  - Primary: Icon fill animation (scale + color transition), celebration confetti on completion
-  - Secondary: Plus button pulse when tappable, card entrance animations, progress bar fills
-  - Tertiary: Subtle hover states, streak badge glow, tab transitions
+  - Primary: Smooth glass-morphic reveals, icon state transitions with glow effects, celebration with abstract particles
+  - Secondary: Navigation drawer slide with blur, card hover elevations with shadows, progress bar fills with gradient shifts
+  - Tertiary: Ambient background animations, subtle icon pulse states, menu transitions with fade and scale
 
 ## Component Selection
 
