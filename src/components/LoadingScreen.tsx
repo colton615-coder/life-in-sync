@@ -25,7 +25,7 @@ const staticAffirmations = [
 ]
 
 export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
-  const [affirmation, setAffirmation] = useState(staticAffirmations[Math.floor(Math.random() * staticAffirmations.length)])
+  const [affirmation, setAffirmation] = useState<{ text: string; author: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -61,6 +61,8 @@ Keep the text under 120 characters. Make it profound and uplifting.`
         }
       } catch (error) {
         console.error('Failed to load affirmation:', error)
+        const fallback = staticAffirmations[Math.floor(Math.random() * staticAffirmations.length)]
+        setAffirmation(fallback)
       }
     }
 
@@ -146,30 +148,35 @@ Keep the text under 120 characters. Make it profound and uplifting.`
               </div>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-              className="space-y-6"
-            >
-              <motion.blockquote
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
-                className="text-2xl md:text-3xl font-medium text-foreground leading-relaxed"
-              >
-                "{affirmation.text}"
-              </motion.blockquote>
-              
-              <motion.cite
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.9, duration: 0.6 }}
-                className="block text-lg text-muted-foreground not-italic"
-              >
-                — {affirmation.author}
-              </motion.cite>
-            </motion.div>
+            <AnimatePresence mode="wait">
+              {affirmation && (
+                <motion.div
+                  key="affirmation"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
+                  className="space-y-6"
+                >
+                  <motion.blockquote
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.6, duration: 0.8 }}
+                    className="text-2xl md:text-3xl font-medium text-foreground leading-relaxed"
+                  >
+                    "{affirmation.text}"
+                  </motion.blockquote>
+                  
+                  <motion.cite
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.9, duration: 0.6 }}
+                    className="block text-lg text-muted-foreground not-italic"
+                  >
+                    — {affirmation.author}
+                  </motion.cite>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <motion.div
               initial={{ opacity: 0 }}
