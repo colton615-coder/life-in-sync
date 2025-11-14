@@ -13,6 +13,7 @@ import { WorkoutSummary } from '../workout/WorkoutSummary'
 import { Badge } from '@/components/ui/badge'
 import { motion } from 'framer-motion'
 import { AIButton } from '@/components/AIButton'
+import { StatCard } from '@/components/StatCard'
 
 type WorkoutStage = 'planning' | 'active' | 'summary'
 
@@ -249,24 +250,13 @@ Return ONLY valid JSON with this exact structure:
       </div>
 
       <Card className="glass-card border-primary/20 hover:border-primary/40 transition-all duration-300">
-        <div className="flex items-center justify-center gap-6">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-foreground">{(completedWorkouts || []).length}</div>
-            <div className="text-xs text-muted-foreground">Completed</div>
-          </div>
-          <div className="h-12 w-px bg-border" />
-          <div className="text-center">
-            <div className="text-3xl font-bold text-foreground">
-              {Math.round((completedWorkouts || []).reduce((acc, w) => acc + w.totalDuration, 0) / 60)}
-            </div>
-            <div className="text-xs text-muted-foreground">Minutes</div>
-          </div>
-          <div className="h-12 w-px bg-border" />
-          <div className="text-center">
-            <div className="text-3xl font-bold text-foreground">{(prs || []).length}</div>
-            <div className="text-xs text-muted-foreground">Records</div>
-          </div>
-        </div>
+        <StatCard 
+          stats={[
+            { value: (completedWorkouts || []).length, label: 'Completed' },
+            { value: Math.round((completedWorkouts || []).reduce((acc, w) => acc + w.totalDuration, 0) / 60), label: 'Minutes' },
+            { value: (prs || []).length, label: 'Records' }
+          ]}
+        />
       </Card>
 
       <div>

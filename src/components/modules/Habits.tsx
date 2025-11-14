@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Confetti } from '@/components/Confetti'
 import { IconPicker } from '@/components/IconPicker'
+import { StatCard } from '@/components/StatCard'
 
 const trackingTypeOptions = [
   { value: 'boolean' as TrackingType, icon: Check, label: 'Simple Checkbox', description: 'Just mark it done' },
@@ -592,26 +593,13 @@ export function Habits() {
       {creationStep === 0 && (
         <>
           {habits && habits.length > 0 && (
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="flex items-center justify-center gap-6"
-            >
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold">{habits.length}</div>
-                <div className="text-xs text-muted-foreground font-normal">Total</div>
-              </div>
-              <div className="h-12 w-px bg-border" />
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold">{activeHabits.length}</div>
-                <div className="text-xs text-muted-foreground font-normal">Active</div>
-              </div>
-              <div className="h-12 w-px bg-border" />
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold">{completedHabits.length}</div>
-                <div className="text-xs text-muted-foreground font-normal">Done</div>
-              </div>
-            </motion.div>
+            <StatCard 
+              stats={[
+                { value: habits.length, label: 'Total' },
+                { value: activeHabits.length, label: 'Active' },
+                { value: completedHabits.length, label: 'Done' }
+              ]}
+            />
           )}
 
           <div className="flex gap-1 p-1 bg-muted/50 rounded-xl w-fit mx-auto">

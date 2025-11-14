@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { format, isToday, isTomorrow, isThisWeek, parseISO, isBefore, startOfDay } from 'date-fns'
 import { Calendar } from '@/components/ui/calendar'
+import { StatCard } from '@/components/StatCard'
 
 type SortOption = 'priority' | 'dueDate' | 'createdAt' | 'title'
 type ViewMode = 'all' | 'active' | 'completed'
@@ -484,40 +485,15 @@ export function Tasks() {
       />
 
       {tasks && tasks.length > 0 && (
-        <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="flex items-center justify-center gap-6 py-3"
-        >
-          <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-foreground tabular-nums">
-              {tasks.length}
-            </div>
-            <div className="text-xs text-muted-foreground font-normal">Total</div>
-          </div>
-          <div className="h-12 w-px bg-border" />
-          <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-accent tabular-nums">
-              {activeTasks.length}
-            </div>
-            <div className="text-xs text-muted-foreground font-normal">Active</div>
-          </div>
-          <div className="h-12 w-px bg-border" />
-          <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-success tabular-nums">
-              {completedTasks.length}
-            </div>
-            <div className="text-xs text-muted-foreground font-normal">Done</div>
-          </div>
-          <div className="h-12 w-px bg-border" />
-          <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-destructive tabular-nums">
-              {overdueTasks.length}
-            </div>
-            <div className="text-xs text-muted-foreground font-normal">Overdue</div>
-          </div>
-        </motion.div>
+        <StatCard 
+          stats={[
+            { value: tasks.length, label: 'Total' },
+            { value: activeTasks.length, label: 'Active', textColor: 'text-accent' },
+            { value: completedTasks.length, label: 'Done', textColor: 'text-success' },
+            { value: overdueTasks.length, label: 'Overdue', textColor: 'text-destructive' }
+          ]}
+          className="py-3"
+        />
       )}
 
       {!tasks || tasks.length === 0 ? (

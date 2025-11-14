@@ -18,6 +18,7 @@ import { DetailedBudgetDisplay } from '@/components/DetailedBudgetDisplay'
 import { TabGroup } from '@/components/TabGroup'
 import { AIButton } from '@/components/AIButton'
 import { SarcasticProgress } from '@/components/SarcasticLoader'
+import { StatCard } from '@/components/StatCard'
 
 const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Other']
 const COLORS = ['#5fd4f4', '#9d7fff', '#6ee7b7', '#fbbf24', '#fb923c', '#f87171', '#94a3b8']
@@ -402,24 +403,13 @@ CRITICAL RULES:
             className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4"
           >
             <Card className="glass-card border-primary/20 hover:border-primary/40 transition-all duration-300">
-              <div className="flex items-center justify-center gap-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
-                    ${totalSpent.toFixed(2)}
-                  </div>
-                  <div className="text-xs text-muted-foreground">This Month</div>
-                </div>
-                <div className="h-12 w-px bg-border" />
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-foreground">{monthExpenses.length}</div>
-                  <div className="text-xs text-muted-foreground">Transactions</div>
-                </div>
-                <div className="h-12 w-px bg-border" />
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-foreground">{categoryData.length}</div>
-                  <div className="text-xs text-muted-foreground">Categories</div>
-                </div>
-              </div>
+              <StatCard 
+                stats={[
+                  { value: `$${totalSpent.toFixed(2)}`, label: 'This Month', gradient: 'from-primary to-primary/70' },
+                  { value: monthExpenses.length, label: 'Transactions' },
+                  { value: categoryData.length, label: 'Categories' }
+                ]}
+              />
             </Card>
 
             {categoryData.length > 0 ? (

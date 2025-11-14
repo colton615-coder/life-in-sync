@@ -8,6 +8,7 @@ import { PencilSimple, Trash, Plus, ShoppingCart, CheckCircle, Sparkle, Lightnin
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { StatCard } from '@/components/StatCard'
 
 export function Shopping() {
   const [items, setItems] = useKV<ShoppingItem[]>('shopping-items', [])
@@ -172,28 +173,14 @@ export function Shopping() {
         </div>
 
         {allItems.length > 0 && (
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="flex items-center justify-center gap-6 pt-2"
-          >
-            <div className="text-center">
-              <div className="text-3xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
-                {completionRate}%
-              </div>
-              <div className="text-xs text-muted-foreground">Complete</div>
-            </div>
-            <div className="h-12 w-px bg-border" />
-            <div className="text-center">
-              <div className="text-3xl font-bold text-foreground">{activeItems.length}</div>
-              <div className="text-xs text-muted-foreground">To Buy</div>
-            </div>
-            <div className="h-12 w-px bg-border" />
-            <div className="text-center">
-              <div className="text-3xl font-bold text-foreground">{completedItems.length}</div>
-              <div className="text-xs text-muted-foreground">Bought</div>
-            </div>
-          </motion.div>
+          <StatCard 
+            stats={[
+              { value: `${completionRate}%`, label: 'Complete', gradient: 'from-green-500 to-emerald-500' },
+              { value: activeItems.length, label: 'To Buy' },
+              { value: completedItems.length, label: 'Bought' }
+            ]}
+            className="pt-2"
+          />
         )}
       </motion.div>
 
