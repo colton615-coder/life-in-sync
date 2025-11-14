@@ -74,19 +74,6 @@ export function NavigationButton({ onClick, isOpen }: NavigationButtonProps) {
           )}
         </Button>
       </motion.div>
-      
-      {!isOpen && (
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 1 }}
-          className="absolute left-20 top-1/2 -translate-y-1/2 whitespace-nowrap pointer-events-none"
-        >
-          <div className="glass-morphic rounded-lg px-3 py-1.5 text-xs font-medium text-foreground/80">
-            Navigation
-          </div>
-        </motion.div>
-      )}
     </motion.div>
   )
 }
