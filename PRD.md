@@ -18,7 +18,7 @@ A visual habit tracking application where users set daily goals (like drinking 8
 - **Purpose**: Create positive user experience on app launch while masking load time, set motivational tone for the session
 - **Trigger**: User opens or refreshes the app
 - **Progression**: App loads → Loading screen appears with animated background → AI fetches daily affirmation → Quote/verse animates in with elegant typography → App content loads in background → Smooth fade transition to main interface
-- **Success criteria**: Loading screen displays within 100ms, affirmation appears smoothly, transitions feel seamless, fallback quotes available if AI fails, total experience under 3 seconds
+- **Success criteria**: Loading screen displays within 100ms, affirmation appears smoothly and remains visible for ~4 seconds to allow reading, transitions feel seamless, fallback quotes available if AI fails
 
 ### Visual Progress Tracking
 - **Functionality**: Display a grid of icon representations (glasses for water, checkmarks for habits, etc.) that fill/highlight as user directly taps individual icons to log progress toward daily goal
@@ -56,11 +56,18 @@ A visual habit tracking application where users set daily goals (like drinking 8
 - **Success criteria**: All modules use consistent completion tracking, active/completed items properly separated, statistics accurate, completion data persists, filters work correctly, analytics provide actionable insights
 
 ### AI Financial Advisor Interview & Budget Generation
-- **Functionality**: Multi-step interview process where an AI financial advisor asks comprehensive questions about income, housing, debt, goals, and spending habits, then generates a detailed, personalized budget plan
+- **Functionality**: Multi-step interview process where an AI financial advisor asks comprehensive questions about income, housing, debt, goals, and spending habits, then generates a detailed, personalized budget plan (currently uses Spark LLM, planned migration to Gemini Pro 2.5 for enhanced reasoning)
 - **Purpose**: Provide in-depth financial planning through conversational AI guidance, creating optimized budget allocations based on user's complete financial picture
 - **Trigger**: User navigates to Finance module → AI Financial Advisor tab
 - **Progression**: User starts interview → Answer 5 step questionnaire covering income, housing, debt, goals, and spending habits → AI analyzes complete profile → Generates detailed budget with category allocations → Shows personalized recommendations with reasoning → Provides savings strategy → Offers debt payoff plan (if applicable) → Displays actionable steps
 - **Success criteria**: Interview feels conversational and thorough, all financial factors considered, budget totals balance to income, recommendations are specific and practical, AI reasoning is clear and helpful, budget persists for future reference, user can restart process anytime
+
+### AI Provider Integration (Planned)
+- **Functionality**: Integrate Google Gemini Pro 2.5 alongside existing Spark LLM (GPT-4o) with intelligent routing, fallback mechanisms, and unified abstraction layer
+- **Purpose**: Leverage best AI model for each task, optimize costs, improve reasoning capabilities for complex features, enable multimodal futures
+- **Trigger**: Developer configures Gemini API key in settings (owner only)
+- **Progression**: Owner adds API key → System validates configuration → AI router automatically selects optimal provider per feature → Usage tracked for cost optimization → Automatic fallback on failures → Analytics show provider performance
+- **Success criteria**: Seamless provider switching, <3s response times, >99% uptime with fallback, secure key storage, no user-facing errors, cost tracking accurate, documentation complete
 
 ### Theme Personalization
 - **Functionality**: Toggle between light, dark, and system-preferred themes with persistent storage of user preference

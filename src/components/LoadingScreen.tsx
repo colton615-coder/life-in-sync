@@ -73,7 +73,7 @@ Keep the text under 120 characters. Make it profound and uplifting.`
       setTimeout(() => {
         onLoadComplete()
       }, 800)
-    }, 2500)
+    }, 3800)
 
     return () => clearTimeout(timer)
   }, [onLoadComplete])
