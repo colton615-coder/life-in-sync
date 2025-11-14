@@ -1,54 +1,176 @@
+import { useState } from 'react'
 import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Plus, Barbell, Trophy, Sparkle } from '@phosphor-icons/react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
-import { Workout, PersonalRecord } from '@/lib/types'
-import { useState } from 'react'
+import { WorkoutPlan, CompletedWorkout, PersonalRecord } from '@/lib/types'
 import { toast } from 'sonner'
+import { ActiveWorkout } from '../workout/ActiveWorkout'
+import { WorkoutSummary } from '../workout/WorkoutSummary'
+import { Badge } from '@/components/ui/badge'
+
+type WorkoutStage = 'planning' | 'active' | 'summary'
 
 export function Workouts() {
-  const [workouts, setWorkouts] = useKV<Workout[]>('workouts', [])
+  const [workoutPlans, setWorkoutPlans] = useKV<WorkoutPlan[]>('workout-plans', [])
+  const [completedWorkouts, setCompletedWorkouts] = useKV<CompletedWorkout[]>('completed-workouts', [])
   const [prs, setPrs] = useKV<PersonalRecord[]>('personal-records', [])
+  
   const [dialogOpen, setDialogOpen] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const [workoutPrompt, setWorkoutPrompt] = useState('')
+  
+  const [workoutStage, setWorkoutStage] = useState<WorkoutStage>('planning')
+  const [activeWorkoutPlan, setActiveWorkoutPlan] = useState<WorkoutPlan | null>(null)
+  const [completedCount, setCompletedCount] = useState(0)
 
   const generateWorkout = async () => {
+    if (!workoutPrompt.trim()) {
+      toast.error('Please describe your workout')
+      return
+    }
+
     setGenerating(true)
     try {
-      const promptText = `Generate a balanced workout routine with 5 exercises. Return as JSON with this structure:
-{
-  "name": "Workout name",
-  "exercises": [
-    {"name": "Exercise name", "sets": 3, "reps": 10}
-  ]
-}
-Only return the JSON, nothing else.`
+      const promptText = `You are a fitness expert. Generate a complete workout plan based on this request: ${workoutPrompt}.
 
-      const response = await window.spark.llm(promptText, 'gpt-4o-mini', true)
+Create a balanced workout with 6-10 exercises including warm-up, main work, and cool-down periods.
+
+For each exercise, provide:
+- A unique ID (use the exercise name in kebab-case)
+- Exercise name
+- Type: "reps" or "time"
+- Category: "Warm-up", "Work", "Cool-down", or "Rest"
+- For reps exercises: sets (1-5) and reps (5-20)
+- For time exercises: duration in seconds (20-60 for work, 10-30 for rest)
+- Muscle groups targeted (array of strings like "chest", "legs", "core", etc.)
+- Difficulty: "beginner", "intermediate", or "advanced"
+- Detailed instructions with a summary and 3-5 key points
+- Asset name (use generic names like "jumping-jacks", "push-ups", "squats", etc.)
+
+Return ONLY valid JSON with this exact structure:
+{
+  "workoutPlan": {
+    "name": "Descriptive workout name",
+    "focus": "Main focus area (e.g., Upper Body Strength, HIIT Cardio)",
+    "difficulty": "beginner|intermediate|advanced",
+    "exercises": [
+      {
+        "id": "exercise-name-kebab-case",
+        "name": "Exercise Name",
+        "type": "reps",
+        "category": "Warm-up",
+        "sets": 2,
+        "reps": 10,
+        "muscleGroups": ["chest", "triceps"],
+        "difficulty": "beginner",
+        "instructions": {
+          "summary": "Clear description of how to perform the exercise",
+          "keyPoints": ["Point 1", "Point 2", "Point 3"]
+        },
+        "asset": "exercise-name"
+      }
+    ]
+  }
+}`
+
+      const response = await window.spark.llm(promptText, 'gpt-4o', true)
       const data = JSON.parse(response)
 
-      const workout: Workout = {
+      const totalDuration = data.workoutPlan.exercises.reduce((acc: number, ex: any) => {
+        if (ex.type === 'time') return acc + (ex.duration || 0)
+        if (ex.type === 'reps') return acc + (ex.sets * ex.reps * 3)
+        return acc
+      }, 0)
+
+      const workout: WorkoutPlan = {
         id: Date.now().toString(),
-        name: data.name,
-        exercises: data.exercises,
-        duration: 45,
-        date: new Date().toISOString().split('T')[0]
+        name: data.workoutPlan.name,
+        focus: data.workoutPlan.focus,
+        exercises: data.workoutPlan.exercises,
+        estimatedDuration: Math.ceil(totalDuration / 60),
+        difficulty: data.workoutPlan.difficulty || 'intermediate',
+        createdAt: new Date().toISOString()
       }
 
-      setWorkouts((current) => [...(current || []), workout])
+      setWorkoutPlans((current) => [...(current || []), workout])
       setDialogOpen(false)
+      setWorkoutPrompt('')
       toast.success('Workout generated!')
     } catch (error) {
+      console.error('Workout generation error:', error)
       toast.error('Failed to generate workout')
     } finally {
       setGenerating(false)
     }
   }
 
+  const startWorkout = (plan: WorkoutPlan) => {
+    setActiveWorkoutPlan(plan)
+    setWorkoutStage('active')
+    setCompletedCount(0)
+  }
+
+  const handleWorkoutFinish = (completed: boolean) => {
+    if (!activeWorkoutPlan) return
+
+    const totalExercises = activeWorkoutPlan.exercises.filter(ex => ex.id !== 'rest').length
+    const exercisesCompleted = completed ? totalExercises : completedCount
+
+    if (completed || exercisesCompleted > 0) {
+      const totalTime = activeWorkoutPlan.exercises
+        .slice(0, exercisesCompleted)
+        .reduce((acc, ex) => acc + (ex.duration || (ex.reps! * ex.sets! * 3)), 0)
+
+      const completedWorkout: CompletedWorkout = {
+        id: Date.now().toString(),
+        workoutPlanId: activeWorkoutPlan.id,
+        workoutName: activeWorkoutPlan.name,
+        workoutFocus: activeWorkoutPlan.focus,
+        completedExercises: exercisesCompleted,
+        totalExercises: totalExercises,
+        totalDuration: totalTime,
+        calories: Math.round((totalTime / 60) * 8),
+        date: new Date().toISOString().split('T')[0],
+        completedAt: new Date().toISOString()
+      }
+
+      setCompletedWorkouts((current) => [...(current || []), completedWorkout])
+      setCompletedCount(exercisesCompleted)
+      setWorkoutStage('summary')
+    } else {
+      setWorkoutStage('planning')
+      setActiveWorkoutPlan(null)
+      toast.info('Workout cancelled')
+    }
+  }
+
+  const handleDone = () => {
+    setWorkoutStage('planning')
+    setActiveWorkoutPlan(null)
+    setCompletedCount(0)
+  }
+
   const deleteWorkout = (workoutId: string) => {
-    setWorkouts((current) => (current || []).filter(w => w.id !== workoutId))
+    setWorkoutPlans((current) => (current || []).filter(w => w.id !== workoutId))
     toast.success('Workout deleted')
+  }
+
+  if (workoutStage === 'active' && activeWorkoutPlan) {
+    return <ActiveWorkout workout={activeWorkoutPlan} onFinish={handleWorkoutFinish} />
+  }
+
+  if (workoutStage === 'summary' && activeWorkoutPlan) {
+    return (
+      <WorkoutSummary 
+        workout={activeWorkoutPlan} 
+        completedCount={completedCount}
+        onDone={handleDone}
+      />
+    )
   }
 
   return (
@@ -56,25 +178,45 @@ Only return the JSON, nothing else.`
       <div className="flex items-center justify-between gap-2 md:gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Workouts</h1>
-          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">Track fitness and build strength</p>
+          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">AI-powered fitness training</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 h-9 md:h-10 text-sm" size="sm">
+            <Button className="gap-2 h-9 md:h-10 text-sm neumorphic-button">
               <Sparkle size={18} className="md:w-5 md:h-5" />
               <span className="hidden sm:inline">Generate Workout</span>
               <span className="sm:hidden">Generate</span>
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="neumorphic">
             <DialogHeader>
-              <DialogTitle>AI-Generated Workout</DialogTitle>
+              <DialogTitle>AI Workout Generator</DialogTitle>
+              <DialogDescription>
+                Describe your ideal workout and let AI create a personalized plan
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">
-              <p className="text-sm text-muted-foreground">
-                Let AI create a custom workout routine tailored for you.
-              </p>
-              <Button onClick={generateWorkout} className="w-full" disabled={generating}>
+              <div className="space-y-2">
+                <Label htmlFor="workout-prompt">What type of workout?</Label>
+                <Input
+                  id="workout-prompt"
+                  placeholder="e.g., 30 min full body HIIT, upper body strength, beginner yoga..."
+                  value={workoutPrompt}
+                  onChange={(e) => setWorkoutPrompt(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !generating) {
+                      generateWorkout()
+                    }
+                  }}
+                  className="neumorphic-inset"
+                />
+              </div>
+              <Button 
+                onClick={generateWorkout} 
+                className="w-full neumorphic-button" 
+                disabled={generating || !workoutPrompt.trim()}
+              >
+                <Sparkle className="mr-2" />
                 {generating ? 'Generating...' : 'Generate Workout'}
               </Button>
             </div>
@@ -82,20 +224,32 @@ Only return the JSON, nothing else.`
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3">
             <Barbell size={32} weight="duotone" className="text-primary" />
             <div>
-              <div className="text-3xl font-bold">{(workouts || []).length}</div>
-              <div className="text-sm text-muted-foreground">Total Workouts</div>
+              <div className="text-3xl font-bold">{(completedWorkouts || []).length}</div>
+              <div className="text-sm text-muted-foreground">Completed</div>
             </div>
           </div>
         </Card>
 
         <Card>
-          <div className="flex items-center gap-3 mb-2">
-            <Trophy size={32} weight="duotone" className="text-primary" />
+          <div className="flex items-center gap-3">
+            <Timer size={32} weight="duotone" className="text-accent" />
+            <div>
+              <div className="text-3xl font-bold">
+                {Math.round((completedWorkouts || []).reduce((acc, w) => acc + w.totalDuration, 0) / 60)}
+              </div>
+              <div className="text-sm text-muted-foreground">Minutes</div>
+            </div>
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-center gap-3">
+            <Trophy size={32} weight="duotone" className="text-success" />
             <div>
               <div className="text-3xl font-bold">{(prs || []).length}</div>
               <div className="text-sm text-muted-foreground">Personal Records</div>
@@ -105,49 +259,100 @@ Only return the JSON, nothing else.`
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold mb-4">Recent Workouts</h2>
-        {!workouts || workouts.length === 0 ? (
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <Sparkle weight="duotone" className="text-primary" />
+          Generated Workouts
+        </h2>
+        {!workoutPlans || workoutPlans.length === 0 ? (
           <Card className="text-center py-12">
-            <Barbell size={48} weight="duotone" className="text-primary mx-auto mb-4" />
+            <Sparkle size={48} weight="duotone" className="text-primary mx-auto mb-4" />
             <h3 className="font-semibold text-lg mb-2">No workouts yet</h3>
-            <p className="text-muted-foreground">Generate your first AI-powered workout!</p>
+            <p className="text-muted-foreground mb-4">Generate your first AI-powered workout!</p>
+            <Button onClick={() => setDialogOpen(true)} className="neumorphic-button">
+              <Sparkle className="mr-2" />
+              Generate Workout
+            </Button>
           </Card>
         ) : (
           <div className="grid gap-4">
-            {[...(workouts || [])].reverse().map((workout) => (
-              <Card key={workout.id}>
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-lg">{workout.name}</h3>
-                    <p className="text-sm text-muted-foreground">{workout.date}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => deleteWorkout(workout.id)}
-                  >
-                    Delete
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  {workout.exercises.map((exercise, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-3 rounded-md bg-background/50"
-                    >
-                      <span className="font-medium">{exercise.name}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {exercise.sets} × {exercise.reps}
-                        {exercise.weight && ` @ ${exercise.weight}lbs`}
-                      </span>
+            {[...(workoutPlans || [])].reverse().map((workout) => (
+              <Card key={workout.id} className="elevated-card">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-start gap-2 mb-2">
+                      <h3 className="font-semibold text-lg">{workout.name}</h3>
+                      <Badge variant="secondary" className="text-xs">
+                        {workout.difficulty}
+                      </Badge>
                     </div>
-                  ))}
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {workout.focus} • {workout.exercises.length} exercises • ~{workout.estimatedDuration} min
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {workout.exercises.slice(0, 3).map((exercise, idx) => (
+                        <Badge key={idx} variant="outline" className="text-xs">
+                          {exercise.name}
+                        </Badge>
+                      ))}
+                      {workout.exercises.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{workout.exercises.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => startWorkout(workout)}
+                      className="neumorphic-button gap-2"
+                    >
+                      <Play weight="fill" />
+                      Start
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteWorkout(workout.id)}
+                      className="neumorphic-flat"
+                    >
+                      ×
+                    </Button>
+                  </div>
                 </div>
               </Card>
             ))}
           </div>
         )}
       </div>
+
+      {completedWorkouts && completedWorkouts.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <ClockCounterClockwise weight="duotone" className="text-accent" />
+            Recent Activity
+          </h2>
+          <div className="grid gap-4">
+            {[...(completedWorkouts || [])].reverse().slice(0, 5).map((workout) => (
+              <Card key={workout.id} className="elevated-card">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-semibold">{workout.workoutName}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {workout.date} • {Math.ceil(workout.totalDuration / 60)} min • {workout.calories} cal
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Completed {workout.completedExercises}/{workout.totalExercises} exercises
+                    </p>
+                  </div>
+                  <Badge variant="secondary">
+                    {Math.round((workout.completedExercises / workout.totalExercises) * 100)}%
+                  </Badge>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

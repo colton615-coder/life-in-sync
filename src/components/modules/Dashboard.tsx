@@ -10,7 +10,7 @@ import {
   ListChecks,
   Sparkle
 } from '@phosphor-icons/react'
-import { Module, Habit, Expense, Task, Workout, ChatMessage } from '@/lib/types'
+import { Module, Habit, Expense, Task, CompletedWorkout, ChatMessage } from '@/lib/types'
 import { useKV } from '@github/spark/hooks'
 import { useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
@@ -24,7 +24,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [habits] = useKV<Habit[]>('habits', [])
   const [expenses] = useKV<Expense[]>('expenses', [])
   const [tasks] = useKV<Task[]>('tasks', [])
-  const [workouts] = useKV<Workout[]>('workouts', [])
+  const [completedWorkouts] = useKV<CompletedWorkout[]>('completed-workouts', [])
   const [knoxMessages] = useKV<ChatMessage[]>('knox-messages', [])
 
   const today = new Date().toISOString().split('T')[0]
@@ -108,17 +108,17 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   }, [tasks])
 
   const workoutStats = useMemo(() => {
-    const allWorkouts = workouts || []
+    const allWorkouts = completedWorkouts || []
     const totalWorkouts = allWorkouts.length
     const oneWeekAgo = new Date()
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
-    const weekWorkouts = allWorkouts.filter(w => new Date(w.date) >= oneWeekAgo).length
+    const weekWorkouts = allWorkouts.filter(w => new Date(w.completedAt) >= oneWeekAgo).length
     
     return { 
       total: totalWorkouts,
       thisWeek: weekWorkouts
     }
-  }, [workouts])
+  }, [completedWorkouts])
 
   const knoxStats = useMemo(() => {
     const allMessages = knoxMessages || []

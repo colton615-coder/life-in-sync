@@ -134,24 +134,52 @@ export interface ChatMessage {
   timestamp: string
 }
 
-export interface Workout {
+export interface Exercise {
   id: string
   name: string
-  exercises: Exercise[]
-  duration: number
-  date: string
+  type: 'reps' | 'time'
+  category: string
+  sets?: number
+  reps?: number
+  duration?: number
+  weight?: number
+  muscleGroups: string[]
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  instructions: {
+    summary: string
+    keyPoints: string[]
+  }
+  asset?: string
 }
 
-export interface Exercise {
+export interface WorkoutPlan {
+  id: string
   name: string
-  sets: number
-  reps: number
-  weight?: number
+  focus: string
+  exercises: Exercise[]
+  estimatedDuration: number
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  createdAt: string
+}
+
+export interface CompletedWorkout {
+  id: string
+  workoutPlanId: string
+  workoutName: string
+  workoutFocus: string
+  completedExercises: number
+  totalExercises: number
+  totalDuration: number
+  calories: number
+  date: string
+  completedAt: string
 }
 
 export interface PersonalRecord {
-  exercise: string
-  weight: number
-  reps: number
-  date: string
+  exerciseId: string
+  exerciseName: string
+  maxWeight?: number
+  maxReps?: number
+  maxDuration?: number
+  achievedAt: string
 }
