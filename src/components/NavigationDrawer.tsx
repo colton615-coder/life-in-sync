@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { 
   House, 
-  ChartBar, 
+  ListChecks, 
   CalendarDots, 
   Gear, 
   CurrencyDollar,
@@ -11,7 +11,6 @@ import {
   ShoppingCart,
   LockKey,
   ChatsCircle,
-  List,
   X
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
@@ -27,7 +26,7 @@ const modules: NavModule[] = [
   { icon: House, label: 'Dashboard', id: 'dashboard', color: 'text-cyan-400' },
   { icon: CheckSquare, label: 'Habits', id: 'habits', color: 'text-green-400' },
   { icon: CurrencyDollar, label: 'Finance', id: 'finance', color: 'text-emerald-400' },
-  { icon: ChartBar, label: 'Tasks', id: 'tasks', color: 'text-orange-400' },
+  { icon: ListChecks, label: 'Tasks', id: 'tasks', color: 'text-orange-400' },
   { icon: Barbell, label: 'Workouts', id: 'workouts', color: 'text-red-400' },
   { icon: ChatsCircle, label: 'Knox AI', id: 'knox', color: 'text-purple-400' },
   { icon: ShoppingCart, label: 'Shopping', id: 'shopping', color: 'text-blue-400' },
