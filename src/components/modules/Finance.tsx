@@ -246,27 +246,28 @@ CRITICAL RULES:
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-4 md:space-y-8 animate-in fade-in duration-500">
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex items-start justify-between gap-4 flex-wrap"
+        className="flex items-start justify-between gap-2 md:gap-4 flex-wrap"
       >
-        <div className="space-y-1">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+        <div className="space-y-0.5 md:space-y-1">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
             Finance
           </h1>
-          <p className="text-muted-foreground text-base md:text-[16px] font-medium">
+          <p className="text-muted-foreground text-sm md:text-base lg:text-[16px] font-medium">
             Smart expense tracking & AI-powered budget planning
           </p>
         </div>
         {activeTab === 'expenses' && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2 shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 transition-all duration-300 h-11 px-6">
-                <Plus size={22} weight="bold" />
-                <span className="font-semibold">Add Expense</span>
+              <Button className="gap-2 shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 transition-all duration-300 h-9 md:h-11 px-4 md:px-6 text-sm" size="sm">
+                <Plus size={18} weight="bold" className="md:w-[22px] md:h-[22px]" />
+                <span className="font-semibold hidden sm:inline">Add Expense</span>
+                <span className="font-semibold sm:hidden">Add</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] glass-card border-primary/30">

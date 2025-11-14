@@ -366,3 +366,37 @@
     inset 4px 4px 8px var(--neu-dark),
     inset -4px -4px 8px var(--neu-light);
 }
+
+.elevated-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.elevated-card:hover {
+  box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+  .abstract-shape {
+    filter: blur(60px);
+  }
+  
+  .glass-card {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  
+  .neumorphic {
+    box-shadow: 
+      8px 8px 16px var(--neu-dark),
+      -8px -8px 16px var(--neu-light);
+  }
+  
+  .neumorphic-button {
+    box-shadow: 
+      6px 6px 12px var(--neu-dark),
+      -6px -6px 12px var(--neu-light);
+  }
+}

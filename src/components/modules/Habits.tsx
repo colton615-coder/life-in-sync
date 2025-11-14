@@ -348,21 +348,23 @@ export function Habits() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500">
       {showConfetti && <Confetti />}
       
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-2 md:gap-4">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight">Habits</h1>
-          <p className="text-muted-foreground mt-2 text-[15px]">Build the life you want, one day at a time</p>
+          <h1 className="text-2xl md:text-4xl font-bold tracking-tight">Habits</h1>
+          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-[15px]">Build the life you want, one day at a time</p>
         </div>
         {creationStep === 0 && (
           <Button 
             onClick={() => setCreationStep(1)}
-            className="gap-2 shadow-lg shadow-primary/20"
+            className="gap-2 shadow-lg shadow-primary/20 h-9 md:h-10 text-sm"
+            size="sm"
           >
-            <Plus size={20} weight="bold" />
-            New Habit
+            <Plus size={18} weight="bold" className="md:w-5 md:h-5" />
+            <span className="hidden sm:inline">New Habit</span>
+            <span className="sm:hidden">New</span>
           </Button>
         )}
       </div>
@@ -375,28 +377,28 @@ export function Habits() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="glass-card border-primary/30 shadow-xl p-8">
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full glass-card border-primary/30 flex items-center justify-center">
-                    <Sparkle weight="fill" className="text-primary" size={20} />
+            <Card className="glass-card border-primary/30 shadow-xl p-4 md:p-8">
+              <div className="flex items-start justify-between mb-4 md:mb-6">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full glass-card border-primary/30 flex items-center justify-center">
+                    <Sparkle weight="fill" className="text-primary" size={16} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Create New Habit</h3>
-                    <p className="text-sm text-muted-foreground">Step {creationStep} of {newHabit.trackingType === 'boolean' ? 3 : 4}</p>
+                    <h3 className="font-semibold text-base md:text-lg">Create New Habit</h3>
+                    <p className="text-xs md:text-sm text-muted-foreground">Step {creationStep} of {newHabit.trackingType === 'boolean' ? 3 : 4}</p>
                   </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={resetCreation}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground h-8 w-8 md:h-10 md:w-10"
                 >
-                  <X size={20} />
+                  <X size={18} className="md:w-5 md:h-5" />
                 </Button>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 <motion.div
                   key={creationStep}
                   initial={{ opacity: 0, x: 20 }}
@@ -404,15 +406,15 @@ export function Habits() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <h2 className="text-2xl font-semibold mb-6 text-primary">{getStepPrompt()}</h2>
+                  <h2 className="text-lg md:text-2xl font-semibold mb-4 md:mb-6 text-primary">{getStepPrompt()}</h2>
 
                   {creationStep === 1 && (
-                    <div className="space-y-4">
+                    <div className="space-y-3 md:space-y-4">
                       <Input
                         placeholder="e.g., Drink water, Read, Exercise, Meditate"
                         value={newHabit.name}
                         onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
-                        className="h-14 text-lg glass-morphic border-border/50 focus:border-primary"
+                        className="h-12 md:h-14 text-base md:text-lg glass-morphic border-border/50 focus:border-primary"
                         autoFocus
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && canProceedToNextStep()) {
@@ -424,7 +426,7 @@ export function Habits() {
                         placeholder="Why does this matter to you? (optional)"
                         value={newHabit.description}
                         onChange={(e) => setNewHabit({ ...newHabit, description: e.target.value })}
-                        className="h-12 glass-morphic border-border/50 focus:border-primary"
+                        className="h-10 md:h-12 glass-morphic border-border/50 focus:border-primary"
                       />
                     </div>
                   )}

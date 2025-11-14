@@ -13,7 +13,7 @@ export function NavigationButton({ onClick, isOpen }: NavigationButtonProps) {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 20 }}
-      className="fixed bottom-6 left-6 z-50"
+      className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-50"
     >
       <motion.div
         whileHover={{ scale: 1.05 }}
@@ -23,7 +23,7 @@ export function NavigationButton({ onClick, isOpen }: NavigationButtonProps) {
           size="icon"
           onClick={onClick}
           className={`
-            w-16 h-16 rounded-2xl shadow-2xl transition-all duration-300 relative overflow-hidden
+            w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl shadow-2xl transition-all duration-300 relative overflow-hidden
             ${isOpen 
               ? 'bg-destructive/80 hover:bg-destructive text-destructive-foreground' 
               : 'glass-card text-primary hover:bg-primary/20 animate-glow'
@@ -55,12 +55,12 @@ export function NavigationButton({ onClick, isOpen }: NavigationButtonProps) {
             }}
             className="relative z-10"
           >
-            <List size={28} weight="bold" />
+            <List size={20} weight="bold" className="md:w-7 md:h-7" />
           </motion.div>
 
           {!isOpen && (
             <motion.div
-              className="absolute inset-0 rounded-2xl border-2 border-primary/50"
+              className="absolute inset-0 rounded-xl md:rounded-2xl border-2 border-primary/50"
               animate={{
                 scale: [1, 1.2, 1],
                 opacity: [0.5, 0, 0.5],

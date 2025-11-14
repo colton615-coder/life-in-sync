@@ -129,25 +129,25 @@ export function Tasks() {
     : 0
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-4 md:space-y-8 animate-in fade-in duration-500">
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex items-start justify-between gap-4 flex-wrap"
+        className="flex items-start justify-between gap-2 md:gap-4 flex-wrap"
       >
-        <div className="space-y-1">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
+        <div className="space-y-0.5 md:space-y-1">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
             Tasks
           </h1>
-          <p className="text-muted-foreground text-base md:text-[16px] font-medium">
+          <p className="text-muted-foreground text-sm md:text-base lg:text-[16px] font-medium">
             Organize and prioritize your to-dos
           </p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <button className="gap-2 px-6 h-12 rounded-2xl flex items-center justify-center font-semibold text-primary-foreground bg-gradient-to-br from-primary to-primary/80 neumorphic-button hover:scale-105 transition-transform duration-200">
-              <Plus size={22} weight="bold" />
+            <button className="gap-2 px-4 md:px-6 h-9 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center font-semibold text-sm md:text-base text-primary-foreground bg-gradient-to-br from-primary to-primary/80 neumorphic-button hover:scale-105 transition-transform duration-200">
+              <Plus size={18} weight="bold" className="md:w-[22px] md:h-[22px]" />
               <span>Add Task</span>
             </button>
           </DialogTrigger>

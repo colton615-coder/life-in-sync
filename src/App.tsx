@@ -59,11 +59,11 @@ function App() {
       <div className="min-h-screen bg-background relative">
         <AbstractBackground />
       
-        <div className="fixed top-4 right-4 z-50">
+        <div className="fixed top-3 right-3 md:top-4 md:right-4 z-50">
           <ThemeToggle />
         </div>
 
-        <div className="relative z-10 max-w-6xl mx-auto px-4 py-8 md:px-8 md:py-16 pb-32">
+        <div className="relative z-10 max-w-6xl mx-auto px-3 py-4 md:px-8 md:py-16 pb-24 md:pb-32">
           {renderModule()}
         </div>
 

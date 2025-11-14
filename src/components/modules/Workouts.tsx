@@ -52,17 +52,18 @@ Only return the JSON, nothing else.`
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex items-center justify-between gap-2 md:gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Workouts</h1>
-          <p className="text-muted-foreground mt-2">Track fitness and build strength</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Workouts</h1>
+          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">Track fitness and build strength</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Sparkle size={20} />
-              Generate Workout
+            <Button className="gap-2 h-9 md:h-10 text-sm" size="sm">
+              <Sparkle size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Generate Workout</span>
+              <span className="sm:hidden">Generate</span>
             </Button>
           </DialogTrigger>
           <DialogContent>

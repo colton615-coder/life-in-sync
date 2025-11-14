@@ -58,10 +58,10 @@ Respond as Knox:`
   }
 
   return (
-    <div className="space-y-6 h-[calc(100vh-12rem)]">
+    <div className="space-y-4 md:space-y-6 h-[calc(100vh-8rem)] md:h-[calc(100vh-12rem)]">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">AI Knox</h1>
-        <p className="text-muted-foreground mt-2">Your therapeutic AI coach with tough love</p>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">AI Knox</h1>
+        <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">Your therapeutic AI coach with tough love</p>
       </div>
 
       <Card className="flex flex-col h-[calc(100%-8rem)]">

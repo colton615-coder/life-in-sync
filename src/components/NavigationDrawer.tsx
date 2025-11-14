@@ -73,19 +73,19 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                 damping: 30,
                 stiffness: 300,
               }}
-              className="fixed left-0 top-0 h-full w-80 z-[101] glass-card border-r-2 border-primary/30 shadow-2xl flex flex-col"
+              className="fixed left-0 top-0 h-full w-80 max-w-[85vw] z-[101] glass-card border-r-2 border-primary/30 shadow-2xl flex flex-col"
             >
-              <div className="p-6 border-b border-primary/20">
-                <div className="flex items-center justify-between mb-6">
+              <div className="p-4 md:p-6 border-b border-primary/20">
+                <div className="flex items-center justify-between mb-4 md:mb-6">
                   <motion.h2 
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent"
+                    className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent"
                   >
                     Navigation
                   </motion.h2>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 md:gap-2">
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -104,9 +104,10 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                         variant="ghost"
                         size="icon"
                         onClick={onClose}
-                        className="rounded-full hover:bg-destructive/20 hover:text-destructive"
+                        className="rounded-full hover:bg-destructive/20 hover:text-destructive h-8 w-8 md:h-10 md:w-10"
                       >
-                        <X size={24} weight="bold" />
+                        <X size={20} weight="bold" className="md:hidden" />
+                        <X size={24} weight="bold" className="hidden md:block" />
                       </Button>
                     </motion.div>
                   </div>
@@ -116,13 +117,13 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
-                  className="text-muted-foreground text-sm"
+                  className="text-muted-foreground text-xs md:text-sm"
                 >
                   Access all modules from here
                 </motion.p>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-1.5 md:space-y-2">
                 {modules.map((module, index) => {
                   const IconComponent = module.icon
                   const isActive = activeModule === module.id
@@ -142,7 +143,7 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                       <Button
                         variant="ghost"
                         className={cn(
-                          'w-full justify-start gap-3 h-12 rounded-lg transition-all duration-200 group relative overflow-hidden px-3',
+                          'w-full justify-start gap-2 md:gap-3 h-10 md:h-12 rounded-lg transition-all duration-200 group relative overflow-hidden px-2 md:px-3',
                           isActive
                             ? 'bg-gradient-to-r from-primary/20 to-accent/20 text-foreground border border-primary/40 shadow-lg'
                             : 'text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent'
@@ -157,28 +158,28 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                           />
                         )}
                         
-                        <div className="relative z-10 flex items-center gap-3 w-full">
+                        <div className="relative z-10 flex items-center gap-2 md:gap-3 w-full">
                           <div className={cn(
                             'transition-all duration-200 flex-shrink-0',
                             module.color
                           )}>
                             <IconComponent 
-                              size={32} 
+                              size={24}
                               weight={isActive ? 'fill' : 'duotone'}
                               className={cn(
-                                'drop-shadow-[0_0_8px_currentColor]',
+                                'drop-shadow-[0_0_8px_currentColor] md:w-8 md:h-8',
                                 isActive && 'animate-pulse-button'
                               )}
                             />
                           </div>
-                          <span className="font-semibold text-base flex-1 text-left">
+                          <span className="font-semibold text-sm md:text-base flex-1 text-left">
                             {module.label}
                           </span>
                           {isActive && (
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="w-2 h-2 rounded-full bg-primary neon-glow"
+                              className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-primary neon-glow"
                             />
                           )}
                         </div>
@@ -188,17 +189,17 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                 })}
               </div>
 
-              <div className="p-4 border-t border-primary/20">
+              <div className="p-3 md:p-4 border-t border-primary/20">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="text-center text-xs text-muted-foreground"
+                  className="text-center text-[10px] md:text-xs text-muted-foreground"
                 >
                   <p className="font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                     LiFE-iN-SYNC
                   </p>
-                  <p className="mt-1">Optimize Your Life</p>
+                  <p className="mt-0.5 md:mt-1">Optimize Your Life</p>
                 </motion.div>
               </div>
             </motion.div>
