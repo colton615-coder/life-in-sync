@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { CalendarBlank, Clock, TextAlignLeft, Tag } from '@phosphor-icons/react'
 
 interface AddEventDialogProps {
   open: boolean
@@ -60,7 +61,7 @@ export function AddEventDialog({ open, onOpenChange, onAdd, initialDate }: AddEv
     }
 
     onAdd(newEvent)
-    toast.success('Event added successfully')
+    toast.success('Event created!', { icon: '🎉' })
     
     setTitle('')
     setDescription('')
@@ -71,61 +72,106 @@ export function AddEventDialog({ open, onOpenChange, onAdd, initialDate }: AddEv
     onOpenChange(false)
   }
 
+  const getCategoryColor = (cat: string) => {
+    switch (cat) {
+      case 'event': return 'from-blue-500 to-cyan-500'
+      case 'plan': return 'from-purple-500 to-pink-500'
+      case 'reminder': return 'from-orange-500 to-amber-500'
+      case 'meeting': return 'from-green-500 to-emerald-500'
+      default: return 'from-gray-500 to-slate-500'
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[550px] bg-gradient-to-br from-white/95 to-white/90 dark:from-gray-900/95 dark:to-gray-900/90 backdrop-blur-xl border-2 border-purple-200/50 dark:border-purple-800/50">
         <DialogHeader>
-          <DialogTitle>Add New Event</DialogTitle>
-          <DialogDescription>
-            Create a new event or plan for your calendar
+          <DialogTitle className="text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
+            <CalendarBlank className="w-6 h-6 text-purple-500" weight="duotone" />
+            Create New Event
+          </DialogTitle>
+          <DialogDescription className="text-base">
+            Add a new event, plan, or reminder to your calendar
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+        <form onSubmit={handleSubmit} className="space-y-5 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title" className="text-sm font-semibold flex items-center gap-2">
+              <TextAlignLeft className="w-4 h-4" weight="duotone" />
+              Title *
+            </Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Event title"
+              placeholder="What's the event?"
+              className="h-12 text-base border-2 focus-visible:border-purple-400 rounded-xl"
               autoFocus
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-sm font-semibold">Description</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add details about this event..."
+              placeholder="Add more details..."
               rows={3}
+              className="text-base border-2 focus-visible:border-purple-400 rounded-xl resize-none"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date">Date *</Label>
+              <Label htmlFor="date" className="text-sm font-semibold flex items-center gap-2">
+                <CalendarBlank className="w-4 h-4" weight="duotone" />
+                Date *
+              </Label>
               <Input
                 id="date"
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
+                className="h-12 border-2 focus-visible:border-purple-400 rounded-xl"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category" className="text-sm font-semibold flex items-center gap-2">
+                <Tag className="w-4 h-4" weight="duotone" />
+                Category
+              </Label>
               <Select value={category} onValueChange={(value) => setCategory(value as CalendarEvent['category'])}>
-                <SelectTrigger id="category">
+                <SelectTrigger id="category" className="h-12 border-2 focus-visible:border-purple-400 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="event">Event</SelectItem>
-                  <SelectItem value="plan">Plan</SelectItem>
-                  <SelectItem value="reminder">Reminder</SelectItem>
-                  <SelectItem value="meeting">Meeting</SelectItem>
+                  <SelectItem value="event">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500`} />
+                      Event
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="plan">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full bg-gradient-to-br from-purple-500 to-pink-500`} />
+                      Plan
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="reminder">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full bg-gradient-to-br from-orange-500 to-amber-500`} />
+                      Reminder
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="meeting">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full bg-gradient-to-br from-green-500 to-emerald-500`} />
+                      Meeting
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -133,22 +179,27 @@ export function AddEventDialog({ open, onOpenChange, onAdd, initialDate }: AddEv
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="start-time">Start Time</Label>
+              <Label htmlFor="start-time" className="text-sm font-semibold flex items-center gap-2">
+                <Clock className="w-4 h-4" weight="duotone" />
+                Start Time
+              </Label>
               <Input
                 id="start-time"
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
+                className="h-12 border-2 focus-visible:border-purple-400 rounded-xl"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="end-time">End Time</Label>
+              <Label htmlFor="end-time" className="text-sm font-semibold">End Time</Label>
               <Input
                 id="end-time"
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
+                className="h-12 border-2 focus-visible:border-purple-400 rounded-xl"
               />
             </div>
           </div>
@@ -158,12 +209,15 @@ export function AddEventDialog({ open, onOpenChange, onAdd, initialDate }: AddEv
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="flex-1"
+              className="flex-1 h-12 rounded-xl border-2 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1">
-              Add Event
+            <Button 
+              type="submit" 
+              className={`flex-1 h-12 rounded-xl bg-gradient-to-r ${getCategoryColor(category)} text-white hover:shadow-xl transition-all duration-300 font-semibold`}
+            >
+              Create Event
             </Button>
           </div>
         </form>

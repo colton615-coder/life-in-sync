@@ -4,37 +4,61 @@ export function AbstractBackground() {
       <div 
         className="abstract-shape"
         style={{
-          width: '600px',
-          height: '600px',
-          background: 'linear-gradient(135deg, oklch(0.60 0.20 230), oklch(0.75 0.15 280))',
-          top: '10%',
-          left: '15%',
-          animationDelay: '0s',
-          opacity: '0.08',
-        }}
-      />
-      <div 
-        className="abstract-shape"
-        style={{
           width: '800px',
           height: '800px',
-          background: 'linear-gradient(225deg, oklch(0.75 0.15 280), oklch(0.60 0.20 25))',
-          bottom: '10%',
-          right: '10%',
-          animationDelay: '-10s',
-          opacity: '0.08',
+          background: 'linear-gradient(135deg, oklch(0.70 0.25 330), oklch(0.80 0.20 280), oklch(0.75 0.22 250))',
+          top: '5%',
+          left: '10%',
+          animationDelay: '0s',
+          opacity: '0.25',
         }}
       />
       <div 
         className="abstract-shape"
         style={{
-          width: '500px',
-          height: '500px',
-          background: 'linear-gradient(90deg, oklch(0.65 0.18 150), oklch(0.70 0.18 180))',
-          top: '50%',
-          right: '20%',
-          animationDelay: '-5s',
-          opacity: '0.08',
+          width: '900px',
+          height: '900px',
+          background: 'linear-gradient(225deg, oklch(0.75 0.22 200), oklch(0.70 0.25 320), oklch(0.80 0.18 30))',
+          bottom: '5%',
+          right: '5%',
+          animationDelay: '-8s',
+          opacity: '0.25',
+        }}
+      />
+      <div 
+        className="abstract-shape"
+        style={{
+          width: '700px',
+          height: '700px',
+          background: 'linear-gradient(90deg, oklch(0.75 0.20 150), oklch(0.72 0.22 180), oklch(0.68 0.25 120))',
+          top: '40%',
+          right: '15%',
+          animationDelay: '-4s',
+          opacity: '0.22',
+        }}
+      />
+      <div 
+        className="abstract-shape"
+        style={{
+          width: '600px',
+          height: '600px',
+          background: 'linear-gradient(180deg, oklch(0.78 0.20 60), oklch(0.72 0.24 45), oklch(0.70 0.26 25))',
+          top: '60%',
+          left: '5%',
+          animationDelay: '-12s',
+          opacity: '0.20',
+        }}
+      />
+      <div 
+        className="abstract-shape"
+        style={{
+          width: '550px',
+          height: '550px',
+          background: 'linear-gradient(270deg, oklch(0.80 0.18 310), oklch(0.75 0.22 290))',
+          bottom: '30%',
+          left: '30%',
+          animationDelay: '-6s',
+          opacity: '0.18',
         }}
       />
     </div>
