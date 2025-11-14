@@ -218,12 +218,12 @@ export function Tasks() {
         >
           <Card className="glass-card border-primary/20 hover:border-primary/40 transition-all duration-300">
             <div className="flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 shadow-lg">
-                <ListChecks size={28} weight="fill" className="text-primary" />
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 shadow-lg">
+                <ListChecks size={32} weight="fill" className="text-primary" />
               </div>
               <div>
-                <div className="text-sm text-muted-foreground font-medium mb-0.5">Total Tasks</div>
-                <div className="text-3xl font-bold tabular-nums bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+                <div className="text-sm text-muted-foreground font-medium mb-1">Total Tasks</div>
+                <div className="text-4xl md:text-5xl font-bold tabular-nums bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
                   {tasks.length}
                 </div>
               </div>
@@ -232,12 +232,12 @@ export function Tasks() {
 
           <Card className="glass-card border-accent/20 hover:border-accent/40 transition-all duration-300">
             <div className="flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center flex-shrink-0 shadow-lg">
-                <Target size={28} weight="fill" className="text-accent" />
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center flex-shrink-0 shadow-lg">
+                <Target size={32} weight="fill" className="text-accent" />
               </div>
               <div>
-                <div className="text-sm text-muted-foreground font-medium mb-0.5">Active</div>
-                <div className="text-3xl font-bold tabular-nums text-accent">
+                <div className="text-sm text-muted-foreground font-medium mb-1">Active Tasks</div>
+                <div className="text-4xl md:text-5xl font-bold tabular-nums text-accent">
                   {activeTasks.length}
                 </div>
               </div>
@@ -246,16 +246,16 @@ export function Tasks() {
 
           <Card className="glass-card border-success/20 hover:border-success/40 transition-all duration-300">
             <div className="flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center flex-shrink-0 shadow-lg">
-                <CheckCircle size={28} weight="fill" className="text-success" />
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center flex-shrink-0 shadow-lg">
+                <CheckCircle size={32} weight="fill" className="text-success" />
               </div>
               <div>
-                <div className="text-sm text-muted-foreground font-medium mb-0.5">Completed</div>
-                <div className="text-3xl font-bold tabular-nums text-success">
+                <div className="text-sm text-muted-foreground font-medium mb-1">Completed</div>
+                <div className="text-4xl md:text-5xl font-bold tabular-nums text-success">
                   {completedTasks.length}
                 </div>
-                <div className="text-xs text-muted-foreground/70 font-medium mt-0.5">
-                  {completionRate}% done
+                <div className="text-xs text-muted-foreground/70 font-medium mt-1">
+                  {completionRate}% completion rate
                 </div>
               </div>
             </div>
@@ -325,10 +325,10 @@ export function Tasks() {
             {filteredTasks.map((task) => (
               <motion.div key={task.id} variants={item}>
                 <Card className={`glass-card hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 border-l-4 ${getPriorityBorder(task.priority)}`}>
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-4">
                     <button
                       onClick={() => toggleTask(task.id)}
-                      className="flex-shrink-0 mt-0.5"
+                      className="flex-shrink-0"
                     >
                       <motion.div
                         whileTap={{ scale: 0.85 }}
@@ -336,22 +336,24 @@ export function Tasks() {
                         transition={{ type: "spring", stiffness: 400, damping: 17 }}
                       >
                         <CheckCircle
-                          size={36}
+                          size={40}
                           weight={task.completed ? 'fill' : 'regular'}
                           className={task.completed ? 'text-success' : 'text-muted-foreground hover:text-primary transition-colors'}
                         />
                       </motion.div>
                     </button>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start gap-2 mb-2.5">
-                        <div className="mt-1">{getPriorityIcon(task.priority)}</div>
-                        <h3
-                          className={`font-semibold text-lg leading-tight ${
-                            task.completed ? 'line-through text-muted-foreground' : 'text-foreground'
-                          }`}
-                        >
-                          {task.title}
-                        </h3>
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <div>{getPriorityIcon(task.priority)}</div>
+                          <h3
+                            className={`font-semibold text-lg leading-tight ${
+                              task.completed ? 'line-through text-muted-foreground' : 'text-foreground'
+                            }`}
+                          >
+                            {task.title}
+                          </h3>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <Badge 
@@ -372,7 +374,8 @@ export function Tasks() {
                         <span className="text-xs text-muted-foreground/70 font-medium ml-auto">
                           {new Date(task.createdAt).toLocaleDateString('en-US', { 
                             month: 'short', 
-                            day: 'numeric'
+                            day: 'numeric',
+                            year: 'numeric'
                           })}
                         </span>
                       </div>
