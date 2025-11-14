@@ -1,4 +1,4 @@
-import { Card } from '../Card'
+import { NeumorphicCard } from '../NeumorphicCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -137,7 +137,7 @@ export function Tasks() {
         className="flex items-start justify-between gap-4 flex-wrap"
       >
         <div className="space-y-1">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
             Tasks
           </h1>
           <p className="text-muted-foreground text-base md:text-[16px] font-medium">
@@ -146,12 +146,12 @@ export function Tasks() {
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 transition-all duration-300 h-11 px-6">
+            <button className="gap-2 px-6 h-12 rounded-2xl flex items-center justify-center font-semibold text-primary-foreground bg-gradient-to-br from-primary to-primary/80 neumorphic-button hover:scale-105 transition-transform duration-200">
               <Plus size={22} weight="bold" />
-              <span className="font-semibold">Add Task</span>
-            </Button>
+              <span>Add Task</span>
+            </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px] glass-card border-primary/30">
+          <DialogContent className="sm:max-w-[500px] neumorphic border-none">
             <DialogHeader>
               <DialogTitle className="text-2xl">Create New Task</DialogTitle>
               <DialogDescription>
@@ -166,7 +166,7 @@ export function Tasks() {
                   placeholder="What needs to be done?"
                   value={newTask.title}
                   onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                  className="h-11 glass-morphic border-border/50 focus:border-primary"
+                  className="h-11 neumorphic-inset border-none focus-visible:ring-2 focus-visible:ring-primary"
                 />
               </div>
               <div className="space-y-2">
@@ -175,7 +175,7 @@ export function Tasks() {
                   value={newTask.priority}
                   onValueChange={(value) => setNewTask({ ...newTask, priority: value as Task['priority'] })}
                 >
-                  <SelectTrigger id="task-priority" className="h-11 glass-morphic border-border/50">
+                  <SelectTrigger id="task-priority" className="h-11 neumorphic-inset border-none">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -201,8 +201,12 @@ export function Tasks() {
                 </Select>
               </div>
               <div className="flex gap-3 pt-2">
-                <Button onClick={addTask} className="flex-1 h-11 shadow-md">Create Task</Button>
-                <Button variant="outline" onClick={() => setDialogOpen(false)} className="h-11">Cancel</Button>
+                <button onClick={addTask} className="flex-1 h-11 rounded-xl font-semibold text-primary-foreground bg-gradient-to-br from-primary to-primary/80 neumorphic-button">
+                  Create Task
+                </button>
+                <button onClick={() => setDialogOpen(false)} className="h-11 px-6 rounded-xl font-medium neumorphic-button">
+                  Cancel
+                </button>
               </div>
             </div>
           </DialogContent>
@@ -216,9 +220,9 @@ export function Tasks() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
-          <Card className="glass-card border-primary/20 hover:border-primary/40 transition-all duration-300">
+          <NeumorphicCard className="hover:shadow-primary/10 transition-all duration-300" hover>
             <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 shadow-lg">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0 neumorphic-inset">
                 <ListChecks size={32} weight="fill" className="text-primary" />
               </div>
               <div>
@@ -228,11 +232,11 @@ export function Tasks() {
                 </div>
               </div>
             </div>
-          </Card>
+          </NeumorphicCard>
 
-          <Card className="glass-card border-accent/20 hover:border-accent/40 transition-all duration-300">
+          <NeumorphicCard className="hover:shadow-accent/10 transition-all duration-300" hover>
             <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center flex-shrink-0 shadow-lg">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/30 to-accent/10 flex items-center justify-center flex-shrink-0 neumorphic-inset">
                 <Target size={32} weight="fill" className="text-accent" />
               </div>
               <div>
@@ -242,11 +246,11 @@ export function Tasks() {
                 </div>
               </div>
             </div>
-          </Card>
+          </NeumorphicCard>
 
-          <Card className="glass-card border-success/20 hover:border-success/40 transition-all duration-300">
+          <NeumorphicCard className="hover:shadow-success/10 transition-all duration-300" hover>
             <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center flex-shrink-0 shadow-lg">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-success/30 to-success/10 flex items-center justify-center flex-shrink-0 neumorphic-inset">
                 <CheckCircle size={32} weight="fill" className="text-success" />
               </div>
               <div>
@@ -259,7 +263,7 @@ export function Tasks() {
                 </div>
               </div>
             </div>
-          </Card>
+          </NeumorphicCard>
         </motion.div>
       )}
 
@@ -274,7 +278,7 @@ export function Tasks() {
       />
 
       {!tasks || tasks.length === 0 ? (
-        <Card className="glass-card border-border/30 text-center py-20">
+        <NeumorphicCard className="text-center py-20" inset>
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -286,9 +290,9 @@ export function Tasks() {
               Add your first task to get started on your productivity journey
             </p>
           </motion.div>
-        </Card>
+        </NeumorphicCard>
       ) : filteredTasks.length === 0 ? (
-        <Card className="glass-card border-border/30 text-center py-20">
+        <NeumorphicCard className="text-center py-20" inset>
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -300,7 +304,7 @@ export function Tasks() {
               Try a different filter to see your tasks
             </p>
           </motion.div>
-        </Card>
+        </NeumorphicCard>
       ) : (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -312,9 +316,9 @@ export function Tasks() {
               <ListChecks weight="fill" className="text-primary" size={28} />
               {filterTab === 'all' ? 'All Tasks' : filterTab === 'active' ? 'Active Tasks' : 'Completed Tasks'}
             </h2>
-            <Badge variant="secondary" className="text-sm px-3 py-1">
+            <div className="px-4 py-2 rounded-full text-sm font-medium neumorphic-flat">
               {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'}
-            </Badge>
+            </div>
           </div>
           <motion.div 
             variants={container}
@@ -324,7 +328,7 @@ export function Tasks() {
           >
             {filteredTasks.map((task) => (
               <motion.div key={task.id} variants={item}>
-                <Card className={`glass-card hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 border-l-4 ${getPriorityBorder(task.priority)}`}>
+                <NeumorphicCard className={`hover:shadow-primary/10 transition-all duration-300 ${task.completed ? 'opacity-70' : ''}`} hover>
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => toggleTask(task.id)}
@@ -334,11 +338,16 @@ export function Tasks() {
                         whileTap={{ scale: 0.85 }}
                         whileHover={{ scale: 1.1 }}
                         transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                          task.completed 
+                            ? 'bg-gradient-to-br from-success/30 to-success/10 neumorphic-inset' 
+                            : 'neumorphic-button'
+                        }`}
                       >
                         <CheckCircle
-                          size={40}
+                          size={28}
                           weight={task.completed ? 'fill' : 'regular'}
-                          className={task.completed ? 'text-success' : 'text-muted-foreground hover:text-primary transition-colors'}
+                          className={task.completed ? 'text-success' : 'text-muted-foreground'}
                         />
                       </motion.div>
                     </button>
@@ -356,20 +365,17 @@ export function Tasks() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Badge 
-                          variant="secondary" 
-                          className={`text-xs capitalize font-medium ${
-                            task.priority === 'high' ? 'border-destructive/30 bg-destructive/10 text-destructive' :
-                            task.priority === 'medium' ? 'border-accent/30 bg-accent/10 text-accent' :
-                            'border-success/30 bg-success/10 text-success'
-                          }`}
-                        >
+                        <div className={`px-3 py-1 rounded-full text-xs capitalize font-medium neumorphic-flat ${
+                            task.priority === 'high' ? 'text-destructive' :
+                            task.priority === 'medium' ? 'text-accent' :
+                            'text-success'
+                          }`}>
                           {task.priority} priority
-                        </Badge>
+                        </div>
                         {task.completed && (
-                          <Badge variant="outline" className="text-xs border-success/40 bg-success/5 text-success font-medium">
+                          <div className="px-3 py-1 rounded-full text-xs font-medium neumorphic-flat text-success">
                             ✓ Completed
-                          </Badge>
+                          </div>
                         )}
                         <span className="text-xs text-muted-foreground/70 font-medium ml-auto">
                           {new Date(task.createdAt).toLocaleDateString('en-US', { 
@@ -380,16 +386,14 @@ export function Tasks() {
                         </span>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
+                    <button
                       onClick={() => deleteTask(task.id)}
-                      className="flex-shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center neumorphic-button text-muted-foreground hover:text-destructive transition-colors"
                     >
-                      <Trash size={20} />
-                    </Button>
+                      <Trash size={18} />
+                    </button>
                   </div>
-                </Card>
+                </NeumorphicCard>
               </motion.div>
             ))}
           </motion.div>

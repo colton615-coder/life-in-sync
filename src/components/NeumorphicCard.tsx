@@ -22,7 +22,7 @@ export function NeumorphicCard({
     <div
       onClick={onClick}
       className={cn(
-        'rounded-lg bg-card p-6',
+        'rounded-3xl bg-card p-6',
         inset ? 'neumorphic-inset' : 'neumorphic',
         hover && 'neumorphic-hover cursor-pointer',
         pressed && 'neumorphic-pressed',
