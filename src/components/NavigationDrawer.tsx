@@ -32,7 +32,7 @@ const modules: NavModule[] = [
   { icon: ChatsCircle, label: 'Knox AI', id: 'knox', color: 'text-purple-400' },
   { icon: ShoppingCart, label: 'Shopping', id: 'shopping', color: 'text-blue-400' },
   { icon: CalendarDots, label: 'Calendar', id: 'calendar', color: 'text-pink-400' },
-  { icon: LockKey, label: 'Vault', id: 'vault', color: 'text-yellow-400' },
+  { icon: LockKey, label: 'Golf Swing', id: 'vault', color: 'text-yellow-400' },
   { icon: Gear, label: 'Settings', id: 'settings', color: 'text-gray-400' },
 ]
 

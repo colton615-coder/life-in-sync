@@ -16,6 +16,7 @@ import { Knox } from '@/components/modules/Knox'
 import { Shopping } from '@/components/modules/Shopping'
 import { Calendar } from '@/components/modules/Calendar'
 import { Settings } from '@/components/modules/Settings'
+import { GolfSwing } from '@/components/modules/GolfSwing'
 
 function App() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
@@ -27,7 +28,7 @@ function App() {
     setActiveModule(moduleId as Module)
     setDrawerOpen(false)
     
-    if (['vault', 'history'].includes(moduleId)) {
+    if (['history'].includes(moduleId)) {
       toast.info('Coming soon', {
         description: `${moduleId.charAt(0).toUpperCase() + moduleId.slice(1)} module is under development`,
       })
@@ -53,6 +54,8 @@ function App() {
         return <Shopping />
       case 'calendar':
         return <Calendar />
+      case 'vault':
+        return <GolfSwing />
       case 'settings':
         return <Settings />
       default:

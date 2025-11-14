@@ -83,8 +83,15 @@ A visual habit tracking application where users set daily goals (like drinking 8
 - **Progression**: User opens Shopping → Sees clean neumorphic notepad interface → Types item name and clicks Add → Item appears in list with checkbox → User checks off items while shopping → Checked items move to bottom with strikethrough → User can inline-edit any item name → User can delete items → Simple counter shows active vs completed items
 - **Success criteria**: Interface feels like a physical notepad, add/edit/delete operations are instant with smooth animations, items persist between sessions using useKV, inline editing feels natural, completed items remain visible but visually de-emphasized, all interactions are polished with subtle hover states and satisfying micro-interactions
 
+### Golf Swing Analyzer Module
+- **Functionality**: Professional AI-powered golf swing analysis using pose estimation to extract 3D landmarks, compute critical metrics (spine angle, hip rotation, head movement, swing plane, tempo, weight transfer), and generate personalized feedback with drill recommendations
+- **Purpose**: Provide golfers with instant, professional-grade swing analysis without expensive coaching sessions, enabling data-driven improvement through actionable insights
+- **Trigger**: User navigates to Golf Swing module (formerly Vault) from navigation drawer
+- **Progression**: User uploads swing video (MP4, MOV, etc.) → Video processes with real-time progress display (uploading → extracting frames → pose estimation → analyzing mechanics → generating AI insights) → Completed analysis displays with video playback, detailed metrics dashboard, strengths/improvements breakdown, AI-generated insights, and personalized practice drills → User can upload multiple swings and compare progress over time → Historical analyses persist in sidebar for easy access
+- **Success criteria**: Video upload accepts common formats under 100MB, processing completes in under 30 seconds with accurate progress feedback, pose estimation detects key body landmarks reliably, metrics calculations are accurate and meaningful, AI feedback is specific and actionable, drill recommendations target actual weaknesses, interface is intuitive for non-technical users, all data persists between sessions, video playback is smooth, comparison view shows improvement trends
+
 ## Edge Case Handling
-- **Empty States**: Show welcoming prompt "Start your first habit!" with animated icon when no habits exist
+- **Empty States**: Show welcoming prompt "Start your first habit!" with animated icon when no habits exist; "Upload Your First Swing" for golf analyzer
 - **Goal Already Complete**: Show success state when daily goal is reached; icons remain clickable to adjust progress
 - **Date Boundaries**: Progress resets at midnight local time; completed days logged to history
 - **Multiple Habits**: Support tracking multiple different habits simultaneously with separate progress for each
@@ -93,6 +100,11 @@ A visual habit tracking application where users set daily goals (like drinking 8
 - **Data Loss Prevention**: Confirm before deleting habits; show toast with undo option
 - **Theme Transitions**: Smooth color transitions when switching themes; no jarring flashes
 - **System Theme Changes**: Automatically adapt when user changes OS theme preference (when system theme is selected)
+- **Video Upload Errors**: Validate file type and size before processing, show clear error messages for unsupported formats or files too large
+- **Processing Failures**: Graceful error handling with retry option, error state persists in analysis list
+- **Incomplete Analysis**: Partial results saved if analysis fails mid-process, user can delete and retry
+- **No Video Selected**: File input validates selection before starting upload process
+- **Browser Compatibility**: Video playback fallbacks for unsupported codecs, WebGL requirements checked for pose estimation
 
 ## Design Direction
 The interface should feel sleek, powerful, and high-functioning with an abstract, premium aesthetic. The design should evoke a sense of sophistication and control through bold geometric elements, subtle gradients, glass-morphic surfaces, and purposeful animations. A dark, rich interface with strategic use of color creates depth and dimension, while abstract background patterns and floating elements convey technical prowess and modern design.

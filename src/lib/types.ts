@@ -202,3 +202,84 @@ export interface CalendarEvent {
   color?: string
   createdAt: string
 }
+
+export interface SwingLandmark {
+  x: number
+  y: number
+  z: number
+  visibility: number
+}
+
+export interface SwingPoseData {
+  timestamp: number
+  landmarks: SwingLandmark[]
+  worldLandmarks?: SwingLandmark[]
+}
+
+export interface SwingMetrics {
+  spineAngle: {
+    address: number
+    backswing: number
+    impact: number
+    followThrough: number
+  }
+  hipRotation: {
+    backswing: number
+    impact: number
+    total: number
+  }
+  shoulderRotation: {
+    backswing: number
+    impact: number
+    total: number
+  }
+  headMovement: {
+    lateral: number
+    vertical: number
+    stability: 'excellent' | 'good' | 'fair' | 'poor'
+  }
+  swingPlane: {
+    backswingAngle: number
+    downswingAngle: number
+    consistency: number
+  }
+  tempo: {
+    backswingTime: number
+    downswingTime: number
+    ratio: number
+  }
+  weightTransfer: {
+    addressBalance: number
+    backswingShift: number
+    impactShift: number
+    rating: 'excellent' | 'good' | 'fair' | 'poor'
+  }
+}
+
+export interface SwingFeedback {
+  overallScore: number
+  strengths: string[]
+  improvements: string[]
+  drills: {
+    title: string
+    description: string
+    focusArea: string
+    difficulty: 'beginner' | 'intermediate' | 'advanced'
+  }[]
+  aiInsights: string
+}
+
+export interface SwingAnalysis {
+  id: string
+  videoId: string
+  videoUrl?: string
+  thumbnailUrl?: string
+  status: 'uploading' | 'processing' | 'analyzing' | 'completed' | 'failed'
+  uploadedAt: string
+  processedAt?: string
+  poseData?: SwingPoseData[]
+  metrics?: SwingMetrics
+  feedback?: SwingFeedback
+  error?: string
+  processingProgress?: number
+}
