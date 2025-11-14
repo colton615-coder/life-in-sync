@@ -32,11 +32,11 @@ export function DashboardWidget({ title, icon, children, onClick, className }: D
         "h-full transition-all duration-200",
         onClick && "group-hover:shadow-lg group-hover:border-primary/50"
       )}>
-        <div className="flex items-center gap-2 mb-2.5 md:mb-3">
-          <div className="p-1.5 md:p-2 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+        <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-2.5">
+          <div className="p-1 md:p-1.5 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
             {icon}
           </div>
-          <h3 className="font-semibold text-sm md:text-base">{title}</h3>
+          <h3 className="font-semibold text-xs md:text-sm">{title}</h3>
         </div>
         {children}
       </Card>

@@ -286,18 +286,18 @@ export function Tasks() {
   }, [])
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500">
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className="flex items-start justify-between gap-3 md:gap-4 flex-wrap"
       >
-        <div className="space-y-1 md:space-y-2">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight bg-gradient-to-br from-primary via-primary to-accent bg-clip-text text-transparent">
+        <div className="space-y-0.5 md:space-y-1">
+          <h1 className="text-xl md:text-3xl font-bold tracking-tight bg-gradient-to-br from-primary via-primary to-accent bg-clip-text text-transparent">
             Tasks
           </h1>
-          <p className="text-muted-foreground text-sm md:text-base font-medium">
+          <p className="text-muted-foreground text-xs md:text-sm font-medium">
             Organize and prioritize your work
           </p>
         </div>
@@ -441,16 +441,16 @@ export function Tasks() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
+          className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3"
         >
           <NeumorphicCard className="hover:shadow-primary/10 transition-all duration-300 col-span-2 md:col-span-1" hover>
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 neumorphic-inset">
-                <ListChecks size={28} weight="fill" className="text-primary" />
+            <div className="flex items-center gap-2.5 md:gap-3">
+              <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 neumorphic-inset">
+                <ListChecks size={24} weight="fill" className="text-primary md:w-7 md:h-7" />
               </div>
               <div>
-                <div className="text-xs text-muted-foreground font-medium mb-0.5">Total Tasks</div>
-                <div className="text-3xl md:text-4xl font-bold tabular-nums bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+                <div className="text-[10px] md:text-xs text-muted-foreground font-medium mb-0.5">Total Tasks</div>
+                <div className="text-2xl md:text-3xl font-bold tabular-nums bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
                   {tasks.length}
                 </div>
               </div>
@@ -458,13 +458,13 @@ export function Tasks() {
           </NeumorphicCard>
 
           <NeumorphicCard className="hover:shadow-accent/10 transition-all duration-300" hover>
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center flex-shrink-0 neumorphic-inset">
-                <Target size={28} weight="fill" className="text-accent" />
+            <div className="flex items-center gap-2.5 md:gap-3">
+              <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center flex-shrink-0 neumorphic-inset">
+                <Target size={24} weight="fill" className="text-accent md:w-7 md:h-7" />
               </div>
               <div>
-                <div className="text-xs text-muted-foreground font-medium mb-0.5">Active</div>
-                <div className="text-3xl md:text-4xl font-bold tabular-nums text-accent">
+                <div className="text-[10px] md:text-xs text-muted-foreground font-medium mb-0.5">Active</div>
+                <div className="text-2xl md:text-3xl font-bold tabular-nums text-accent">
                   {activeTasks.length}
                 </div>
               </div>
@@ -472,13 +472,13 @@ export function Tasks() {
           </NeumorphicCard>
 
           <NeumorphicCard className="hover:shadow-success/10 transition-all duration-300" hover>
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center flex-shrink-0 neumorphic-inset">
-                <CheckCircle size={28} weight="fill" className="text-success" />
+            <div className="flex items-center gap-2.5 md:gap-3">
+              <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center flex-shrink-0 neumorphic-inset">
+                <CheckCircle size={24} weight="fill" className="text-success md:w-7 md:h-7" />
               </div>
               <div>
-                <div className="text-xs text-muted-foreground font-medium mb-0.5">Done</div>
-                <div className="text-3xl md:text-4xl font-bold tabular-nums text-success">
+                <div className="text-[10px] md:text-xs text-muted-foreground font-medium mb-0.5">Done</div>
+                <div className="text-2xl md:text-3xl font-bold tabular-nums text-success">
                   {completedTasks.length}
                 </div>
               </div>
@@ -486,13 +486,13 @@ export function Tasks() {
           </NeumorphicCard>
 
           <NeumorphicCard className="hover:shadow-destructive/10 transition-all duration-300" hover>
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-destructive/20 to-destructive/5 flex items-center justify-center flex-shrink-0 neumorphic-inset">
-                <Clock size={28} weight="fill" className="text-destructive" />
+            <div className="flex items-center gap-2.5 md:gap-3">
+              <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-destructive/20 to-destructive/5 flex items-center justify-center flex-shrink-0 neumorphic-inset">
+                <Clock size={24} weight="fill" className="text-destructive md:w-7 md:h-7" />
               </div>
               <div>
-                <div className="text-xs text-muted-foreground font-medium mb-0.5">Overdue</div>
-                <div className="text-3xl md:text-4xl font-bold tabular-nums text-destructive">
+                <div className="text-[10px] md:text-xs text-muted-foreground font-medium mb-0.5">Overdue</div>
+                <div className="text-2xl md:text-3xl font-bold tabular-nums text-destructive">
                   {overdueTasks.length}
                 </div>
               </div>

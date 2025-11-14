@@ -132,13 +132,13 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   }, [knoxMessages])
 
   return (
-    <div className="space-y-4 md:space-y-5 animate-in fade-in duration-500">
+    <div className="space-y-3 md:space-y-4 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-0.5 md:mt-1.5 text-xs md:text-sm">Your unified command center</p>
+        <h1 className="text-xl md:text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-0.5 text-xs md:text-sm">Your unified command center</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-2.5">
         <DashboardWidget
           title="Habits"
           icon={<Fire size={20} weight="duotone" />}

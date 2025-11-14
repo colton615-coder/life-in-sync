@@ -246,18 +246,18 @@ CRITICAL RULES:
   }
 
   return (
-    <div className="space-y-4 md:space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-3 md:space-y-5 animate-in fade-in duration-500">
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className="flex items-start justify-between gap-2 md:gap-4 flex-wrap"
       >
-        <div className="space-y-0.5 md:space-y-1">
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+        <div className="space-y-0.5">
+          <h1 className="text-xl md:text-3xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
             Finance
           </h1>
-          <p className="text-muted-foreground text-sm md:text-base lg:text-[16px] font-medium">
+          <p className="text-muted-foreground text-xs md:text-sm font-medium">
             Smart expense tracking & AI-powered budget planning
           </p>
         </div>
@@ -366,30 +366,30 @@ CRITICAL RULES:
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4"
           >
             <Card className="glass-card border-primary/20 hover:border-primary/40 transition-all duration-300">
-              <div className="flex items-center gap-5">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <Wallet size={32} weight="fill" className="text-primary" />
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <Wallet size={26} weight="fill" className="text-primary md:w-8 md:h-8" />
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground font-medium mb-1">Total Spent</div>
-                  <div className="text-4xl md:text-5xl font-bold tabular-nums bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+                  <div className="text-xs md:text-sm text-muted-foreground font-medium mb-0.5 md:mb-1">Total Spent</div>
+                  <div className="text-2xl md:text-4xl font-bold tabular-nums bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
                     ${totalSpent.toFixed(2)}
                   </div>
-                  <div className="text-xs text-muted-foreground font-medium mt-1">This month</div>
+                  <div className="text-[10px] md:text-xs text-muted-foreground font-medium mt-0.5">This month</div>
                 </div>
               </div>
             </Card>
 
             {categoryData.length > 0 ? (
               <Card className="glass-card border-accent/20">
-                <div className="flex items-center gap-2 mb-5">
-                  <ChartPie size={24} weight="fill" className="text-accent" />
-                  <h3 className="font-semibold text-lg">Spending by Category</h3>
+                <div className="flex items-center gap-2 mb-3 md:mb-4">
+                  <ChartPie size={20} weight="fill" className="text-accent md:w-6 md:h-6" />
+                  <h3 className="font-semibold text-base md:text-lg">Spending by Category</h3>
                 </div>
-                <ResponsiveContainer width="100%" height={220}>
+                <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
                     <Pie
                       data={categoryData}
@@ -440,27 +440,27 @@ CRITICAL RULES:
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold flex items-center gap-2">
-                <TrendUp weight="fill" className="text-primary" size={28} />
+            <div className="flex items-center justify-between mb-4 md:mb-5">
+              <h2 className="text-lg md:text-2xl font-semibold flex items-center gap-2">
+                <TrendUp weight="fill" className="text-primary" size={22} />
                 Recent Expenses
               </h2>
               {expenses && expenses.length > 0 && (
-                <Badge variant="secondary" className="text-sm px-3 py-1">
+                <Badge variant="secondary" className="text-xs md:text-sm px-2 md:px-3 py-0.5 md:py-1">
                   {expenses.length} total
                 </Badge>
               )}
             </div>
             {!expenses || expenses.length === 0 ? (
-              <Card className="glass-card border-border/30 text-center py-20">
+              <Card className="glass-card border-border/30 text-center py-14 md:py-16">
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <CurrencyDollar size={72} weight="duotone" className="text-primary mx-auto mb-5 opacity-50" />
-                  <h3 className="font-semibold text-2xl mb-2">No expenses yet</h3>
-                  <p className="text-muted-foreground text-base max-w-sm mx-auto">
+                  <CurrencyDollar size={56} weight="duotone" className="text-primary mx-auto mb-4 md:mb-5 opacity-50 md:w-16 md:h-16" />
+                  <h3 className="font-semibold text-xl md:text-2xl mb-2">No expenses yet</h3>
+                  <p className="text-muted-foreground text-sm md:text-base max-w-sm mx-auto">
                     Start tracking your spending to gain insights into your financial habits
                   </p>
                 </motion.div>
@@ -470,33 +470,33 @@ CRITICAL RULES:
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid gap-4"
+                className="grid gap-2.5 md:gap-3"
               >
                 {[...(expenses || [])].reverse().slice(0, 10).map((expense) => {
                   const categoryIcon = CATEGORY_ICONS[expense.category] || '💵'
                   return (
                     <motion.div key={expense.id} variants={item}>
                       <Card className="glass-card hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-4 flex-1">
-                            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-xl">
+                        <div className="flex items-center justify-between gap-3 md:gap-4">
+                          <div className="flex items-center gap-2.5 md:gap-3 flex-1">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-lg md:text-xl">
                               {categoryIcon}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-3 mb-1.5 flex-wrap">
-                                <span className="text-2xl font-bold tabular-nums text-primary">
+                              <div className="flex items-center gap-2 md:gap-3 mb-1 flex-wrap">
+                                <span className="text-xl md:text-2xl font-bold tabular-nums text-primary">
                                   ${expense.amount.toFixed(2)}
                                 </span>
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="text-[10px] md:text-xs">
                                   {expense.category}
                                 </Badge>
                               </div>
                               {expense.description && (
-                                <p className="text-sm text-muted-foreground mb-2 line-clamp-1">
+                                <p className="text-xs md:text-sm text-muted-foreground mb-1 md:mb-1.5 line-clamp-1">
                                   {expense.description}
                                 </p>
                               )}
-                              <p className="text-xs text-muted-foreground/70 font-medium">
+                              <p className="text-[10px] md:text-xs text-muted-foreground/70 font-medium">
                                 {new Date(expense.date).toLocaleDateString('en-US', { 
                                   month: 'short', 
                                   day: 'numeric', 
@@ -511,17 +511,17 @@ CRITICAL RULES:
                               variant="ghost"
                               size="icon"
                               onClick={() => openEditDialog(expense)}
-                              className="flex-shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                              className="flex-shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors w-8 h-8"
                             >
-                              <PencilSimple size={20} />
+                              <PencilSimple size={16} className="md:w-5 md:h-5" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => deleteExpense(expense.id)}
-                              className="flex-shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                              className="flex-shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors w-8 h-8"
                             >
-                              <Trash size={20} />
+                              <Trash size={16} className="md:w-5 md:h-5" />
                             </Button>
                           </div>
                         </div>
