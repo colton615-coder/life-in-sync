@@ -23,16 +23,16 @@ interface NavModule {
 }
 
 const modules: NavModule[] = [
-  { icon: House, label: 'Dashboard', id: 'dashboard', color: 'text-cyan-400' },
-  { icon: CheckSquare, label: 'Habits', id: 'habits', color: 'text-green-400' },
-  { icon: CurrencyDollar, label: 'Finance', id: 'finance', color: 'text-emerald-400' },
-  { icon: ListChecks, label: 'Tasks', id: 'tasks', color: 'text-orange-400' },
-  { icon: Barbell, label: 'Workouts', id: 'workouts', color: 'text-red-400' },
-  { icon: ChatsCircle, label: 'Knox AI', id: 'knox', color: 'text-purple-400' },
-  { icon: ShoppingCart, label: 'Shopping', id: 'shopping', color: 'text-blue-400' },
-  { icon: CalendarDots, label: 'Calendar', id: 'calendar', color: 'text-pink-400' },
-  { icon: LockKey, label: 'Golf Swing', id: 'vault', color: 'text-yellow-400' },
-  { icon: Gear, label: 'Settings', id: 'settings', color: 'text-gray-400' },
+  { icon: House, label: 'Dashboard', id: 'dashboard', color: 'text-icon-vibrant' },
+  { icon: CheckSquare, label: 'Habits', id: 'habits', color: 'text-icon-primary' },
+  { icon: CurrencyDollar, label: 'Finance', id: 'finance', color: 'text-icon-vibrant' },
+  { icon: ListChecks, label: 'Tasks', id: 'tasks', color: 'text-icon-accent' },
+  { icon: Barbell, label: 'Workouts', id: 'workouts', color: 'text-icon-secondary' },
+  { icon: ChatsCircle, label: 'Knox AI', id: 'knox', color: 'text-icon-accent' },
+  { icon: ShoppingCart, label: 'Shopping', id: 'shopping', color: 'text-icon-primary' },
+  { icon: CalendarDots, label: 'Calendar', id: 'calendar', color: 'text-icon-secondary' },
+  { icon: LockKey, label: 'Golf Swing', id: 'vault', color: 'text-icon-accent' },
+  { icon: Gear, label: 'Settings', id: 'settings', color: 'text-icon-muted' },
 ]
 
 interface NavigationDrawerProps {

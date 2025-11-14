@@ -20,14 +20,14 @@ interface HabitCardProps {
 }
 
 const iconColors = [
-  'text-[#6DD4FF]',
-  'text-[#FF6B9D]',
-  'text-[#FFD93D]',
-  'text-[#95F985]',
-  'text-[#C77DFF]',
-  'text-[#FF9770]',
-  'text-[#7FFFD4]',
-  'text-[#FFB6C1]',
+  'text-icon-vibrant',
+  'text-icon-accent',
+  'text-icon-primary',
+  'text-icon-secondary',
+  'text-icon-vibrant',
+  'text-icon-accent',
+  'text-icon-primary',
+  'text-icon-secondary',
 ]
 
 const getIconColor = (index: number) => iconColors[index % iconColors.length]
