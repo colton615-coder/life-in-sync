@@ -295,7 +295,7 @@ export function Tasks() {
       >
         <div className="space-y-0.5 md:space-y-1">
           <h1 className="text-xl md:text-3xl font-bold tracking-tight bg-gradient-to-br from-primary via-primary to-accent bg-clip-text text-transparent">
-            Tasks
+            ✅ Tasks
           </h1>
           <p className="text-muted-foreground text-xs md:text-sm font-medium">
             Organize and prioritize your work

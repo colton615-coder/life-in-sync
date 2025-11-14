@@ -359,7 +359,7 @@ export function Habits() {
       
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h1 className="text-xl md:text-3xl font-bold tracking-tight">Habits</h1>
+          <h1 className="text-xl md:text-3xl font-bold tracking-tight">🔥 Habits</h1>
           <p className="text-muted-foreground mt-0.5 md:mt-1 text-xs md:text-sm">Build the life you want, one day at a time</p>
         </div>
         {creationStep === 0 && (

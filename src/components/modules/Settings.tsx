@@ -101,7 +101,7 @@ export function Settings() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">⚙️ Settings</h1>
           <p className="text-muted-foreground">
             Only the app owner can configure AI settings.
           </p>
@@ -113,7 +113,7 @@ export function Settings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">⚙️ Settings</h1>
         <p className="text-muted-foreground">
           Configure AI providers and manage your application preferences.
         </p>

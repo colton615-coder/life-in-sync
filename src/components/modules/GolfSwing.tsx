@@ -512,7 +512,7 @@ export function GolfSwing() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-            Golf Swing Analyzer
+            ⛳ Golf Swing Analyzer
           </h1>
           <p className="text-muted-foreground mt-1">
             AI-powered swing analysis with professional feedback

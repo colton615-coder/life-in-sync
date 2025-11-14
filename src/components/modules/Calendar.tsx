@@ -145,7 +145,7 @@ export function Calendar() {
         </motion.div>
         <div>
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-            Calendar 2.0
+            📅 Calendar 2.0
           </h1>
           <p className="text-lg text-muted-foreground mt-2 flex items-center justify-center gap-2">
             <Star className="w-4 h-4 text-blue-500" weight="fill" />

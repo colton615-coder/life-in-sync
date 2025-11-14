@@ -271,7 +271,7 @@ CRITICAL RULES:
       >
         <div className="space-y-0.5">
           <h1 className="text-xl md:text-3xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
-            Finance
+            💰 Finance
           </h1>
           <p className="text-muted-foreground text-xs md:text-sm font-medium">
             Smart expense tracking & AI-powered budget planning

@@ -177,7 +177,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
               <LockKey size={32} weight="duotone" className="text-primary" />
-              Knox
+              🧠 Knox
             </h1>
             <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
               Your personal Devil's Advocate - Radical honesty, no coddling
