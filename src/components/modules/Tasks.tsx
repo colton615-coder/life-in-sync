@@ -1,11 +1,10 @@
 import { NeumorphicCard } from '../NeumorphicCard'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TabGroup } from '@/components/TabGroup'
-import { Plus, CheckCircle, Trash, ArrowUp, ArrowRight, ArrowDown, ListChecks, Target, Calendar as CalendarIcon, MagnifyingGlass, Pencil, X, Clock, CalendarBlank, Sparkle, Fire, Lightning, SortAscending, Tag } from '@phosphor-icons/react'
+import { Plus, CheckCircle, Trash, Calendar as CalendarIcon, MagnifyingGlass, X, CalendarBlank, Sparkle, Fire, Lightning, SortAscending } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { Task } from '@/lib/types'
 import { useState, useEffect } from 'react'
@@ -13,7 +12,7 @@ import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Textarea } from '@/components/ui/textarea'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { format, isToday, isTomorrow, isPast, isThisWeek, parseISO, isBefore, startOfDay } from 'date-fns'
+import { format, isToday, isTomorrow, isThisWeek, parseISO, isBefore, startOfDay } from 'date-fns'
 import { Calendar } from '@/components/ui/calendar'
 
 type SortOption = 'priority' | 'dueDate' | 'createdAt' | 'title'
@@ -436,72 +435,7 @@ export function Tasks() {
         </Dialog>
       </motion.div>
 
-      {tasks && tasks.length > 0 && (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3"
-        >
-          <NeumorphicCard className="hover:shadow-primary/10 transition-all duration-300 col-span-2 md:col-span-1" hover>
-            <div className="flex items-center gap-2.5 md:gap-3">
-              <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 neumorphic-inset">
-                <ListChecks size={24} weight="fill" className="text-primary md:w-7 md:h-7" />
-              </div>
-              <div>
-                <div className="text-[10px] md:text-xs text-muted-foreground font-normal mb-0.5">Total Tasks</div>
-                <div className="text-2xl md:text-3xl font-semibold tabular-nums bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
-                  {tasks.length}
-                </div>
-              </div>
-            </div>
-          </NeumorphicCard>
-
-          <NeumorphicCard className="hover:shadow-accent/10 transition-all duration-300" hover>
-            <div className="flex items-center gap-2.5 md:gap-3">
-              <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center flex-shrink-0 neumorphic-inset">
-                <Target size={24} weight="fill" className="text-accent md:w-7 md:h-7" />
-              </div>
-              <div>
-                <div className="text-[10px] md:text-xs text-muted-foreground font-normal mb-0.5">Active</div>
-                <div className="text-2xl md:text-3xl font-semibold tabular-nums text-accent">
-                  {activeTasks.length}
-                </div>
-              </div>
-            </div>
-          </NeumorphicCard>
-
-          <NeumorphicCard className="hover:shadow-success/10 transition-all duration-300" hover>
-            <div className="flex items-center gap-2.5 md:gap-3">
-              <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center flex-shrink-0 neumorphic-inset">
-                <CheckCircle size={24} weight="fill" className="text-success md:w-7 md:h-7" />
-              </div>
-              <div>
-                <div className="text-[10px] md:text-xs text-muted-foreground font-normal mb-0.5">Done</div>
-                <div className="text-2xl md:text-3xl font-semibold tabular-nums text-success">
-                  {completedTasks.length}
-                </div>
-              </div>
-            </div>
-          </NeumorphicCard>
-
-          <NeumorphicCard className="hover:shadow-destructive/10 transition-all duration-300" hover>
-            <div className="flex items-center gap-2.5 md:gap-3">
-              <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-destructive/20 to-destructive/5 flex items-center justify-center flex-shrink-0 neumorphic-inset">
-                <Clock size={24} weight="fill" className="text-destructive md:w-7 md:h-7" />
-              </div>
-              <div>
-                <div className="text-[10px] md:text-xs text-muted-foreground font-normal mb-0.5">Overdue</div>
-                <div className="text-2xl md:text-3xl font-semibold tabular-nums text-destructive">
-                  {overdueTasks.length}
-                </div>
-              </div>
-            </div>
-          </NeumorphicCard>
-        </motion.div>
-      )}
-
-      <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+      <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-stretch md:items-center">
         <div className="flex-1 relative">
           <MagnifyingGlass 
             size={20} 
@@ -524,7 +458,7 @@ export function Tasks() {
         </div>
         
         <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-          <SelectTrigger className="h-12 w-full md:w-[180px] neumorphic-inset border-none">
+          <SelectTrigger className="h-12 w-full md:w-[200px] neumorphic-inset border-none">
             <div className="flex items-center gap-2">
               <SortAscending size={18} />
               <SelectValue />
@@ -548,6 +482,43 @@ export function Tasks() {
         activeTab={filterTab}
         onChange={(tab) => setFilterTab(tab as ViewMode)}
       />
+
+      {tasks && tasks.length > 0 && (
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="flex items-center justify-center gap-6 py-3"
+        >
+          <div className="text-center">
+            <div className="text-2xl md:text-3xl font-bold text-foreground tabular-nums">
+              {tasks.length}
+            </div>
+            <div className="text-xs text-muted-foreground font-normal">Total</div>
+          </div>
+          <div className="h-12 w-px bg-border" />
+          <div className="text-center">
+            <div className="text-2xl md:text-3xl font-bold text-accent tabular-nums">
+              {activeTasks.length}
+            </div>
+            <div className="text-xs text-muted-foreground font-normal">Active</div>
+          </div>
+          <div className="h-12 w-px bg-border" />
+          <div className="text-center">
+            <div className="text-2xl md:text-3xl font-bold text-success tabular-nums">
+              {completedTasks.length}
+            </div>
+            <div className="text-xs text-muted-foreground font-normal">Done</div>
+          </div>
+          <div className="h-12 w-px bg-border" />
+          <div className="text-center">
+            <div className="text-2xl md:text-3xl font-bold text-destructive tabular-nums">
+              {overdueTasks.length}
+            </div>
+            <div className="text-xs text-muted-foreground font-normal">Overdue</div>
+          </div>
+        </motion.div>
+      )}
 
       {!tasks || tasks.length === 0 ? (
         <NeumorphicCard className="text-center py-20 md:py-24" inset>
@@ -620,7 +591,10 @@ export function Tasks() {
                     >
                       <div className="flex items-start gap-4">
                         <motion.button
-                          onClick={() => toggleTask(task.id)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleTask(task.id)
+                          }}
                           className="flex-shrink-0 mt-1"
                           whileTap={{ scale: 0.9 }}
                           whileHover={{ scale: 1.05 }}
@@ -638,11 +612,12 @@ export function Tasks() {
                           </div>
                         </motion.button>
 
-                        <div className="flex-1 min-w-0 pt-1">
-                          <div className="flex items-start gap-3 mb-2">
-                            <div className="flex items-center gap-2">
-                              {getPriorityIcon(task.priority)}
-                            </div>
+                        <motion.div 
+                          className="flex-1 min-w-0 pt-1 cursor-pointer"
+                          onClick={() => openEditDialog(task)}
+                          whileHover={{ x: 2 }}
+                        >
+                          <div className="flex items-start gap-2 mb-2">
                             <h3 className={`font-semibold text-lg leading-tight flex-1 ${
                               task.completed ? 'line-through text-muted-foreground' : 'text-foreground'
                             }`}>
@@ -659,46 +634,38 @@ export function Tasks() {
                           )}
 
                           <div className="flex items-center gap-2 flex-wrap">
-                            <div className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 neumorphic-flat ${
-                              task.priority === 'high' ? 'text-destructive' :
-                              task.priority === 'medium' ? 'text-accent' :
-                              'text-success'
+                            <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide ${
+                              task.priority === 'high' ? 'bg-destructive/15 text-destructive' :
+                              task.priority === 'medium' ? 'bg-accent/15 text-accent' :
+                              'bg-success/15 text-success'
                             }`}>
-                              {getPriorityIcon(task.priority)}
                               {getPriorityLabel(task.priority)}
                             </div>
 
                             {dueDateInfo && (
-                              <div className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 ${dueDateInfo.bgColor} ${dueDateInfo.color}`}>
-                                <CalendarBlank size={14} weight="bold" />
+                              <div className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 ${dueDateInfo.bgColor} ${dueDateInfo.color}`}>
+                                <CalendarBlank size={12} weight="bold" />
                                 {dueDateInfo.label}
                               </div>
                             )}
 
                             {task.completed && task.completedAt && (
-                              <div className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-success/10 text-success">
-                                <CheckCircle size={14} weight="fill" />
+                              <div className="px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 bg-success/10 text-success">
+                                <CheckCircle size={12} weight="fill" />
                                 Completed
                               </div>
                             )}
                           </div>
-                        </div>
+                        </motion.div>
 
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          {!task.completed && (
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => openEditDialog(task)}
-                              className="w-10 h-10 rounded-xl flex items-center justify-center neumorphic-button text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
-                            >
-                              <Pencil size={18} weight="bold" />
-                            </motion.button>
-                          )}
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => deleteTask(task.id)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              deleteTask(task.id)
+                            }}
                             className="w-10 h-10 rounded-xl flex items-center justify-center neumorphic-button text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                           >
                             <Trash size={18} weight="bold" />
