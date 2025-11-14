@@ -67,7 +67,7 @@ function App() {
     <>
       {!isAppReady && <LoadingScreen onLoadComplete={() => setIsAppReady(true)} />}
       
-      <div className="min-h-screen bg-background relative">
+      <div className="min-h-screen relative">
         <AbstractBackground />
 
         <div className="relative z-10 max-w-6xl mx-auto px-3 py-4 md:px-8 md:py-16 pb-24 md:pb-32">
