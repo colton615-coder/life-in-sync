@@ -1,9 +1,16 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkle } from '@phosphor-icons/react'
+import { getTodayKey } from '@/lib/utils'
 
 interface LoadingScreenProps {
   onLoadComplete: () => void
+}
+
+export interface DailyAffirmation {
+  text: string
+  author: string
+  date: string
 }
 
 const staticAffirmations = [
@@ -23,7 +30,16 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
 
   useEffect(() => {
     const loadAffirmation = async () => {
+      const today = getTodayKey()
+      
       try {
+        const storedAffirmation = await window.spark.kv.get<DailyAffirmation>('daily-affirmation')
+        
+        if (storedAffirmation && storedAffirmation.date === today) {
+          setAffirmation({ text: storedAffirmation.text, author: storedAffirmation.author })
+          return
+        }
+
         const promptText = `Generate a single inspirational quote or Bible verse for daily motivation. Return the result as valid JSON in the following format:
 {
   "text": "the quote or verse text",
@@ -35,7 +51,13 @@ Keep the text under 120 characters. Make it profound and uplifting.`
         const data = JSON.parse(response)
         
         if (data.text && data.author) {
-          setAffirmation(data)
+          const newAffirmation: DailyAffirmation = {
+            text: data.text,
+            author: data.author,
+            date: today
+          }
+          await window.spark.kv.set('daily-affirmation', newAffirmation)
+          setAffirmation({ text: data.text, author: data.author })
         }
       } catch (error) {
         console.error('Failed to load affirmation:', error)
