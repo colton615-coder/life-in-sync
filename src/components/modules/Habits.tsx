@@ -1,7 +1,8 @@
 import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
 import { TabGroup } from '@/components/TabGroup'
-import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Drop, BookOpen, Barbell, AppleLogo, MoonStars, HeartStraight, Sparkle, X, ArrowRight, ArrowLeft } from '@phosphor-icons/react'
+import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Sparkle, X, ArrowRight, ArrowLeft, Question } from '@phosphor-icons/react'
+import * as Icons from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { Habit, TrackingType, HabitEntry, HabitIcon } from '@/lib/types'
 import { useState } from 'react'
@@ -11,15 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Confetti } from '@/components/Confetti'
-
-const iconOptions: { value: HabitIcon; Icon: any; label: string; color: string }[] = [
-  { value: 'droplet', Icon: Drop, label: 'Water', color: 'text-blue-400' },
-  { value: 'book', Icon: BookOpen, label: 'Reading', color: 'text-amber-400' },
-  { value: 'dumbbell', Icon: Barbell, label: 'Exercise', color: 'text-red-400' },
-  { value: 'apple', Icon: AppleLogo, label: 'Nutrition', color: 'text-green-400' },
-  { value: 'moon', Icon: MoonStars, label: 'Sleep', color: 'text-purple-400' },
-  { value: 'heart', Icon: HeartStraight, label: 'Meditation', color: 'text-pink-400' },
-]
+import { IconPicker } from '@/components/IconPicker'
 
 const trackingTypeOptions = [
   { value: 'boolean' as TrackingType, icon: Check, label: 'Simple Checkbox', description: 'Just mark it done' },
@@ -42,7 +35,7 @@ export function Habits() {
     trackingType: 'boolean' as TrackingType,
     target: '',
     unit: '',
-    icon: 'droplet' as HabitIcon
+    icon: 'Drop' as HabitIcon
   })
 
   const today = new Date().toISOString().split('T')[0]
@@ -55,7 +48,7 @@ export function Habits() {
       trackingType: 'boolean',
       target: '',
       unit: '',
-      icon: 'droplet'
+      icon: 'Drop'
     })
   }
 
@@ -273,9 +266,9 @@ export function Habits() {
     return ''
   }
 
-  const getIconComponent = (iconValue: HabitIcon) => {
-    const option = iconOptions.find(opt => opt.value === iconValue)
-    return option || iconOptions[0]
+  const getIconComponent = (iconName: HabitIcon) => {
+    const IconComponent = (Icons as any)[iconName]
+    return IconComponent || Question
   }
 
   const filteredHabits = habits?.filter(habit => {
@@ -417,28 +410,10 @@ export function Habits() {
                   )}
 
                   {creationStep === 2 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {iconOptions.map(({ value, Icon, label, color }) => (
-                        <motion.button
-                          key={value}
-                          onClick={() => setNewHabit({ ...newHabit, icon: value })}
-                          whileHover={{ scale: 1.05, y: -4 }}
-                          whileTap={{ scale: 0.95 }}
-                          className={cn(
-                            'flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all',
-                            newHabit.icon === value
-                              ? 'glass-card border-primary bg-primary/20 shadow-lg'
-                              : 'glass-morphic border-border/50 hover:border-primary/30'
-                          )}
-                        >
-                          <Icon
-                            weight={newHabit.icon === value ? 'fill' : 'regular'}
-                            className={cn('w-12 h-12 transition-all', newHabit.icon === value ? color : 'text-muted-foreground')}
-                          />
-                          <span className="text-sm font-medium">{label}</span>
-                        </motion.button>
-                      ))}
-                    </div>
+                    <IconPicker
+                      value={newHabit.icon}
+                      onChange={(iconName) => setNewHabit({ ...newHabit, icon: iconName })}
+                    />
                   )}
 
                   {creationStep === 3 && (
@@ -597,7 +572,7 @@ export function Habits() {
               {filteredHabits.map((habit) => {
                 const completed = isCompletedToday(habit)
                 const progress = getTodayProgress(habit)
-                const { Icon, color } = getIconComponent(habit.icon || 'droplet')
+                const IconComponent = getIconComponent(habit.icon || 'Drop')
                 
                 return (
                   <motion.div key={habit.id} variants={item}>
@@ -623,10 +598,10 @@ export function Habits() {
                                 : 'glass-morphic border-border/50'
                             )}
                           >
-                            <Icon
+                            <IconComponent
                               size={32}
                               weight={completed ? 'fill' : 'regular'}
-                              className={cn('transition-all', completed ? color : 'text-muted-foreground')}
+                              className={cn('transition-all', completed ? 'text-primary' : 'text-muted-foreground')}
                             />
                           </motion.div>
                         </button>

@@ -1,4 +1,4 @@
-export type HabitIcon = 'droplet' | 'book' | 'dumbbell' | 'apple' | 'moon' | 'heart'
+export type HabitIcon = string
 
 export type Module = 
   | 'dashboard' 
