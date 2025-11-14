@@ -9,59 +9,28 @@ import * as Icons from '@phosphor-icons/react'
 
 const iconCategories = {
   health: [
-    'Heart', 'HeartStraight', 'HeartPulse', 'Drop', 'Droplet', 'Activity', 'FirstAid', 'Heartbeat',
-    'Pill', 'Syringe', 'Thermometer', 'Bandaids', 'Stethoscope', 'Cpu', 'Pulse'
+    'Heart', 'HeartStraight', 'Drop', 'Activity', 'FirstAid', 'Heartbeat'
   ],
   fitness: [
-    'Barbell', 'Person', 'PersonSimpleRun', 'Bicycle', 'PersonSimpleWalk', 'PersonSimpleBike',
-    'Sneaker', 'SneakerMove', 'TennisBall', 'Basketball', 'Football', 'Soccer', 'Fire',
-    'Lightning', 'Target', 'Medal', 'Trophy', 'FirstAidKit'
+    'Barbell', 'PersonSimpleRun', 'Bicycle', 'Fire', 'Lightning', 'Target', 'Medal', 'Trophy'
   ],
   food: [
-    'Apple', 'AppleLogo', 'Hamburger', 'Coffee', 'ForkKnife', 'Knife', 'Wine', 'BeerBottle',
-    'Cookie', 'Pizza', 'Egg', 'Fish', 'Carrot', 'Pepper', 'BowlFood', 'BowlSteam'
+    'Apple', 'Coffee', 'ForkKnife', 'Cookie', 'Pizza', 'Carrot'
   ],
   learning: [
-    'Book', 'BookOpen', 'BookBookmark', 'Books', 'GraduationCap', 'Student', 'Certificate',
-    'Pencil', 'PencilSimple', 'Pen', 'Note', 'Notebook', 'Article', 'Backpack', 'Exam',
-    'MathOperations', 'Calculator', 'ChalkboardTeacher', 'Chalkboard', 'Brain'
+    'Book', 'BookOpen', 'GraduationCap', 'Brain', 'Lightbulb', 'Certificate'
   ],
   mindfulness: [
-    'FlowerLotus', 'Yin', 'Peace', 'Leaf', 'Plant', 'Tree', 'Moon', 'MoonStars', 'Sun',
-    'CloudSun', 'HandsPraying', 'HandHeart', 'Sparkle', 'Confetti', 'Rainbow'
+    'FlowerLotus', 'Leaf', 'Moon', 'MoonStars', 'Sun', 'Sparkle'
   ],
   productivity: [
-    'CheckSquare', 'Check', 'CheckCircle', 'ListChecks', 'ListDashes', 'ListBullets', 'ListNumbers',
-    'Clipboard', 'ClipboardText', 'Briefcase', 'Desktop', 'Laptop', 'Folders', 'Folder',
-    'Calendar', 'CalendarCheck', 'Clock', 'Timer', 'Alarm', 'Bell', 'Target', 'Lightbulb'
+    'CheckCircle', 'ListChecks', 'Briefcase', 'Calendar', 'Clock', 'Timer', 'Bell', 'Target'
   ],
   creative: [
-    'PaintBrush', 'PaintBrushBroad', 'PaintBucket', 'Palette', 'Camera', 'Image', 'Film',
-    'MusicNote', 'MusicNotes', 'Guitar', 'Piano', 'Microphone', 'Headphones', 'Waveform',
-    'Pen', 'PencilLine', 'Eraser', 'Scissors', 'Stamp'
+    'PaintBrush', 'Palette', 'Camera', 'MusicNote', 'Microphone', 'Guitar'
   ],
   social: [
-    'Users', 'UsersThree', 'UserCircle', 'UsersFour', 'Handshake', 'HandWaving', 'Smiley',
-    'SmileyXEyes', 'Chats', 'ChatCircle', 'Phone', 'PhoneCall', 'Video', 'Gift',
-    'Heart', 'ThumbsUp', 'Peace', 'House', 'ChatCenteredDots'
-  ],
-  nature: [
-    'Tree', 'Leaf', 'Plant', 'FlowerTulip', 'Flower', 'Sun', 'Cloud', 'CloudRain',
-    'Lightning', 'Snowflake', 'Drop', 'Fire', 'Mountains', 'Park', 'Campfire',
-    'Bug', 'Butterfly', 'Dog', 'Cat', 'Bird', 'Fish', 'PawPrint'
-  ],
-  travel: [
-    'Airplane', 'AirplaneTilt', 'Car', 'Bicycle', 'Train', 'Bus', 'Boat', 'Rocket',
-    'MapPin', 'MapTrifold', 'Globe', 'GlobeHemisphereWest', 'Compass', 'Binoculars',
-    'Backpack', 'Tent', 'Mountains', 'Island', 'Passport', 'Suitcase'
-  ],
-  home: [
-    'House', 'HouseSimple', 'Bed', 'Armchair', 'Couch', 'Bathtub', 'Toilet', 'Shower',
-    'Lightbulb', 'Fan', 'Thermometer', 'Lock', 'Key', 'Door', 'Garage', 'Broom'
-  ],
-  finance: [
-    'CurrencyDollar', 'Money', 'Coin', 'Coins', 'Wallet', 'CreditCard', 'Bank', 'Vault',
-    'ChartLine', 'ChartLineUp', 'TrendUp', 'PiggyBank', 'Receipt', 'Invoice', 'Calculator'
+    'Users', 'Handshake', 'Chats', 'Gift', 'ThumbsUp', 'House'
   ]
 }
 
@@ -103,10 +72,6 @@ export function IconPicker({ value, onChange, className }: IconPickerProps) {
     { id: 'productivity', label: 'Productivity', count: iconCategories.productivity.length },
     { id: 'creative', label: 'Creative', count: iconCategories.creative.length },
     { id: 'social', label: 'Social', count: iconCategories.social.length },
-    { id: 'nature', label: 'Nature', count: iconCategories.nature.length },
-    { id: 'travel', label: 'Travel', count: iconCategories.travel.length },
-    { id: 'home', label: 'Home', count: iconCategories.home.length },
-    { id: 'finance', label: 'Finance', count: iconCategories.finance.length },
   ]
 
   const getIconComponent = (iconName: string) => {

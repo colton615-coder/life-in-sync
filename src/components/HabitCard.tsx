@@ -3,7 +3,8 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Trash, PencilSimple, Fire, Drop, BookOpen, Barbell, AppleLogo, MoonStars, HeartStraight } from '@phosphor-icons/react'
+import { Trash, PencilSimple, Fire, Drop } from '@phosphor-icons/react'
+import * as Icons from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
@@ -18,17 +19,27 @@ interface HabitCardProps {
   style?: React.CSSProperties
 }
 
-const iconComponents: Record<HabitIcon, any> = {
-  droplet: Drop,
-  book: BookOpen,
-  dumbbell: Barbell,
-  apple: AppleLogo,
-  moon: MoonStars,
-  heart: HeartStraight,
-}
+const iconColors = [
+  'text-[#6DD4FF]',
+  'text-[#FF6B9D]',
+  'text-[#FFD93D]',
+  'text-[#95F985]',
+  'text-[#C77DFF]',
+  'text-[#FF9770]',
+  'text-[#7FFFD4]',
+  'text-[#FFB6C1]',
+]
+
+const getIconColor = (index: number) => iconColors[index % iconColors.length]
 
 export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog, className, style }: HabitCardProps) {
-  const IconComponent = habit.icon ? iconComponents[habit.icon] : Drop
+  const getIconComponent = () => {
+    if (!habit.icon) return Drop
+    const IconComponent = (Icons as any)[habit.icon]
+    return IconComponent || Drop
+  }
+
+  const IconComponent = getIconComponent()
   const progressPercent = ((habit.currentProgress || 0) / (habit.targetCount || 1)) * 100
   const isComplete = (habit.currentProgress || 0) >= (habit.targetCount || 1)
 
@@ -60,30 +71,52 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
     const icons: React.ReactElement[] = []
     for (let i = 0; i < (habit.targetCount || 1); i++) {
       const isFilled = i < (habit.currentProgress || 0)
+      const colorClass = getIconColor(i)
+      
       icons.push(
         <motion.button
           key={i}
           onClick={() => handleIconClick(i)}
-          whileHover={{ scale: 1.1, y: -4 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          whileHover={{ scale: 1.15, y: -6 }}
+          whileTap={{ scale: 0.85 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 20 }}
           className={cn(
-            'w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center transition-all duration-300',
-            'cursor-pointer relative',
+            'w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center transition-all duration-300',
+            'cursor-pointer relative overflow-hidden',
             isFilled
-              ? 'glass-card bg-gradient-to-br from-primary/40 to-accent/40 border-primary/50 shadow-xl neon-glow'
-              : 'glass-morphic border-border/50 hover:border-primary/30'
+              ? 'glass-card bg-gradient-to-br from-primary/30 via-accent/30 to-secondary/30 border-2 shadow-2xl'
+              : 'glass-morphic border border-border/40 hover:border-primary/40 hover:bg-card/50'
           )}
         >
           <IconComponent
             weight={isFilled ? 'fill' : 'regular'}
             className={cn(
-              'w-8 h-8 md:w-10 md:h-10 transition-all duration-300',
-              isFilled ? 'text-primary drop-shadow-[0_0_8px_currentColor]' : 'text-muted-foreground'
+              'w-11 h-11 md:w-14 md:h-14 transition-all duration-300',
+              isFilled 
+                ? `${colorClass} drop-shadow-[0_0_12px_currentColor] brightness-125` 
+                : 'text-muted-foreground/60'
             )}
           />
           {isFilled && (
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 to-transparent animate-pulse-button" />
+            <>
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10"
+              />
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  opacity: [0.5, 0.8, 0.5],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+                className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-transparent via-white/10 to-transparent"
+              />
+            </>
           )}
         </motion.button>
       )
@@ -151,7 +184,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
           />
         </div>
 
-        <div className="grid grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-4 md:gap-5">
           {renderIconGrid()}
         </div>
 
