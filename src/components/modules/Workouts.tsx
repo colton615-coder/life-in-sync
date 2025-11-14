@@ -35,7 +35,7 @@ export function Workouts() {
 
     setGenerating(true)
     try {
-      const promptText = `You are a fitness expert. Generate a complete workout plan based on this request: ${workoutPrompt}.
+      const promptText = window.spark.llmPrompt`You are a fitness expert. Generate a complete workout plan based on this request: ${workoutPrompt}.
 
 Create a balanced workout with 6-10 exercises including warm-up, main work, and cool-down periods.
 
@@ -174,16 +174,16 @@ Return ONLY valid JSON with this exact structure:
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      <div className="flex items-center justify-between gap-2 md:gap-4">
+    <div className="space-y-3 md:space-y-6">
+      <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Workouts</h1>
-          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">AI-powered fitness training</p>
+          <h1 className="text-xl md:text-3xl font-bold tracking-tight">Workouts</h1>
+          <p className="text-muted-foreground mt-0.5 md:mt-2 text-xs md:text-base">AI-powered fitness training</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 h-9 md:h-10 text-sm neumorphic-button">
-              <Sparkle size={18} className="md:w-5 md:h-5" />
+            <Button className="gap-1.5 md:gap-2 h-8 md:h-10 text-xs md:text-sm bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg">
+              <Sparkle size={16} className="md:w-5 md:h-5" />
               <span className="hidden sm:inline">Generate Workout</span>
               <span className="sm:hidden">Generate</span>
             </Button>
@@ -213,7 +213,7 @@ Return ONLY valid JSON with this exact structure:
               </div>
               <Button 
                 onClick={generateWorkout} 
-                className="w-full neumorphic-button" 
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg" 
                 disabled={generating || !workoutPrompt.trim()}
               >
                 <Sparkle className="mr-2" />
@@ -224,7 +224,7 @@ Return ONLY valid JSON with this exact structure:
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         <Card>
           <div className="flex items-center gap-3">
             <Barbell size={32} weight="duotone" className="text-primary" />
@@ -264,17 +264,17 @@ Return ONLY valid JSON with this exact structure:
           Generated Workouts
         </h2>
         {!workoutPlans || workoutPlans.length === 0 ? (
-          <Card className="text-center py-12">
-            <Sparkle size={48} weight="duotone" className="text-primary mx-auto mb-4" />
-            <h3 className="font-semibold text-lg mb-2">No workouts yet</h3>
-            <p className="text-muted-foreground mb-4">Generate your first AI-powered workout!</p>
-            <Button onClick={() => setDialogOpen(true)} className="neumorphic-button">
+          <Card className="text-center py-12 md:py-12">
+            <Sparkle size={40} weight="duotone" className="text-primary mx-auto mb-3 md:mb-4 md:w-12 md:h-12" />
+            <h3 className="font-semibold text-base md:text-lg mb-1 md:mb-2">No workouts yet</h3>
+            <p className="text-muted-foreground text-sm md:text-base mb-3 md:mb-4">Generate your first AI-powered workout!</p>
+            <Button onClick={() => setDialogOpen(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 md:h-10 text-sm shadow-lg">
               <Sparkle className="mr-2" />
               Generate Workout
             </Button>
           </Card>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-3 md:gap-4">
             {[...(workoutPlans || [])].reverse().map((workout) => (
               <Card key={workout.id} className="elevated-card">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
@@ -304,7 +304,7 @@ Return ONLY valid JSON with this exact structure:
                   <div className="flex gap-2">
                     <Button
                       onClick={() => startWorkout(workout)}
-                      className="neumorphic-button gap-2"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-9 md:h-10 text-sm shadow-lg"
                     >
                       <Play weight="fill" />
                       Start
@@ -313,7 +313,7 @@ Return ONLY valid JSON with this exact structure:
                       variant="ghost"
                       size="icon"
                       onClick={() => deleteWorkout(workout.id)}
-                      className="neumorphic-flat"
+                      className="hover:bg-destructive/10 hover:text-destructive h-9 w-9 md:h-10 md:w-10"
                     >
                       ×
                     </Button>
@@ -331,7 +331,7 @@ Return ONLY valid JSON with this exact structure:
             <ClockCounterClockwise weight="duotone" className="text-accent" />
             Recent Activity
           </h2>
-          <div className="grid gap-4">
+          <div className="grid gap-3 md:gap-4">
             {[...(completedWorkouts || [])].reverse().slice(0, 5).map((workout) => (
               <Card key={workout.id} className="elevated-card">
                 <div className="flex items-start justify-between">
