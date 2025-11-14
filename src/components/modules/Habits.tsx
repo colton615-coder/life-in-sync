@@ -367,9 +367,9 @@ export function Habits() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setCreationStep(1)}
-            className="gap-2 px-5 md:px-6 h-14 md:h-16 rounded-2xl flex items-center justify-center font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
+            className="gap-2 px-6 md:px-8 h-14 md:h-16 rounded-2xl flex items-center justify-center font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
           >
-            <Plus size={20} weight="bold" className="md:w-6 md:h-6" />
+            <Plus size={22} weight="bold" className="md:w-6 md:h-6" />
             <span className="hidden sm:inline">New Habit</span>
             <span className="sm:hidden">New</span>
           </motion.button>
@@ -596,9 +596,9 @@ export function Habits() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setCreationStep(1)}
-                className="gap-2 px-6 md:px-8 h-12 md:h-14 rounded-2xl inline-flex items-center justify-center font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
+                className="gap-2 px-6 md:px-8 h-14 md:h-16 rounded-2xl inline-flex items-center justify-center font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
               >
-                <Plus size={20} weight="bold" className="md:w-6 md:h-6" />
+                <Plus size={22} weight="bold" className="md:w-6 md:h-6" />
                 Create Your First Habit
               </motion.button>
             </Card>
