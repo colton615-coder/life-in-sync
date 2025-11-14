@@ -2,32 +2,22 @@ import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Brain, PaperPlaneTilt, Lightbulb, Warning, Info, LockKey } from '@phosphor-icons/react'
+import { PaperPlaneTilt, LockKey } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { ChatMessage } from '@/lib/types'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog'
-import { Separator } from '@/components/ui/separator'
 
 export function Knox() {
   const [messages, setMessages] = useKV<ChatMessage[]>('knox-messages', [])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [showWelcome, setShowWelcome] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     if (!messages || messages.length === 0) {
-      setShowWelcome(true)
+      startSession()
     }
   }, [])
 
@@ -38,7 +28,6 @@ export function Knox() {
   }, [messages, loading])
 
   const startSession = async () => {
-    setShowWelcome(false)
     setLoading(true)
 
     try {
@@ -97,7 +86,6 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
       setTimeout(() => textareaRef.current?.focus(), 100)
     } catch (error) {
       toast.error('Knox is temporarily unavailable')
-      setShowWelcome(true)
     } finally {
       setLoading(false)
     }
@@ -178,8 +166,8 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
 
   const clearSession = () => {
     setMessages([])
-    setShowWelcome(true)
     toast.success('Session cleared')
+    startSession()
   }
 
   return (
@@ -189,7 +177,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
               <LockKey size={32} weight="duotone" className="text-primary" />
-              AI Knox
+              Knox
             </h1>
             <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
               Your personal Devil's Advocate - Radical honesty, no coddling
@@ -210,23 +198,6 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
         <Card className="flex flex-col h-[calc(100%-8rem)]">
           <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
             <div className="space-y-4 pb-4">
-              {(!messages || messages.length === 0) && !loading && (
-                <div className="text-center py-12">
-                  <Brain size={64} weight="duotone" className="text-primary mx-auto mb-4" />
-                  <h3 className="font-semibold text-lg mb-2">Ready for the Truth?</h3>
-                  <p className="text-muted-foreground text-sm max-w-md mx-auto mb-6">
-                    Knox doesn't do small talk. This is deep, challenging work designed to push you toward uncomfortable truths.
-                  </p>
-                  <Button
-                    onClick={startSession}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
-                  >
-                    <Brain size={20} weight="fill" className="mr-2" />
-                    Start Session
-                  </Button>
-                </div>
-              )}
-
               {(messages || []).map((message, idx) => (
                 <div
                   key={idx}
@@ -294,89 +265,6 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
           )}
         </Card>
       </div>
-
-      <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-2xl">
-              <Warning size={28} weight="duotone" className="text-destructive" />
-              Welcome to Knox Therapy
-            </DialogTitle>
-            <DialogDescription className="text-base pt-2">
-              This is not your typical therapy experience.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div className="flex gap-3 items-start">
-              <Info size={24} weight="duotone" className="text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-semibold mb-1">What Knox Does</h4>
-                <p className="text-sm text-muted-foreground">
-                  Knox acts as your Devil's Advocate - challenging every assumption, questioning your narratives, and forcing you to confront uncomfortable truths. This is adversarial guidance designed to help you grow.
-                </p>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="flex gap-3 items-start">
-              <Warning size={24} weight="duotone" className="text-destructive flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-semibold mb-1">What to Expect</h4>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                  <li>Direct, unfiltered responses - no sugar-coating</li>
-                  <li>Challenges to your beliefs and self-narratives</li>
-                  <li>Questions designed to expose inconsistencies</li>
-                  <li>Focus on topics you might be avoiding</li>
-                  <li>Dark humor when appropriate</li>
-                </ul>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="flex gap-3 items-start">
-              <Lightbulb size={24} weight="duotone" className="text-accent flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-semibold mb-1">Your Profile</h4>
-                <p className="text-sm text-muted-foreground">
-                  Knox is calibrated to your specific personality traits, weak spots, and goals. The AI knows you're analytical but emotion-avoidant, quick-witted with dark humor, and struggling with procrastination, relationships, and self-confidence.
-                </p>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="flex gap-3 items-start">
-              <LockKey size={24} weight="duotone" className="text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-semibold mb-1">Privacy & Safety</h4>
-                <p className="text-sm text-muted-foreground">
-                  Your conversations are stored locally in your browser. Knox is an AI tool, not a replacement for professional mental health services. If you're in crisis, please contact a licensed professional.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowWelcome(false)}
-              className="w-full sm:w-auto"
-            >
-              Not Ready Yet
-            </Button>
-            <Button
-              onClick={startSession}
-              className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
-            >
-              <Brain size={20} weight="fill" className="mr-2" />
-              I'm Ready - Start Session
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   )
 }
