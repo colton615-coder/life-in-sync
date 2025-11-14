@@ -309,11 +309,11 @@ export function Tasks() {
             <motion.button 
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="gap-2 px-5 md:px-6 h-11 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center font-semibold text-sm md:text-base text-primary-foreground bg-gradient-to-br from-primary via-primary to-accent shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-200"
+              className="gap-2 px-6 md:px-8 h-14 md:h-16 rounded-2xl flex items-center justify-center font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
             >
-              <Plus size={20} weight="bold" className="md:w-[22px] md:h-[22px]" />
+              <Plus size={22} weight="bold" className="md:w-6 md:h-6" />
               <span>New Task</span>
-              <span className="hidden md:inline text-xs opacity-70 ml-1">⌘K</span>
+              <span className="hidden md:inline text-xs opacity-80 ml-2">⌘K</span>
             </motion.button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[580px] neumorphic border-none">
@@ -564,12 +564,12 @@ export function Tasks() {
               Start organizing your work by creating your first task
             </p>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setDialogOpen(true)}
-              className="inline-flex items-center gap-2 px-6 h-12 rounded-xl font-semibold text-primary-foreground bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/20"
+              className="inline-flex items-center gap-2 px-6 md:px-8 h-12 md:h-14 rounded-2xl font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
             >
-              <Plus size={20} weight="bold" />
+              <Plus size={22} weight="bold" className="md:w-6 md:h-6" />
               Create Your First Task
             </motion.button>
           </motion.div>

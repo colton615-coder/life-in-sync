@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { ActiveWorkout } from '../workout/ActiveWorkout'
 import { WorkoutSummary } from '../workout/WorkoutSummary'
 import { Badge } from '@/components/ui/badge'
+import { motion } from 'framer-motion'
 
 type WorkoutStage = 'planning' | 'active' | 'summary'
 
@@ -205,11 +206,15 @@ Return ONLY valid JSON with this exact structure:
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-1.5 md:gap-2 h-8 md:h-10 text-xs md:text-sm bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg">
-              <Sparkle size={16} className="md:w-5 md:h-5" />
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="gap-2 px-6 md:px-8 h-14 md:h-16 rounded-2xl flex items-center justify-center font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
+            >
+              <Sparkle size={22} weight="fill" className="md:w-6 md:h-6" />
               <span className="hidden sm:inline">Generate Workout</span>
               <span className="sm:hidden">Generate</span>
-            </Button>
+            </motion.button>
           </DialogTrigger>
           <DialogContent className="neumorphic">
             <DialogHeader>
@@ -291,10 +296,15 @@ Return ONLY valid JSON with this exact structure:
             <Sparkle size={40} weight="duotone" className="text-primary mx-auto mb-3 md:mb-4 md:w-12 md:h-12" />
             <h3 className="font-semibold text-base md:text-lg mb-1 md:mb-2">No workouts yet</h3>
             <p className="text-muted-foreground text-sm md:text-base mb-3 md:mb-4">Generate your first AI-powered workout!</p>
-            <Button onClick={() => setDialogOpen(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 md:h-10 text-sm shadow-lg">
-              <Sparkle className="mr-2" />
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setDialogOpen(true)}
+              className="inline-flex items-center gap-2 px-6 md:px-8 h-12 md:h-14 rounded-2xl font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
+            >
+              <Sparkle size={22} weight="fill" className="md:w-6 md:h-6" />
               Generate Workout
-            </Button>
+            </motion.button>
           </Card>
         ) : (
           <div className="grid gap-3 md:gap-4">
