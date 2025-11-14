@@ -4,7 +4,6 @@ import { NavigationButton } from '@/components/NavigationButton'
 import { AbstractBackground } from '@/components/AbstractBackground'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import { Toaster } from '@/components/ui/sonner'
-import { ThemeToggle } from '@/components/ThemeToggle'
 import { useTheme } from '@/components/ThemeProvider'
 import { toast } from 'sonner'
 import { Module } from '@/lib/types'
@@ -67,10 +66,6 @@ function App() {
       
       <div className="min-h-screen bg-background relative">
         <AbstractBackground />
-      
-        <div className="fixed top-3 right-3 md:top-4 md:right-4 z-50">
-          <ThemeToggle />
-        </div>
 
         <div className="relative z-10 max-w-6xl mx-auto px-3 py-4 md:px-8 md:py-16 pb-24 md:pb-32">
           {renderModule()}

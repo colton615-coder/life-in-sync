@@ -18,8 +18,9 @@ export function DashboardWidget({ title, icon, children, onClick, className }: D
     <Component
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={onClick ? { y: -4 } : {}}
-      transition={{ duration: 0.2 }}
+      whileHover={onClick ? { y: -3, scale: 1.005 } : {}}
+      whileTap={onClick ? { scale: 0.995 } : {}}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       onClick={onClick}
       className={cn(
         "w-full text-left",
@@ -31,11 +32,11 @@ export function DashboardWidget({ title, icon, children, onClick, className }: D
         "h-full transition-all duration-200",
         onClick && "group-hover:shadow-lg group-hover:border-primary/50"
       )}>
-        <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
-          <div className="p-2 md:p-2.5 rounded-lg md:rounded-xl bg-primary/10 text-primary">
+        <div className="flex items-center gap-2 mb-2.5 md:mb-3">
+          <div className="p-1.5 md:p-2 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
             {icon}
           </div>
-          <h3 className="font-semibold text-sm md:text-base lg:text-lg">{title}</h3>
+          <h3 className="font-semibold text-sm md:text-base">{title}</h3>
         </div>
         {children}
       </Card>

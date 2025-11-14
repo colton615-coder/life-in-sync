@@ -132,33 +132,33 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   }, [knoxMessages])
 
   return (
-    <div className="space-y-3 md:space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-4 md:space-y-5 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-xl md:text-4xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-0.5 md:mt-2 text-xs md:text-base">Your unified command center</p>
+        <h1 className="text-xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-0.5 md:mt-1.5 text-xs md:text-sm">Your unified command center</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-3">
         <DashboardWidget
           title="Habits"
-          icon={<Fire size={24} weight="duotone" />}
+          icon={<Fire size={20} weight="duotone" />}
           onClick={() => onNavigate('habits')}
         >
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Today's Progress</span>
-              <Badge variant="secondary" className="font-semibold">
+              <span className="text-xs text-muted-foreground">Today's Progress</span>
+              <Badge variant="secondary" className="font-semibold text-xs px-2 py-0.5">
                 {habitStats.completedToday}/{habitStats.total}
               </Badge>
             </div>
-            <Progress value={habitStats.percentComplete} className="h-2" />
-            <div className="grid grid-cols-2 gap-2 pt-2">
+            <Progress value={habitStats.percentComplete} className="h-1.5" />
+            <div className="grid grid-cols-2 gap-2 pt-1">
               <div>
-                <div className="text-2xl font-bold text-primary">{habitStats.longestStreak}</div>
+                <div className="text-xl font-bold text-primary">{habitStats.longestStreak}</div>
                 <div className="text-xs text-muted-foreground">Best Streak</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-primary">{habitStats.averageStreak}</div>
+                <div className="text-xl font-bold text-primary">{habitStats.averageStreak}</div>
                 <div className="text-xs text-muted-foreground">Avg Streak</div>
               </div>
             </div>
@@ -167,23 +167,23 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
         <DashboardWidget
           title="Finance"
-          icon={<CurrencyDollar size={24} weight="duotone" />}
+          icon={<CurrencyDollar size={20} weight="duotone" />}
           onClick={() => onNavigate('finance')}
         >
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <div>
-              <div className="text-3xl font-bold text-primary">
+              <div className="text-2xl font-bold text-primary">
                 ${financeStats.totalSpent.toFixed(2)}
               </div>
               <div className="text-xs text-muted-foreground">Spent This Month</div>
             </div>
-            <div className="grid grid-cols-2 gap-2 pt-2">
+            <div className="grid grid-cols-2 gap-2 pt-1">
               <div>
-                <div className="text-xl font-bold">{financeStats.transactionCount}</div>
+                <div className="text-lg font-bold">{financeStats.transactionCount}</div>
                 <div className="text-xs text-muted-foreground">Transactions</div>
               </div>
               <div>
-                <div className="text-xl font-bold">
+                <div className="text-lg font-bold">
                   ${financeStats.averageTransaction > 0 ? financeStats.averageTransaction.toFixed(0) : '0'}
                 </div>
                 <div className="text-xs text-muted-foreground">Avg/Transaction</div>
@@ -205,24 +205,24 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
         <DashboardWidget
           title="Tasks"
-          icon={<CheckCircle size={24} weight="duotone" />}
+          icon={<CheckCircle size={20} weight="duotone" />}
           onClick={() => onNavigate('tasks')}
         >
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Completion Rate</span>
-              <Badge variant="secondary" className="font-semibold">
+              <span className="text-xs text-muted-foreground">Completion Rate</span>
+              <Badge variant="secondary" className="font-semibold text-xs px-2 py-0.5">
                 {taskStats.completionRate}%
               </Badge>
             </div>
-            <Progress value={taskStats.completionRate} className="h-2" />
-            <div className="grid grid-cols-2 gap-2 pt-2">
+            <Progress value={taskStats.completionRate} className="h-1.5" />
+            <div className="grid grid-cols-2 gap-2 pt-1">
               <div>
-                <div className="text-2xl font-bold text-primary">{taskStats.active}</div>
+                <div className="text-xl font-bold text-primary">{taskStats.active}</div>
                 <div className="text-xs text-muted-foreground">Active Tasks</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-destructive">{taskStats.highPriority}</div>
+                <div className="text-xl font-bold text-destructive">{taskStats.highPriority}</div>
                 <div className="text-xs text-muted-foreground">High Priority</div>
               </div>
             </div>
@@ -231,25 +231,25 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
         <DashboardWidget
           title="Workouts"
-          icon={<Barbell size={24} weight="duotone" />}
+          icon={<Barbell size={20} weight="duotone" />}
           onClick={() => onNavigate('workouts')}
         >
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <div>
-              <div className="text-3xl font-bold text-primary">{workoutStats.total}</div>
+              <div className="text-2xl font-bold text-primary">{workoutStats.total}</div>
               <div className="text-xs text-muted-foreground">Total Workouts</div>
             </div>
-            <div className="pt-2 border-t border-border">
+            <div className="pt-1.5 border-t border-border">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">This Week</span>
-                <Badge variant="secondary" className="font-semibold">
+                <span className="text-xs text-muted-foreground">This Week</span>
+                <Badge variant="secondary" className="font-semibold text-xs px-2 py-0.5">
                   {workoutStats.thisWeek} workouts
                 </Badge>
               </div>
             </div>
             {workoutStats.thisWeek > 0 && (
               <div className="flex items-center gap-2 text-xs text-success">
-                <TrendUp size={16} weight="bold" />
+                <TrendUp size={14} weight="bold" />
                 <span>Keep up the momentum!</span>
               </div>
             )}
@@ -258,25 +258,25 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
         <DashboardWidget
           title="AI Knox"
-          icon={<Brain size={24} weight="duotone" />}
+          icon={<Brain size={20} weight="duotone" />}
           onClick={() => onNavigate('knox')}
         >
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <div>
-              <div className="text-3xl font-bold text-primary">{knoxStats.conversations}</div>
+              <div className="text-2xl font-bold text-primary">{knoxStats.conversations}</div>
               <div className="text-xs text-muted-foreground">Conversations</div>
             </div>
-            <div className="pt-2 border-t border-border">
+            <div className="pt-1.5 border-t border-border">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total Messages</span>
-                <Badge variant="secondary" className="font-semibold">
+                <span className="text-xs text-muted-foreground">Total Messages</span>
+                <Badge variant="secondary" className="font-semibold text-xs px-2 py-0.5">
                   {knoxStats.totalMessages}
                 </Badge>
               </div>
             </div>
             {knoxStats.conversations === 0 && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Sparkle size={16} />
+                <Sparkle size={14} />
                 <span>Start a conversation</span>
               </div>
             )}
@@ -285,36 +285,36 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
         <DashboardWidget
           title="Quick Stats"
-          icon={<Target size={24} weight="duotone" />}
+          icon={<Target size={20} weight="duotone" />}
         >
-          <div className="space-y-2">
-            <div className="flex items-center justify-between py-2 border-b border-border">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between py-1.5 border-b border-border">
               <div className="flex items-center gap-2">
-                <Fire size={16} className="text-primary" />
-                <span className="text-sm">Habits Completed</span>
+                <Fire size={14} className="text-primary" />
+                <span className="text-xs">Habits Completed</span>
               </div>
-              <span className="text-sm font-bold">{habitStats.completedToday}</span>
+              <span className="text-xs font-bold">{habitStats.completedToday}</span>
             </div>
-            <div className="flex items-center justify-between py-2 border-b border-border">
+            <div className="flex items-center justify-between py-1.5 border-b border-border">
               <div className="flex items-center gap-2">
-                <ListChecks size={16} className="text-primary" />
-                <span className="text-sm">Tasks Done</span>
+                <ListChecks size={14} className="text-primary" />
+                <span className="text-xs">Tasks Done</span>
               </div>
-              <span className="text-sm font-bold">{taskStats.completed}</span>
+              <span className="text-xs font-bold">{taskStats.completed}</span>
             </div>
-            <div className="flex items-center justify-between py-2 border-b border-border">
+            <div className="flex items-center justify-between py-1.5 border-b border-border">
               <div className="flex items-center gap-2">
-                <Barbell size={16} className="text-primary" />
-                <span className="text-sm">Week Workouts</span>
+                <Barbell size={14} className="text-primary" />
+                <span className="text-xs">Week Workouts</span>
               </div>
-              <span className="text-sm font-bold">{workoutStats.thisWeek}</span>
+              <span className="text-xs font-bold">{workoutStats.thisWeek}</span>
             </div>
-            <div className="flex items-center justify-between py-2">
+            <div className="flex items-center justify-between py-1.5">
               <div className="flex items-center gap-2">
-                <CurrencyDollar size={16} className="text-primary" />
-                <span className="text-sm">Expenses</span>
+                <CurrencyDollar size={14} className="text-primary" />
+                <span className="text-xs">Expenses</span>
               </div>
-              <span className="text-sm font-bold">{financeStats.transactionCount}</span>
+              <span className="text-xs font-bold">{financeStats.transactionCount}</span>
             </div>
           </div>
         </DashboardWidget>

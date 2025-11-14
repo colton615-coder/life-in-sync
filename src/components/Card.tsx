@@ -20,7 +20,7 @@ export function Card({
     <div
       onClick={onClick}
       className={cn(
-        'rounded-lg md:rounded-xl p-3 md:p-6',
+        'rounded-lg md:rounded-xl p-3 md:p-4',
         glass ? 'glass-card' : 'elevated-card',
         hover && 'cursor-pointer',
         className
