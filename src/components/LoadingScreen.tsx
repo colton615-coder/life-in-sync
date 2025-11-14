@@ -24,11 +24,26 @@ const staticAffirmations = [
   { text: "Trust in the Lord with all your heart and lean not on your own understanding.", author: "Proverbs 3:5" },
 ]
 
+const LOADING_MESSAGES = [
+  "Loading your life together (it's harder than you think)...",
+  "Pretending to load important stuff...",
+  "Making you wait for dramatic effect...",
+  "Waking up the hamsters that power this app...",
+  "Loading... because instant gratification is overrated...",
+  "Consulting with the void...",
+  "Gathering digital wisdom (it's hiding)...",
+  "Teaching the app to count to 100...",
+]
+
 export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
   const [affirmation, setAffirmation] = useState<{ text: string; author: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [loadingMessage, setLoadingMessage] = useState('')
 
   useEffect(() => {
+    const randomMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]
+    setLoadingMessage(randomMessage)
+
     const loadAffirmation = async () => {
       const today = getTodayKey()
       
@@ -195,24 +210,27 @@ Keep the text under 120 characters. Make it profound and uplifting.`
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.2, duration: 0.6 }}
-              className="flex justify-center gap-2"
+              className="space-y-4"
             >
-              {[0, 1, 2].map((index) => (
-                <motion.div
-                  key={index}
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.3, 1, 0.3]
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    delay: index * 0.2,
-                    ease: "easeInOut"
-                  }}
-                  className="w-2 h-2 rounded-full bg-accent-vibrant"
-                />
-              ))}
+              <p className="text-sm text-muted-foreground italic">{loadingMessage}</p>
+              <div className="flex justify-center gap-2">
+                {[0, 1, 2].map((index) => (
+                  <motion.div
+                    key={index}
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.3, 1, 0.3]
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      delay: index * 0.2,
+                      ease: "easeInOut"
+                    }}
+                    className="w-2 h-2 rounded-full bg-accent-vibrant"
+                  />
+                ))}
+              </div>
             </motion.div>
           </div>
         </motion.div>

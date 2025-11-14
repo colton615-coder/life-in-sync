@@ -7,6 +7,7 @@ import { useKV } from '@github/spark/hooks'
 import { ChatMessage } from '@/lib/types'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+import { SarcasticLoader } from '@/components/SarcasticLoader'
 
 export function Knox() {
   const [messages, setMessages] = useKV<ChatMessage[]>('knox-messages', [])
@@ -226,11 +227,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-card border border-border rounded-lg p-4 shadow-md max-w-[85%]">
-                    <div className="flex items-center gap-2">
-                      <LockKey size={16} weight="bold" className="text-primary animate-pulse" />
-                      <p className="text-sm font-medium">Knox</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1">Cutting through the BS...</p>
+                    <SarcasticLoader className="justify-start" />
                   </div>
                 </div>
               )}

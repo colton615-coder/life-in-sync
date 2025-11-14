@@ -1,7 +1,7 @@
 import { motion, HTMLMotionProps } from 'framer-motion'
 import { Sparkle } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
-import { ReactNode } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 
 interface AIButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref'> {
   children: ReactNode
@@ -11,7 +11,31 @@ interface AIButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref'> {
   variant?: 'default' | 'ghost' | 'outline'
 }
 
+const SARCASTIC_LOADING_MESSAGES = [
+  "Convincing AI...",
+  "Teaching robots...",
+  "Asking ChatGPT...",
+  "Pretending to work...",
+  "Consulting algorithms...",
+  "Making it fancy...",
+  "Generating excuses...",
+  "Summoning wisdom...",
+  "Calculating dreams...",
+  "Running calculations...",
+  "Avoiding work...",
+  "Teaching computers...",
+  "Beep boop beep...",
+  "Consulting AI...",
+  "Making you wait...",
+  "Justifying existence...",
+  "Taking longer...",
+  "Doing AI things...",
+  "Loading suspiciously...",
+]
+
 export function AIButton({ children, loading = false, icon, size = 'md', variant = 'default', className, disabled, ...props }: AIButtonProps) {
+    const [loadingMessage, setLoadingMessage] = useState('')
+    
     const sizeClasses = {
       sm: 'gap-1.5 px-4 md:px-5 h-11 md:h-12 text-sm md:text-base',
       md: 'gap-2 px-6 md:px-8 h-14 md:h-16 text-base md:text-lg',
@@ -23,6 +47,13 @@ export function AIButton({ children, loading = false, icon, size = 'md', variant
       ghost: 'text-foreground bg-transparent border border-purple-500/30 hover:bg-purple-500/10 hover:border-purple-500/50',
       outline: 'text-purple-600 dark:text-purple-400 bg-transparent border-2 border-purple-500 hover:bg-purple-500/10'
     }
+
+    useEffect(() => {
+      if (loading) {
+        const randomMessage = SARCASTIC_LOADING_MESSAGES[Math.floor(Math.random() * SARCASTIC_LOADING_MESSAGES.length)]
+        setLoadingMessage(randomMessage)
+      }
+    }, [loading])
 
   return (
     <motion.button
@@ -46,7 +77,7 @@ export function AIButton({ children, loading = false, icon, size = 'md', variant
           >
             <Sparkle size={size === 'sm' ? 18 : size === 'lg' ? 26 : 22} weight="fill" />
           </motion.div>
-          <span>Generating...</span>
+          <span className="italic">{loadingMessage}</span>
         </>
       ) : (
         <>

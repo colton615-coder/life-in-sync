@@ -8,6 +8,7 @@ import { Sparkle, ArrowRight } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { AIButton } from '@/components/AIButton'
+import { SarcasticLoader } from '@/components/SarcasticLoader'
 
 interface BudgetRecommendation {
   category: string

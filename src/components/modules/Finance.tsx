@@ -17,6 +17,7 @@ import { FinancialAdvisorInterview } from '@/components/FinancialAdvisorIntervie
 import { DetailedBudgetDisplay } from '@/components/DetailedBudgetDisplay'
 import { TabGroup } from '@/components/TabGroup'
 import { AIButton } from '@/components/AIButton'
+import { SarcasticProgress } from '@/components/SarcasticLoader'
 
 const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Other']
 const COLORS = ['#5fd4f4', '#9d7fff', '#6ee7b7', '#fbbf24', '#fb923c', '#f87171', '#94a3b8']
@@ -359,10 +360,22 @@ CRITICAL RULES:
       {activeTab === 'advisor' ? (
         <>
           {isGeneratingBudget ? (
-            <Card className="glass-card border-primary/30 text-center py-16">
-              <Sparkle weight="fill" className="text-primary mx-auto mb-4 animate-spin" size={56} />
-              <h3 className="font-semibold text-2xl mb-2">Analyzing Your Financial Profile</h3>
-              <p className="text-muted-foreground text-[15px]">Creating your personalized budget plan...</p>
+            <Card className="glass-card border-primary/30 py-12 md:py-16">
+              <div className="max-w-lg mx-auto space-y-8">
+                <div className="flex justify-center">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                  >
+                    <Sparkle weight="fill" className="text-primary" size={56} />
+                  </motion.div>
+                </div>
+                <div className="text-center space-y-2">
+                  <h3 className="font-semibold text-xl md:text-2xl">Analyzing Your Financial Profile</h3>
+                  <p className="text-muted-foreground text-sm md:text-[15px]">AI is crunching the numbers (and judging your choices)</p>
+                </div>
+                <SarcasticProgress />
+              </div>
             </Card>
           ) : detailedBudget && financialProfile ? (
             <DetailedBudgetDisplay budget={detailedBudget} onStartOver={handleStartOver} />
