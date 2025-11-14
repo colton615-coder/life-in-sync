@@ -203,7 +203,7 @@ Return ONLY valid JSON with this exact structure:
       <div className="flex items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">💪 Workouts</h1>
-          <p className="text-muted-foreground mt-1 text-sm font-normal">No pain, no pain. That's it. Just pain</p>
+          <p className="text-muted-foreground mt-1 text-sm font-normal">Suffering is mandatory, results are optional</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>

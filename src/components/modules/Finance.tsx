@@ -274,7 +274,7 @@ CRITICAL RULES:
             💰 Finance
           </h1>
           <p className="text-muted-foreground text-sm font-normal">
-            Money can't buy happiness, but poverty guarantees misery
+            Watch your dreams leak away, one transaction at a time
           </p>
         </div>
         {activeTab === 'expenses' && (

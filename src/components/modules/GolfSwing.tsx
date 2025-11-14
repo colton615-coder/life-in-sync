@@ -143,7 +143,7 @@ export function GolfSwing() {
         </h2>
         
         <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-          Upload a video of your golf swing and get instant professional analysis with personalized feedback and improvement drills
+          Technology can't fix your slice, but at least it'll tell you exactly how bad it is
         </p>
 
         <Button

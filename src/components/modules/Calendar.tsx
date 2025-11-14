@@ -149,7 +149,7 @@ export function Calendar() {
           </h1>
           <p className="text-lg text-muted-foreground mt-2 flex items-center justify-center gap-2">
             <Star className="w-4 h-4 text-blue-500" weight="fill" />
-            Plan. Schedule. Achieve.
+            Time marches on whether you plan or not
             <Sparkle className="w-4 h-4 text-pink-500" weight="fill" />
           </p>
         </div>

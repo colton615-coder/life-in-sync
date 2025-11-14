@@ -180,7 +180,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
               🧠 Knox
             </h1>
             <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
-              Your personal Devil's Advocate - Radical honesty, no coddling
+              Truth hurts. Lies hurt more. Pick your poison
             </p>
           </div>
           {messages && messages.length > 0 && (

@@ -298,7 +298,7 @@ export function Tasks() {
             ✅ Tasks
           </h1>
           <p className="text-muted-foreground text-sm font-normal">
-            Things won't do themselves (yet)
+            The void stares back, but these still need doing
           </p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {

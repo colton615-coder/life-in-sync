@@ -166,7 +166,7 @@ export function Shopping() {
           </h1>
           <p className="text-lg text-muted-foreground mt-2 flex items-center justify-center gap-2">
             <Lightning className="w-4 h-4 text-yellow-500" weight="fill" />
-            Smart. Fast. Beautiful.
+            Capitalism made pretty
             <Sparkle className="w-4 h-4 text-pink-500" weight="fill" />
           </p>
         </div>

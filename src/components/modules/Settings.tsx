@@ -115,7 +115,7 @@ export function Settings() {
       <div>
         <h1 className="text-3xl font-bold text-foreground mb-2">⚙️ Settings</h1>
         <p className="text-muted-foreground">
-          Configure AI providers and manage your application preferences.
+          Configure the machinery of your digital existence
         </p>
       </div>
 

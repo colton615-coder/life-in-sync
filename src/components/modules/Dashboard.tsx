@@ -135,7 +135,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     <div className="pt-2 md:pt-4 space-y-3 md:space-y-4 animate-in fade-in duration-500">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-1 text-sm font-normal">Nowhere to run, nothing to hide</p>
+        <p className="text-muted-foreground mt-1 text-sm font-normal">Your life in numbers (they don't lie)</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-2.5">
