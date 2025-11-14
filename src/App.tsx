@@ -15,6 +15,7 @@ import { Tasks } from '@/components/modules/Tasks'
 import { Workouts } from '@/components/modules/Workouts'
 import { Knox } from '@/components/modules/Knox'
 import { Shopping } from '@/components/modules/Shopping'
+import { Calendar } from '@/components/modules/Calendar'
 
 function App() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
@@ -26,7 +27,7 @@ function App() {
     setActiveModule(moduleId as Module)
     setDrawerOpen(false)
     
-    if (['calendar', 'vault', 'settings', 'history'].includes(moduleId)) {
+    if (['vault', 'settings', 'history'].includes(moduleId)) {
       toast.info('Coming soon', {
         description: `${moduleId.charAt(0).toUpperCase() + moduleId.slice(1)} module is under development`,
       })
@@ -50,6 +51,8 @@ function App() {
         return <Knox />
       case 'shopping':
         return <Shopping />
+      case 'calendar':
+        return <Calendar />
       default:
         return <Dashboard onNavigate={handleModuleChange} />
     }

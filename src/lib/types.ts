@@ -190,3 +190,15 @@ export interface ShoppingItem {
   completed: boolean
   createdAt: string
 }
+
+export interface CalendarEvent {
+  id: string
+  title: string
+  description?: string
+  date: string
+  startTime?: string
+  endTime?: string
+  category: 'event' | 'plan' | 'reminder' | 'meeting'
+  color?: string
+  createdAt: string
+}
