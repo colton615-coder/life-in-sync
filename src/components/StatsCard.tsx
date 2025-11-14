@@ -28,8 +28,8 @@ export function StatsCard({ title, stats, className }: StatsCardProps) {
             <Target size={18} className="text-primary" weight="fill" />
           </div>
           <div>
-            <div className="text-xs text-muted-foreground font-medium">Total</div>
-            <div className="text-lg font-bold tabular-nums">{stats.total}</div>
+            <div className="text-xs text-muted-foreground font-normal">Total</div>
+            <div className="text-lg font-semibold tabular-nums">{stats.total}</div>
           </div>
         </motion.div>
 
@@ -41,8 +41,8 @@ export function StatsCard({ title, stats, className }: StatsCardProps) {
             <CheckCircle size={18} className="text-accent" weight="fill" />
           </div>
           <div>
-            <div className="text-xs text-muted-foreground font-medium">Active</div>
-            <div className="text-lg font-bold tabular-nums">{stats.active}</div>
+            <div className="text-xs text-muted-foreground font-normal">Active</div>
+            <div className="text-lg font-semibold tabular-nums">{stats.active}</div>
           </div>
         </motion.div>
 
@@ -54,8 +54,8 @@ export function StatsCard({ title, stats, className }: StatsCardProps) {
             <CheckCircle size={18} className="text-success" weight="fill" />
           </div>
           <div>
-            <div className="text-xs text-muted-foreground font-medium">Done</div>
-            <div className="text-lg font-bold tabular-nums">{stats.completed}</div>
+            <div className="text-xs text-muted-foreground font-normal">Done</div>
+            <div className="text-lg font-semibold tabular-nums">{stats.completed}</div>
           </div>
         </motion.div>
 
@@ -74,10 +74,10 @@ export function StatsCard({ title, stats, className }: StatsCardProps) {
             )}
           </div>
           <div>
-            <div className="text-xs text-muted-foreground font-medium">
+            <div className="text-xs text-muted-foreground font-normal">
               {stats.streak !== undefined ? 'Rate' : 'Rate'}
             </div>
-            <div className="text-lg font-bold tabular-nums">
+            <div className="text-lg font-semibold tabular-nums">
               {stats.completionRate || 0}%
             </div>
           </div>

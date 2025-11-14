@@ -379,8 +379,8 @@ export function Habits() {
       
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h1 className="text-xl md:text-3xl font-bold tracking-tight">🔥 Habits</h1>
-          <p className="text-muted-foreground mt-0.5 md:mt-1 text-xs md:text-sm">Build the life you want, one day at a time</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">🔥 Habits</h1>
+          <p className="text-muted-foreground mt-1 text-sm font-normal">Today you, tomorrow also you, probably</p>
         </div>
         {creationStep === 0 && (
           <motion.button

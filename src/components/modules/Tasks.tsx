@@ -294,11 +294,11 @@ export function Tasks() {
         className="flex items-start justify-between gap-3 md:gap-4 flex-wrap"
       >
         <div className="space-y-0.5 md:space-y-1">
-          <h1 className="text-xl md:text-3xl font-bold tracking-tight bg-gradient-to-br from-primary via-primary to-accent bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-br from-primary via-primary to-accent bg-clip-text text-transparent">
             ✅ Tasks
           </h1>
-          <p className="text-muted-foreground text-xs md:text-sm font-medium">
-            Organize and prioritize your work
+          <p className="text-muted-foreground text-sm font-normal">
+            Things won't do themselves (yet)
           </p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
@@ -449,8 +449,8 @@ export function Tasks() {
                 <ListChecks size={24} weight="fill" className="text-primary md:w-7 md:h-7" />
               </div>
               <div>
-                <div className="text-[10px] md:text-xs text-muted-foreground font-medium mb-0.5">Total Tasks</div>
-                <div className="text-2xl md:text-3xl font-bold tabular-nums bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+                <div className="text-[10px] md:text-xs text-muted-foreground font-normal mb-0.5">Total Tasks</div>
+                <div className="text-2xl md:text-3xl font-semibold tabular-nums bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
                   {tasks.length}
                 </div>
               </div>
@@ -463,8 +463,8 @@ export function Tasks() {
                 <Target size={24} weight="fill" className="text-accent md:w-7 md:h-7" />
               </div>
               <div>
-                <div className="text-[10px] md:text-xs text-muted-foreground font-medium mb-0.5">Active</div>
-                <div className="text-2xl md:text-3xl font-bold tabular-nums text-accent">
+                <div className="text-[10px] md:text-xs text-muted-foreground font-normal mb-0.5">Active</div>
+                <div className="text-2xl md:text-3xl font-semibold tabular-nums text-accent">
                   {activeTasks.length}
                 </div>
               </div>
@@ -477,8 +477,8 @@ export function Tasks() {
                 <CheckCircle size={24} weight="fill" className="text-success md:w-7 md:h-7" />
               </div>
               <div>
-                <div className="text-[10px] md:text-xs text-muted-foreground font-medium mb-0.5">Done</div>
-                <div className="text-2xl md:text-3xl font-bold tabular-nums text-success">
+                <div className="text-[10px] md:text-xs text-muted-foreground font-normal mb-0.5">Done</div>
+                <div className="text-2xl md:text-3xl font-semibold tabular-nums text-success">
                   {completedTasks.length}
                 </div>
               </div>
@@ -491,8 +491,8 @@ export function Tasks() {
                 <Clock size={24} weight="fill" className="text-destructive md:w-7 md:h-7" />
               </div>
               <div>
-                <div className="text-[10px] md:text-xs text-muted-foreground font-medium mb-0.5">Overdue</div>
-                <div className="text-2xl md:text-3xl font-bold tabular-nums text-destructive">
+                <div className="text-[10px] md:text-xs text-muted-foreground font-normal mb-0.5">Overdue</div>
+                <div className="text-2xl md:text-3xl font-semibold tabular-nums text-destructive">
                   {overdueTasks.length}
                 </div>
               </div>

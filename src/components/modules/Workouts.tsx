@@ -202,8 +202,8 @@ Return ONLY valid JSON with this exact structure:
     <div className="pt-2 md:pt-4 space-y-3 md:space-y-6">
       <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl md:text-3xl font-bold tracking-tight">💪 Workouts</h1>
-          <p className="text-muted-foreground mt-0.5 md:mt-2 text-xs md:text-base">AI-powered fitness training</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">💪 Workouts</h1>
+          <p className="text-muted-foreground mt-1 text-sm font-normal">No pain, no pain. That's it. Just pain</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -253,8 +253,8 @@ Return ONLY valid JSON with this exact structure:
           <div className="flex items-center gap-3">
             <Barbell size={32} weight="duotone" className="text-primary" />
             <div>
-              <div className="text-3xl font-bold">{(completedWorkouts || []).length}</div>
-              <div className="text-sm text-muted-foreground">Completed</div>
+              <div className="text-3xl font-semibold">{(completedWorkouts || []).length}</div>
+              <div className="text-sm text-muted-foreground font-normal">Completed</div>
             </div>
           </div>
         </Card>
@@ -263,10 +263,10 @@ Return ONLY valid JSON with this exact structure:
           <div className="flex items-center gap-3">
             <Timer size={32} weight="duotone" className="text-accent" />
             <div>
-              <div className="text-3xl font-bold">
+              <div className="text-3xl font-semibold">
                 {Math.round((completedWorkouts || []).reduce((acc, w) => acc + w.totalDuration, 0) / 60)}
               </div>
-              <div className="text-sm text-muted-foreground">Minutes</div>
+              <div className="text-sm text-muted-foreground font-normal">Minutes</div>
             </div>
           </div>
         </Card>
@@ -275,8 +275,8 @@ Return ONLY valid JSON with this exact structure:
           <div className="flex items-center gap-3">
             <Trophy size={32} weight="duotone" className="text-success" />
             <div>
-              <div className="text-3xl font-bold">{(prs || []).length}</div>
-              <div className="text-sm text-muted-foreground">Personal Records</div>
+              <div className="text-3xl font-semibold">{(prs || []).length}</div>
+              <div className="text-sm text-muted-foreground font-normal">Personal Records</div>
             </div>
           </div>
         </Card>

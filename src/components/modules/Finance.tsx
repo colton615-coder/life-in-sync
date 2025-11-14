@@ -270,11 +270,11 @@ CRITICAL RULES:
         className="flex items-start justify-between gap-2 md:gap-4 flex-wrap"
       >
         <div className="space-y-0.5">
-          <h1 className="text-xl md:text-3xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
             💰 Finance
           </h1>
-          <p className="text-muted-foreground text-xs md:text-sm font-medium">
-            Smart expense tracking & AI-powered budget planning
+          <p className="text-muted-foreground text-sm font-normal">
+            Money can't buy happiness, but poverty guarantees misery
           </p>
         </div>
         {activeTab === 'expenses' && (
@@ -394,11 +394,11 @@ CRITICAL RULES:
                   <Wallet size={26} weight="fill" className="text-primary md:w-8 md:h-8" />
                 </div>
                 <div>
-                  <div className="text-xs md:text-sm text-muted-foreground font-medium mb-0.5 md:mb-1">Total Spent</div>
-                  <div className="text-2xl md:text-4xl font-bold tabular-nums bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+                  <div className="text-xs md:text-sm text-muted-foreground font-normal mb-0.5 md:mb-1">Total Spent</div>
+                  <div className="text-2xl md:text-4xl font-semibold tabular-nums bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
                     ${totalSpent.toFixed(2)}
                   </div>
-                  <div className="text-[10px] md:text-xs text-muted-foreground font-medium mt-0.5">This month</div>
+                  <div className="text-[10px] md:text-xs text-muted-foreground font-normal mt-0.5">This month</div>
                 </div>
               </div>
             </Card>
@@ -504,7 +504,7 @@ CRITICAL RULES:
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 md:gap-3 mb-1 flex-wrap">
-                                <span className="text-xl md:text-2xl font-bold tabular-nums text-primary">
+                                <span className="text-xl md:text-2xl font-semibold tabular-nums text-primary">
                                   ${expense.amount.toFixed(2)}
                                 </span>
                                 <Badge variant="secondary" className="text-[10px] md:text-xs">

@@ -32,11 +32,11 @@ export function StatCard({ icon, label, value, trend, onClick }: StatCardProps) 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="text-4xl font-bold tabular-nums text-foreground"
+          className="text-4xl font-semibold tabular-nums text-foreground"
         >
           {value}
         </motion.div>
-        <div className="text-sm font-medium text-muted-foreground mt-2">{label}</div>
+        <div className="text-sm font-normal text-muted-foreground mt-2">{label}</div>
       </div>
     </motion.div>
   )

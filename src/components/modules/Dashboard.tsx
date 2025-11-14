@@ -134,8 +134,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   return (
     <div className="pt-2 md:pt-4 space-y-3 md:space-y-4 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-xl md:text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-0.5 text-xs md:text-sm">Your unified command center</p>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-1 text-sm font-normal">Nowhere to run, nothing to hide</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-2.5">
@@ -154,12 +154,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <Progress value={habitStats.percentComplete} className="h-1.5" />
             <div className="grid grid-cols-2 gap-2 pt-1">
               <div>
-                <div className="text-xl font-bold text-primary">{habitStats.longestStreak}</div>
-                <div className="text-xs text-muted-foreground">Best Streak</div>
+                <div className="text-xl font-semibold text-primary">{habitStats.longestStreak}</div>
+                <div className="text-xs text-muted-foreground font-normal">Best Streak</div>
               </div>
               <div>
-                <div className="text-xl font-bold text-primary">{habitStats.averageStreak}</div>
-                <div className="text-xs text-muted-foreground">Avg Streak</div>
+                <div className="text-xl font-semibold text-primary">{habitStats.averageStreak}</div>
+                <div className="text-xs text-muted-foreground font-normal">Avg Streak</div>
               </div>
             </div>
           </div>
@@ -172,21 +172,21 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         >
           <div className="space-y-2.5">
             <div>
-              <div className="text-2xl font-bold text-primary">
+              <div className="text-2xl font-semibold text-primary">
                 ${financeStats.totalSpent.toFixed(2)}
               </div>
-              <div className="text-xs text-muted-foreground">Spent This Month</div>
+              <div className="text-xs text-muted-foreground font-normal">Spent This Month</div>
             </div>
             <div className="grid grid-cols-2 gap-2 pt-1">
               <div>
-                <div className="text-lg font-bold">{financeStats.transactionCount}</div>
-                <div className="text-xs text-muted-foreground">Transactions</div>
+                <div className="text-lg font-semibold">{financeStats.transactionCount}</div>
+                <div className="text-xs text-muted-foreground font-normal">Transactions</div>
               </div>
               <div>
-                <div className="text-lg font-bold">
+                <div className="text-lg font-semibold">
                   ${financeStats.averageTransaction > 0 ? financeStats.averageTransaction.toFixed(0) : '0'}
                 </div>
-                <div className="text-xs text-muted-foreground">Avg/Transaction</div>
+                <div className="text-xs text-muted-foreground font-normal">Avg/Transaction</div>
               </div>
             </div>
             {financeStats.topCategory && (
@@ -218,12 +218,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <Progress value={taskStats.completionRate} className="h-1.5" />
             <div className="grid grid-cols-2 gap-2 pt-1">
               <div>
-                <div className="text-xl font-bold text-primary">{taskStats.active}</div>
-                <div className="text-xs text-muted-foreground">Active Tasks</div>
+                <div className="text-xl font-semibold text-primary">{taskStats.active}</div>
+                <div className="text-xs text-muted-foreground font-normal">Active Tasks</div>
               </div>
               <div>
-                <div className="text-xl font-bold text-destructive">{taskStats.highPriority}</div>
-                <div className="text-xs text-muted-foreground">High Priority</div>
+                <div className="text-xl font-semibold text-destructive">{taskStats.highPriority}</div>
+                <div className="text-xs text-muted-foreground font-normal">High Priority</div>
               </div>
             </div>
           </div>
@@ -236,8 +236,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         >
           <div className="space-y-2.5">
             <div>
-              <div className="text-2xl font-bold text-primary">{workoutStats.total}</div>
-              <div className="text-xs text-muted-foreground">Total Workouts</div>
+              <div className="text-2xl font-semibold text-primary">{workoutStats.total}</div>
+              <div className="text-xs text-muted-foreground font-normal">Total Workouts</div>
             </div>
             <div className="pt-1.5 border-t border-border">
               <div className="flex items-center justify-between">
@@ -263,8 +263,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         >
           <div className="space-y-2.5">
             <div>
-              <div className="text-2xl font-bold text-primary">{knoxStats.conversations}</div>
-              <div className="text-xs text-muted-foreground">Conversations</div>
+              <div className="text-2xl font-semibold text-primary">{knoxStats.conversations}</div>
+              <div className="text-xs text-muted-foreground font-normal">Conversations</div>
             </div>
             <div className="pt-1.5 border-t border-border">
               <div className="flex items-center justify-between">
@@ -293,28 +293,28 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 <Fire size={14} className="text-primary" />
                 <span className="text-xs">Habits Completed</span>
               </div>
-              <span className="text-xs font-bold">{habitStats.completedToday}</span>
+              <span className="text-xs font-semibold">{habitStats.completedToday}</span>
             </div>
             <div className="flex items-center justify-between py-1.5 border-b border-border">
               <div className="flex items-center gap-2">
                 <ListChecks size={14} className="text-primary" />
                 <span className="text-xs">Tasks Done</span>
               </div>
-              <span className="text-xs font-bold">{taskStats.completed}</span>
+              <span className="text-xs font-semibold">{taskStats.completed}</span>
             </div>
             <div className="flex items-center justify-between py-1.5 border-b border-border">
               <div className="flex items-center gap-2">
                 <Barbell size={14} className="text-primary" />
                 <span className="text-xs">Week Workouts</span>
               </div>
-              <span className="text-xs font-bold">{workoutStats.thisWeek}</span>
+              <span className="text-xs font-semibold">{workoutStats.thisWeek}</span>
             </div>
             <div className="flex items-center justify-between py-1.5">
               <div className="flex items-center gap-2">
                 <CurrencyDollar size={14} className="text-primary" />
                 <span className="text-xs">Expenses</span>
               </div>
-              <span className="text-xs font-bold">{financeStats.transactionCount}</span>
+              <span className="text-xs font-semibold">{financeStats.transactionCount}</span>
             </div>
           </div>
         </DashboardWidget>
