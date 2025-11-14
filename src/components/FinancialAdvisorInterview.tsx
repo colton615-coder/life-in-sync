@@ -497,35 +497,47 @@ export function FinancialAdvisorInterview({ onComplete }: FinancialAdvisorInterv
   const progress = ((currentStep + 1) / steps.length) * 100
 
   return (
-    <div className="space-y-6">
-      <Card className="glass-card border-primary/30">
-        <div className="flex items-start gap-4 mb-6">
-          <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-            <ChatsCircle weight="fill" className="text-primary" size={28} />
-          </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      <Card className="glass-card border-primary/30 shadow-2xl shadow-primary/10">
+        <div className="flex items-start gap-5 mb-8">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", duration: 0.6, delay: 0.2 }}
+            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0 shadow-lg"
+          >
+            <ChatsCircle weight="fill" className="text-primary" size={32} />
+          </motion.div>
           <div className="flex-1">
-            <h3 className="font-semibold text-2xl mb-1">Financial Advisor Interview</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="font-semibold text-3xl mb-2 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Financial Advisor Interview
+            </h3>
+            <p className="text-base text-muted-foreground leading-relaxed">
               Answer a few questions so I can create a detailed, personalized budget for you
             </p>
           </div>
         </div>
 
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-muted-foreground">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-semibold text-muted-foreground">
               Step {currentStep + 1} of {steps.length}
             </span>
-            <span className="text-sm font-medium text-primary">
+            <span className="text-sm font-bold text-primary tabular-nums">
               {Math.round(progress)}%
             </span>
           </div>
-          <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div className="h-3 bg-muted/50 rounded-full overflow-hidden shadow-inner">
             <motion.div
-              className="h-full bg-primary"
+              className="h-full bg-gradient-to-r from-primary to-accent shadow-lg"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
             />
           </div>
         </div>
@@ -533,50 +545,57 @@ export function FinancialAdvisorInterview({ onComplete }: FinancialAdvisorInterv
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="space-y-6"
+            exit={{ opacity: 0, x: -30 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="space-y-8"
           >
-            <div>
-              <h4 className="text-xl font-semibold mb-2">{steps[currentStep].title}</h4>
-              <p className="text-sm text-muted-foreground">{steps[currentStep].subtitle}</p>
+            <div className="space-y-3">
+              <h4 className="text-2xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+                {steps[currentStep].title}
+              </h4>
+              <p className="text-base text-muted-foreground leading-relaxed">
+                {steps[currentStep].subtitle}
+              </p>
             </div>
 
-            {steps[currentStep].fields}
+            <div className="glass-morphic p-6 rounded-2xl border border-border/50">
+              {steps[currentStep].fields}
+            </div>
 
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-3 pt-2">
               {currentStep > 0 && (
                 <Button
                   variant="outline"
                   onClick={handleBack}
-                  className="gap-2"
+                  className="gap-2 h-12 px-6"
                   disabled={isSubmitting}
                 >
-                  <ArrowLeft size={18} />
+                  <ArrowLeft size={20} />
                   Back
                 </Button>
               )}
               <Button
                 onClick={handleNext}
-                className="flex-1 gap-2 shadow-lg shadow-primary/20"
+                className="flex-1 gap-2 shadow-xl shadow-primary/30 h-12 text-base font-semibold hover:shadow-2xl hover:shadow-primary/40 transition-all duration-300"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
                   <>
-                    <Sparkle className="animate-spin" size={20} />
+                    <Sparkle className="animate-spin" size={22} weight="fill" />
                     Generating Your Budget...
                   </>
                 ) : currentStep < steps.length - 1 ? (
                   <>
                     Continue
-                    <ArrowRight size={18} />
+                    <ArrowRight size={20} weight="bold" />
                   </>
                 ) : (
                   <>
+                    <Sparkle size={20} weight="fill" />
                     Generate Budget
-                    <Check size={18} weight="bold" />
+                    <Check size={20} weight="bold" />
                   </>
                 )}
               </Button>
@@ -585,11 +604,17 @@ export function FinancialAdvisorInterview({ onComplete }: FinancialAdvisorInterv
         </AnimatePresence>
       </Card>
 
-      <div className="glass-morphic p-4 rounded-xl border border-primary/20">
-        <p className="text-xs text-muted-foreground text-center">
-          🔒 Your financial information is stored locally on your device and never shared
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, delay: 0.4 }}
+        className="glass-morphic p-5 rounded-2xl border border-primary/20"
+      >
+        <p className="text-sm text-muted-foreground text-center font-medium flex items-center justify-center gap-2">
+          <span className="text-xl">🔒</span>
+          Your financial information is stored locally on your device and never shared
         </p>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
