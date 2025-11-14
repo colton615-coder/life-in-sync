@@ -1,7 +1,7 @@
 import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
 import { TabGroup } from '@/components/TabGroup'
-import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Sparkle, X, ArrowRight, ArrowLeft, Question } from '@phosphor-icons/react'
+import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Sparkle, X, ArrowRight, ArrowLeft, Question, Minus } from '@phosphor-icons/react'
 import * as Icons from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { Habit, TrackingType, HabitEntry, HabitIcon } from '@/lib/types'
@@ -23,9 +23,6 @@ const trackingTypeOptions = [
 export function Habits() {
   const [habits, setHabits] = useKV<Habit[]>('habits', [])
   const [creationStep, setCreationStep] = useState(0)
-  const [trackDialogOpen, setTrackDialogOpen] = useState(false)
-  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null)
-  const [trackValue, setTrackValue] = useState<string>('')
   const [filterTab, setFilterTab] = useState('all')
   const [showConfetti, setShowConfetti] = useState(false)
   
@@ -87,55 +84,28 @@ export function Habits() {
     resetCreation()
   }
 
-  const openTrackDialog = (habit: Habit) => {
-    setSelectedHabit(habit)
-    const todayEntry = getTodayEntry(habit)
-    if (todayEntry) {
-      if (habit.trackingType === 'numerical' && todayEntry.value !== undefined) {
-        setTrackValue(todayEntry.value.toString())
-      } else if (habit.trackingType === 'time' && todayEntry.minutes !== undefined) {
-        setTrackValue(todayEntry.minutes.toString())
-      }
-    } else {
-      setTrackValue('')
-    }
-    setTrackDialogOpen(true)
-  }
-
-  const trackHabit = () => {
-    if (!selectedHabit) return
-
-    if (selectedHabit.trackingType === 'boolean') {
-      toggleBooleanHabit(selectedHabit.id)
-      setTrackDialogOpen(false)
-      return
-    }
-
-    const value = parseFloat(trackValue)
-    if (isNaN(value) || value <= 0) {
-      toast.error('Please enter a valid value')
-      return
-    }
-
+  const incrementNumerical = (habitId: string) => {
     setHabits((current) => {
       const updated = (current || []).map(habit => {
-        if (habit.id !== selectedHabit.id) return habit
+        if (habit.id !== habitId) return habit
 
         const entries = [...(habit.entries || [])]
         const todayIndex = entries.findIndex(e => e.date === today)
+        
+        const currentValue = todayIndex > -1 
+          ? (habit.trackingType === 'numerical' ? (entries[todayIndex].value || 0) : (entries[todayIndex].minutes || 0))
+          : 0
+        
+        const newValue = currentValue + 1
 
         const newEntry: HabitEntry = {
           date: today,
-          ...(habit.trackingType === 'numerical' ? { value } : {}),
-          ...(habit.trackingType === 'time' ? { minutes: value } : {})
+          ...(habit.trackingType === 'numerical' ? { value: newValue } : {}),
+          ...(habit.trackingType === 'time' ? { minutes: newValue } : {})
         }
 
-        const isTargetMet = value >= (habit.target || 0)
-        const wasAlreadyComplete = todayIndex > -1 && (
-          habit.trackingType === 'numerical' 
-            ? (entries[todayIndex].value || 0) >= (habit.target || 0)
-            : (entries[todayIndex].minutes || 0) >= (habit.target || 0)
-        )
+        const wasAlreadyComplete = currentValue >= (habit.target || 0)
+        const isNowComplete = newValue >= (habit.target || 0)
 
         if (todayIndex > -1) {
           entries[todayIndex] = newEntry
@@ -145,7 +115,7 @@ export function Habits() {
 
         const newStreak = calculateStreak(entries, habit)
         
-        if (isTargetMet && !wasAlreadyComplete) {
+        if (isNowComplete && !wasAlreadyComplete) {
           setShowConfetti(true)
           setTimeout(() => setShowConfetti(false), 4000)
           
@@ -160,9 +130,43 @@ export function Habits() {
       })
       return updated
     })
+  }
 
-    setTrackDialogOpen(false)
-    setTrackValue('')
+  const decrementNumerical = (habitId: string) => {
+    setHabits((current) => {
+      const updated = (current || []).map(habit => {
+        if (habit.id !== habitId) return habit
+
+        const entries = [...(habit.entries || [])]
+        const todayIndex = entries.findIndex(e => e.date === today)
+        
+        if (todayIndex === -1) return habit
+        
+        const currentValue = habit.trackingType === 'numerical' 
+          ? (entries[todayIndex].value || 0) 
+          : (entries[todayIndex].minutes || 0)
+        
+        if (currentValue <= 0) return habit
+        
+        const newValue = currentValue - 1
+
+        if (newValue === 0) {
+          entries.splice(todayIndex, 1)
+        } else {
+          const newEntry: HabitEntry = {
+            date: today,
+            ...(habit.trackingType === 'numerical' ? { value: newValue } : {}),
+            ...(habit.trackingType === 'time' ? { minutes: newValue } : {})
+          }
+          entries[todayIndex] = newEntry
+        }
+
+        const newStreak = calculateStreak(entries, habit)
+
+        return { ...habit, entries, streak: newStreak }
+      })
+      return updated
+    })
   }
 
   const toggleBooleanHabit = (habitId: string) => {
@@ -573,38 +577,73 @@ export function Habits() {
                 const completed = isCompletedToday(habit)
                 const progress = getTodayProgress(habit)
                 const IconComponent = getIconComponent(habit.icon || 'Drop')
+                const todayEntry = getTodayEntry(habit)
+                const currentValue = todayEntry 
+                  ? (habit.trackingType === 'numerical' ? (todayEntry.value || 0) : (todayEntry.minutes || 0))
+                  : 0
+                
+                const iconColors = [
+                  'text-cyan-400',
+                  'text-blue-400', 
+                  'text-purple-400',
+                  'text-pink-400',
+                  'text-rose-400',
+                  'text-orange-400',
+                  'text-amber-400',
+                  'text-yellow-400',
+                  'text-lime-400',
+                  'text-green-400',
+                  'text-emerald-400',
+                  'text-teal-400',
+                ]
+                
+                const iconColor = iconColors[parseInt(habit.id) % iconColors.length]
                 
                 return (
                   <motion.div key={habit.id} variants={item}>
                     <Card className="relative glass-card hover:border-primary/30 transition-all duration-300">
-                      <div className="flex items-start gap-4">
-                        <button
-                          onClick={() => {
-                            if (habit.trackingType === 'boolean') {
-                              toggleBooleanHabit(habit.id)
-                            } else {
-                              openTrackDialog(habit)
-                            }
-                          }}
-                          className="flex-shrink-0 mt-1"
-                        >
-                          <motion.div
-                            whileTap={{ scale: 0.85 }}
-                            whileHover={{ scale: 1.1 }}
-                            className={cn(
-                              'w-16 h-16 rounded-2xl flex items-center justify-center border-2 transition-all',
-                              completed 
-                                ? 'glass-card border-primary bg-primary/20 shadow-lg' 
-                                : 'glass-morphic border-border/50'
-                            )}
+                      <div className="flex items-start gap-5">
+                        {habit.trackingType === 'boolean' ? (
+                          <button
+                            onClick={() => toggleBooleanHabit(habit.id)}
+                            className="flex-shrink-0 mt-1"
                           >
-                            <IconComponent
-                              size={32}
-                              weight={completed ? 'fill' : 'regular'}
-                              className={cn('transition-all', completed ? 'text-primary' : 'text-muted-foreground')}
-                            />
-                          </motion.div>
-                        </button>
+                            <motion.div
+                              whileTap={{ scale: 0.85 }}
+                              whileHover={{ scale: 1.05 }}
+                              className={cn(
+                                'w-20 h-20 rounded-2xl flex items-center justify-center border-2 transition-all',
+                                completed 
+                                  ? 'glass-card border-primary bg-primary/20 shadow-lg shadow-primary/30' 
+                                  : 'glass-morphic border-border/50'
+                              )}
+                            >
+                              <IconComponent
+                                size={44}
+                                weight={completed ? 'fill' : 'regular'}
+                                className={cn('transition-all', completed ? iconColor : 'text-muted-foreground')}
+                              />
+                            </motion.div>
+                          </button>
+                        ) : (
+                          <div className="flex-shrink-0 mt-1">
+                            <motion.div
+                              className={cn(
+                                'w-20 h-20 rounded-2xl flex items-center justify-center border-2 transition-all',
+                                completed 
+                                  ? 'glass-card border-primary bg-primary/20 shadow-lg shadow-primary/30' 
+                                  : 'glass-morphic border-border/50'
+                              )}
+                            >
+                              <IconComponent
+                                size={44}
+                                weight={completed ? 'fill' : 'regular'}
+                                className={cn('transition-all', completed ? iconColor : 'text-muted-foreground')}
+                              />
+                            </motion.div>
+                          </div>
+                        )}
+                        
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-3 mb-2">
                             <h3 className="font-semibold text-xl">{habit.name}</h3>
@@ -618,11 +657,39 @@ export function Habits() {
                           {habit.description && (
                             <p className="text-sm text-muted-foreground mb-3">{habit.description}</p>
                           )}
-                          {progress && (
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg glass-morphic border border-primary/30 text-primary text-sm font-semibold mb-3">
-                              {progress}
+                          
+                          {habit.trackingType !== 'boolean' && (
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass-card border border-primary/30 text-primary text-base font-bold">
+                                {currentValue} / {habit.target} {habit.unit || 'min'}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => decrementNumerical(habit.id)}
+                                  disabled={currentValue === 0}
+                                  className={cn(
+                                    "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                                    currentValue === 0 
+                                      ? "glass-morphic border border-border/30 text-muted-foreground/30 cursor-not-allowed"
+                                      : "glass-card border border-primary/30 text-primary hover:bg-primary/20"
+                                  )}
+                                >
+                                  <Minus size={20} weight="bold" />
+                                </motion.button>
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => incrementNumerical(habit.id)}
+                                  className="w-10 h-10 rounded-xl glass-card border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 transition-all shadow-lg shadow-primary/20"
+                                >
+                                  <Plus size={20} weight="bold" />
+                                </motion.button>
+                              </div>
                             </div>
                           )}
+                          
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
                               <Fire weight="fill" className="text-orange-500" size={20} />
@@ -652,71 +719,6 @@ export function Habits() {
           )}
         </>
       )}
-
-      <AnimatePresence>
-        {trackDialogOpen && selectedHabit && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
-              onClick={() => setTrackDialogOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50 p-4"
-            >
-              <Card className="glass-card border-primary/30 shadow-2xl p-8">
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <h3 className="text-2xl font-semibold mb-1">Track Progress</h3>
-                    <p className="text-muted-foreground">{selectedHabit.name}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setTrackDialogOpen(false)}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <X size={20} />
-                  </Button>
-                </div>
-                <div className="space-y-5">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                      {selectedHabit.trackingType === 'numerical' 
-                        ? `How many ${selectedHabit.unit} today?` 
-                        : 'How many minutes today?'}
-                    </label>
-                    <Input
-                      type="number"
-                      placeholder={selectedHabit.trackingType === 'numerical' 
-                        ? `Goal: ${selectedHabit.target} ${selectedHabit.unit}` 
-                        : `Goal: ${selectedHabit.target} min`}
-                      value={trackValue}
-                      onChange={(e) => setTrackValue(e.target.value)}
-                      autoFocus
-                      className="h-14 text-lg glass-morphic border-border/50 focus:border-primary"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          trackHabit()
-                        }
-                      }}
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                    <Button onClick={trackHabit} className="flex-1 h-12 shadow-lg shadow-primary/20">Save</Button>
-                    <Button variant="outline" onClick={() => setTrackDialogOpen(false)} className="h-12 glass-morphic">Cancel</Button>
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   )
 }

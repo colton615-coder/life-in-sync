@@ -9,13 +9,13 @@ import * as Icons from '@phosphor-icons/react'
 
 const iconCategories = {
   health: [
-    'Heart', 'HeartStraight', 'Drop', 'Activity', 'FirstAid', 'Heartbeat'
+    'Heart', 'Drop', 'Activity', 'Heartbeat', 'FirstAid'
   ],
   fitness: [
     'Barbell', 'PersonSimpleRun', 'Bicycle', 'Fire', 'Lightning', 'Target', 'Medal', 'Trophy'
   ],
   food: [
-    'Apple', 'Coffee', 'ForkKnife', 'Cookie', 'Pizza', 'Carrot'
+    'Apple', 'Coffee', 'ForkKnife', 'Cookie', 'Carrot'
   ],
   learning: [
     'Book', 'BookOpen', 'GraduationCap', 'Brain', 'Lightbulb', 'Certificate'
@@ -24,7 +24,7 @@ const iconCategories = {
     'FlowerLotus', 'Leaf', 'Moon', 'MoonStars', 'Sun', 'Sparkle'
   ],
   productivity: [
-    'CheckCircle', 'ListChecks', 'Briefcase', 'Calendar', 'Clock', 'Timer', 'Bell', 'Target'
+    'CheckCircle', 'ListChecks', 'Briefcase', 'Calendar', 'Clock', 'Timer', 'Bell'
   ],
   creative: [
     'PaintBrush', 'Palette', 'Camera', 'MusicNote', 'Microphone', 'Guitar'
