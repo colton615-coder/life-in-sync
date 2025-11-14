@@ -248,39 +248,26 @@ Return ONLY valid JSON with this exact structure:
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-        <Card>
-          <div className="flex items-center gap-3">
-            <Barbell size={32} weight="duotone" className="text-primary" />
-            <div>
-              <div className="text-3xl font-semibold">{(completedWorkouts || []).length}</div>
-              <div className="text-sm text-muted-foreground font-normal">Completed</div>
-            </div>
+      <Card className="glass-card border-primary/20 hover:border-primary/40 transition-all duration-300">
+        <div className="flex items-center justify-center gap-6">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-foreground">{(completedWorkouts || []).length}</div>
+            <div className="text-xs text-muted-foreground">Completed</div>
           </div>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3">
-            <Timer size={32} weight="duotone" className="text-accent" />
-            <div>
-              <div className="text-3xl font-semibold">
-                {Math.round((completedWorkouts || []).reduce((acc, w) => acc + w.totalDuration, 0) / 60)}
-              </div>
-              <div className="text-sm text-muted-foreground font-normal">Minutes</div>
+          <div className="h-12 w-px bg-border" />
+          <div className="text-center">
+            <div className="text-3xl font-bold text-foreground">
+              {Math.round((completedWorkouts || []).reduce((acc, w) => acc + w.totalDuration, 0) / 60)}
             </div>
+            <div className="text-xs text-muted-foreground">Minutes</div>
           </div>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3">
-            <Trophy size={32} weight="duotone" className="text-success" />
-            <div>
-              <div className="text-3xl font-semibold">{(prs || []).length}</div>
-              <div className="text-sm text-muted-foreground font-normal">Personal Records</div>
-            </div>
+          <div className="h-12 w-px bg-border" />
+          <div className="text-center">
+            <div className="text-3xl font-bold text-foreground">{(prs || []).length}</div>
+            <div className="text-xs text-muted-foreground">Records</div>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
 
       <div>
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">

@@ -402,16 +402,22 @@ CRITICAL RULES:
             className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4"
           >
             <Card className="glass-card border-primary/20 hover:border-primary/40 transition-all duration-300">
-              <div className="flex items-center gap-3 md:gap-4">
-                <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <Wallet size={26} weight="fill" className="text-primary md:w-8 md:h-8" />
-                </div>
-                <div>
-                  <div className="text-xs md:text-sm text-muted-foreground font-normal mb-0.5 md:mb-1">Total Spent</div>
-                  <div className="text-2xl md:text-4xl font-semibold tabular-nums bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+              <div className="flex items-center justify-center gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
                     ${totalSpent.toFixed(2)}
                   </div>
-                  <div className="text-[10px] md:text-xs text-muted-foreground font-normal mt-0.5">This month</div>
+                  <div className="text-xs text-muted-foreground">This Month</div>
+                </div>
+                <div className="h-12 w-px bg-border" />
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-foreground">{monthExpenses.length}</div>
+                  <div className="text-xs text-muted-foreground">Transactions</div>
+                </div>
+                <div className="h-12 w-px bg-border" />
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-foreground">{categoryData.length}</div>
+                  <div className="text-xs text-muted-foreground">Categories</div>
                 </div>
               </div>
             </Card>
