@@ -24,8 +24,8 @@ interface NavModule {
 }
 
 const modules: NavModule[] = [
-  { icon: House, label: 'Dashboard', id: 'dashboard', color: 'text-primary' },
-  { icon: CheckSquare, label: 'Habits', id: 'habits', color: 'text-accent' },
+  { icon: House, label: 'Dashboard', id: 'dashboard', color: 'text-cyan-400' },
+  { icon: CheckSquare, label: 'Habits', id: 'habits', color: 'text-green-400' },
   { icon: CurrencyDollar, label: 'Finance', id: 'finance', color: 'text-emerald-400' },
   { icon: ChartBar, label: 'Tasks', id: 'tasks', color: 'text-orange-400' },
   { icon: Barbell, label: 'Workouts', id: 'workouts', color: 'text-red-400' },
@@ -33,7 +33,7 @@ const modules: NavModule[] = [
   { icon: ShoppingCart, label: 'Shopping', id: 'shopping', color: 'text-blue-400' },
   { icon: CalendarDots, label: 'Calendar', id: 'calendar', color: 'text-pink-400' },
   { icon: LockKey, label: 'Vault', id: 'vault', color: 'text-yellow-400' },
-  { icon: Gear, label: 'Settings', id: 'settings', color: 'text-muted-foreground' },
+  { icon: Gear, label: 'Settings', id: 'settings', color: 'text-gray-400' },
 ]
 
 interface NavigationDrawerProps {
@@ -132,7 +132,7 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                       <Button
                         variant="ghost"
                         className={cn(
-                          'w-full justify-start gap-4 h-14 rounded-xl transition-all duration-200 group relative overflow-hidden',
+                          'w-full justify-start gap-3 h-12 rounded-lg transition-all duration-200 group relative overflow-hidden px-3',
                           isActive
                             ? 'bg-gradient-to-r from-primary/20 to-accent/20 text-foreground border border-primary/40 shadow-lg'
                             : 'text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent'
@@ -142,20 +142,23 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                         {isActive && (
                           <motion.div
                             layoutId="activeModule"
-                            className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl"
+                            className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg"
                             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                           />
                         )}
                         
-                        <div className="relative z-10 flex items-center gap-4 w-full">
+                        <div className="relative z-10 flex items-center gap-3 w-full">
                           <div className={cn(
-                            'transition-all duration-200',
-                            isActive ? module.color : 'text-muted-foreground group-hover:text-foreground'
+                            'transition-all duration-200 flex-shrink-0',
+                            module.color
                           )}>
                             <IconComponent 
-                              size={24} 
-                              weight={isActive ? 'fill' : 'regular'}
-                              className={isActive ? 'neon-glow' : ''}
+                              size={32} 
+                              weight={isActive ? 'fill' : 'duotone'}
+                              className={cn(
+                                'drop-shadow-[0_0_8px_currentColor]',
+                                isActive && 'animate-pulse-button'
+                              )}
                             />
                           </div>
                           <span className="font-semibold text-base flex-1 text-left">
