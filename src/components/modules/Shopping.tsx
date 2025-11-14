@@ -1,277 +1,252 @@
-import { useState, useMemo } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { ShoppingItem } from '@/lib/types'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
-import { Plus, ShoppingCart, Check, Archive } from '@phosphor-icons/react'
-import { AddShoppingItemDialog } from '@/components/shopping/AddShoppingItemDialog'
-import { EditShoppingItemDialog } from '@/components/shopping/EditShoppingItemDialog'
-import { ShoppingItemCard } from '@/components/shopping/ShoppingItemCard'
-import { ShoppingStats } from '@/components/shopping/ShoppingStats'
+import { PencilSimple, Trash, Plus, NotePencil } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 export function Shopping() {
   const [items, setItems] = useKV<ShoppingItem[]>('shopping-items', [])
-  const [addDialogOpen, setAddDialogOpen] = useState(false)
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null)
-  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active')
+  const [newItemName, setNewItemName] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingName, setEditingName] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+  const editInputRef = useRef<HTMLInputElement>(null)
 
-  const activeItems = useMemo(
-    () => (items || []).filter(item => !item.completed).sort((a, b) => {
-      const priorityOrder = { high: 0, medium: 1, low: 2 }
-      return priorityOrder[a.priority] - priorityOrder[b.priority]
-    }),
-    [items]
-  )
+  useEffect(() => {
+    if (editingId && editInputRef.current) {
+      editInputRef.current.focus()
+      editInputRef.current.select()
+    }
+  }, [editingId])
 
-  const completedItems = useMemo(
-    () => (items || []).filter(item => item.completed).sort((a, b) => 
-      new Date(b.completedAt || b.createdAt).getTime() - new Date(a.completedAt || a.createdAt).getTime()
-    ),
-    [items]
-  )
+  const handleAddItem = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newItemName.trim()) return
 
-  const handleAddItem = (item: Omit<ShoppingItem, 'id' | 'completed' | 'createdAt'>) => {
     const newItem: ShoppingItem = {
-      ...item,
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: newItemName.trim(),
       completed: false,
       createdAt: new Date().toISOString(),
     }
 
     setItems(current => [...(current || []), newItem])
-    toast.success('Item added', {
-      description: `${newItem.name} added to your shopping list`,
-    })
-  }
-
-  const handleEditItem = (updatedItem: ShoppingItem) => {
-    setItems(current =>
-      (current || []).map(item => (item.id === updatedItem.id ? updatedItem : item))
-    )
-    toast.success('Item updated', {
-      description: `${updatedItem.name} has been updated`,
-    })
+    setNewItemName('')
+    inputRef.current?.focus()
   }
 
   const handleToggleComplete = (itemId: string) => {
     setItems(current =>
-      (current || []).map(item => {
-        if (item.id === itemId) {
-          const isCompleting = !item.completed
-          return {
-            ...item,
-            completed: isCompleting,
-            completedAt: isCompleting ? new Date().toISOString() : undefined,
-          }
-        }
-        return item
-      })
+      (current || []).map(item =>
+        item.id === itemId ? { ...item, completed: !item.completed } : item
+      )
     )
+  }
 
-    const item = (items || []).find(i => i.id === itemId)
-    if (item) {
-      if (!item.completed) {
-        toast.success('Item checked off!', {
-          description: `${item.name} marked as purchased`,
-        })
-      } else {
-        toast.info('Item unchecked', {
-          description: `${item.name} moved back to shopping list`,
-        })
-      }
+  const handleStartEdit = (item: ShoppingItem) => {
+    setEditingId(item.id)
+    setEditingName(item.name)
+  }
+
+  const handleSaveEdit = () => {
+    if (!editingName.trim()) {
+      setEditingId(null)
+      return
     }
+
+    setItems(current =>
+      (current || []).map(item =>
+        item.id === editingId ? { ...item, name: editingName.trim() } : item
+      )
+    )
+    setEditingId(null)
+    setEditingName('')
+  }
+
+  const handleCancelEdit = () => {
+    setEditingId(null)
+    setEditingName('')
   }
 
   const handleDeleteItem = (itemId: string) => {
-    const item = (items || []).find(i => i.id === itemId)
     setItems(current => (current || []).filter(item => item.id !== itemId))
-    
-    if (item) {
-      toast.success('Item removed', {
-        description: `${item.name} deleted from your list`,
-      })
+  }
+
+  const handleEditKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSaveEdit()
+    } else if (e.key === 'Escape') {
+      handleCancelEdit()
     }
   }
 
-  const handleEditClick = (item: ShoppingItem) => {
-    setEditingItem(item)
-    setEditDialogOpen(true)
-  }
-
-  const handleClearCompleted = () => {
-    const count = completedItems.length
-    setItems(current => (current || []).filter(item => !item.completed))
-    toast.success('Completed items cleared', {
-      description: `Removed ${count} completed ${count === 1 ? 'item' : 'items'}`,
-    })
-  }
+  const activeItems = (items || []).filter(item => !item.completed)
+  const completedItems = (items || []).filter(item => item.completed)
+  const allItems = [...activeItems, ...completedItems]
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="max-w-2xl mx-auto space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="text-center space-y-2"
       >
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <div className="rounded-2xl bg-primary/10 p-3">
-              <ShoppingCart className="w-7 h-7 text-primary" weight="duotone" />
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-                Shopping List
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Organize your shopping with smart lists
-              </p>
-            </div>
+        <div className="flex items-center justify-center gap-3">
+          <div className="rounded-2xl bg-primary/10 p-3">
+            <NotePencil className="w-8 h-8 text-primary" weight="duotone" />
           </div>
-
-          <Button
-            onClick={() => setAddDialogOpen(true)}
-            size="lg"
-            className="gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            <Plus className="w-5 h-5" weight="bold" />
-            Add Item
-          </Button>
         </div>
+        <h1 className="text-4xl font-bold tracking-tight">Shopping List</h1>
+        <p className="text-muted-foreground">Simple. Clean. Effective.</p>
       </motion.div>
 
-      <ShoppingStats 
-        activeCount={activeItems.length}
-        completedCount={completedItems.length}
-        items={items || []}
-      />
-
-      <Card className="elevated-card p-1">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'active' | 'completed')}>
-          <div className="p-4 pb-0">
-            <TabsList className="grid w-full grid-cols-2 h-12">
-              <TabsTrigger value="active" className="gap-2 text-base">
-                <ShoppingCart className="w-4 h-4" weight="duotone" />
-                Active
-                {activeItems.length > 0 && (
-                  <Badge variant="secondary" className="ml-1">
-                    {activeItems.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="completed" className="gap-2 text-base">
-                <Archive className="w-4 h-4" weight="duotone" />
-                Completed
-                {completedItems.length > 0 && (
-                  <Badge variant="secondary" className="ml-1">
-                    {completedItems.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-            </TabsList>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="neumorphic rounded-3xl p-8 md:p-10 space-y-6"
+      >
+        <form onSubmit={handleAddItem} className="flex gap-3">
+          <div className="flex-1">
+            <Input
+              ref={inputRef}
+              value={newItemName}
+              onChange={(e) => setNewItemName(e.target.value)}
+              placeholder="Add an item..."
+              className="h-14 text-base neumorphic-inset border-0 focus-visible:ring-2 focus-visible:ring-primary/20"
+              autoFocus
+            />
           </div>
+          <Button
+            type="submit"
+            size="lg"
+            className="h-14 px-6 neumorphic-button gap-2 border-0 shadow-none"
+            disabled={!newItemName.trim()}
+          >
+            <Plus className="w-5 h-5" weight="bold" />
+            <span className="hidden sm:inline">Add</span>
+          </Button>
+        </form>
 
-          <TabsContent value="active" className="p-4 pt-6 space-y-3">
-            <AnimatePresence mode="popLayout">
-              {activeItems.length === 0 ? (
+        <div className="space-y-1">
+          <AnimatePresence mode="popLayout">
+            {allItems.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-center py-16 px-4"
+              >
+                <div className="rounded-full bg-muted/30 w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <NotePencil className="w-8 h-8 text-muted-foreground/50" weight="duotone" />
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  Your list is empty. Start adding items!
+                </p>
+              </motion.div>
+            ) : (
+              allItems.map((item, index) => (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="text-center py-16 px-4"
+                  key={item.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20, height: 0 }}
+                  transition={{
+                    duration: 0.2,
+                    delay: index * 0.02,
+                  }}
+                  layout
+                  className="group"
                 >
-                  <div className="rounded-full bg-muted/50 w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                    <ShoppingCart className="w-10 h-10 text-muted-foreground" weight="duotone" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">No items yet</h3>
-                  <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                    Start building your shopping list by adding your first item
-                  </p>
-                  <Button onClick={() => setAddDialogOpen(true)} className="gap-2">
-                    <Plus className="w-4 h-4" weight="bold" />
-                    Add Your First Item
-                  </Button>
-                </motion.div>
-              ) : (
-                activeItems.map((item, index) => (
-                  <ShoppingItemCard
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    onToggleComplete={handleToggleComplete}
-                    onEdit={handleEditClick}
-                    onDelete={handleDeleteItem}
-                  />
-                ))
-              )}
-            </AnimatePresence>
-          </TabsContent>
+                  <div
+                    className={cn(
+                      'flex items-center gap-4 p-4 rounded-2xl transition-all duration-200',
+                      'hover:bg-muted/30',
+                      item.completed && 'opacity-60'
+                    )}
+                  >
+                    <motion.div
+                      whileTap={{ scale: 0.85 }}
+                      transition={{ duration: 0.1 }}
+                    >
+                      <Checkbox
+                        id={`item-${item.id}`}
+                        checked={item.completed}
+                        onCheckedChange={() => handleToggleComplete(item.id)}
+                        className="w-6 h-6 rounded-lg data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                      />
+                    </motion.div>
 
-          <TabsContent value="completed" className="p-4 pt-6 space-y-3">
-            {completedItems.length > 0 && (
-              <div className="flex justify-end mb-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClearCompleted}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  Clear All Completed
-                </Button>
-              </div>
+                    {editingId === item.id ? (
+                      <div className="flex-1 flex gap-2">
+                        <Input
+                          ref={editInputRef}
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onBlur={handleSaveEdit}
+                          onKeyDown={handleEditKeyDown}
+                          className="h-10 text-base neumorphic-inset border-0"
+                        />
+                      </div>
+                    ) : (
+                      <label
+                        htmlFor={`item-${item.id}`}
+                        className={cn(
+                          'flex-1 text-base cursor-pointer select-none transition-all duration-200',
+                          item.completed && 'line-through text-muted-foreground'
+                        )}
+                      >
+                        {item.name}
+                      </label>
+                    )}
+
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      {editingId !== item.id && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleStartEdit(item)}
+                            className="h-9 w-9 hover:bg-primary/10 hover:text-primary"
+                          >
+                            <PencilSimple className="w-4 h-4" weight="duotone" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteItem(item.id)}
+                            className="h-9 w-9 hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <Trash className="w-4 h-4" weight="duotone" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))
             )}
-            
-            <AnimatePresence mode="popLayout">
-              {completedItems.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="text-center py-16 px-4"
-                >
-                  <div className="rounded-full bg-muted/50 w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                    <Check className="w-10 h-10 text-muted-foreground" weight="duotone" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">No completed items</h3>
-                  <p className="text-muted-foreground max-w-sm mx-auto">
-                    Items you check off will appear here
-                  </p>
-                </motion.div>
-              ) : (
-                completedItems.map((item, index) => (
-                  <ShoppingItemCard
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    onToggleComplete={handleToggleComplete}
-                    onEdit={handleEditClick}
-                    onDelete={handleDeleteItem}
-                  />
-                ))
-              )}
-            </AnimatePresence>
-          </TabsContent>
-        </Tabs>
-      </Card>
+          </AnimatePresence>
+        </div>
 
-      <AddShoppingItemDialog
-        open={addDialogOpen}
-        onOpenChange={setAddDialogOpen}
-        onAdd={handleAddItem}
-      />
-
-      {editingItem && (
-        <EditShoppingItemDialog
-          open={editDialogOpen}
-          onOpenChange={setEditDialogOpen}
-          item={editingItem}
-          onEdit={handleEditItem}
-        />
-      )}
+        {allItems.length > 0 && (
+          <div className="pt-4 border-t border-border/50">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                {activeItems.length} active {activeItems.length === 1 ? 'item' : 'items'}
+              </span>
+              <span>
+                {completedItems.length} completed
+              </span>
+            </div>
+          </div>
+        )}
+      </motion.div>
     </div>
   )
 }

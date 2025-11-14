@@ -187,12 +187,6 @@ export interface PersonalRecord {
 export interface ShoppingItem {
   id: string
   name: string
-  quantity: number
-  unit?: string
-  category: string
-  notes?: string
   completed: boolean
-  completedAt?: string
   createdAt: string
-  priority: 'low' | 'medium' | 'high'
 }
