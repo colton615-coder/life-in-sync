@@ -17,6 +17,7 @@ import { AddEventDialog } from '@/components/calendar/AddEventDialog'
 import { EventDetailsDialog } from '@/components/calendar/EventDetailsDialog'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { StatCard } from '@/components/StatCard'
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -155,25 +156,20 @@ export function Calendar() {
         </div>
 
         {totalEvents > 0 && (
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="flex items-center justify-center gap-6 pt-2"
-          >
-            <div className="text-center">
-              <div className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
-                {totalEvents}
-              </div>
-              <div className="text-xs text-muted-foreground">Total Events</div>
-            </div>
-            <div className="h-12 w-px bg-border" />
-            <div className="text-center">
-              <div className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                {upcomingEvents}
-              </div>
-              <div className="text-xs text-muted-foreground">Upcoming</div>
-            </div>
-          </motion.div>
+          <StatCard 
+            stats={[
+              { 
+                value: totalEvents, 
+                label: 'Total Events',
+                gradient: 'from-purple-500 to-pink-500'
+              },
+              { 
+                value: upcomingEvents, 
+                label: 'Upcoming',
+                gradient: 'from-blue-500 to-cyan-500'
+              }
+            ]}
+          />
         )}
       </motion.div>
 
