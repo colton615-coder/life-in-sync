@@ -699,7 +699,7 @@ export function Tasks() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => deleteTask(task.id)}
-                            className="w-10 h-10 rounded-xl flex items-center justify-center neumorphic-button text-muted-foreground hover:text-destructive transition-colors"
+                            className="w-10 h-10 rounded-xl flex items-center justify-center neumorphic-button text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                           >
                             <Trash size={18} weight="bold" />
                           </motion.button>

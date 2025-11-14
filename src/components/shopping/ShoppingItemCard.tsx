@@ -182,7 +182,7 @@ export function ShoppingItemCard({
               variant="ghost"
               size="icon"
               onClick={() => onDelete(item.id)}
-              className="h-9 w-9 hover:bg-destructive/10 hover:text-destructive"
+              className="h-9 w-9 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 transition-colors"
             >
               <Trash className="w-4 h-4" weight="duotone" />
             </Button>

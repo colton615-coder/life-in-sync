@@ -350,7 +350,7 @@ export function Shopping() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => handleDeleteItem(item.id)}
-                                  className="h-10 w-10 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 rounded-xl"
+                                  className="h-10 w-10 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 rounded-xl transition-colors"
                                 >
                                   <Trash className="w-5 h-5" weight="duotone" />
                                 </Button>
@@ -411,7 +411,7 @@ export function Shopping() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => handleDeleteItem(item.id)}
-                                  className="h-10 w-10 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 rounded-xl"
+                                  className="h-10 w-10 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 rounded-xl transition-colors"
                                 >
                                   <Trash className="w-5 h-5" weight="duotone" />
                                 </Button>

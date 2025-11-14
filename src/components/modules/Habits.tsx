@@ -754,7 +754,7 @@ export function Habits() {
                           variant="ghost"
                           size="icon"
                           onClick={() => deleteHabit(habit.id)}
-                          className="flex-shrink-0 text-muted-foreground hover:text-destructive w-7 h-7 md:w-9 md:h-9"
+                          className="flex-shrink-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors w-7 h-7 md:w-9 md:h-9"
                         >
                           <Trash size={14} className="md:hidden" />
                           <Trash size={18} className="hidden md:block" />

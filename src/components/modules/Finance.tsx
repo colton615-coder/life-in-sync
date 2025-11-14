@@ -539,7 +539,7 @@ CRITICAL RULES:
                               variant="ghost"
                               size="icon"
                               onClick={() => deleteExpense(expense.id)}
-                              className="flex-shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors w-8 h-8"
+                              className="flex-shrink-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors w-8 h-8"
                             >
                               <Trash size={16} className="md:w-5 md:h-5" />
                             </Button>
