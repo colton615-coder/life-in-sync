@@ -9,7 +9,6 @@ import { NavigationDrawer } from '@/components/NavigationDrawer'
 import { NavigationButton } from '@/components/NavigationButton'
 import { AbstractBackground } from '@/components/AbstractBackground'
 import { LoadingScreen } from '@/components/LoadingScreen'
-import { DailyAffirmation } from '@/components/DailyAffirmation'
 import { Button } from '@/components/ui/button'
 import { Plus } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
@@ -165,10 +164,9 @@ function App() {
           <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
             Habit Matrix
           </h1>
-          <p className="text-muted-foreground text-lg md:text-xl mb-8">
+          <p className="text-muted-foreground text-lg md:text-xl">
             Track your progress with precision and style
           </p>
-          <DailyAffirmation />
         </motion.header>
 
         <AnimatePresence mode="wait">

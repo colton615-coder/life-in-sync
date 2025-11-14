@@ -1,5 +1,6 @@
 import { StatCard } from '../StatCard'
 import { Card } from '../Card'
+import { DailyAffirmation } from '../DailyAffirmation'
 import { 
   Fire, 
   CurrencyDollar, 
@@ -55,7 +56,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
         <h1 className="text-4xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-2 text-[15px]">Your life at a glance</p>
+        <p className="text-muted-foreground mt-2 text-[15px] mb-6">Your life at a glance</p>
+        <DailyAffirmation />
       </div>
 
       <motion.div 
