@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { motion } from 'framer-motion'
 import { AIButton } from '@/components/AIButton'
 import { StatCard } from '@/components/StatCard'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 type WorkoutStage = 'planning' | 'active' | 'summary'
 
@@ -208,10 +209,18 @@ Return ONLY valid JSON with this exact structure:
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <AIButton>
-              <span className="hidden sm:inline">Generate Workout</span>
-              <span className="sm:hidden">Generate</span>
-            </AIButton>
+            <motion.div
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Button 
+                className="bg-accent-vibrant hover:bg-accent-vibrant/90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Sparkle weight="fill" />
+                <span className="hidden sm:inline">⚡️ Generate</span>
+                <span className="sm:hidden">⚡️</span>
+              </Button>
+            </motion.div>
           </DialogTrigger>
           <DialogContent className="neumorphic">
             <DialogHeader>
@@ -254,111 +263,138 @@ Return ONLY valid JSON with this exact structure:
           stats={[
             { value: (completedWorkouts || []).length, label: 'Completed' },
             { value: Math.round((completedWorkouts || []).reduce((acc, w) => acc + w.totalDuration, 0) / 60), label: 'Minutes' },
-            { value: (prs || []).length, label: 'Records' }
+            { value: (prs || []).length, label: 'Personal Records', icon: <Barbell weight="duotone" className="text-primary" size={20} /> }
           ]}
         />
       </Card>
 
-      <div>
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Sparkle weight="duotone" className="text-primary" />
-          Generated Workouts
-        </h2>
-        {!workoutPlans || workoutPlans.length === 0 ? (
-          <Card className="text-center py-12 md:py-12">
-            <Sparkle size={40} weight="duotone" className="text-primary mx-auto mb-3 md:mb-4 md:w-12 md:h-12" />
-            <h3 className="font-semibold text-base md:text-lg mb-1 md:mb-2">No workouts yet</h3>
-            <p className="text-muted-foreground text-sm md:text-base mb-3 md:mb-4">Generate your first AI-powered workout!</p>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setDialogOpen(true)}
-              className="inline-flex items-center gap-2 px-6 md:px-8 h-14 md:h-16 rounded-2xl font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
-            >
-              <Sparkle size={22} weight="fill" className="md:w-6 md:h-6" />
-              Generate Workout
-            </motion.button>
-          </Card>
-        ) : (
-          <div className="grid gap-3 md:gap-4">
-            {[...(workoutPlans || [])].reverse().map((workout) => (
-              <Card key={workout.id} className="elevated-card">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-start gap-2 mb-2">
-                      <h3 className="font-semibold text-lg">{workout.name}</h3>
-                      <Badge variant="secondary" className="text-xs">
-                        {workout.difficulty}
+      <Tabs defaultValue="workouts" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsTrigger value="workouts">Workouts</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="workouts" className="space-y-4">
+          <div>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Sparkle weight="duotone" className="text-primary" />
+              Generated Workouts
+            </h2>
+            {!workoutPlans || workoutPlans.length === 0 ? (
+              <Card className="text-center py-12 md:py-16">
+                <div className="max-w-md mx-auto space-y-4">
+                  <Sparkle size={48} weight="duotone" className="text-primary mx-auto" />
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Ready to get started?</h3>
+                    <p className="text-muted-foreground text-base">
+                      Tap "⚡️ Generate" to create your first AI workout!
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            ) : (
+              <div className="grid gap-3 md:gap-4">
+                {[...(workoutPlans || [])].reverse().map((workout) => (
+                  <Card key={workout.id} className="elevated-card">
+                    <div className="space-y-4">
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-start gap-2 mb-2">
+                            <h3 className="font-semibold text-lg">{workout.name}</h3>
+                            <Badge variant="secondary" className="text-xs">
+                              {workout.difficulty}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {workout.focus} • {workout.exercises.length} exercises • ~{workout.estimatedDuration} min
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => startWorkout(workout)}
+                            className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-9 md:h-10 text-sm shadow-lg"
+                          >
+                            <Play weight="fill" />
+                            Start
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteWorkout(workout.id)}
+                            className="hover:bg-destructive/10 hover:text-destructive h-9 w-9 md:h-10 md:w-10"
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-muted-foreground">Exercises</h4>
+                        <div className="space-y-1.5">
+                          {workout.exercises.map((exercise, idx) => (
+                            <div key={idx} className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                              <span className="text-sm font-medium">{exercise.name}</span>
+                              <span className="text-sm text-muted-foreground">
+                                {exercise.type === 'reps' 
+                                  ? `${exercise.sets} × ${exercise.reps} reps`
+                                  : `${exercise.duration}s`
+                                }
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-4">
+          <div>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <ClockCounterClockwise weight="duotone" className="text-accent" />
+              Workout History
+            </h2>
+            {!completedWorkouts || completedWorkouts.length === 0 ? (
+              <Card className="text-center py-12 md:py-16">
+                <div className="max-w-md mx-auto space-y-4">
+                  <ClockCounterClockwise size={48} weight="duotone" className="text-muted-foreground mx-auto" />
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">No workout history yet</h3>
+                    <p className="text-muted-foreground text-base">
+                      Complete your first workout to see it here
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            ) : (
+              <div className="grid gap-3 md:gap-4">
+                {[...(completedWorkouts || [])].reverse().map((workout) => (
+                  <Card key={workout.id} className="elevated-card">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold">{workout.workoutName}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {workout.date} • {Math.ceil(workout.totalDuration / 60)} min • {workout.calories} cal
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Completed {workout.completedExercises}/{workout.totalExercises} exercises
+                        </p>
+                      </div>
+                      <Badge variant="secondary">
+                        {Math.round((workout.completedExercises / workout.totalExercises) * 100)}%
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {workout.focus} • {workout.exercises.length} exercises • ~{workout.estimatedDuration} min
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {workout.exercises.slice(0, 3).map((exercise, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
-                          {exercise.name}
-                        </Badge>
-                      ))}
-                      {workout.exercises.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{workout.exercises.length - 3} more
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => startWorkout(workout)}
-                      className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-9 md:h-10 text-sm shadow-lg"
-                    >
-                      <Play weight="fill" />
-                      Start
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteWorkout(workout.id)}
-                      className="hover:bg-destructive/10 hover:text-destructive h-9 w-9 md:h-10 md:w-10"
-                    >
-                      ×
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
-
-      {completedWorkouts && completedWorkouts.length > 0 && (
-        <div>
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <ClockCounterClockwise weight="duotone" className="text-accent" />
-            Recent Activity
-          </h2>
-          <div className="grid gap-3 md:gap-4">
-            {[...(completedWorkouts || [])].reverse().slice(0, 5).map((workout) => (
-              <Card key={workout.id} className="elevated-card">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold">{workout.workoutName}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {workout.date} • {Math.ceil(workout.totalDuration / 60)} min • {workout.calories} cal
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Completed {workout.completedExercises}/{workout.totalExercises} exercises
-                    </p>
-                  </div>
-                  <Badge variant="secondary">
-                    {Math.round((workout.completedExercises / workout.totalExercises) * 100)}%
-                  </Badge>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

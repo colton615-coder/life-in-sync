@@ -7,6 +7,7 @@ interface Stat {
   label: string
   gradient?: string
   textColor?: string
+  icon?: ReactNode
 }
 
 interface StatCardProps {
@@ -24,13 +25,16 @@ export function StatCard({ stats, className }: StatCardProps) {
       {stats.map((stat, index) => (
         <div key={index} className="flex items-center gap-6">
           <div className="text-center">
-            <div className={cn(
-              "text-3xl font-bold",
-              stat.gradient 
-                ? `bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`
-                : stat.textColor || "text-foreground"
-            )}>
-              {stat.value}
+            <div className="flex items-center justify-center gap-2 mb-1">
+              {stat.icon && <div className="flex-shrink-0">{stat.icon}</div>}
+              <div className={cn(
+                "text-3xl font-bold",
+                stat.gradient 
+                  ? `bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`
+                  : stat.textColor || "text-foreground"
+              )}>
+                {stat.value}
+              </div>
             </div>
             <div className="text-xs text-muted-foreground">{stat.label}</div>
           </div>
