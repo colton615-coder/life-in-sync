@@ -87,7 +87,9 @@ export function Habits() {
 
   const incrementNumerical = (habitId: string) => {
     setHabits((current) => {
-      const updated = (current || []).map(habit => {
+      if (!current) return []
+      
+      const updated = current.map(habit => {
         if (habit.id !== habitId) return habit
 
         const entries = [...(habit.entries || [])]
@@ -135,7 +137,9 @@ export function Habits() {
 
   const decrementNumerical = (habitId: string) => {
     setHabits((current) => {
-      const updated = (current || []).map(habit => {
+      if (!current) return []
+      
+      const updated = current.map(habit => {
         if (habit.id !== habitId) return habit
 
         const entries = [...(habit.entries || [])]
@@ -172,7 +176,9 @@ export function Habits() {
 
   const toggleBooleanHabit = (habitId: string) => {
     setHabits((current) => {
-      const updated = (current || []).map(habit => {
+      if (!current) return []
+      
+      const updated = current.map(habit => {
         if (habit.id !== habitId || habit.trackingType !== 'boolean') return habit
 
         const entries = [...(habit.entries || [])]
@@ -237,7 +243,7 @@ export function Habits() {
   }
 
   const deleteHabit = (habitId: string) => {
-    setHabits((current) => (current || []).filter(h => h.id !== habitId))
+    setHabits((current) => current ? current.filter(h => h.id !== habitId) : [])
     toast.success('Habit removed')
   }
 
