@@ -15,7 +15,6 @@ import {
   X
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
-import { ThemeToggle } from '@/components/ThemeToggle'
 
 interface NavModule {
   icon: any
@@ -85,32 +84,23 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                   >
                     Navigation
                   </motion.h2>
-                  <div className="flex items-center gap-1 md:gap-2">
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.1 }}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.1 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={onClose}
+                      className="rounded-full hover:bg-destructive/20 hover:text-destructive h-8 w-8 md:h-10 md:w-10"
                     >
-                      <ThemeToggle />
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.1 }}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onClose}
-                        className="rounded-full hover:bg-destructive/20 hover:text-destructive h-8 w-8 md:h-10 md:w-10"
-                      >
-                        <X size={20} weight="bold" className="md:hidden" />
-                        <X size={24} weight="bold" className="hidden md:block" />
-                      </Button>
-                    </motion.div>
-                  </div>
+                      <X size={20} weight="bold" className="md:hidden" />
+                      <X size={24} weight="bold" className="hidden md:block" />
+                    </Button>
+                  </motion.div>
                 </div>
                 
                 <motion.p 
