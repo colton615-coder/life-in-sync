@@ -78,7 +78,27 @@ Return ONLY valid JSON with this exact structure:
 }`
 
       const response = await window.spark.llm(promptText, 'gpt-4o', true)
-      const data = JSON.parse(response)
+      
+      if (!response || typeof response !== 'string') {
+        throw new Error('Invalid response from AI service')
+      }
+
+      let data
+      try {
+        data = JSON.parse(response)
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError, 'Response:', response)
+        throw new Error('Failed to parse AI response')
+      }
+
+      if (!data.workoutPlan || !data.workoutPlan.exercises || !Array.isArray(data.workoutPlan.exercises)) {
+        console.error('Invalid workout plan structure:', data)
+        throw new Error('AI returned invalid workout structure')
+      }
+
+      if (data.workoutPlan.exercises.length === 0) {
+        throw new Error('AI returned empty workout plan')
+      }
 
       const totalDuration = data.workoutPlan.exercises.reduce((acc: number, ex: any) => {
         if (ex.type === 'time') return acc + (ex.duration || 0)
@@ -88,8 +108,8 @@ Return ONLY valid JSON with this exact structure:
 
       const workout: WorkoutPlan = {
         id: Date.now().toString(),
-        name: data.workoutPlan.name,
-        focus: data.workoutPlan.focus,
+        name: data.workoutPlan.name || 'Custom Workout',
+        focus: data.workoutPlan.focus || 'General Fitness',
         exercises: data.workoutPlan.exercises,
         estimatedDuration: Math.ceil(totalDuration / 60),
         difficulty: data.workoutPlan.difficulty || 'intermediate',
@@ -102,7 +122,10 @@ Return ONLY valid JSON with this exact structure:
       toast.success('Workout generated!')
     } catch (error) {
       console.error('Workout generation error:', error)
-      toast.error('Failed to generate workout')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate workout'
+      toast.error(errorMessage, {
+        description: 'Please try again or rephrase your request'
+      })
     } finally {
       setGenerating(false)
     }

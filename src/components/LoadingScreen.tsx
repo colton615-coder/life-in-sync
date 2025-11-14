@@ -40,7 +40,7 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
           return
         }
 
-        const promptText = `Generate a single inspirational quote or Bible verse for daily motivation. Return the result as valid JSON in the following format:
+        const promptText = window.spark.llmPrompt`Generate a single inspirational quote or Bible verse for daily motivation. Return the result as valid JSON in the following format:
 {
   "text": "the quote or verse text",
   "author": "author name or Bible reference"
@@ -48,7 +48,18 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
 Keep the text under 120 characters. Make it profound and uplifting.`
         
         const response = await window.spark.llm(promptText, "gpt-4o-mini", true)
-        const data = JSON.parse(response)
+        
+        if (!response || typeof response !== 'string') {
+          throw new Error('Invalid response from AI service')
+        }
+
+        let data
+        try {
+          data = JSON.parse(response)
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError)
+          throw new Error('Failed to parse affirmation')
+        }
         
         if (data.text && data.author) {
           const newAffirmation: DailyAffirmation = {
@@ -58,6 +69,8 @@ Keep the text under 120 characters. Make it profound and uplifting.`
           }
           await window.spark.kv.set('daily-affirmation', newAffirmation)
           setAffirmation({ text: data.text, author: data.author })
+        } else {
+          throw new Error('Invalid affirmation structure')
         }
       } catch (error) {
         console.error('Failed to load affirmation:', error)

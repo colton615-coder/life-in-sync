@@ -184,28 +184,43 @@ CRITICAL RULES:
 8. Ensure the budget is balanced and achievable`
 
       const response = await window.spark.llm(promptText, 'gpt-4o', true)
-      const parsed = JSON.parse(response)
       
-      if (parsed.budget) {
-        const budget: DetailedBudget = {
-          id: Date.now().toString(),
-          profileId: profile.createdAt,
-          totalIncome: totalIncome,
-          ...parsed.budget,
-          createdAt: new Date().toISOString()
-        }
-        
-        setDetailedBudget(budget)
-        setActiveTab('budget')
-        toast.success('Your personalized budget is ready!', {
-          description: 'Review your AI-generated financial plan below'
-        })
-      } else {
-        throw new Error('Invalid response format')
+      if (!response || typeof response !== 'string') {
+        throw new Error('Invalid response from AI service')
       }
+
+      let parsed
+      try {
+        parsed = JSON.parse(response)
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError, 'Response:', response)
+        throw new Error('Failed to parse AI response')
+      }
+      
+      if (!parsed.budget || !parsed.budget.allocations) {
+        console.error('Invalid budget structure:', parsed)
+        throw new Error('AI returned invalid budget structure')
+      }
+
+      const budget: DetailedBudget = {
+        id: Date.now().toString(),
+        profileId: profile.createdAt,
+        totalIncome: totalIncome,
+        ...parsed.budget,
+        createdAt: new Date().toISOString()
+      }
+      
+      setDetailedBudget(budget)
+      setActiveTab('budget')
+      toast.success('Your personalized budget is ready!', {
+        description: 'Review your AI-generated financial plan below'
+      })
     } catch (error) {
       console.error('Budget generation error:', error)
-      toast.error('Failed to generate budget. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate budget'
+      toast.error(errorMessage, {
+        description: 'Please try again or adjust your profile details'
+      })
     } finally {
       setIsGeneratingBudget(false)
     }
