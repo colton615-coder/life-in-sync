@@ -54,6 +54,13 @@ A visual habit tracking application where users set daily goals (like drinking 8
 - **Progression**: User completes item → Completion timestamp recorded → Item moved to completed list → Stats updated in real-time → Analytics data accumulated → User can filter by completion status and view statistics
 - **Success criteria**: All modules use consistent completion tracking, active/completed items properly separated, statistics accurate, completion data persists, filters work correctly, analytics provide actionable insights
 
+### AI Financial Advisor Interview & Budget Generation
+- **Functionality**: Multi-step interview process where an AI financial advisor asks comprehensive questions about income, housing, debt, goals, and spending habits, then generates a detailed, personalized budget plan
+- **Purpose**: Provide in-depth financial planning through conversational AI guidance, creating optimized budget allocations based on user's complete financial picture
+- **Trigger**: User navigates to Finance module → AI Financial Advisor tab
+- **Progression**: User starts interview → Answer 5 step questionnaire covering income, housing, debt, goals, and spending habits → AI analyzes complete profile → Generates detailed budget with category allocations → Shows personalized recommendations with reasoning → Provides savings strategy → Offers debt payoff plan (if applicable) → Displays actionable steps
+- **Success criteria**: Interview feels conversational and thorough, all financial factors considered, budget totals balance to income, recommendations are specific and practical, AI reasoning is clear and helpful, budget persists for future reference, user can restart process anytime
+
 ## Edge Case Handling
 - **Empty States**: Show welcoming prompt "Start your first habit!" with animated icon when no habits exist
 - **Goal Already Complete**: Show success state when daily goal is reached; icons remain clickable to adjust progress

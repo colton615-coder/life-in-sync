@@ -62,6 +62,71 @@ export interface Budget {
   spent: number
 }
 
+export interface FinancialProfile {
+  monthlyIncome: number
+  hasPartner: boolean
+  partnerIncome?: number
+  dependents: number
+  location: string
+  housingType: 'rent' | 'own' | 'mortgage'
+  monthlyHousingCost: number
+  hasDebt: boolean
+  debtTypes?: string[]
+  totalDebtAmount?: number
+  monthlyDebtPayment?: number
+  financialGoals: string[]
+  riskTolerance: 'conservative' | 'moderate' | 'aggressive'
+  savingsGoal?: number
+  emergencyFundMonths?: number
+  hasRetirement: boolean
+  currentSavings?: number
+  spendingHabits: string
+  majorExpenses?: string
+  concerns?: string
+  createdAt: string
+}
+
+export interface DetailedBudget {
+  id: string
+  profileId: string
+  totalIncome: number
+  allocations: {
+    housing: number
+    utilities: number
+    food: number
+    transportation: number
+    insurance: number
+    healthcare: number
+    debtPayment: number
+    savings: number
+    retirement: number
+    entertainment: number
+    personal: number
+    miscellaneous: number
+  }
+  recommendations: {
+    category: string
+    amount: number
+    percentage: number
+    reasoning: string
+    tips: string[]
+  }[]
+  savingsStrategy: {
+    emergencyFund: number
+    shortTermSavings: number
+    longTermSavings: number
+    timeline: string
+  }
+  debtStrategy?: {
+    payoffPlan: string
+    monthlyPayment: number
+    estimatedPayoffDate: string
+    tips: string[]
+  }
+  actionItems: string[]
+  createdAt: string
+}
+
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'

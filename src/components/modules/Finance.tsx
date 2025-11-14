@@ -4,16 +4,17 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, CurrencyDollar, Trash, ChartPie, PencilSimple } from '@phosphor-icons/react'
+import { Plus, CurrencyDollar, Trash, ChartPie, PencilSimple, Sparkle } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
-import { Expense, Budget } from '@/lib/types'
+import { Expense, FinancialProfile, DetailedBudget } from '@/lib/types'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 import { motion } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
 import { EditExpenseDialog } from '@/components/EditExpenseDialog'
-import { AIBudgetGenerator } from '@/components/AIBudgetGenerator'
+import { FinancialAdvisorInterview } from '@/components/FinancialAdvisorInterview'
+import { DetailedBudgetDisplay } from '@/components/DetailedBudgetDisplay'
 import { TabGroup } from '@/components/TabGroup'
 
 const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Other']
@@ -21,11 +22,13 @@ const COLORS = ['#3b82f6', '#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444'
 
 export function Finance() {
   const [expenses, setExpenses] = useKV<Expense[]>('expenses', [])
-  const [budgets] = useKV<Budget[]>('budgets', [])
+  const [financialProfile, setFinancialProfile] = useKV<FinancialProfile | null>('financial-profile', null)
+  const [detailedBudget, setDetailedBudget] = useKV<DetailedBudget | null>('detailed-budget', null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
   const [activeTab, setActiveTab] = useState('expenses')
+  const [isGeneratingBudget, setIsGeneratingBudget] = useState(false)
   const [newExpense, setNewExpense] = useState({
     amount: '',
     category: 'Food',
@@ -69,6 +72,139 @@ export function Finance() {
   const openEditDialog = (expense: Expense) => {
     setSelectedExpense(expense)
     setEditDialogOpen(true)
+  }
+
+  const handleProfileComplete = async (profile: FinancialProfile) => {
+    setFinancialProfile(profile)
+    setIsGeneratingBudget(true)
+    
+    try {
+      const totalIncome = profile.monthlyIncome + (profile.partnerIncome || 0)
+      
+      const promptText = `You are an expert financial advisor. Based on the following detailed financial profile, create a comprehensive, personalized budget plan.
+
+FINANCIAL PROFILE:
+- Total Monthly Income: $${totalIncome}
+- Location: ${profile.location}
+- Dependents: ${profile.dependents}
+- Housing: ${profile.housingType} ($${profile.monthlyHousingCost}/month)
+- Has Debt: ${profile.hasDebt ? 'Yes' : 'No'}
+${profile.hasDebt ? `- Debt Types: ${profile.debtTypes?.join(', ')}
+- Total Debt: $${profile.totalDebtAmount}
+- Current Monthly Payment: $${profile.monthlyDebtPayment}` : ''}
+- Financial Goals: ${profile.financialGoals.join(', ')}
+- Risk Tolerance: ${profile.riskTolerance}
+- Emergency Fund Goal: ${profile.emergencyFundMonths} months
+- Current Savings: $${profile.currentSavings || 0}
+- Has Retirement: ${profile.hasRetirement ? 'Yes' : 'No'}
+- Spending Habits: ${profile.spendingHabits}
+${profile.majorExpenses ? `- Upcoming Expenses: ${profile.majorExpenses}` : ''}
+${profile.concerns ? `- Concerns: ${profile.concerns}` : ''}
+
+Create a detailed budget allocation for ALL of these categories:
+- housing: Monthly housing cost (rent/mortgage)
+- utilities: Gas, electric, water, internet, phone
+- food: Groceries and dining out
+- transportation: Car payment, insurance, gas, maintenance, public transit
+- insurance: Health, life, disability (non-auto)
+- healthcare: Medical expenses, prescriptions, copays
+- debtPayment: Minimum debt payments + extra toward high-interest debt
+- savings: Emergency fund and short-term savings
+- retirement: 401k, IRA, or other retirement contributions
+- entertainment: Streaming, hobbies, activities, going out
+- personal: Clothing, haircuts, personal care
+- miscellaneous: Everything else
+
+RETURN ONLY VALID JSON (no markdown, no code blocks) in this EXACT format:
+{
+  "budget": {
+    "allocations": {
+      "housing": 1200,
+      "utilities": 150,
+      "food": 500,
+      "transportation": 400,
+      "insurance": 200,
+      "healthcare": 150,
+      "debtPayment": 300,
+      "savings": 600,
+      "retirement": 400,
+      "entertainment": 200,
+      "personal": 100,
+      "miscellaneous": 100
+    },
+    "recommendations": [
+      {
+        "category": "Category Name",
+        "amount": 500,
+        "percentage": 15,
+        "reasoning": "Detailed explanation of why this allocation makes sense",
+        "tips": ["Specific actionable tip 1", "Specific actionable tip 2"]
+      }
+    ],
+    "savingsStrategy": {
+      "emergencyFund": 500,
+      "shortTermSavings": 200,
+      "longTermSavings": 300,
+      "timeline": "Detailed timeline with milestones"
+    },
+    ${profile.hasDebt ? `"debtStrategy": {
+      "payoffPlan": "Detailed strategy (avalanche/snowball method)",
+      "monthlyPayment": 350,
+      "estimatedPayoffDate": "Month Year",
+      "tips": ["Tip 1", "Tip 2", "Tip 3"]
+    },` : ''}
+    "actionItems": [
+      "Specific action item 1",
+      "Specific action item 2",
+      "Specific action item 3",
+      "Specific action item 4",
+      "Specific action item 5"
+    ]
+  }
+}
+
+CRITICAL RULES:
+1. All allocation amounts must be realistic and sum to approximately the total income
+2. Consider their location's cost of living (${profile.location})
+3. Prioritize emergency fund if current savings are low
+4. If they have high-interest debt, allocate more to debt payment
+5. Account for their ${profile.dependents} dependent(s) in food, healthcare, etc.
+6. Match recommendations to their stated financial goals
+7. Be practical and specific with all tips and action items
+8. Ensure the budget is balanced and achievable`
+
+      const response = await window.spark.llm(promptText, 'gpt-4o', true)
+      const parsed = JSON.parse(response)
+      
+      if (parsed.budget) {
+        const budget: DetailedBudget = {
+          id: Date.now().toString(),
+          profileId: profile.createdAt,
+          totalIncome: totalIncome,
+          ...parsed.budget,
+          createdAt: new Date().toISOString()
+        }
+        
+        setDetailedBudget(budget)
+        setActiveTab('budget')
+        toast.success('Your personalized budget is ready!', {
+          description: 'Review your AI-generated financial plan below'
+        })
+      } else {
+        throw new Error('Invalid response format')
+      }
+    } catch (error) {
+      console.error('Budget generation error:', error)
+      toast.error('Failed to generate budget. Please try again.')
+    } finally {
+      setIsGeneratingBudget(false)
+    }
+  }
+
+  const handleStartOver = () => {
+    setFinancialProfile(null)
+    setDetailedBudget(null)
+    setActiveTab('advisor')
   }
 
   const monthExpenses = (expenses || []).filter(e => {
@@ -173,14 +309,29 @@ export function Finance() {
       <TabGroup
         tabs={[
           { id: 'expenses', label: 'Expenses' },
-          { id: 'ai-budget', label: 'AI Budget Generator' },
+          { id: 'advisor', label: 'AI Financial Advisor', icon: <Sparkle weight="fill" size={16} /> },
+          ...(detailedBudget ? [{ id: 'budget', label: 'Your Budget' }] : []),
         ]}
         activeTab={activeTab}
         onChange={setActiveTab}
       />
 
-      {activeTab === 'ai-budget' ? (
-        <AIBudgetGenerator />
+      {activeTab === 'advisor' ? (
+        <>
+          {isGeneratingBudget ? (
+            <Card className="glass-card border-primary/30 text-center py-16">
+              <Sparkle weight="fill" className="text-primary mx-auto mb-4 animate-spin" size={56} />
+              <h3 className="font-semibold text-2xl mb-2">Analyzing Your Financial Profile</h3>
+              <p className="text-muted-foreground text-[15px]">Creating your personalized budget plan...</p>
+            </Card>
+          ) : detailedBudget && financialProfile ? (
+            <DetailedBudgetDisplay budget={detailedBudget} onStartOver={handleStartOver} />
+          ) : (
+            <FinancialAdvisorInterview onComplete={handleProfileComplete} />
+          )}
+        </>
+      ) : activeTab === 'budget' && detailedBudget ? (
+        <DetailedBudgetDisplay budget={detailedBudget} onStartOver={handleStartOver} />
       ) : (
         <>
           <EditExpenseDialog
