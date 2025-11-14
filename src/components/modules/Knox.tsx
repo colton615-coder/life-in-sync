@@ -172,7 +172,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
 
   return (
     <>
-      <div className="space-y-4 md:space-y-6 h-[calc(100vh-8rem)] md:h-[calc(100vh-12rem)]">
+      <div className="pt-2 md:pt-4 space-y-4 md:space-y-6 h-[calc(100vh-8rem)] md:h-[calc(100vh-12rem)]">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">

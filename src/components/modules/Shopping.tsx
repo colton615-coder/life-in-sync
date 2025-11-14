@@ -148,7 +148,7 @@ export function Shopping() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-center space-y-4"
+        className="pt-2 md:pt-4 text-center space-y-4"
       >
         <motion.div 
           className="flex items-center justify-center gap-3"

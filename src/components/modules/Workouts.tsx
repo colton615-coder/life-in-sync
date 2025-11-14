@@ -199,7 +199,7 @@ Return ONLY valid JSON with this exact structure:
   }
 
   return (
-    <div className="space-y-3 md:space-y-6">
+    <div className="pt-2 md:pt-4 space-y-3 md:space-y-6">
       <div className="flex items-center justify-between gap-2">
         <div>
           <h1 className="text-xl md:text-3xl font-bold tracking-tight">💪 Workouts</h1>

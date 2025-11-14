@@ -120,7 +120,7 @@ export function Calendar() {
   const upcomingEvents = events?.filter(e => new Date(e.date) >= new Date()).length || 0
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto relative">
+    <div className="pt-2 md:pt-4 space-y-6 max-w-6xl mx-auto relative">
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/20 via-cyan-500/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '0s' }} />
         <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />

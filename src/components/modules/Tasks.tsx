@@ -286,7 +286,7 @@ export function Tasks() {
   }, [])
 
   return (
-    <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500">
+    <div className="pt-2 md:pt-4 space-y-4 md:space-y-6 animate-in fade-in duration-500">
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}

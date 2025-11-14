@@ -374,7 +374,7 @@ export function Habits() {
   }
 
   return (
-    <div className="space-y-3 md:space-y-4 animate-in fade-in duration-500">
+    <div className="pt-2 md:pt-4 space-y-3 md:space-y-4 animate-in fade-in duration-500">
       {showConfetti && <Confetti />}
       
       <div className="flex items-start justify-between gap-2">

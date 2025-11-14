@@ -508,7 +508,7 @@ export function GolfSwing() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="pt-2 md:pt-4 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
