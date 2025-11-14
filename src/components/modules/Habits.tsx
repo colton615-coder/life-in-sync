@@ -1,6 +1,5 @@
 import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
-import { TabGroup } from '@/components/TabGroup'
 import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Sparkle, X, ArrowRight, ArrowLeft, Minus } from '@phosphor-icons/react'
 import * as Icons from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
@@ -13,7 +12,6 @@ import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Confetti } from '@/components/Confetti'
 import { IconPicker } from '@/components/IconPicker'
-import { StatsCard } from '@/components/StatsCard'
 
 const trackingTypeOptions = [
   { value: 'boolean' as TrackingType, icon: Check, label: 'Simple Checkbox', description: 'Just mark it done' },
@@ -26,6 +24,7 @@ export function Habits() {
   const [creationStep, setCreationStep] = useState(0)
   const [filterTab, setFilterTab] = useState('all')
   const [showConfetti, setShowConfetti] = useState(false)
+  const [animatingStreak, setAnimatingStreak] = useState<string | null>(null)
   
   const [newHabit, setNewHabit] = useState({
     name: '',
@@ -122,6 +121,9 @@ export function Habits() {
           setShowConfetti(true)
           setTimeout(() => setShowConfetti(false), 4000)
           
+          setAnimatingStreak(habitId)
+          setTimeout(() => setAnimatingStreak(null), 600)
+          
           if (newStreak === 7 || newStreak === 30 || newStreak === 100) {
             toast.success(`🎉 ${newStreak} day streak! Amazing!`)
           } else {
@@ -193,6 +195,9 @@ export function Habits() {
           setTimeout(() => setShowConfetti(false), 4000)
           
           const newStreak = calculateStreak([...entries, { date: today, completed: true }], habit)
+          
+          setAnimatingStreak(habitId)
+          setTimeout(() => setAnimatingStreak(null), 600)
           
           if (newStreak === 7 || newStreak === 30 || newStreak === 100) {
             toast.success(`🎉 ${newStreak} day streak! Amazing!`)
@@ -286,7 +291,8 @@ export function Habits() {
     const name = habitName.toLowerCase()
     
     if (name.includes('water') || name.includes('drink') || name.includes('hydrat')) return Icons.Drop
-    if (name.includes('exercise') || name.includes('workout') || name.includes('gym') || name.includes('run')) return Icons.Barbell
+    if (name.includes('exercise') || name.includes('workout') || name.includes('gym')) return Icons.Barbell
+    if (name.includes('run')) return Icons.PersonSimpleRun
     if (name.includes('read') || name.includes('book')) return Icons.Book
     if (name.includes('sleep') || name.includes('rest')) return Icons.Moon
     if (name.includes('meditat') || name.includes('mindful')) return Icons.FlowerLotus
@@ -586,26 +592,63 @@ export function Habits() {
       {creationStep === 0 && (
         <>
           {habits && habits.length > 0 && (
-            <StatsCard
-              title="Habits"
-              stats={{
-                total: habits.length,
-                active: activeHabits.length,
-                completed: completedHabits.length,
-                completionRate: Math.round((completedHabits.length / habits.length) * 100)
-              }}
-            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="flex items-center justify-center gap-6"
+            >
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold">{habits.length}</div>
+                <div className="text-xs text-muted-foreground font-normal">Total</div>
+              </div>
+              <div className="h-12 w-px bg-border" />
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold">{activeHabits.length}</div>
+                <div className="text-xs text-muted-foreground font-normal">Active</div>
+              </div>
+              <div className="h-12 w-px bg-border" />
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold">{completedHabits.length}</div>
+                <div className="text-xs text-muted-foreground font-normal">Done</div>
+              </div>
+            </motion.div>
           )}
 
-          <TabGroup
-            tabs={[
-              { id: 'all', label: 'All Habits' },
-              { id: 'active', label: `Active (${activeHabits.length})` },
-              { id: 'completed', label: `Completed (${completedHabits.length})` },
-            ]}
-            activeTab={filterTab}
-            onChange={setFilterTab}
-          />
+          <div className="flex gap-1 p-1 bg-muted/50 rounded-xl w-fit mx-auto">
+            <button
+              onClick={() => setFilterTab('all')}
+              className={cn(
+                'px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+                filterTab === 'all'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
+              )}
+            >
+              All Habits
+            </button>
+            <button
+              onClick={() => setFilterTab('active')}
+              className={cn(
+                'px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+                filterTab === 'active'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
+              )}
+            >
+              Active
+            </button>
+            <button
+              onClick={() => setFilterTab('completed')}
+              className={cn(
+                'px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+                filterTab === 'completed'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
+              )}
+            >
+              Completed
+            </button>
+          </div>
 
           {!habits || habits.length === 0 ? (
             <Card className="text-center py-12 md:py-16">
@@ -761,7 +804,18 @@ export function Habits() {
                           <div className="flex items-center gap-2 md:gap-3">
                             <div className="flex items-center gap-1 md:gap-1.5">
                               <Fire weight="fill" className="text-orange-500" size={14} />
-                              <span className="font-semibold text-xs md:text-sm">{habit.streak} day streak</span>
+                              <motion.span 
+                                key={`${habit.id}-${habit.streak}`}
+                                animate={animatingStreak === habit.id ? {
+                                  scale: [1, 1.4, 1],
+                                  rotate: [0, 5, -5, 0]
+                                } : {}}
+                                transition={{ duration: 0.6, ease: "easeInOut" }}
+                                className="font-semibold text-xs md:text-sm"
+                              >
+                                {habit.streak}
+                              </motion.span>
+                              <span className="font-normal text-xs md:text-sm">day streak</span>
                             </div>
                             {completed && (
                               <Badge variant="outline" className="text-[10px] md:text-xs border-primary/30 text-primary glass-morphic px-1.5 py-0">
