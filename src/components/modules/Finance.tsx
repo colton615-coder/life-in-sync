@@ -16,6 +16,7 @@ import { EditExpenseDialog } from '@/components/EditExpenseDialog'
 import { FinancialAdvisorInterview } from '@/components/FinancialAdvisorInterview'
 import { DetailedBudgetDisplay } from '@/components/DetailedBudgetDisplay'
 import { TabGroup } from '@/components/TabGroup'
+import { AIButton } from '@/components/AIButton'
 
 const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Other']
 const COLORS = ['#5fd4f4', '#9d7fff', '#6ee7b7', '#fbbf24', '#fb923c', '#f87171', '#94a3b8']

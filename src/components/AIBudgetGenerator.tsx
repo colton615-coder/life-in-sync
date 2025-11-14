@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Sparkle, ArrowRight } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
+import { AIButton } from '@/components/AIButton'
 
 interface BudgetRecommendation {
   category: string
@@ -150,23 +151,15 @@ Ensure all recommended amounts sum to the total budget. Be realistic and practic
             />
           </div>
 
-          <Button
+          <AIButton
             onClick={generateBudget}
             disabled={isGenerating}
-            className="w-full h-12 gap-2 shadow-lg shadow-primary/20"
+            loading={isGenerating}
+            className="w-full"
+            icon={!isGenerating ? <ArrowRight size={20} /> : undefined}
           >
-            {isGenerating ? (
-              <>
-                <Sparkle className="animate-spin" size={20} />
-                Generating Budget...
-              </>
-            ) : (
-              <>
-                Generate Budget
-                <ArrowRight size={20} />
-              </>
-            )}
-          </Button>
+            {!isGenerating && 'Generate Budget'}
+          </AIButton>
         </div>
       </Card>
 

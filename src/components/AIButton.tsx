@@ -24,40 +24,36 @@ export function AIButton({ children, loading = false, icon, size = 'md', variant
       outline: 'text-purple-600 dark:text-purple-400 bg-transparent border-2 border-purple-500 hover:bg-purple-500/10'
     }
 
-    return (
-      <motion.button
-        ref={ref}
-        whileHover={{ scale: disabled || loading ? 1 : 1.02 }}
-        whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
-        disabled={disabled || loading}
-        className={cn(
-          'rounded-2xl flex items-center justify-center font-semibold transition-all duration-300',
-          'disabled:opacity-50 disabled:cursor-not-allowed',
-          sizeClasses[size],
-          variantClasses[variant],
-          className
-        )}
-        {...props}
-      >
-        {loading ? (
-          <>
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-            >
-              <Sparkle size={size === 'sm' ? 18 : size === 'lg' ? 26 : 22} weight="fill" />
-            </motion.div>
-            <span>Generating...</span>
-          </>
-        ) : (
-          <>
-            {icon || <Sparkle size={size === 'sm' ? 18 : size === 'lg' ? 26 : 22} weight="fill" className="md:w-6 md:h-6" />}
-            {children}
-          </>
-        )}
-      </motion.button>
-    )
-  }
-)
-
-AIButton.displayName = 'AIButton'
+  return (
+    <motion.button
+      whileHover={{ scale: disabled || loading ? 1 : 1.02 }}
+      whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
+      disabled={disabled || loading}
+      className={cn(
+        'rounded-2xl flex items-center justify-center font-semibold transition-all duration-300',
+        'disabled:opacity-50 disabled:cursor-not-allowed',
+        sizeClasses[size],
+        variantClasses[variant],
+        className
+      )}
+      {...props}
+    >
+      {loading ? (
+        <>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+          >
+            <Sparkle size={size === 'sm' ? 18 : size === 'lg' ? 26 : 22} weight="fill" />
+          </motion.div>
+          <span>Generating...</span>
+        </>
+      ) : (
+        <>
+          {icon || <Sparkle size={size === 'sm' ? 18 : size === 'lg' ? 26 : 22} weight="fill" className="md:w-6 md:h-6" />}
+          {children}
+        </>
+      )}
+    </motion.button>
+  )
+}
