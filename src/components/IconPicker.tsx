@@ -76,7 +76,7 @@ export function IconPicker({ value, onChange, className }: IconPickerProps) {
 
   const getIconComponent = (iconName: string) => {
     const IconComponent = (Icons as any)[iconName]
-    return IconComponent || Icons.Question
+    return IconComponent || Icons.Target
   }
 
   return (

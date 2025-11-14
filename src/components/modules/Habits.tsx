@@ -1,7 +1,7 @@
 import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
 import { TabGroup } from '@/components/TabGroup'
-import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Sparkle, X, ArrowRight, ArrowLeft, Question, Minus } from '@phosphor-icons/react'
+import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Sparkle, X, ArrowRight, ArrowLeft, Minus } from '@phosphor-icons/react'
 import * as Icons from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { Habit, TrackingType, HabitEntry, HabitIcon } from '@/lib/types'
@@ -277,9 +277,29 @@ export function Habits() {
     return ''
   }
 
-  const getIconComponent = (iconName: HabitIcon) => {
+  const getIconComponent = (iconName: HabitIcon, habitName?: string) => {
     const IconComponent = (Icons as any)[iconName]
-    return IconComponent || Question
+    if (IconComponent) return IconComponent
+    
+    if (!habitName) return Icons.Target
+    
+    const name = habitName.toLowerCase()
+    
+    if (name.includes('water') || name.includes('drink') || name.includes('hydrat')) return Icons.Drop
+    if (name.includes('exercise') || name.includes('workout') || name.includes('gym') || name.includes('run')) return Icons.Barbell
+    if (name.includes('read') || name.includes('book')) return Icons.Book
+    if (name.includes('sleep') || name.includes('rest')) return Icons.Moon
+    if (name.includes('meditat') || name.includes('mindful')) return Icons.FlowerLotus
+    if (name.includes('walk')) return Icons.PersonSimpleRun
+    if (name.includes('stretch') || name.includes('yoga')) return Icons.FlowerLotus
+    if (name.includes('food') || name.includes('eat') || name.includes('meal')) return Icons.ForkKnife
+    if (name.includes('vitamin') || name.includes('supplement') || name.includes('medicine')) return Icons.FirstAid
+    if (name.includes('journal') || name.includes('write')) return Icons.BookOpen
+    if (name.includes('learn') || name.includes('study')) return Icons.GraduationCap
+    if (name.includes('clean')) return Icons.House
+    if (name.includes('call') || name.includes('contact') || name.includes('friend')) return Icons.Chats
+    
+    return Icons.Target
   }
 
   const { activeHabits, completedHabits } = (() => {
@@ -618,7 +638,7 @@ export function Habits() {
               {filteredHabits.map((habit) => {
                 const completed = isCompletedToday(habit)
                 const progress = getTodayProgress(habit)
-                const IconComponent = getIconComponent(habit.icon || 'Drop')
+                const IconComponent = getIconComponent(habit.icon || 'Drop', habit.name)
                 const todayEntry = getTodayEntry(habit)
                 const currentValue = todayEntry 
                   ? (habit.trackingType === 'numerical' ? (todayEntry.value || 0) : (todayEntry.minutes || 0))

@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Trash, PencilSimple, Fire, Drop } from '@phosphor-icons/react'
+import { Trash, PencilSimple, Fire, Drop, Target } from '@phosphor-icons/react'
 import * as Icons from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -36,7 +36,25 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
   const getIconComponent = () => {
     if (!habit.icon) return Drop
     const IconComponent = (Icons as any)[habit.icon]
-    return IconComponent || Drop
+    if (IconComponent) return IconComponent
+    
+    const name = habit.name.toLowerCase()
+    
+    if (name.includes('water') || name.includes('drink') || name.includes('hydrat')) return Drop
+    if (name.includes('exercise') || name.includes('workout') || name.includes('gym') || name.includes('run')) return Icons.Barbell
+    if (name.includes('read') || name.includes('book')) return Icons.Book
+    if (name.includes('sleep') || name.includes('rest')) return Icons.Moon
+    if (name.includes('meditat') || name.includes('mindful')) return Icons.FlowerLotus
+    if (name.includes('walk')) return Icons.PersonSimpleRun
+    if (name.includes('stretch') || name.includes('yoga')) return Icons.FlowerLotus
+    if (name.includes('food') || name.includes('eat') || name.includes('meal')) return Icons.ForkKnife
+    if (name.includes('vitamin') || name.includes('supplement') || name.includes('medicine')) return Icons.FirstAid
+    if (name.includes('journal') || name.includes('write')) return Icons.BookOpen
+    if (name.includes('learn') || name.includes('study')) return Icons.GraduationCap
+    if (name.includes('clean')) return Icons.House
+    if (name.includes('call') || name.includes('contact') || name.includes('friend')) return Icons.Chats
+    
+    return Target
   }
 
   const IconComponent = getIconComponent()
