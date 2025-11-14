@@ -118,9 +118,9 @@ Respond as Knox:`
             onClick={sendMessage}
             disabled={loading || !input.trim()}
             size="icon"
-            className="h-auto"
+            className="h-auto bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
           >
-            <PaperPlaneTilt size={20} />
+            <PaperPlaneTilt size={20} weight="fill" />
           </Button>
         </div>
       </Card>

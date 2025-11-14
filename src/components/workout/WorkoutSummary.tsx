@@ -118,7 +118,7 @@ export function WorkoutSummary({ workout, completedCount, onDone }: WorkoutSumma
        >
          <Button 
            onClick={onDone} 
-           className="w-full neumorphic-button hover:scale-105 transition-all bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-base sm:text-lg h-12 sm:h-14"
+           className="w-full bg-success text-success-foreground hover:bg-success/90 shadow-xl shadow-success/30 text-base sm:text-lg h-12 sm:h-14 font-semibold"
          >
               Done
          </Button>

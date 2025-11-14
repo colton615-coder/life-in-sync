@@ -119,7 +119,7 @@ export function AddHabitDialog({ open, onOpenChange, onAddHabit }: AddHabitDialo
             </Button>
             <Button 
               type="submit"
-              className="glass-card bg-gradient-to-r from-primary/30 to-accent/30 hover:from-primary/50 hover:to-accent/50 border-primary/50"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
             >
               Initialize
             </Button>

@@ -125,7 +125,7 @@ export function Shopping() {
           <Button
             type="submit"
             size="lg"
-            className="h-14 px-6 neumorphic-button gap-2 border-0 shadow-none"
+            className="h-14 px-6 gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
             disabled={!newItemName.trim()}
           >
             <Plus className="w-5 h-5" weight="bold" />
