@@ -15,6 +15,7 @@ import {
   X
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 interface NavModule {
   icon: any
@@ -84,22 +85,31 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                   >
                     Navigation
                   </motion.h2>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.1 }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={onClose}
-                      className="rounded-full hover:bg-destructive/20 hover:text-destructive"
+                  <div className="flex items-center gap-2">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.1 }}
                     >
-                      <X size={24} weight="bold" />
-                    </Button>
-                  </motion.div>
+                      <ThemeToggle />
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.1 }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onClose}
+                        className="rounded-full hover:bg-destructive/20 hover:text-destructive"
+                      >
+                        <X size={24} weight="bold" />
+                      </Button>
+                    </motion.div>
+                  </div>
                 </div>
                 
                 <motion.p 

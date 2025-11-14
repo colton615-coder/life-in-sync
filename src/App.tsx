@@ -4,6 +4,8 @@ import { NavigationButton } from '@/components/NavigationButton'
 import { AbstractBackground } from '@/components/AbstractBackground'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import { Toaster } from '@/components/ui/sonner'
+import { ThemeToggle } from '@/components/ThemeToggle'
+import { useTheme } from '@/components/ThemeProvider'
 import { toast } from 'sonner'
 import { Module } from '@/lib/types'
 import { Dashboard } from '@/components/modules/Dashboard'
@@ -17,6 +19,7 @@ function App() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isAppReady, setIsAppReady] = useState(false)
+  const { effectiveTheme } = useTheme()
 
   const handleModuleChange = (moduleId: string) => {
     setActiveModule(moduleId as Module)
@@ -56,6 +59,10 @@ function App() {
       <div className="min-h-screen bg-background relative">
         <AbstractBackground />
       
+        <div className="fixed top-4 right-4 z-50">
+          <ThemeToggle />
+        </div>
+
         <div className="relative z-10 max-w-6xl mx-auto px-4 py-8 md:px-8 md:py-16 pb-32">
           {renderModule()}
         </div>
@@ -72,7 +79,7 @@ function App() {
           onModuleChange={handleModuleChange}
         />
 
-        <Toaster position="top-right" theme="dark" />
+        <Toaster position="top-right" theme={effectiveTheme} />
       </div>
     </>
   )

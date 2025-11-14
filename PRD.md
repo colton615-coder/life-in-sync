@@ -6,6 +6,7 @@ A visual habit tracking application where users set daily goals (like drinking 8
 1. **Satisfying** - Each tap provides immediate visual feedback with icons filling up, creating a dopamine-rewarding experience
 2. **Motivating** - Visual progress bars and celebration animations encourage users to complete their daily goals
 3. **Simple** - No complex menus or settings—just set a goal, tap throughout the day, and watch progress
+4. **Personalized** - Customizable theme options (light, dark, system) allow users to tailor the app's appearance to their preferences
 
 **Complexity Level**: Light Application (focused feature set with visual feedback, daily state tracking, and cross-module completion analytics)
   - Habit tracking tool with visual icon-based progress, celebration animations, daily completion history, and a global completion tracking system for analytics across all modules
@@ -61,6 +62,13 @@ A visual habit tracking application where users set daily goals (like drinking 8
 - **Progression**: User starts interview → Answer 5 step questionnaire covering income, housing, debt, goals, and spending habits → AI analyzes complete profile → Generates detailed budget with category allocations → Shows personalized recommendations with reasoning → Provides savings strategy → Offers debt payoff plan (if applicable) → Displays actionable steps
 - **Success criteria**: Interview feels conversational and thorough, all financial factors considered, budget totals balance to income, recommendations are specific and practical, AI reasoning is clear and helpful, budget persists for future reference, user can restart process anytime
 
+### Theme Personalization
+- **Functionality**: Toggle between light, dark, and system-preferred themes with persistent storage of user preference
+- **Purpose**: Provide visual customization that adapts to user environment and preference, enhancing comfort and accessibility
+- **Trigger**: User clicks theme toggle button (top-right corner or in navigation drawer)
+- **Progression**: User opens theme menu → Selects light, dark, or system theme → Interface transitions smoothly to selected theme → Preference saved automatically → Theme persists across sessions
+- **Success criteria**: Theme changes apply instantly with smooth transitions, user preference persists between sessions, system theme automatically adapts to OS preference changes, all UI elements properly support both themes with correct contrast ratios
+
 ## Edge Case Handling
 - **Empty States**: Show welcoming prompt "Start your first habit!" with animated icon when no habits exist
 - **Goal Already Complete**: Show success state when daily goal is reached; icons remain clickable to adjust progress
@@ -69,13 +77,28 @@ A visual habit tracking application where users set daily goals (like drinking 8
 - **Accidental Taps**: Clicking filled icons adjusts progress backwards to that point, allowing easy corrections
 - **Long Streaks**: Special milestone celebrations at 7, 30, 100 days with different animations
 - **Data Loss Prevention**: Confirm before deleting habits; show toast with undo option
+- **Theme Transitions**: Smooth color transitions when switching themes; no jarring flashes
+- **System Theme Changes**: Automatically adapt when user changes OS theme preference (when system theme is selected)
 
 ## Design Direction
 The interface should feel sleek, powerful, and high-functioning with an abstract, premium aesthetic. The design should evoke a sense of sophistication and control through bold geometric elements, subtle gradients, glass-morphic surfaces, and purposeful animations. A dark, rich interface with strategic use of color creates depth and dimension, while abstract background patterns and floating elements convey technical prowess and modern design.
 
 ## Color Selection
-Dark, sophisticated color scheme with vibrant neon accents and deep backgrounds to create a premium, high-tech atmosphere that feels powerful and abstract.
+Dark and light themes with sophisticated color scheme featuring vibrant neon accents in dark mode and clean, modern tones in light mode.
 
+**Light Theme:**
+- **Primary Color**: Soft Teal (oklch(0.48 0.12 75)) - Calming, focused action color for primary buttons
+- **Secondary Colors**: 
+  - Pale Green (oklch(0.90 0.05 90)) - Gentle supporting color for secondary surfaces
+  - Bright Green (oklch(0.72 0.08 110)) - Fresh accent for highlights
+- **Accent Color**: Success Green (oklch(0.65 0.18 150)) - Completion states with positive reinforcement
+- **Foreground/Background Pairings**:
+  - Background (Soft White oklch(0.98 0.008 85)): Dark Text (oklch(0.20 0.02 45)) - Ratio 11.4:1 ✓
+  - Card (Crisp White oklch(0.99 0.005 85)): Dark Text (oklch(0.20 0.02 45)) - Ratio 12.1:1 ✓
+  - Primary (Soft Teal oklch(0.48 0.12 75)): Light Text (oklch(0.98 0.008 85)) - Ratio 6.2:1 ✓
+  - Accent (Bright Green oklch(0.72 0.08 110)): Dark Text (oklch(0.20 0.02 45)) - Ratio 5.1:1 ✓
+
+**Dark Theme:**
 - **Primary Color**: Electric Cyan (oklch(0.75 0.20 195)) - High-tech, powerful accent for primary actions and key interactive elements
 - **Secondary Colors**: 
   - Deep Purple (oklch(0.55 0.25 285)) - Premium, abstract feel for secondary surfaces and accents
