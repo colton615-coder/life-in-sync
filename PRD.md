@@ -182,3 +182,52 @@ Animations should create a sense of power and precision, with smooth, purposeful
   - Bottom sheet for add/edit forms
   - Celebration animation optimized for portrait orientation
   - Icon grid wraps responsively (2-3 columns on mobile, 4-6 on tablet/desktop)
+
+## AI Integration
+
+### Dual Provider Architecture
+The app supports two AI providers with intelligent routing and automatic fallback:
+
+- **Spark LLM (GPT-4o)**: Built-in provider, no configuration needed, excellent for JSON and quick responses
+- **Google Gemini 2.5**: Optional provider requiring API key, cost-effective for long context and complex reasoning
+
+### AI Provider Router
+- **Functionality**: Unified interface that routes AI requests to optimal provider based on task and user preferences
+- **Purpose**: Maximize reliability through automatic fallback while optimizing for cost and performance
+- **Features**:
+  - Automatic provider selection based on task complexity
+  - Seamless fallback if primary provider fails
+  - User-configurable preferences (Automatic, Spark, or Gemini)
+  - Usage tracking and cost monitoring
+  - Support for both text and JSON generation
+
+### Current AI Features
+1. **Daily Affirmations** - Generated motivational quotes on app load (Spark LLM)
+2. **AI Financial Advisor** - Multi-step interview and personalized budget generation (Can use either provider)
+3. **Habit Suggestions** - AI-powered recommendations based on existing habits (Gemini recommended)
+4. **Spending Analysis** - Pattern detection and financial insights (Gemini recommended)
+5. **Workout Generation** - Custom workout plans based on fitness level and goals (Either provider)
+
+### Settings & Configuration
+- **Gemini API Key Management**: Secure storage in Spark KV, owner-only access
+- **Connection Testing**: Verify API key validity before use
+- **Provider Selection**: Choose default provider or let system auto-route
+- **Usage Statistics**: Track requests, tokens, and costs per provider
+- **AI Provider Badges**: Visual indicators showing which AI powered each feature
+
+### Implementation Details
+- **Location**: `/src/lib/ai/` and `/src/lib/gemini/`
+- **Key Files**:
+  - `ai/provider.ts` - Main AI router with fallback logic
+  - `ai/usage-tracker.ts` - Cost and usage monitoring
+  - `gemini/client.ts` - Gemini API wrapper
+  - `ai/examples.ts` - Pre-built helper functions
+- **Components**: AIBadge for provider indication
+- **Module**: Settings page for configuration (owner-only)
+
+### Security Considerations
+- API keys stored encrypted in Spark KV store
+- Never exposed in client code or logs
+- Owner-only access to configuration
+- Secure key masking in UI
+- Error messages don't leak sensitive info
