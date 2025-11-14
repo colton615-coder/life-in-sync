@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
+import { Confetti } from '@/components/Confetti'
 
 const iconOptions: { value: HabitIcon; Icon: any; label: string; color: string }[] = [
   { value: 'droplet', Icon: Drop, label: 'Water', color: 'text-blue-400' },
@@ -33,6 +34,7 @@ export function Habits() {
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null)
   const [trackValue, setTrackValue] = useState<string>('')
   const [filterTab, setFilterTab] = useState('all')
+  const [showConfetti, setShowConfetti] = useState(false)
   
   const [newHabit, setNewHabit] = useState({
     name: '',
@@ -136,6 +138,11 @@ export function Habits() {
         }
 
         const isTargetMet = value >= (habit.target || 0)
+        const wasAlreadyComplete = todayIndex > -1 && (
+          habit.trackingType === 'numerical' 
+            ? (entries[todayIndex].value || 0) >= (habit.target || 0)
+            : (entries[todayIndex].minutes || 0) >= (habit.target || 0)
+        )
 
         if (todayIndex > -1) {
           entries[todayIndex] = newEntry
@@ -145,11 +152,14 @@ export function Habits() {
 
         const newStreak = calculateStreak(entries, habit)
         
-        if (isTargetMet && todayIndex === -1) {
+        if (isTargetMet && !wasAlreadyComplete) {
+          setShowConfetti(true)
+          setTimeout(() => setShowConfetti(false), 4000)
+          
           if (newStreak === 7 || newStreak === 30 || newStreak === 100) {
             toast.success(`🎉 ${newStreak} day streak! Amazing!`)
           } else {
-            toast.success('Progress logged!')
+            toast.success('🎉 Goal completed!')
           }
         }
 
@@ -174,15 +184,20 @@ export function Habits() {
           entries.splice(todayIndex, 1)
         } else {
           entries.push({ date: today, completed: true })
+          
+          setShowConfetti(true)
+          setTimeout(() => setShowConfetti(false), 4000)
+          
+          const newStreak = calculateStreak([...entries, { date: today, completed: true }], habit)
+          
+          if (newStreak === 7 || newStreak === 30 || newStreak === 100) {
+            toast.success(`🎉 ${newStreak} day streak! Amazing!`)
+          } else {
+            toast.success('🎉 Habit completed!')
+          }
         }
 
         const newStreak = calculateStreak(entries, habit)
-        
-        if (todayIndex === -1) {
-          if (newStreak === 7 || newStreak === 30 || newStreak === 100) {
-            toast.success(`🎉 ${newStreak} day streak! Amazing!`)
-          }
-        }
 
         return { ...habit, entries, streak: newStreak }
       })
@@ -321,6 +336,8 @@ export function Habits() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      {showConfetti && <Confetti />}
+      
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-4xl font-bold tracking-tight">Habits</h1>
