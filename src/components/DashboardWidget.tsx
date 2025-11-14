@@ -30,10 +30,10 @@ export function DashboardWidget({ title, icon, children, onClick, className }: D
     >
       <Card className={cn(
         "h-full transition-all duration-200",
-        onClick && "group-hover:shadow-lg group-hover:border-primary/50"
+        onClick && "group-hover:shadow-lg group-hover:border-accent-vibrant/50"
       )}>
         <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-2.5">
-          <div className="p-1 md:p-1.5 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+          <div className="p-1 md:p-1.5 rounded-lg bg-accent-vibrant/10 text-accent-vibrant flex items-center justify-center">
             {icon}
           </div>
           <h3 className="font-semibold text-xs md:text-sm">{title}</h3>

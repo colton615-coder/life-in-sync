@@ -71,15 +71,15 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                 damping: 30,
                 stiffness: 300,
               }}
-              className="fixed left-0 top-0 h-full w-80 max-w-[85vw] z-[101] glass-card border-r-2 border-primary/30 shadow-2xl flex flex-col"
+              className="fixed left-0 top-0 h-full w-80 max-w-[85vw] z-[101] glass-card border-r-2 border-accent-vibrant/30 shadow-2xl flex flex-col"
             >
-              <div className="p-4 md:p-6 border-b border-primary/20">
+              <div className="p-4 md:p-6 border-b border-accent-vibrant/20">
                 <div className="flex items-center justify-between mb-4 md:mb-6">
                   <motion.h2 
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent"
+                    className="text-xl md:text-2xl font-bold bg-gradient-to-r from-accent-vibrant via-accent-vibrant to-secondary bg-clip-text text-transparent"
                   >
                     Navigation
                   </motion.h2>
@@ -134,7 +134,7 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                         className={cn(
                           'w-full justify-start gap-2 md:gap-3 h-10 md:h-12 rounded-lg transition-all duration-200 group relative overflow-hidden px-2 md:px-3',
                           isActive
-                            ? 'bg-gradient-to-r from-primary/20 to-accent/20 text-foreground border border-primary/40 shadow-lg'
+                            ? 'bg-gradient-to-r from-accent-vibrant/20 to-accent-vibrant/20 text-foreground border border-accent-vibrant/40 shadow-lg'
                             : 'text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent'
                         )}
                         onClick={() => handleModuleClick(module.id)}
@@ -142,7 +142,7 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                         {isActive && (
                           <motion.div
                             layoutId="activeModule"
-                            className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg"
+                            className="absolute inset-0 bg-gradient-to-r from-accent-vibrant/10 to-accent-vibrant/10 rounded-lg"
                             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                           />
                         )}
@@ -168,7 +168,7 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-primary neon-glow"
+                              className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-accent-vibrant neon-glow"
                             />
                           )}
                         </div>
@@ -178,14 +178,14 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                 })}
               </div>
 
-              <div className="p-3 md:p-4 border-t border-primary/20">
+              <div className="p-3 md:p-4 border-t border-accent-vibrant/20">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                   className="text-center text-[10px] md:text-xs text-muted-foreground"
                 >
-                  <p className="font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  <p className="font-semibold bg-gradient-to-r from-accent-vibrant to-accent-vibrant bg-clip-text text-transparent">
                     LiFE-iN-SYNC
                   </p>
                   <p className="mt-0.5 md:mt-1">Optimize Your Life</p>

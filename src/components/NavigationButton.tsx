@@ -26,12 +26,12 @@ export function NavigationButton({ onClick, isOpen }: NavigationButtonProps) {
             w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl shadow-2xl transition-all duration-300 relative overflow-hidden
             ${isOpen 
               ? 'bg-destructive/80 hover:bg-destructive text-destructive-foreground' 
-              : 'glass-card text-primary hover:bg-primary/20 animate-glow'
+              : 'glass-card text-accent-vibrant hover:bg-accent-vibrant/20 animate-glow'
             }
           `}
         >
           <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20"
+            className="absolute inset-0 bg-gradient-to-br from-accent-vibrant/20 to-accent-vibrant/20"
             animate={{
               scale: isOpen ? 0 : [1, 1.5, 1],
               opacity: isOpen ? 0 : [0.3, 0.6, 0.3],
@@ -60,7 +60,7 @@ export function NavigationButton({ onClick, isOpen }: NavigationButtonProps) {
 
           {!isOpen && (
             <motion.div
-              className="absolute inset-0 rounded-xl md:rounded-2xl border-2 border-primary/50"
+              className="absolute inset-0 rounded-xl md:rounded-2xl border-2 border-accent-vibrant/50"
               animate={{
                 scale: [1, 1.2, 1],
                 opacity: [0.5, 0, 0.5],
