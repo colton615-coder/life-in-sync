@@ -18,66 +18,68 @@ interface StatsCardProps {
 
 export function StatsCard({ title, stats, className }: StatsCardProps) {
   return (
-    <Card className={cn('glass-card border-primary/20', className)}>
-      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-        <TrendUp size={22} className="text-primary" weight="bold" />
-        {title} Stats
-      </h3>
-      
-      <div className="grid grid-cols-2 gap-4">
+    <Card className={cn('glass-card border-primary/20 p-4', className)}>
+      <div className="flex items-center justify-between gap-6">
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className="p-4 rounded-xl glass-morphic border border-border/30"
+          className="flex items-center gap-2"
         >
-          <div className="flex items-center gap-2 mb-1">
+          <div className="w-9 h-9 rounded-lg glass-morphic border border-primary/30 flex items-center justify-center">
             <Target size={18} className="text-primary" weight="fill" />
-            <span className="text-xs text-muted-foreground font-medium">Total</span>
           </div>
-          <div className="text-2xl font-bold tabular-nums">{stats.total}</div>
+          <div>
+            <div className="text-xs text-muted-foreground font-medium">Total</div>
+            <div className="text-lg font-bold tabular-nums">{stats.total}</div>
+          </div>
         </motion.div>
 
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className="p-4 rounded-xl glass-morphic border border-border/30"
+          className="flex items-center gap-2"
         >
-          <div className="flex items-center gap-2 mb-1">
+          <div className="w-9 h-9 rounded-lg glass-morphic border border-accent/30 flex items-center justify-center">
             <CheckCircle size={18} className="text-accent" weight="fill" />
-            <span className="text-xs text-muted-foreground font-medium">Active</span>
           </div>
-          <div className="text-2xl font-bold tabular-nums">{stats.active}</div>
+          <div>
+            <div className="text-xs text-muted-foreground font-medium">Active</div>
+            <div className="text-lg font-bold tabular-nums">{stats.active}</div>
+          </div>
         </motion.div>
 
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className="p-4 rounded-xl glass-morphic border border-border/30"
+          className="flex items-center gap-2"
         >
-          <div className="flex items-center gap-2 mb-1">
+          <div className="w-9 h-9 rounded-lg glass-morphic border border-success/30 flex items-center justify-center">
             <CheckCircle size={18} className="text-success" weight="fill" />
-            <span className="text-xs text-muted-foreground font-medium">Done Today</span>
           </div>
-          <div className="text-2xl font-bold tabular-nums">{stats.completed}</div>
+          <div>
+            <div className="text-xs text-muted-foreground font-medium">Done</div>
+            <div className="text-lg font-bold tabular-nums">{stats.completed}</div>
+          </div>
         </motion.div>
 
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className="p-4 rounded-xl glass-morphic border border-border/30"
+          className="flex items-center gap-2"
         >
-          <div className="flex items-center gap-2 mb-1">
+          <div className={cn(
+            "w-9 h-9 rounded-lg glass-morphic flex items-center justify-center",
+            stats.streak !== undefined ? "border border-orange-500/30" : "border border-primary/30"
+          )}>
             {stats.streak !== undefined ? (
               <Fire size={18} className="text-orange-500" weight="fill" />
             ) : (
               <TrendUp size={18} className="text-primary" weight="fill" />
             )}
-            <span className="text-xs text-muted-foreground font-medium">
-              {stats.streak !== undefined ? 'Streak' : 'Rate'}
-            </span>
           </div>
-          <div className="text-2xl font-bold tabular-nums">
-            {stats.streak !== undefined ? (
-              <span>{stats.streak} days</span>
-            ) : (
-              <span>{stats.completionRate || 0}%</span>
-            )}
+          <div>
+            <div className="text-xs text-muted-foreground font-medium">
+              {stats.streak !== undefined ? 'Rate' : 'Rate'}
+            </div>
+            <div className="text-lg font-bold tabular-nums">
+              {stats.completionRate || 0}%
+            </div>
           </div>
         </motion.div>
       </div>

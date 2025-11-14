@@ -26,7 +26,7 @@ export function TabGroup({ tabs, activeTab, onChange, className }: TabGroupProps
             'px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
             'flex items-center gap-2',
             activeTab === tab.id
-              ? 'bg-white text-foreground shadow-sm'
+              ? 'bg-primary text-primary-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
           )}
         >
