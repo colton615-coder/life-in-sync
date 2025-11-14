@@ -647,12 +647,6 @@ export function Habits() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-3 mb-2">
                             <h3 className="font-semibold text-xl">{habit.name}</h3>
-                            {habit.trackingType && habit.trackingType !== 'boolean' && (
-                              <Badge variant="secondary" className="flex items-center gap-1.5 text-xs font-medium">
-                                {habit.trackingType === 'numerical' ? <Hash size={14} /> : <Clock size={14} />}
-                                {habit.trackingType === 'numerical' ? 'Count' : 'Time'}
-                              </Badge>
-                            )}
                           </div>
                           {habit.description && (
                             <p className="text-sm text-muted-foreground mb-3">{habit.description}</p>
