@@ -13,10 +13,11 @@ import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Confetti } from '@/components/Confetti'
 import { IconPicker } from '@/components/IconPicker'
+import { StatsCard } from '@/components/StatsCard'
 
 const trackingTypeOptions = [
   { value: 'boolean' as TrackingType, icon: Check, label: 'Simple Checkbox', description: 'Just mark it done' },
-  { value: 'numerical' as TrackingType, icon: Hash, label: 'Count Things', description: 'Track reps, pages, glasses' },
+  { value: 'numerical' as TrackingType, icon: Hash, label: 'Track Numbers', description: 'Track reps, pages, glasses' },
   { value: 'time' as TrackingType, icon: Clock, label: 'Track Time', description: 'Measure minutes or hours' },
 ]
 
@@ -275,12 +276,27 @@ export function Habits() {
     return IconComponent || Question
   }
 
-  const filteredHabits = habits?.filter(habit => {
-    if (filterTab === 'all') return true
-    if (filterTab === 'active') return habit.streak > 0
-    if (filterTab === 'pending') return !isCompletedToday(habit)
-    return true
-  }) || []
+  const { activeHabits, completedHabits } = (() => {
+    const active: Habit[] = []
+    const completed: Habit[] = []
+    
+    habits?.forEach(habit => {
+      if (isCompletedToday(habit)) {
+        completed.push(habit)
+      } else {
+        active.push(habit)
+      }
+    })
+    
+    return { activeHabits: active, completedHabits: completed }
+  })()
+
+  const filteredHabits = (() => {
+    if (filterTab === 'all') return [...activeHabits, ...completedHabits]
+    if (filterTab === 'active') return activeHabits
+    if (filterTab === 'completed') return completedHabits
+    return habits || []
+  })()
 
   const container = {
     hidden: { opacity: 0 },
@@ -540,11 +556,23 @@ export function Habits() {
 
       {creationStep === 0 && (
         <>
+          {habits && habits.length > 0 && (
+            <StatsCard
+              title="Habits"
+              stats={{
+                total: habits.length,
+                active: activeHabits.length,
+                completed: completedHabits.length,
+                completionRate: Math.round((completedHabits.length / habits.length) * 100)
+              }}
+            />
+          )}
+
           <TabGroup
             tabs={[
               { id: 'all', label: 'All Habits' },
-              { id: 'active', label: 'Active Streaks' },
-              { id: 'pending', label: 'Pending Today' },
+              { id: 'active', label: `Active (${activeHabits.length})` },
+              { id: 'completed', label: `Completed (${completedHabits.length})` },
             ]}
             activeTab={filterTab}
             onChange={setFilterTab}

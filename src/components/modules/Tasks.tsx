@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
+import { StatsCard } from '@/components/StatsCard'
 
 export function Tasks() {
   const [tasks, setTasks] = useKV<Task[]>('tasks', [])
@@ -42,9 +43,20 @@ export function Tasks() {
   const toggleTask = (taskId: string) => {
     setTasks((current) =>
       (current || []).map(task =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
+        task.id === taskId 
+          ? { 
+              ...task, 
+              completed: !task.completed,
+              completedAt: !task.completed ? new Date().toISOString() : undefined
+            } 
+          : task
       )
     )
+    
+    const task = tasks?.find(t => t.id === taskId)
+    if (task && !task.completed) {
+      toast.success('Task completed! 🎉')
+    }
   }
 
   const deleteTask = (taskId: string) => {
@@ -52,11 +64,32 @@ export function Tasks() {
     toast.success('Task deleted')
   }
 
-  const sortedTasks = [...(tasks || [])].sort((a, b) => {
-    if (a.completed !== b.completed) return a.completed ? 1 : -1
-    const priorityOrder = { high: 0, medium: 1, low: 2 }
-    return priorityOrder[a.priority] - priorityOrder[b.priority]
-  })
+  const { activeTasks, completedTasks } = (() => {
+    const active: Task[] = []
+    const completed: Task[] = []
+    
+    const sorted = [...(tasks || [])].sort((a, b) => {
+      const priorityOrder = { high: 0, medium: 1, low: 2 }
+      return priorityOrder[a.priority] - priorityOrder[b.priority]
+    })
+    
+    sorted.forEach(task => {
+      if (task.completed) {
+        completed.push(task)
+      } else {
+        active.push(task)
+      }
+    })
+    
+    return { activeTasks: active, completedTasks: completed }
+  })()
+
+  const filteredTasks = (() => {
+    if (filterTab === 'all') return [...activeTasks, ...completedTasks]
+    if (filterTab === 'active') return activeTasks
+    if (filterTab === 'completed') return completedTasks
+    return []
+  })()
 
   const getPriorityIcon = (priority: Task['priority']) => {
     switch (priority) {
@@ -76,13 +109,6 @@ export function Tasks() {
       case 'low': return 'border-emerald-200 bg-emerald-50'
     }
   }
-
-  const filteredTasks = sortedTasks.filter(task => {
-    if (filterTab === 'all') return true
-    if (filterTab === 'active') return !task.completed
-    if (filterTab === 'completed') return task.completed
-    return true
-  })
 
   const container = {
     hidden: { opacity: 0 },
@@ -171,11 +197,23 @@ export function Tasks() {
         </Dialog>
       </div>
 
+      {tasks && tasks.length > 0 && (
+        <StatsCard
+          title="Tasks"
+          stats={{
+            total: tasks.length,
+            active: activeTasks.length,
+            completed: completedTasks.length,
+            completionRate: Math.round((completedTasks.length / tasks.length) * 100)
+          }}
+        />
+      )}
+
       <TabGroup
         tabs={[
           { id: 'all', label: 'All Tasks' },
-          { id: 'active', label: 'Active' },
-          { id: 'completed', label: 'Completed' },
+          { id: 'active', label: `Active (${activeTasks.length})` },
+          { id: 'completed', label: `Completed (${completedTasks.length})` },
         ]}
         activeTab={filterTab}
         onChange={setFilterTab}

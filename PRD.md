@@ -1,14 +1,14 @@
 # Habit Tracker PRD
 
-A visual habit tracking application where users set daily goals (like drinking 8 glasses of water) and tap interactive icons throughout the day to mark progress, with celebration animations upon completion to reinforce positive behavior.
+A visual habit tracking application where users set daily goals (like drinking 8 glasses of water) and tap interactive icons throughout the day to mark progress, with celebration animations upon completion to reinforce positive behavior. The app features a global completion tracking system that separates completed items from active items across all modules, enabling rich analytics and data-driven insights.
 
 **Experience Qualities**:
 1. **Satisfying** - Each tap provides immediate visual feedback with icons filling up, creating a dopamine-rewarding experience
 2. **Motivating** - Visual progress bars and celebration animations encourage users to complete their daily goals
 3. **Simple** - No complex menus or settings—just set a goal, tap throughout the day, and watch progress
 
-**Complexity Level**: Light Application (focused feature set with visual feedback and daily state tracking)
-  - Single-purpose habit tracking tool with visual icon-based progress, celebration animations, and daily completion history
+**Complexity Level**: Light Application (focused feature set with visual feedback, daily state tracking, and cross-module completion analytics)
+  - Habit tracking tool with visual icon-based progress, celebration animations, daily completion history, and a global completion tracking system for analytics across all modules
 
 ## Essential Features
 
@@ -41,11 +41,18 @@ A visual habit tracking application where users set daily goals (like drinking 8
 - **Success criteria**: Animation plays within 100ms of completion, feels rewarding without being excessive (2-3 seconds), doesn't block continued interaction
 
 ### History & Streaks
-- **Functionality**: Calendar view showing which days goals were completed, current streak counter
-- **Purpose**: Provide long-term motivation through streak building and visual history
-- **Trigger**: User views history tab or sees streak badge on main screen
-- **Progression**: User completes daily goal → Completion logged with date → Calendar marks day as complete → Streak counter increments if consecutive → User can view past days
-- **Success criteria**: Streak calculates correctly across day boundaries, history persists indefinitely, missed days clearly visible
+- **Functionality**: Calendar view showing which days goals were completed, current streak counter, completion analytics across all modules
+- **Purpose**: Provide long-term motivation through streak building, visual history, and data-driven insights into completion patterns
+- **Trigger**: User views history tab, sees streak badge on main screen, or accesses analytics dashboard
+- **Progression**: User completes daily goal → Completion logged with date → Calendar marks day as complete → Streak counter increments if consecutive → Completion stats update → User can view past days and patterns across modules
+- **Success criteria**: Streak calculates correctly across day boundaries, history persists indefinitely, missed days clearly visible, completion data can be analyzed across all modules
+
+### Global Completion Tracking System
+- **Functionality**: Unified system for tracking, separating, and analyzing completed vs. active items across all modules (Habits, Tasks, Workouts, etc.)
+- **Purpose**: Provide consistent completion tracking, enable rich analytics, maintain data integrity, and allow cross-module insights
+- **Trigger**: Any item completion in any module
+- **Progression**: User completes item → Completion timestamp recorded → Item moved to completed list → Stats updated in real-time → Analytics data accumulated → User can filter by completion status and view statistics
+- **Success criteria**: All modules use consistent completion tracking, active/completed items properly separated, statistics accurate, completion data persists, filters work correctly, analytics provide actionable insights
 
 ## Edge Case Handling
 - **Empty States**: Show welcoming prompt "Start your first habit!" with animated icon when no habits exist

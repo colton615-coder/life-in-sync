@@ -42,6 +42,7 @@ export interface Task {
   title: string
   description?: string
   completed: boolean
+  completedAt?: string
   priority: 'low' | 'medium' | 'high'
   dueDate?: string
   createdAt: string
