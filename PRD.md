@@ -76,6 +76,13 @@ A visual habit tracking application where users set daily goals (like drinking 8
 - **Progression**: User opens theme menu → Selects light, dark, or system theme → Interface transitions smoothly to selected theme → Preference saved automatically → Theme persists across sessions
 - **Success criteria**: Theme changes apply instantly with smooth transitions, user preference persists between sessions, system theme automatically adapts to OS preference changes, all UI elements properly support both themes with correct contrast ratios
 
+### Shopping List Module
+- **Functionality**: Comprehensive shopping list manager with add, edit, delete, complete/uncomplete capabilities, category organization, priority levels, quantity tracking, and smart statistics
+- **Purpose**: Provide users with an elegant, efficient way to organize shopping needs with premium UX that makes list management feel delightful and effortless
+- **Trigger**: User navigates to Shopping module from navigation drawer
+- **Progression**: User opens Shopping → Views active/completed tabs with stats → Adds new item with details (name, quantity, unit, category, priority, notes) → Items display sorted by priority → User checks off items as purchased → Items move to completed tab with celebration feedback → User can edit any item → User can delete items → Clear all completed items at once → Statistics update in real-time
+- **Success criteria**: Add/edit/delete operations are instant with smooth animations, items persist between sessions using useKV, priority sorting works correctly, category icons display appropriately, completed items maintain history, stats accurately reflect current state, all interactions feel polished with 10x mastercraft UX including micro-interactions, hover states, and satisfying feedback
+
 ## Edge Case Handling
 - **Empty States**: Show welcoming prompt "Start your first habit!" with animated icon when no habits exist
 - **Goal Already Complete**: Show success state when daily goal is reached; icons remain clickable to adjust progress
