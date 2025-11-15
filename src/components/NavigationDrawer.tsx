@@ -58,7 +58,7 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+              className="fixed inset-0 bg-gradient-to-br from-purple-900/40 via-blue-900/40 to-violet-900/40 backdrop-blur-md z-[100]"
               onClick={onClose}
             />
 
@@ -71,15 +71,20 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                 damping: 30,
                 stiffness: 300,
               }}
-              className="fixed left-0 top-0 h-full w-80 max-w-[85vw] z-[101] glass-card border-r-2 border-accent-vibrant/30 shadow-2xl flex flex-col"
+              className="fixed left-0 top-0 h-full w-80 max-w-[85vw] z-[101] glass-card border-r-2 border-white/30 shadow-2xl flex flex-col"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.18))',
+                backdropFilter: 'blur(40px)',
+                WebkitBackdropFilter: 'blur(40px)',
+              }}
             >
-              <div className="p-4 md:p-6 border-b border-accent-vibrant/20">
+              <div className="p-4 md:p-6 border-b border-white/25">
                 <div className="flex items-center justify-between mb-4 md:mb-6">
                   <motion.h2 
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="text-xl md:text-2xl font-bold bg-gradient-to-r from-accent-vibrant via-accent-vibrant to-secondary bg-clip-text text-transparent"
+                    className="text-xl md:text-2xl font-bold bg-gradient-to-r from-icon-vibrant via-icon-accent to-icon-secondary bg-clip-text text-transparent drop-shadow-sm"
                   >
                     Navigation
                   </motion.h2>
@@ -94,10 +99,10 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                       variant="ghost"
                       size="icon"
                       onClick={onClose}
-                      className="rounded-full hover:bg-destructive/20 hover:text-destructive h-8 w-8 md:h-10 md:w-10"
+                      className="rounded-full hover:bg-destructive/25 hover:text-destructive text-foreground/80 h-8 w-8 md:h-10 md:w-10 transition-all duration-200"
                     >
-                      <X size={20} weight="bold" className="md:hidden" />
-                      <X size={24} weight="bold" className="hidden md:block" />
+                      <X size={20} weight="bold" className="md:hidden drop-shadow-[0_0_4px_currentColor]" />
+                      <X size={24} weight="bold" className="hidden md:block drop-shadow-[0_0_4px_currentColor]" />
                     </Button>
                   </motion.div>
                 </div>
@@ -106,7 +111,7 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
-                  className="text-muted-foreground text-xs md:text-sm"
+                  className="text-foreground/70 text-xs md:text-sm font-medium"
                 >
                   Access all modules from here
                 </motion.p>
@@ -132,17 +137,17 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                       <Button
                         variant="ghost"
                         className={cn(
-                          'w-full justify-start gap-2 md:gap-3 h-10 md:h-12 rounded-lg transition-all duration-200 group relative overflow-hidden px-2 md:px-3',
+                          'w-full justify-start gap-2 md:gap-3 h-10 md:h-12 rounded-xl transition-all duration-200 group relative overflow-hidden px-2 md:px-3',
                           isActive
-                            ? 'bg-gradient-to-r from-accent-vibrant/20 to-accent-vibrant/20 text-foreground border border-accent-vibrant/40 shadow-lg'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent'
+                            ? 'bg-gradient-to-r from-white/40 to-white/25 text-foreground border-2 border-white/50 shadow-lg backdrop-blur-sm'
+                            : 'text-foreground/75 hover:text-foreground hover:bg-white/20 border border-white/20 hover:border-white/40 hover:shadow-md'
                         )}
                         onClick={() => handleModuleClick(module.id)}
                       >
                         {isActive && (
                           <motion.div
                             layoutId="activeModule"
-                            className="absolute inset-0 bg-gradient-to-r from-accent-vibrant/10 to-accent-vibrant/10 rounded-lg"
+                            className="absolute inset-0 bg-gradient-to-br from-white/30 to-white/15 rounded-xl"
                             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                           />
                         )}
@@ -150,25 +155,30 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                         <div className="relative z-10 flex items-center gap-2 md:gap-3 w-full">
                           <div className={cn(
                             'transition-all duration-200 flex-shrink-0',
-                            module.color
+                            module.color,
+                            isActive && 'drop-shadow-[0_0_10px_currentColor]'
                           )}>
                             <IconComponent 
                               size={24}
                               weight={isActive ? 'fill' : 'duotone'}
                               className={cn(
-                                'drop-shadow-[0_0_8px_currentColor] md:w-8 md:h-8',
+                                'transition-all duration-200 md:w-7 md:h-7',
+                                isActive ? 'drop-shadow-[0_0_12px_currentColor]' : 'drop-shadow-[0_0_6px_currentColor]',
                                 isActive && 'animate-pulse-button'
                               )}
                             />
                           </div>
-                          <span className="font-semibold text-sm md:text-base flex-1 text-left">
+                          <span className={cn(
+                            "font-semibold text-sm md:text-base flex-1 text-left transition-all duration-200",
+                            isActive ? "text-foreground drop-shadow-sm" : "text-foreground/80"
+                          )}>
                             {module.label}
                           </span>
                           {isActive && (
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-accent-vibrant neon-glow"
+                              className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-gradient-to-br from-icon-vibrant to-icon-accent drop-shadow-[0_0_8px_currentColor]"
                             />
                           )}
                         </div>
@@ -178,17 +188,17 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                 })}
               </div>
 
-              <div className="p-3 md:p-4 border-t border-accent-vibrant/20">
+              <div className="p-3 md:p-4 border-t border-white/25">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="text-center text-[10px] md:text-xs text-muted-foreground"
+                  className="text-center text-[10px] md:text-xs"
                 >
-                  <p className="font-semibold bg-gradient-to-r from-accent-vibrant to-accent-vibrant bg-clip-text text-transparent">
+                  <p className="font-bold bg-gradient-to-r from-icon-vibrant via-icon-accent to-icon-secondary bg-clip-text text-transparent drop-shadow-sm text-sm md:text-base">
                     LiFE-iN-SYNC
                   </p>
-                  <p className="mt-0.5 md:mt-1">Optimize Your Life</p>
+                  <p className="mt-0.5 md:mt-1 text-foreground/70 font-medium">Optimize Your Life</p>
                 </motion.div>
               </div>
             </motion.div>
