@@ -45,22 +45,13 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
     setLoadingMessage(randomMessage)
 
     const loadAffirmation = async () => {
-      const today = getTodayKey()
-      
       try {
-        const storedAffirmation = await window.spark.kv.get<DailyAffirmation>('daily-affirmation')
-        
-        if (storedAffirmation && storedAffirmation.date === today) {
-          setAffirmation({ text: storedAffirmation.text, author: storedAffirmation.author })
-          return
-        }
-
         const promptText = window.spark.llmPrompt`Generate a single inspirational quote or Bible verse for daily motivation. Return the result as valid JSON in the following format:
 {
   "text": "the quote or verse text",
   "author": "author name or Bible reference"
 }
-Keep the text under 120 characters. Make it profound and uplifting.`
+Keep the text under 120 characters. Make it profound and uplifting. Generate a different quote each time.`
         
         const response = await window.spark.llm(promptText, "gpt-4o-mini", true)
         
@@ -77,12 +68,6 @@ Keep the text under 120 characters. Make it profound and uplifting.`
         }
         
         if (data.text && data.author) {
-          const newAffirmation: DailyAffirmation = {
-            text: data.text,
-            author: data.author,
-            date: today
-          }
-          await window.spark.kv.set('daily-affirmation', newAffirmation)
           setAffirmation({ text: data.text, author: data.author })
         } else {
           throw new Error('Invalid affirmation structure')
