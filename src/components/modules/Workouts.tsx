@@ -39,74 +39,80 @@ export function Workouts() {
 
     setGenerating(true)
     try {
-      const promptText = window.spark.llmPrompt`You are a fitness expert. Generate a complete workout plan based on this request: ${workoutPrompt}.
+      const promptText = window.spark.llmPrompt`You are a fitness expert. Generate a complete workout plan based on this request: "${workoutPrompt}".
 
-Create a balanced workout with 6-10 exercises including warm-up, main work, and cool-down periods.
+Create a balanced workout with 6-8 exercises including warm-up, main work, and cool-down periods.
 
-For each exercise, provide:
-- A unique ID (use the exercise name in kebab-case)
-- Exercise name
-- Type: "reps" or "time"
-- Category: "Warm-up", "Work", "Cool-down", or "Rest"
-- For reps exercises: sets (1-5) and reps (5-20)
-- For time exercises: duration in seconds (20-60 for work, 10-30 for rest)
-- Muscle groups targeted (array of strings like "chest", "legs", "core", etc.)
-- Difficulty: "beginner", "intermediate", or "advanced"
-- Detailed instructions with a summary and 3-5 key points
-- Asset name (use generic names like "jumping-jacks", "push-ups", "squats", etc.)
+IMPORTANT: Return a valid JSON object (not an array) with the following structure. Ensure all fields are present:
 
-Return ONLY valid JSON with this exact structure:
 {
   "workoutPlan": {
-    "name": "Descriptive workout name",
-    "focus": "Main focus area (e.g., Upper Body Strength, HIIT Cardio)",
-    "difficulty": "beginner|intermediate|advanced",
+    "name": "30-Minute Full Body HIIT",
+    "focus": "Full Body Conditioning",
+    "difficulty": "intermediate",
     "exercises": [
       {
-        "id": "exercise-name-kebab-case",
-        "name": "Exercise Name",
-        "type": "reps",
+        "id": "jumping-jacks",
+        "name": "Jumping Jacks",
+        "type": "time",
         "category": "Warm-up",
-        "sets": 2,
-        "reps": 10,
-        "muscleGroups": ["chest", "triceps"],
+        "duration": 30,
+        "muscleGroups": ["legs", "cardio"],
         "difficulty": "beginner",
         "instructions": {
-          "summary": "Clear description of how to perform the exercise",
-          "keyPoints": ["Point 1", "Point 2", "Point 3"]
+          "summary": "A dynamic full-body warm-up exercise",
+          "keyPoints": ["Keep core engaged", "Land softly", "Maintain steady rhythm"]
         },
-        "asset": "exercise-name"
+        "asset": "jumping-jacks"
       }
     ]
   }
-}`
+}
 
+For reps-based exercises, use: "type": "reps", "sets": 3, "reps": 12
+For time-based exercises, use: "type": "time", "duration": 30
+
+Muscle groups can include: chest, back, legs, arms, core, shoulders, cardio
+Categories: "Warm-up", "Work", "Cool-down"
+Difficulty levels: "beginner", "intermediate", "advanced"`
+
+      console.log('Sending workout generation request...')
       const response = await window.spark.llm(promptText, 'gpt-4o', true)
+      console.log('Received response:', response)
       
       if (!response || typeof response !== 'string') {
-        throw new Error('Invalid response from AI service')
+        console.error('Invalid response type:', typeof response)
+        throw new Error('AI service returned an invalid response')
       }
 
       let data
       try {
         data = JSON.parse(response)
+        console.log('Parsed workout data:', data)
       } catch (parseError) {
-        console.error('JSON parse error:', parseError, 'Response:', response)
-        throw new Error('Failed to parse AI response')
+        console.error('JSON parse error:', parseError)
+        console.error('Raw response:', response)
+        throw new Error('AI returned invalid JSON. Please try again.')
       }
 
-      if (!data.workoutPlan || !data.workoutPlan.exercises || !Array.isArray(data.workoutPlan.exercises)) {
-        console.error('Invalid workout plan structure:', data)
-        throw new Error('AI returned invalid workout structure')
+      if (!data.workoutPlan) {
+        console.error('Missing workoutPlan in response:', data)
+        throw new Error('Invalid workout format - missing workoutPlan')
+      }
+
+      if (!data.workoutPlan.exercises || !Array.isArray(data.workoutPlan.exercises)) {
+        console.error('Invalid exercises array:', data.workoutPlan.exercises)
+        throw new Error('Invalid workout format - exercises must be an array')
       }
 
       if (data.workoutPlan.exercises.length === 0) {
-        throw new Error('AI returned empty workout plan')
+        console.error('Empty exercises array')
+        throw new Error('AI returned an empty workout plan')
       }
 
       const totalDuration = data.workoutPlan.exercises.reduce((acc: number, ex: any) => {
         if (ex.type === 'time') return acc + (ex.duration || 0)
-        if (ex.type === 'reps') return acc + (ex.sets * ex.reps * 3)
+        if (ex.type === 'reps') return acc + ((ex.sets || 3) * (ex.reps || 10) * 3)
         return acc
       }, 0)
 
@@ -114,21 +120,33 @@ Return ONLY valid JSON with this exact structure:
         id: Date.now().toString(),
         name: data.workoutPlan.name || 'Custom Workout',
         focus: data.workoutPlan.focus || 'General Fitness',
-        exercises: data.workoutPlan.exercises,
+        exercises: data.workoutPlan.exercises.map((ex: any) => ({
+          ...ex,
+          sets: ex.sets || 3,
+          reps: ex.reps || 10,
+          muscleGroups: ex.muscleGroups || [],
+          difficulty: ex.difficulty || 'intermediate',
+          instructions: ex.instructions || {
+            summary: 'Perform this exercise with proper form',
+            keyPoints: ['Focus on form', 'Breathe steadily', 'Control the movement']
+          }
+        })),
         estimatedDuration: Math.ceil(totalDuration / 60),
         difficulty: data.workoutPlan.difficulty || 'intermediate',
         createdAt: new Date().toISOString()
       }
 
+      console.log('Final workout plan:', workout)
+
       setWorkoutPlans((current) => [...(current || []), workout])
       setDialogOpen(false)
       setWorkoutPrompt('')
-      toast.success('Workout generated!')
+      toast.success('Workout generated successfully!')
     } catch (error) {
       console.error('Workout generation error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to generate workout'
-      toast.error(errorMessage, {
-        description: 'Please try again or rephrase your request'
+      toast.error('Generation Failed', {
+        description: errorMessage
       })
     } finally {
       setGenerating(false)
