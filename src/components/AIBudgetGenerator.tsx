@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { AIButton } from '@/components/AIButton'
 import { SarcasticLoader } from '@/components/SarcasticLoader'
+import { callAIWithRetry, parseAIJsonResponse, validateAIResponse } from '@/lib/ai-utils'
 
 interface BudgetRecommendation {
   category: string
@@ -42,7 +43,7 @@ export function AIBudgetGenerator() {
     setIsGenerating(true)
     
     try {
-      const promptText = `You are a financial advisor helping create a realistic budget.
+      const promptText = window.spark.llmPrompt`You are a financial advisor helping create a realistic budget.
 
 User's monthly income: $${income}
 Budget scenario: ${scenario}
@@ -80,29 +81,15 @@ Return ONLY valid JSON in this exact format (no markdown, no code blocks):
 
 Ensure all recommended amounts sum to the total budget. Be realistic and practical based on the user's scenario.`
 
-      const response = await window.spark.llm(promptText, 'gpt-4o', true)
+      const response = await callAIWithRetry(promptText, 'gpt-4o', true)
+      const parsed = parseAIJsonResponse<{ budget: GeneratedBudget }>(response, 'budget structure')
       
-      if (!response || typeof response !== 'string') {
-        throw new Error('Invalid response from AI service')
-      }
-
-      let parsed
-      try {
-        parsed = JSON.parse(response)
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError, 'Response:', response)
-        throw new Error('Failed to parse AI response')
-      }
-      
-      if (!parsed.budget || !parsed.budget.recommendations) {
-        console.error('Invalid budget structure:', parsed)
-        throw new Error('AI returned invalid budget structure')
-      }
+      validateAIResponse(parsed, ['budget', 'budget.recommendations', 'budget.tips'])
 
       setGeneratedBudget(parsed.budget)
       toast.success('Budget generated successfully!')
     } catch (error) {
-      console.error('Budget generation error:', error)
+      console.error('[Budget] Generation error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to generate budget'
       toast.error(errorMessage, {
         description: 'Please try again or adjust your inputs'

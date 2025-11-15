@@ -15,6 +15,7 @@ import { motion } from 'framer-motion'
 import { AIButton } from '@/components/AIButton'
 import { StatCard } from '@/components/StatCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { callAIWithRetry, parseAIJsonResponse, validateAIResponse } from '@/lib/ai-utils'
 
 type WorkoutStage = 'planning' | 'active' | 'summary'
 
@@ -76,38 +77,17 @@ Muscle groups can include: chest, back, legs, arms, core, shoulders, cardio
 Categories: "Warm-up", "Work", "Cool-down"
 Difficulty levels: "beginner", "intermediate", "advanced"`
 
-      console.log('Sending workout generation request...')
-      const response = await window.spark.llm(promptText, 'gpt-4o', true)
-      console.log('Received response:', response)
+      const response = await callAIWithRetry(promptText, 'gpt-4o', true)
+      const data = parseAIJsonResponse<{ workoutPlan: any }>(response, 'workoutPlan structure')
       
-      if (!response || typeof response !== 'string') {
-        console.error('Invalid response type:', typeof response)
-        throw new Error('AI service returned an invalid response')
-      }
+      validateAIResponse(data, ['workoutPlan', 'workoutPlan.name', 'workoutPlan.exercises'])
 
-      let data
-      try {
-        data = JSON.parse(response)
-        console.log('Parsed workout data:', data)
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError)
-        console.error('Raw response:', response)
-        throw new Error('AI returned invalid JSON. Please try again.')
-      }
-
-      if (!data.workoutPlan) {
-        console.error('Missing workoutPlan in response:', data)
-        throw new Error('Invalid workout format - missing workoutPlan')
-      }
-
-      if (!data.workoutPlan.exercises || !Array.isArray(data.workoutPlan.exercises)) {
-        console.error('Invalid exercises array:', data.workoutPlan.exercises)
-        throw new Error('Invalid workout format - exercises must be an array')
+      if (!Array.isArray(data.workoutPlan.exercises)) {
+        throw new Error('workoutPlan.exercises must be an array')
       }
 
       if (data.workoutPlan.exercises.length === 0) {
-        console.error('Empty exercises array')
-        throw new Error('AI returned an empty workout plan')
+        throw new Error('workoutPlan.exercises cannot be empty')
       }
 
       const totalDuration = data.workoutPlan.exercises.reduce((acc: number, ex: any) => {
@@ -136,14 +116,14 @@ Difficulty levels: "beginner", "intermediate", "advanced"`
         createdAt: new Date().toISOString()
       }
 
-      console.log('Final workout plan:', workout)
+      console.log('[Workout] Generated successfully:', workout)
 
       setWorkoutPlans((current) => [...(current || []), workout])
       setDialogOpen(false)
       setWorkoutPrompt('')
       toast.success('Workout generated successfully!')
     } catch (error) {
-      console.error('Workout generation error:', error)
+      console.error('[Workout] Generation error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to generate workout'
       toast.error('Generation Failed', {
         description: errorMessage

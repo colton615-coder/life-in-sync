@@ -94,7 +94,7 @@ export function Finance() {
     try {
       const totalIncome = profile.monthlyIncome + (profile.partnerIncome || 0)
       
-      const promptText = `You are an expert financial advisor. Based on the following detailed financial profile, create a comprehensive, personalized budget plan.
+      const promptText = window.spark.llmPrompt`You are an expert financial advisor. Based on the following detailed financial profile, create a comprehensive, personalized budget plan.
 
 FINANCIAL PROFILE:
 - Total Monthly Income: $${totalIncome}

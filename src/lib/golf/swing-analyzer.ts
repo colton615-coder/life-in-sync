@@ -230,7 +230,7 @@ export async function generateFeedback(metrics: SwingMetrics): Promise<SwingFeed
 
   const overallScore = calculateOverallScore(metrics)
 
-  const prompt = spark.llmPrompt`You are a professional golf instructor analyzing a student's swing. Based on these metrics:
+  const prompt = window.spark.llmPrompt`You are a professional golf instructor analyzing a student's swing. Based on these metrics:
 - Hip Rotation: ${metrics.hipRotation.total.toFixed(1)}°
 - Shoulder Rotation: ${metrics.shoulderRotation.total.toFixed(1)}°
 - Head Stability: ${metrics.headMovement.stability}
@@ -239,7 +239,7 @@ export async function generateFeedback(metrics: SwingMetrics): Promise<SwingFeed
 
 Provide a 2-3 sentence personalized insight focusing on the most important aspect to work on for improvement.`
 
-  const aiInsights = await spark.llm(prompt, 'gpt-4o')
+  const aiInsights = await window.spark.llm(prompt, 'gpt-4o')
 
   return {
     overallScore,
