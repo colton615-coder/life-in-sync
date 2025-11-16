@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { SarcasticLoader } from '@/components/SarcasticLoader'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { callAIWithRetry } from '@/lib/ai-utils'
 
 export function Knox() {
   const [messages, setMessages] = useKV<ChatMessage[]>('knox-messages', [])
@@ -41,6 +42,8 @@ export function Knox() {
     setInitError(false)
 
     try {
+      console.log('[Knox] Starting session initialization')
+      
       if (!window.spark || !window.spark.llm || !window.spark.llmPrompt) {
         throw new Error('Spark SDK not available')
       }
@@ -87,8 +90,10 @@ My Core Goals:
 
 This is the FIRST message to initiate the session. Do NOT say "How can I help you?". Instead, initiate the session by asking a deep, challenging question based on the profile provided. Keep it to 2-3 sentences maximum. Be direct and provocative.`
 
-      const response = await window.spark.llm(promptText, 'gpt-4o', false)
-
+      console.log('[Knox] Calling AI with retry logic')
+      const response = await callAIWithRetry(promptText, 'gpt-4o', false)
+      
+      console.log('[Knox] Session initialized successfully')
       const assistantMessage: ChatMessage = {
         id: Date.now().toString(),
         role: 'assistant',
@@ -99,12 +104,15 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
       setMessages([assistantMessage])
       setInitError(false)
       setTimeout(() => textareaRef.current?.focus(), 100)
+      toast.success('Knox is ready', {
+        description: 'Your session has started'
+      })
     } catch (error) {
-      console.error('Knox initialization error:', error)
+      console.error('[Knox] Initialization error:', error)
       setInitError(true)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       toast.error('Knox initialization failed', {
-        description: `Unable to start session. ${errorMessage}`
+        description: errorMessage
       })
       
       setMessages([{
@@ -133,6 +141,8 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
     setLoading(true)
 
     try {
+      console.log('[Knox] Sending user message')
+      
       if (!window.spark || !window.spark.llm || !window.spark.llmPrompt) {
         throw new Error('Spark SDK not available')
       }
@@ -177,8 +187,10 @@ ${conversationHistory}
 
 Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them toward uncomfortable truths. Match their dark humor when appropriate.`
 
-      const response = await window.spark.llm(promptText, 'gpt-4o', false)
-
+      console.log('[Knox] Calling AI with retry logic')
+      const response = await callAIWithRetry(promptText, 'gpt-4o', false)
+      
+      console.log('[Knox] Response received successfully')
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -189,10 +201,10 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
       setMessages((current) => [...(current || []), assistantMessage])
       setTimeout(() => textareaRef.current?.focus(), 100)
     } catch (error) {
-      console.error('Knox message error:', error)
+      console.error('[Knox] Message error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       toast.error('Message failed', {
-        description: `Unable to get Knox's response. ${errorMessage}`
+        description: errorMessage
       })
       
       const errorResponse: ChatMessage = {

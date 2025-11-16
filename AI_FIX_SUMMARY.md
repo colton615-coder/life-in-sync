@@ -50,9 +50,15 @@ This new utility file provides three key functions that ALL AI calls should use:
 #### 🔄 **Finance Module** - Ready for Update
 The Finance.tsx module's `handleProfileComplete()` function should be updated to use the same utilities.
 
+#### ✅ **Knox Module** (`src/components/modules/Knox.tsx`)
+- Now uses `callAIWithRetry()` for robust API calls
+- Integrated automatic retry logic with exponential backoff
+- Added comprehensive logging with `[Knox]` prefix
+- Both `startSession()` and `sendMessage()` now use the utility
+- Improved error handling and user feedback
+
 #### 🔄 **Other Modules** - Can Be Updated
 - `LoadingScreen.tsx` - Daily affirmation generation
-- `Knox.tsx` - Chat AI responses
 - `GolfSwing.tsx` / `swing-analyzer.ts` - Swing analysis feedback
 - `Settings.tsx` - Any AI features
 
@@ -150,7 +156,7 @@ To apply these fixes to ALL AI features globally:
 
 1. **Update Finance Module** - Apply same pattern to `handleProfileComplete()`
 2. **Update LoadingScreen** - Use utilities for affirmation generation  
-3. **Update Knox Module** - Use utilities for chat responses
+3. ~~**Update Knox Module**~~ - ✅ **COMPLETED** - Uses utilities for chat responses
 4. **Update Golf Analyzer** - Use utilities in `generateFeedback()`
 5. **Update any other AI features** - Consistent pattern everywhere
 
@@ -159,6 +165,7 @@ To apply these fixes to ALL AI features globally:
 - ✅ `src/lib/ai-utils.ts` - **NEW** centralized utilities
 - ✅ `src/components/modules/Workouts.tsx` - Updated with utilities
 - ✅ `src/components/AIBudgetGenerator.tsx` - Updated with utilities
+- ✅ `src/components/modules/Knox.tsx` - **UPDATED** with utilities and retry logic
 - ✅ `src/components/modules/Finance.tsx` - Updated prompt syntax (needs utility integration)
 - ✅ `src/lib/golf/swing-analyzer.ts` - Fixed prompt syntax
 
