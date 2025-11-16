@@ -3,7 +3,7 @@ import { WorkoutPlan, Exercise } from '@/lib/types'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { PauseCircle, PlayCircle, SkipForward, XCircle, Info, Check, Flame, Target, Wind, Clock } from '@phosphor-icons/react'
+import { PauseCircle, PlayCircle, SkipForward, XCircle, Check, Flame, Target, Wind, Clock } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import {
@@ -14,8 +14,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Separator } from '@/components/ui/separator'
 
 interface ActiveWorkoutProps {
   workout: WorkoutPlan
@@ -26,7 +24,6 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [isPauseModalOpen, setIsPauseModalOpen] = useState(false)
-  const [isInstructionsSheetOpen, setIsInstructionsSheetOpen] = useState(false)
   
   const currentExercise = workout.exercises[currentExerciseIndex]
   const [timeLeft, setTimeLeft] = useState(currentExercise.duration || 0)
@@ -183,18 +180,45 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
             >
               {currentExercise.name}
             </motion.h1>
-            <div className="flex-1 text-right">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsInstructionsSheetOpen(true)}
-                  className="hover:scale-110 transition-transform"
-                >
-                  <Info className={cn(categoryStyle.text)}/>
-                </Button>
-            </div>
+            <div className="flex-1" />
           </div>
         </header>
+
+        <div className="flex flex-col items-center gap-6 w-full max-w-2xl my-6">
+          {currentExercise.asset && (
+            <motion.div
+              key={`image-${currentExerciseIndex}`}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="w-full max-w-md rounded-2xl overflow-hidden shadow-lg"
+            >
+              <img 
+                src={currentExercise.asset} 
+                alt={currentExercise.name}
+                className="w-full h-64 object-cover"
+              />
+            </motion.div>
+          )}
+          
+          <motion.div
+            key={`instructions-${currentExerciseIndex}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="w-full px-4 text-center space-y-3"
+          >
+            <p className="text-sm sm:text-base text-foreground/90">
+              {currentExercise.instructions.summary}
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {currentExercise.instructions.keyPoints.slice(0, 3).map((point, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {point}
+                </Badge>
+              ))}
+            </div>
+          </motion.div>
+        </div>
 
         {isRepBased ? (
             <motion.div 
@@ -370,46 +394,6 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      <Sheet open={isInstructionsSheetOpen} onOpenChange={setIsInstructionsSheetOpen}>
-        <SheetContent
-          side="bottom"
-          className="h-4/5 rounded-t-lg bg-background/95 backdrop-blur-lg border-t border-border overflow-y-auto"
-        >
-            <SheetHeader>
-                <SheetTitle className="text-2xl sm:text-3xl text-center mb-4">
-                  {currentExercise.name}
-                </SheetTitle>
-            </SheetHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-2 pb-8">
-                <div className="rounded-lg overflow-hidden h-64 md:h-auto aspect-square self-center bg-muted flex items-center justify-center">
-                     <span className="text-6xl">💪</span>
-                </div>
-                <div className="space-y-6">
-                    <div>
-                        <h3 className="font-semibold text-xl text-accent mb-2">Instructions</h3>
-                        <p className="text-base text-foreground/90 whitespace-pre-line">
-                          {currentExercise.instructions.summary}
-                        </p>
-                    </div>
-                    <Separator />
-                    <div>
-                       <h3 className="font-semibold text-xl text-accent mb-3">Key Points</h3>
-                       <ul className="space-y-3">
-                        {currentExercise.instructions.keyPoints.map((point: string, index: number) => (
-                            <li key={index} className="flex items-start gap-3">
-                                <div className="w-5 h-5 flex-shrink-0 rounded-full bg-accent/20 text-accent flex items-center justify-center mt-0.5">
-                                    <Check size={14}/>
-                                </div>
-                                <span className="text-foreground/90">{point}</span>
-                            </li>
-                        ))}
-                       </ul>
-                    </div>
-                </div>
-            </div>
-        </SheetContent>
-      </Sheet>
     </>
   )
 }
