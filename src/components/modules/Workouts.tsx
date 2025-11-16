@@ -66,7 +66,12 @@ export function Workouts() {
       console.log('[Workout Generation] Step 1: Creating LLM prompt')
       const promptText = window.spark.llmPrompt`You are a fitness expert. Generate a complete workout plan based on this request: "${workoutPrompt}".
 
-Create a balanced workout with 6-8 exercises including warm-up, main work, and cool-down periods.
+CRITICAL: If the user specifies a time duration (e.g., "15 minute", "30 min", etc.), you MUST create exercises that add up to approximately that duration.
+- For time-based exercises (type: "time"), the "duration" field is in SECONDS
+- For reps-based exercises (type: "reps"), estimate ~3 seconds per rep, so sets × reps × 3 = total seconds
+- Calculate carefully to match the requested workout duration
+
+Create a balanced workout with 6-10 exercises including warm-up, main work, and cool-down periods.
 
 IMPORTANT: Return a valid JSON object (not an array) with the following structure. Ensure all fields are present:
 
@@ -81,7 +86,7 @@ IMPORTANT: Return a valid JSON object (not an array) with the following structur
         "name": "Jumping Jacks",
         "type": "time",
         "category": "Warm-up",
-        "duration": 30,
+        "duration": 60,
         "muscleGroups": ["legs", "cardio"],
         "difficulty": "beginner",
         "instructions": {
@@ -94,8 +99,12 @@ IMPORTANT: Return a valid JSON object (not an array) with the following structur
   }
 }
 
-For reps-based exercises, use: "type": "reps", "sets": 3, "reps": 12
-For time-based exercises, use: "type": "time", "duration": 30
+For reps-based exercises, use: "type": "reps", "sets": 3, "reps": 12 (this equals ~108 seconds or ~2 minutes)
+For time-based exercises, use: "type": "time", "duration": 60 (duration is in SECONDS, not minutes)
+
+Examples:
+- A 15-minute workout should have exercises totaling ~900 seconds (15 × 60)
+- A 30-minute workout should have exercises totaling ~1800 seconds (30 × 60)
 
 Muscle groups can include: chest, back, legs, arms, core, shoulders, cardio
 Categories: "Warm-up", "Work", "Cool-down"
@@ -157,8 +166,18 @@ Difficulty levels: "beginner", "intermediate", "advanced"`
 
       console.log('[Workout Generation] Step 9: Calculating total duration')
       const totalDuration = data.workoutPlan.exercises.reduce((acc: number, ex: any) => {
-        if (ex.type === 'time') return acc + (ex.duration || 0)
-        if (ex.type === 'reps') return acc + ((ex.sets || 3) * (ex.reps || 10) * 3)
+        if (ex.type === 'time') {
+          const duration = ex.duration || 0
+          console.log(`[Workout Generation] Time-based exercise "${ex.name}": ${duration}s`)
+          return acc + duration
+        }
+        if (ex.type === 'reps') {
+          const sets = ex.sets || 3
+          const reps = ex.reps || 10
+          const estimatedTime = sets * reps * 3
+          console.log(`[Workout Generation] Reps-based exercise "${ex.name}": ${sets} sets × ${reps} reps × 3s = ${estimatedTime}s`)
+          return acc + estimatedTime
+        }
         return acc
       }, 0)
       console.log('[Workout Generation] Total duration (seconds):', totalDuration)
@@ -392,7 +411,7 @@ Difficulty levels: "beginner", "intermediate", "advanced"`
                         <div className="flex-1">
                           <div className="flex items-start gap-2 mb-2">
                             <h3 className="font-semibold text-lg">{workout.name}</h3>
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="text-xs capitalize">
                               {workout.difficulty}
                             </Badge>
                           </div>
