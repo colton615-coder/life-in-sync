@@ -5,7 +5,6 @@ interface CardProps {
   children: ReactNode
   className?: string
   hover?: boolean
-  glass?: boolean
   onClick?: () => void
 }
 
@@ -13,15 +12,14 @@ export function Card({
   children, 
   className, 
   hover = false, 
-  glass = false,
   onClick 
 }: CardProps) {
   return (
     <div
       onClick={onClick}
       className={cn(
-        'rounded-lg md:rounded-xl p-2.5 md:p-3',
-        glass ? 'glass-card' : 'elevated-card',
+        'rounded-xl p-4',
+        'dashboard-card',
         hover && 'cursor-pointer',
         className
       )}

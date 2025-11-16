@@ -107,56 +107,47 @@ A visual habit tracking application where users set daily goals (like drinking 8
 - **Browser Compatibility**: Video playback fallbacks for unsupported codecs, WebGL requirements checked for pose estimation
 
 ## Design Direction
-The interface should feel sleek, powerful, and high-functioning with an abstract, premium aesthetic. The design should evoke a sense of sophistication and control through bold geometric elements, subtle gradients, glass-morphic surfaces, and purposeful animations. A dark, rich interface with strategic use of color creates depth and dimension, while abstract background patterns and floating elements convey technical prowess and modern design.
+The interface should feel like a professional dark dashboard UI kit—sleek, modern, and high-tech with a focus on data visualization and control. The design evokes technical sophistication through dark surfaces, bright cyan/blue accents, clean geometric layouts, and subtle gradients. The aesthetic is minimalist yet functional, with clear hierarchies, rounded corners, and purposeful use of color to highlight interactive elements and data. The overall feel is professional, cutting-edge, and optimized for extended use in low-light environments.
 
 ## Color Selection
-Dark and light themes with sophisticated color scheme featuring vibrant neon accents in dark mode and clean, modern tones in light mode.
+Dark theme with vibrant cyan/blue accents following modern dashboard UI conventions.
 
-**Light Theme:**
-- **Primary Color**: Soft Teal (oklch(0.48 0.12 75)) - Calming, focused action color for primary buttons
+**Dark Dashboard Theme:**
+- **Primary Color**: Vibrant Cyan (oklch(0.70 0.19 195)) - High-tech accent for primary actions, interactive elements, and data highlights
 - **Secondary Colors**: 
-  - Pale Green (oklch(0.90 0.05 90)) - Gentle supporting color for secondary surfaces
-  - Bright Green (oklch(0.72 0.08 110)) - Fresh accent for highlights
-- **Accent Color**: Success Green (oklch(0.65 0.18 150)) - Completion states with positive reinforcement
+  - Dark Surface (oklch(0.25 0.01 240)) - Card and component backgrounds
+  - Darker Surface (oklch(0.20 0.01 240)) - Nested elements and inputs
+- **Accent Color**: Electric Blue (oklch(0.65 0.18 230)) - Secondary highlights and alternate data points
 - **Foreground/Background Pairings**:
-  - Background (Soft White oklch(0.98 0.008 85)): Dark Text (oklch(0.20 0.02 45)) - Ratio 11.4:1 ✓
-  - Card (Crisp White oklch(0.99 0.005 85)): Dark Text (oklch(0.20 0.02 45)) - Ratio 12.1:1 ✓
-  - Primary (Soft Teal oklch(0.48 0.12 75)): Light Text (oklch(0.98 0.008 85)) - Ratio 6.2:1 ✓
-  - Accent (Bright Green oklch(0.72 0.08 110)): Dark Text (oklch(0.20 0.02 45)) - Ratio 5.1:1 ✓
-
-**Dark Theme:**
-- **Primary Color**: Electric Cyan (oklch(0.75 0.20 195)) - High-tech, powerful accent for primary actions and key interactive elements
-- **Secondary Colors**: 
-  - Deep Purple (oklch(0.55 0.25 285)) - Premium, abstract feel for secondary surfaces and accents
-  - Neon Pink (oklch(0.70 0.25 350)) - Bold highlight for critical actions and special states
-- **Accent Color**: Lime Green (oklch(0.80 0.22 130)) - Success and completion states with high contrast
-- **Foreground/Background Pairings**:
-  - Background (Deep Dark oklch(0.15 0.02 265)): Light Text (oklch(0.95 0.01 265)) - Ratio 11.2:1 ✓
-  - Card (Dark Surface oklch(0.22 0.03 265)): Light Text (oklch(0.95 0.01 265)) - Ratio 8.5:1 ✓
-  - Primary (Electric Cyan oklch(0.75 0.20 195)): Dark Background (oklch(0.15 0.02 265)) - Ratio 7.1:1 ✓
-  - Secondary (Deep Purple oklch(0.55 0.25 285)): Light Text (oklch(0.95 0.01 265)) - Ratio 5.8:1 ✓
-  - Accent (Lime Green oklch(0.80 0.22 130)): Dark Background (oklch(0.15 0.02 265)) - Ratio 9.2:1 ✓
-  - Muted (Subtle Gray oklch(0.40 0.02 265)): Light Text (oklch(0.95 0.01 265)) - Ratio 4.8:1 ✓
+  - Background (Deep Dark oklch(0.17 0.01 240)): Light Text (oklch(0.92 0.005 240)) - Ratio 10.8:1 ✓
+  - Card (Dark Surface oklch(0.25 0.01 240)): Light Text (oklch(0.92 0.005 240)) - Ratio 7.2:1 ✓
+  - Primary (Vibrant Cyan oklch(0.70 0.19 195)): Dark Background (oklch(0.17 0.01 240)) - Ratio 6.8:1 ✓
+  - Secondary (Dark Surface oklch(0.25 0.01 240)): Muted Text (oklch(0.65 0.005 240)) - Ratio 4.5:1 ✓
+  - Accent (Electric Blue oklch(0.65 0.18 230)): Dark Background (oklch(0.17 0.01 240)) - Ratio 5.9:1 ✓
+  - Muted (Gray oklch(0.45 0.005 240)): Light Text (oklch(0.92 0.005 240)) - Ratio 4.6:1 ✓
+  - Success (Cyan Green oklch(0.68 0.16 180)): Dark Background (oklch(0.17 0.01 240)) - Ratio 6.2:1 ✓
 
 ## Font Selection
-Typography should convey friendly approachability with clear readability through the Poppins font family for headings (personality) and Inter for body text (clarity).
+Typography should convey technical precision and clarity through sans-serif fonts with excellent legibility on dark backgrounds—Inter for all text elements with weight variations to establish hierarchy.
 
 - **Typographic Hierarchy**:
-  - H1 (Habit Names): Poppins SemiBold / 32px / normal letter spacing / 1.2 line height
-  - H2 (Section Headers): Poppins Medium / 24px / normal / 1.3
-  - Body (Descriptions): Inter Regular / 16px / normal / 1.5
-  - Stats (Progress Numbers): Poppins SemiBold / 48px / tight / 1.1 / tabular-nums
-  - Labels: Inter Medium / 14px / normal / 1.4
-  - Captions: Inter Regular / 13px / normal / 1.4
+  - H1 (Page Titles): Inter Bold / 32px / tight letter spacing (-0.02em) / 1.2 line height
+  - H2 (Section Headers): Inter SemiBold / 24px / tight (-0.01em) / 1.3
+  - H3 (Card Titles): Inter SemiBold / 18px / normal / 1.4
+  - Body (Descriptions): Inter Regular / 15px / normal / 1.5
+  - Stats (Data Numbers): Inter Bold / 36px / tight / 1.1 / tabular-nums
+  - Labels: Inter Medium / 13px / wide (0.01em) / 1.4 / uppercase
+  - Captions: Inter Regular / 12px / normal / 1.4
+  - Code/Metrics: Inter Medium / 14px / tabular-nums
 
 ## Animations
-Animations should create a sense of power and precision, with smooth, purposeful movements that emphasize the app's high-functioning nature. Glass-morphic transitions, subtle particle effects, and geometric transformations convey technical sophistication. The balance is restrained elegance—every animation serves a purpose and reinforces the premium, abstract aesthetic.
+Animations should be fast, precise, and purposeful—emphasizing efficiency and technical sophistication. Transitions are smooth but quick, hover states are subtle, and interactive feedback is immediate. The balance is professional restraint with purposeful micro-interactions that enhance usability without distraction.
 
-- **Purposeful Meaning**: Glass-morphic transitions communicate depth and layering; geometric animations provide sophisticated feedback; ambient particles suggest technical complexity; glow effects emphasize interactive states
+- **Purposeful Meaning**: Quick transitions communicate responsiveness; subtle hover glows indicate interactivity; smooth fades maintain context during state changes; data animations draw attention to changes
 - **Hierarchy of Movement**: 
-  - Primary: Smooth glass-morphic reveals, icon state transitions with glow effects, celebration with abstract particles
-  - Secondary: Navigation drawer slide with blur, card hover elevations with shadows, progress bar fills with gradient shifts
-  - Tertiary: Ambient background animations, subtle icon pulse states, menu transitions with fade and scale
+  - Primary: Button hover glows (100ms), data updates with smooth number transitions, chart animations on load
+  - Secondary: Navigation transitions with fade, card hover elevations, modal appear/disappear
+  - Tertiary: Subtle icon color transitions, input focus states, tooltip delays
 
 ## Component Selection
 
