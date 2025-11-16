@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Card } from './Card'
+import { NeumorphicCard } from './NeumorphicCard'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 
@@ -12,34 +12,36 @@ interface DashboardWidgetProps {
 }
 
 export function DashboardWidget({ title, icon, children, onClick, className }: DashboardWidgetProps) {
-  const Component = onClick ? motion.button : motion.div
-  
   return (
-    <Component
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={onClick ? { y: -2 } : {}}
-      whileTap={onClick ? { scale: 0.99 } : {}}
-      transition={{ duration: 0.15 }}
+      whileHover={onClick ? { y: -4, scale: 1.02 } : {}}
+      whileTap={onClick ? { scale: 0.98 } : {}}
+      transition={{ duration: 0.2, type: 'spring', stiffness: 300, damping: 20 }}
       onClick={onClick}
       className={cn(
-        "w-full text-left",
+        "w-full",
         onClick && "cursor-pointer group",
         className
       )}
     >
-      <Card className={cn(
-        "dashboard-card h-full",
-        onClick && "group-hover:border-primary/50"
+      <div className={cn(
+        "neumorphic-card h-full transition-all duration-300",
+        onClick && "hover:glow-border"
       )}>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="p-2 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
-            {icon}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="icon-circle-glow flex items-center justify-center w-12 h-12">
+            <div className="text-accent-foreground">
+              {icon}
+            </div>
           </div>
-          <h3 className="font-semibold text-sm uppercase tracking-wide text-foreground/80">{title}</h3>
+          <h3 className="widget-title flex-1">{title}</h3>
         </div>
-        {children}
-      </Card>
-    </Component>
+        <div className="text-foreground">
+          {children}
+        </div>
+      </div>
+    </motion.div>
   )
 }

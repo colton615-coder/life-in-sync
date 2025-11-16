@@ -132,13 +132,13 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   }, [knoxMessages])
 
   return (
-    <div className="pt-2 md:pt-4 space-y-3 md:space-y-4 animate-in fade-in duration-500">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-1 text-sm font-normal">Your life in numbers (they don't lie)</p>
+    <div className="pt-2 md:pt-4 space-y-6 md:space-y-8">
+      <div className="space-y-2">
+        <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gradient-cyan">Dashboard</h1>
+        <p className="text-muted-foreground text-base md:text-lg">Your life in numbers</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-2.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         <DashboardWidget
           title="Habits"
           icon={<Fire size={20} weight="duotone" />}

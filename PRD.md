@@ -107,84 +107,87 @@ A visual habit tracking application where users set daily goals (like drinking 8
 - **Browser Compatibility**: Video playback fallbacks for unsupported codecs, WebGL requirements checked for pose estimation
 
 ## Design Direction
-The interface should feel like a professional dark dashboard UI kit—sleek, modern, and high-tech with a focus on data visualization and control. The design evokes technical sophistication through dark surfaces, bright cyan/blue accents, clean geometric layouts, and subtle gradients. The aesthetic is minimalist yet functional, with clear hierarchies, rounded corners, and purposeful use of color to highlight interactive elements and data. The overall feel is professional, cutting-edge, and optimized for extended use in low-light environments.
+The interface should evoke a premium, futuristic tech aesthetic inspired by Tesla Cybertruck's UI and high-end automotive dashboards—sophisticated, minimalist, and cutting-edge. The neumorphic (soft-UI) approach with dark backgrounds, subtle depth through shadows, and glowing cyan accents creates a tactile, three-dimensional interface that feels both tangible and futuristic. Every element should feel precisely crafted with purposeful micro-interactions, smooth physics-based animations, and attention to detail that reinforces premium quality.
 
 ## Color Selection
-Dark theme with vibrant cyan/blue accents following modern dashboard UI conventions.
+**Neumorphic Dark Palette with Electric Cyan Glow**: The design uses a dark neumorphic style with charcoal gray surfaces that create soft, raised or inset effects through dual-shadow techniques (light shadow from top-left, dark shadow from bottom-right). Vibrant electric cyan serves as the primary accent, providing a high-tech glow effect that stands out beautifully against dark backgrounds.
 
-**Dark Dashboard Theme:**
-- **Primary Color**: Vibrant Cyan (oklch(0.70 0.19 195)) - High-tech accent for primary actions, interactive elements, and data highlights
+**Dark Neumorphic Theme:**
+- **Primary Color**: Electric Cyan (oklch 0.68 0.19 211) - High-tech glow for active buttons, primary actions, progress rings, and interactive highlights; used with box-shadow glow effects
 - **Secondary Colors**: 
-  - Dark Surface (oklch(0.25 0.01 240)) - Card and component backgrounds
-  - Darker Surface (oklch(0.20 0.01 240)) - Nested elements and inputs
-- **Accent Color**: Electric Blue (oklch(0.65 0.18 230)) - Secondary highlights and alternate data points
+  - Card Surface (oklch 0.26 0.01 240) - Raised neumorphic cards with dual shadow
+  - Main Background (oklch 0.22 0.01 240) - Deep charcoal base
+  - Elevated Elements (oklch 0.30 0.015 240) - Borders and lighter surfaces
+- **Accent Color**: Electric Cyan with glow - Creates depth through 0 0 20px oklch(0.68 0.19 211 / 0.3) shadows for glowing buttons and active states
 - **Foreground/Background Pairings**:
-  - Background (Deep Dark oklch(0.17 0.01 240)): Light Text (oklch(0.92 0.005 240)) - Ratio 10.8:1 ✓
-  - Card (Dark Surface oklch(0.25 0.01 240)): Light Text (oklch(0.92 0.005 240)) - Ratio 7.2:1 ✓
-  - Primary (Vibrant Cyan oklch(0.70 0.19 195)): Dark Background (oklch(0.17 0.01 240)) - Ratio 6.8:1 ✓
-  - Secondary (Dark Surface oklch(0.25 0.01 240)): Muted Text (oklch(0.65 0.005 240)) - Ratio 4.5:1 ✓
-  - Accent (Electric Blue oklch(0.65 0.18 230)): Dark Background (oklch(0.17 0.01 240)) - Ratio 5.9:1 ✓
-  - Muted (Gray oklch(0.45 0.005 240)): Light Text (oklch(0.92 0.005 240)) - Ratio 4.6:1 ✓
-  - Success (Cyan Green oklch(0.68 0.16 180)): Dark Background (oklch(0.17 0.01 240)) - Ratio 6.2:1 ✓
+  - Background (Deep Charcoal oklch 0.22 0.01 240): Light Text (oklch 0.95 0.005 240) - Ratio 16.8:1 ✓
+  - Card (Charcoal oklch 0.26 0.01 240): Light Text (oklch 0.95 0.005 240) - Ratio 14.2:1 ✓
+  - Primary (Cyan oklch 0.68 0.19 211): White text (oklch 0.98 0.005 240) - Ratio 5.1:1 ✓
+  - Secondary (Mid Charcoal oklch 0.30 0.015 240): Light text (oklch 0.90 0.01 240) - Ratio 8.4:1 ✓
+  - Muted (Dark Gray oklch 0.28 0.01 240): Muted text (oklch 0.55 0.01 240) - Ratio 4.6:1 ✓
 
 ## Font Selection
-Typography should convey technical precision and clarity through sans-serif fonts with excellent legibility on dark backgrounds—Inter for all text elements with weight variations to establish hierarchy.
+Typography should convey technical precision and modern elegance through clean sans-serif fonts optimized for digital displays—Outfit for display/headings and Inter for body text, both with excellent legibility on dark backgrounds.
 
 - **Typographic Hierarchy**:
-  - H1 (Page Titles): Inter Bold / 32px / tight letter spacing (-0.02em) / 1.2 line height
-  - H2 (Section Headers): Inter SemiBold / 24px / tight (-0.01em) / 1.3
-  - H3 (Card Titles): Inter SemiBold / 18px / normal / 1.4
-  - Body (Descriptions): Inter Regular / 15px / normal / 1.5
-  - Stats (Data Numbers): Inter Bold / 36px / tight / 1.1 / tabular-nums
-  - Labels: Inter Medium / 13px / wide (0.01em) / 1.4 / uppercase
-  - Captions: Inter Regular / 12px / normal / 1.4
-  - Code/Metrics: Inter Medium / 14px / tabular-nums
+  - H1 (Page Titles): Outfit Bold / 48px mobile, 80px desktop / tight letter spacing (-0.02em) / 1.1 line height / gradient text effect
+  - H2 (Section Headers): Outfit SemiBold / 28px / tight (-0.01em) / 1.2
+  - H3 (Widget Titles): Inter SemiBold / 14px / uppercase / wide spacing (0.05em) / muted color
+  - H4 (Card Headers): Outfit Medium / 20px / normal / 1.3
+  - Body (Descriptions): Inter Regular / 16px / normal / 1.5
+  - Stats (Large Numbers): Outfit Bold / 64px / tight / 1.0 / tabular-nums / gradient effect
+  - Data Labels: Inter Medium / 12px / uppercase / wide (0.08em) / 1.4 / muted color
+  - Captions: Inter Regular / 14px / normal / 1.4
+  - Metrics: Inter SemiBold / 18px / tabular-nums
 
 ## Animations
-Animations should be fast, precise, and purposeful—emphasizing efficiency and technical sophistication. Transitions are smooth but quick, hover states are subtle, and interactive feedback is immediate. The balance is professional restraint with purposeful micro-interactions that enhance usability without distraction.
+Animations should feel smooth, polished, and physics-based—like premium automotive interfaces. Transitions use spring-based easing for natural, satisfying motion. The balance is purposeful micro-interactions that delight without distracting, with hover states that respond instantly and state changes that feel tactile through subtle scale and glow effects.
 
-- **Purposeful Meaning**: Quick transitions communicate responsiveness; subtle hover glows indicate interactivity; smooth fades maintain context during state changes; data animations draw attention to changes
+- **Purposeful Meaning**: Spring-based animations communicate premium quality; cyan glow pulses indicate active/processing states; neumorphic depth changes (pressed/raised) provide tactile feedback; smooth fades maintain context during navigation
 - **Hierarchy of Movement**: 
-  - Primary: Button hover glows (100ms), data updates with smooth number transitions, chart animations on load
-  - Secondary: Navigation transitions with fade, card hover elevations, modal appear/disappear
-  - Tertiary: Subtle icon color transitions, input focus states, tooltip delays
+  - Primary: Button press depth changes (200ms spring), glow pulse on active elements (3s infinite), circular progress rings with smooth transitions
+  - Secondary: Card hover elevation with 4px lift (300ms spring), page transitions with fade (400ms), drawer slide with spring physics
+  - Tertiary: Icon color shifts (150ms ease), input focus glow (200ms), micro-scale on tap (100ms)
 
 ## Component Selection
 
 - **Components**:
-  - **Card**: Primary container for each habit with elevated shadow
-  - **Dialog**: Add/edit habit forms, history calendar view
-  - **Progress**: Linear progress bar showing overall completion percentage
-  - **Badge**: Streak counter with flame icon, milestone indicators
-  - **Tabs**: Switch between active habits and history view
-  - **Input**: Habit name and target number entry
-  - **Select**: Icon type selection dropdown
-  - **ScrollArea**: List of multiple habits
-  - **Separator**: Visual dividers between habits
+  - **NeumorphicCard**: Primary container with dual-shadow depth effect (raised or inset variants)
+  - **Dialog**: Forms and modals with neumorphic styling and backdrop blur
+  - **Progress**: Circular rings with cyan glow, linear bars with gradient fill
+  - **Badge**: Pill-shaped indicators with subtle inset styling
+  - **Tabs**: Segmented control with active state using glowing cyan button
+  - **Input**: Inset neumorphic fields with focus glow effect
+  - **Button**: Raised neumorphic (default) or glowing cyan (primary) variants with press depth animation
+  - **ScrollArea**: Custom thin scrollbar with neumorphic track
+  - **IconCircle**: 56px circular container with neumorphic depth, optional cyan glow for active state
 
 - **Customizations**:
-  - **Habit Icon Grid**: Custom component displaying clickable icon array that fills progressively (e.g., 8 glasses)—each icon is an interactive button
-  - **Celebration Overlay**: Full-screen confetti animation with success message
-  - **Streak Badge**: Animated counter with flame icon and glow effect
-  - **Progress Icon**: Individual tappable icon button that animates fill state (empty → filled) with hover and active states
+  - **Glowing Buttons**: Cyan background with box-shadow glow (0 0 20px cyan/0.4) that intensifies on hover
+  - **Neumorphic Surfaces**: Dual-shadow technique (8px 8px 16px dark, -4px -4px 12px light) for raised effect
+  - **Metric Display**: Extra-large numbers (64px+) with gradient cyan effect and tabular numerals
+  - **Progress Rings**: SVG circular progress with cyan stroke, drop-shadow glow, and smooth transitions
+  - **Mode Buttons**: 64px circular neumorphic buttons that transform to glowing cyan when active
 
 - **States**:
-  - **Icons**: Empty (outlined gray with hover effect), Filled (solid color with checkmark), Hover (scale up, highlighted border), Active (scale down), Completed (all filled with celebration)
-  - **Cards**: Default (elevated shadow), Hover (increased shadow), Completed Today (success border glow)
+  - **Buttons**: Default (raised neumorphic with dual shadow), Hover (slightly elevated, reduced shadow), Active (inset depth with inverted shadow), Glow Variant (cyan background with box-shadow glow)
+  - **Cards**: Default (raised neumorphic), Hover (increased elevation with 4px lift, optional glow border), Active (subtle scale 0.98)
+  - **Icon Circles**: Default (raised 56px circle), Hover (reduced shadow depth), Glow (cyan background with radial glow)
 
 - **Icon Selection**:
-  - Habit Types: Droplet (water), Book (reading), Dumbbell (exercise), Apple (nutrition), Moon (sleep), Heart (meditation)
-  - Actions: Plus (increment), Minus (decrement), Fire (streak), Calendar (history), Settings (configure)
-  - Status: CheckCircle (complete), Clock (in progress), Sparkles (celebration)
+  - Primary Icons: House (dashboard), CheckSquare (habits), CurrencyDollar (finance), ListChecks (tasks), Barbell (workouts), Brain (Knox AI)
+  - All icons use Phosphor Icons with 'regular' weight by default, 'fill' weight for active states
+  - Consistent 20-24px sizing for most contexts, 28px+ for primary navigation
 
-- **Spacing**: Generous 8-based scale (8px, 16px, 24px, 32px, 48px) with large icon grids using gap-6, cards using p-8, comfortable tap targets of 60px minimum
+- **Spacing**: 8-based scale with generous breathing room (16px, 24px, 32px, 48px) between cards; internal card padding of 24px-32px; icon circles with 12-16px spacing; min touch targets of 56px (icon circles) and 48px (buttons)
 
 - **Mobile**: 
-  - Stacked habit cards with full-width layout
-  - Large, easily tappable icon buttons (min 60px)
-  - Bottom sheet for add/edit forms
-  - Celebration animation optimized for portrait orientation
-  - Icon grid wraps responsively (2-3 columns on mobile, 4-6 on tablet/desktop)
+  - Full-width neumorphic cards with 16px horizontal margins
+  - Large touch targets (56px+ icon circles, 48px+ buttons)
+  - Bottom-anchored navigation with neumorphic FAB (80px)
+  - Drawer navigation slides from left with backdrop blur
+  - Reduced card padding (16px) and font sizes on mobile
+  - Single column grid layout below 768px
 
 ## AI Integration
 

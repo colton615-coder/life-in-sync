@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { List } from '@phosphor-icons/react'
+import { List, X } from '@phosphor-icons/react'
 
 interface NavigationButtonProps {
   onClick: () => void
@@ -13,37 +12,38 @@ export function NavigationButton({ onClick, isOpen }: NavigationButtonProps) {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 20 }}
-      className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-50"
+      className="fixed bottom-6 left-6 md:bottom-8 md:left-8 z-50"
     >
-      <motion.div
+      <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
+        onClick={onClick}
+        className={`
+          w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center
+          transition-all duration-300 cursor-pointer
+          ${isOpen 
+            ? 'button-glow' 
+            : 'button-neumorphic'
+          }
+        `}
       >
-        <Button
-          size="icon"
-          onClick={onClick}
-          className={`
-            w-14 h-14 md:w-16 md:h-16 rounded-xl transition-all duration-200
-            ${isOpen 
-              ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground' 
-              : 'bg-card hover:bg-card/80 text-primary border border-primary/30 hover:border-primary button-glow'
-            }
-          `}
+        <motion.div
+          animate={{ 
+            rotate: isOpen ? 180 : 0
+          }}
+          transition={{ 
+            type: 'spring',
+            stiffness: 300,
+            damping: 20
+          }}
         >
-          <motion.div
-            animate={{ 
-              rotate: isOpen ? 90 : 0
-            }}
-            transition={{ 
-              type: 'spring',
-              stiffness: 300,
-              damping: 20
-            }}
-          >
-            <List size={24} weight="bold" className="md:w-7 md:h-7" />
-          </motion.div>
-        </Button>
-      </motion.div>
+          {isOpen ? (
+            <X size={28} weight="bold" className="text-accent-foreground md:w-8 md:h-8" />
+          ) : (
+            <List size={28} weight="bold" className="text-foreground md:w-8 md:h-8" />
+          )}
+        </motion.div>
+      </motion.button>
     </motion.div>
   )
 }

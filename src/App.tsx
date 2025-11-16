@@ -76,7 +76,7 @@ function App() {
         onModuleChange={handleModuleChange}
       />
 
-      <Toaster position="top-right" theme="dark" />
+      <Toaster position="top-right" richColors />
     </div>
   )
 }
