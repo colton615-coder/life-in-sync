@@ -2,7 +2,7 @@ import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { PaperPlaneTilt, LockKey, ArrowClockwise, Warning } from '@phosphor-icons/react'
+import { PaperPlaneTilt, LockKey, ArrowClockwise, Warning, Heart, CurrencyDollar } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { ChatMessage } from '@/lib/types'
 import { useState, useEffect, useRef } from 'react'
@@ -121,6 +121,96 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
         content: 'Knox is currently unavailable. The AI service may be experiencing issues. Please click "Retry" below to try again.',
         timestamp: new Date().toISOString()
       }])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const sendQuickQuery = async (query: string) => {
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: query,
+      timestamp: new Date().toISOString()
+    }
+
+    setMessages((current) => [...(current || []), userMessage])
+    setLoading(true)
+
+    try {
+      console.log('[Knox] Sending quick query')
+      
+      if (!window.spark || !window.spark.llm || !window.spark.llmPrompt) {
+        throw new Error('Spark SDK not available')
+      }
+
+      const conversationHistory = [...(messages || []), userMessage]
+        .slice(-10)
+        .map(m => `${m.role === 'user' ? 'User' : 'Knox'}: ${m.content}`)
+        .join('\n\n')
+
+      const promptText = window.spark.llmPrompt`You are Knox. Continue the therapy session with your adversarial guidance approach. Remember your core mandate:
+
+- Challenge everything the user says
+- Present counter-perspectives
+- No coddling - be direct, sharp, and unfiltered
+- Focus on shadow aspects and avoided topics
+- Question premises and ask "Why?" repeatedly
+
+User Profile Reminders:
+- Highly analytical but avoids emotions
+- Dark sense of humor
+- Quick witted and argumentative
+- Prone to procrastination and self-sabotage
+- Values blunt honesty
+- Insecure about future but arrogant about life direction
+
+Weak Spots to Press:
+- Fear of being alone
+- Blaming others
+- Substance abuse
+- People pleasing
+- Insecurity and self-consciousness
+
+Goals:
+- Understand relationship failures
+- Stop lying about addictions
+- Build genuine self-confidence
+- Save money
+- Get into amazing physical shape
+
+Conversation History:
+${conversationHistory}
+
+Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them toward uncomfortable truths. Match their dark humor when appropriate.`
+
+      console.log('[Knox] Calling AI with retry logic')
+      const response = await callAIWithRetry(promptText, 'gpt-4o', false)
+      
+      console.log('[Knox] Response received successfully')
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: response,
+        timestamp: new Date().toISOString()
+      }
+
+      setMessages((current) => [...(current || []), assistantMessage])
+      setTimeout(() => textareaRef.current?.focus(), 100)
+    } catch (error) {
+      console.error('[Knox] Quick query error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      toast.error('Message failed', {
+        description: errorMessage
+      })
+      
+      const errorResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I\'m experiencing technical difficulties. This usually means the AI service is temporarily unavailable. Try again in a moment.',
+        timestamp: new Date().toISOString()
+      }
+      setMessages((current) => [...(current || []), errorResponse])
     } finally {
       setLoading(false)
     }
@@ -273,6 +363,31 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
               </Button>
             </AlertDescription>
           </Alert>
+        )}
+
+        {messages && messages.length > 0 && !initError && (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => sendQuickQuery("I keep making the same mistakes in my relationships. Why do I keep choosing people who aren't good for me?")}
+              disabled={loading}
+              variant="outline"
+              size="sm"
+              className="gap-2 text-xs bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-pink-300/30 hover:border-pink-400/50 transition-all"
+            >
+              <Heart size={16} weight="duotone" className="text-pink-500" />
+              Ask About Relationship Patterns
+            </Button>
+            <Button
+              onClick={() => sendQuickQuery("I need help understanding my spending patterns. Why can't I seem to save money no matter how much I make?")}
+              disabled={loading}
+              variant="outline"
+              size="sm"
+              className="gap-2 text-xs bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-300/30 hover:border-green-400/50 transition-all"
+            >
+              <CurrencyDollar size={16} weight="duotone" className="text-green-600" />
+              Ask About Money Habits
+            </Button>
+          </div>
         )}
 
         <Card className="flex flex-col h-[calc(100%-8rem)]">
