@@ -46,7 +46,9 @@ export async function callAIWithRetry(
 export function parseAIJsonResponse<T>(response: string, expectedStructure?: string): T {
   try {
     console.log('[JSON Parse] Attempting to parse AI response')
-    console.log('[JSON Parse] Response preview:', response.substring(0, 200))
+    console.log('[JSON Parse] Response length:', response.length)
+    console.log('[JSON Parse] Response preview (first 500):', response.substring(0, 500))
+    console.log('[JSON Parse] Response preview (last 200):', response.substring(Math.max(0, response.length - 200)))
     
     let cleanedResponse = response.trim()
     
@@ -58,6 +60,52 @@ export function parseAIJsonResponse<T>(response: string, expectedStructure?: str
       cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '')
     }
     
+    cleanedResponse = cleanedResponse.trim()
+    
+    console.log('[JSON Parse] Checking for truncated/malformed JSON')
+    let openBraces = (cleanedResponse.match(/{/g) || []).length
+    let closeBraces = (cleanedResponse.match(/}/g) || []).length
+    let openBrackets = (cleanedResponse.match(/\[/g) || []).length
+    let closeBrackets = (cleanedResponse.match(/\]/g) || []).length
+    
+    console.log('[JSON Parse] Balance check:', { openBraces, closeBraces, openBrackets, closeBrackets })
+    
+    if (openBraces !== closeBraces || openBrackets !== closeBrackets) {
+      console.warn('[JSON Parse] Unbalanced brackets/braces detected - attempting to fix')
+      
+      while (openBrackets > closeBrackets) {
+        cleanedResponse += ']'
+        closeBrackets++
+      }
+      while (openBraces > closeBraces) {
+        cleanedResponse += '}'
+        closeBraces++
+      }
+      
+      console.log('[JSON Parse] After balance fix:', { openBraces, closeBraces, openBrackets, closeBrackets })
+    }
+    
+    const lastQuoteIndex = cleanedResponse.lastIndexOf('"')
+    if (lastQuoteIndex !== -1) {
+      const afterLastQuote = cleanedResponse.substring(lastQuoteIndex + 1).trim()
+      if (afterLastQuote && !afterLastQuote.match(/^[\s,\}\]]*$/)) {
+        console.warn('[JSON Parse] Possible unterminated string detected, truncating')
+        cleanedResponse = cleanedResponse.substring(0, lastQuoteIndex + 1)
+        
+        while (openBrackets > closeBrackets) {
+          cleanedResponse += ']'
+          closeBrackets++
+        }
+        while (openBraces > closeBraces) {
+          cleanedResponse += '}'
+          closeBraces++
+        }
+      }
+    }
+    
+    console.log('[JSON Parse] Cleaned response preview (first 300):', cleanedResponse.substring(0, 300))
+    console.log('[JSON Parse] Cleaned response preview (last 200):', cleanedResponse.substring(Math.max(0, cleanedResponse.length - 200)))
+    
     const parsed = JSON.parse(cleanedResponse)
     console.log('[JSON Parse] Successfully parsed JSON')
     console.log('[JSON Parse] Parsed structure keys:', Object.keys(parsed))
@@ -66,7 +114,8 @@ export function parseAIJsonResponse<T>(response: string, expectedStructure?: str
   } catch (error) {
     console.error('[JSON Parse] Failed to parse response')
     console.error('[JSON Parse] Error:', error)
-    console.error('[JSON Parse] Raw response:', response)
+    console.error('[JSON Parse] Full raw response:')
+    console.error(response)
     if (expectedStructure) {
       console.error('[JSON Parse] Expected structure:', expectedStructure)
     }
