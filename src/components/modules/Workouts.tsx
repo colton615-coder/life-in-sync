@@ -33,13 +33,37 @@ export function Workouts() {
   const [completedCount, setCompletedCount] = useState(0)
 
   const generateWorkout = async () => {
+    console.log('====================================')
+    console.log('[Workout Generation] Starting new workout generation')
+    console.log('[Workout Generation] User prompt:', workoutPrompt)
+    console.log('====================================')
+    
     if (!workoutPrompt.trim()) {
+      console.warn('[Workout Generation] Empty prompt detected')
       toast.error('Please describe your workout')
       return
     }
 
     setGenerating(true)
+    console.log('[Workout Generation] State set to generating')
+    
     try {
+      console.log('[Workout Generation] Step 0: Checking spark API availability')
+      console.log('[Workout Generation] window.spark exists?', !!window.spark)
+      console.log('[Workout Generation] window.spark.llm exists?', !!(window.spark && window.spark.llm))
+      console.log('[Workout Generation] window.spark.llmPrompt exists?', !!(window.spark && window.spark.llmPrompt))
+      
+      if (!window.spark) {
+        throw new Error('Spark API not available - window.spark is undefined')
+      }
+      if (!window.spark.llm) {
+        throw new Error('Spark LLM API not available - window.spark.llm is undefined')
+      }
+      if (!window.spark.llmPrompt) {
+        throw new Error('Spark llmPrompt API not available - window.spark.llmPrompt is undefined')
+      }
+      
+      console.log('[Workout Generation] Step 1: Creating LLM prompt')
       const promptText = window.spark.llmPrompt`You are a fitness expert. Generate a complete workout plan based on this request: "${workoutPrompt}".
 
 Create a balanced workout with 6-8 exercises including warm-up, main work, and cool-down periods.
@@ -77,25 +101,70 @@ Muscle groups can include: chest, back, legs, arms, core, shoulders, cardio
 Categories: "Warm-up", "Work", "Cool-down"
 Difficulty levels: "beginner", "intermediate", "advanced"`
 
+      console.log('[Workout Generation] Step 2: Calling AI with retry mechanism')
+      console.log('[Workout Generation] Using model: gpt-4o, JSON mode: true')
+      
       const response = await callAIWithRetry(promptText, 'gpt-4o', true)
+      
+      console.log('[Workout Generation] Step 3: AI response received')
+      console.log('[Workout Generation] Response type:', typeof response)
+      console.log('[Workout Generation] Response length:', response?.length)
+      console.log('[Workout Generation] First 500 chars:', response?.substring(0, 500))
+      console.log('[Workout Generation] Step 4: Parsing JSON response')
       const data = parseAIJsonResponse<{ workoutPlan: any }>(response, 'workoutPlan structure')
       
+      console.log('[Workout Generation] Step 5: Parsed data structure')
+      console.log('[Workout Generation] Data keys:', Object.keys(data))
+      console.log('[Workout Generation] Has workoutPlan?', 'workoutPlan' in data)
+      
+      if (data.workoutPlan) {
+        console.log('[Workout Generation] WorkoutPlan keys:', Object.keys(data.workoutPlan))
+        console.log('[Workout Generation] WorkoutPlan name:', data.workoutPlan.name)
+        console.log('[Workout Generation] WorkoutPlan focus:', data.workoutPlan.focus)
+        console.log('[Workout Generation] WorkoutPlan difficulty:', data.workoutPlan.difficulty)
+        console.log('[Workout Generation] Exercises type:', typeof data.workoutPlan.exercises)
+        console.log('[Workout Generation] Exercises is array?', Array.isArray(data.workoutPlan.exercises))
+        console.log('[Workout Generation] Exercises length:', data.workoutPlan.exercises?.length)
+      }
+      
+      console.log('[Workout Generation] Step 6: Validating required fields')
       validateAIResponse(data, ['workoutPlan', 'workoutPlan.name', 'workoutPlan.exercises'])
 
+      console.log('[Workout Generation] Step 7: Validating exercises array')
       if (!Array.isArray(data.workoutPlan.exercises)) {
+        console.error('[Workout Generation] ERROR: exercises is not an array')
+        console.error('[Workout Generation] exercises type:', typeof data.workoutPlan.exercises)
+        console.error('[Workout Generation] exercises value:', data.workoutPlan.exercises)
         throw new Error('workoutPlan.exercises must be an array')
       }
 
       if (data.workoutPlan.exercises.length === 0) {
+        console.error('[Workout Generation] ERROR: exercises array is empty')
         throw new Error('workoutPlan.exercises cannot be empty')
       }
 
+      console.log('[Workout Generation] Step 8: Processing exercises')
+      data.workoutPlan.exercises.forEach((ex: any, idx: number) => {
+        console.log(`[Workout Generation] Exercise ${idx + 1}:`, {
+          name: ex.name,
+          type: ex.type,
+          category: ex.category,
+          duration: ex.duration,
+          sets: ex.sets,
+          reps: ex.reps
+        })
+      })
+
+      console.log('[Workout Generation] Step 9: Calculating total duration')
       const totalDuration = data.workoutPlan.exercises.reduce((acc: number, ex: any) => {
         if (ex.type === 'time') return acc + (ex.duration || 0)
         if (ex.type === 'reps') return acc + ((ex.sets || 3) * (ex.reps || 10) * 3)
         return acc
       }, 0)
+      console.log('[Workout Generation] Total duration (seconds):', totalDuration)
+      console.log('[Workout Generation] Estimated duration (minutes):', Math.ceil(totalDuration / 60))
 
+      console.log('[Workout Generation] Step 10: Building workout plan object')
       const workout: WorkoutPlan = {
         id: Date.now().toString(),
         name: data.workoutPlan.name || 'Custom Workout',
@@ -116,20 +185,44 @@ Difficulty levels: "beginner", "intermediate", "advanced"`
         createdAt: new Date().toISOString()
       }
 
-      console.log('[Workout] Generated successfully:', workout)
+      console.log('[Workout Generation] Step 11: Final workout object created')
+      console.log('[Workout Generation] Workout ID:', workout.id)
+      console.log('[Workout Generation] Workout name:', workout.name)
+      console.log('[Workout Generation] Exercise count:', workout.exercises.length)
+      console.log('[Workout Generation] Estimated duration:', workout.estimatedDuration, 'minutes')
 
-      setWorkoutPlans((current) => [...(current || []), workout])
+      console.log('[Workout Generation] Step 12: Saving to KV store')
+      setWorkoutPlans((current) => {
+        console.log('[Workout Generation] Current plans count:', current?.length || 0)
+        const newPlans = [...(current || []), workout]
+        console.log('[Workout Generation] New plans count:', newPlans.length)
+        return newPlans
+      })
+      
+      console.log('[Workout Generation] Step 13: Cleanup and success')
       setDialogOpen(false)
       setWorkoutPrompt('')
       toast.success('Workout generated successfully!')
+      
+      console.log('====================================')
+      console.log('[Workout Generation] ✅ SUCCESS - Workout generated and saved')
+      console.log('====================================')
     } catch (error) {
-      console.error('[Workout] Generation error:', error)
+      console.log('====================================')
+      console.error('[Workout Generation] ❌ ERROR - Generation failed')
+      console.error('[Workout Generation] Error type:', error?.constructor?.name)
+      console.error('[Workout Generation] Error message:', error instanceof Error ? error.message : String(error))
+      console.error('[Workout Generation] Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+      console.error('[Workout Generation] Full error object:', error)
+      console.log('====================================')
+      
       const errorMessage = error instanceof Error ? error.message : 'Failed to generate workout'
       toast.error('Generation Failed', {
         description: errorMessage
       })
     } finally {
       setGenerating(false)
+      console.log('[Workout Generation] State set to not generating')
     }
   }
 
