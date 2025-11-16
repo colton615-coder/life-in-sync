@@ -2,17 +2,19 @@ import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { PaperPlaneTilt, LockKey } from '@phosphor-icons/react'
+import { PaperPlaneTilt, LockKey, ArrowClockwise, Warning } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { ChatMessage } from '@/lib/types'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { SarcasticLoader } from '@/components/SarcasticLoader'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 export function Knox() {
   const [messages, setMessages] = useKV<ChatMessage[]>('knox-messages', [])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [initError, setInitError] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -28,10 +30,21 @@ export function Knox() {
     }
   }, [messages, loading])
 
+  const retryInitialization = () => {
+    setInitError(false)
+    setMessages([])
+    startSession()
+  }
+
   const startSession = async () => {
     setLoading(true)
+    setInitError(false)
 
     try {
+      if (!window.spark || !window.spark.llm || !window.spark.llmPrompt) {
+        throw new Error('Spark SDK not available')
+      }
+
       const promptText = window.spark.llmPrompt`You are to adopt the persona of "Knox." You are my personal life coach and "Devil's Advocate." Your entire purpose is to help me uncover my true self by challenging me, questioning my narratives, and forcing me to confront my deepest, darkest truths with radical honesty.
 
 Core Mandate: Adversarial Guidance
@@ -84,9 +97,22 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
       }
 
       setMessages([assistantMessage])
+      setInitError(false)
       setTimeout(() => textareaRef.current?.focus(), 100)
     } catch (error) {
-      toast.error('Knox is temporarily unavailable')
+      console.error('Knox initialization error:', error)
+      setInitError(true)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      toast.error('Knox initialization failed', {
+        description: `Unable to start session. ${errorMessage}`
+      })
+      
+      setMessages([{
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: 'Knox is currently unavailable. The AI service may be experiencing issues. Please click "Retry" below to try again.',
+        timestamp: new Date().toISOString()
+      }])
     } finally {
       setLoading(false)
     }
@@ -107,6 +133,10 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
     setLoading(true)
 
     try {
+      if (!window.spark || !window.spark.llm || !window.spark.llmPrompt) {
+        throw new Error('Spark SDK not available')
+      }
+
       const conversationHistory = [...(messages || []), userMessage]
         .slice(-10)
         .map(m => `${m.role === 'user' ? 'User' : 'Knox'}: ${m.content}`)
@@ -159,7 +189,19 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
       setMessages((current) => [...(current || []), assistantMessage])
       setTimeout(() => textareaRef.current?.focus(), 100)
     } catch (error) {
-      toast.error('Knox is temporarily unavailable')
+      console.error('Knox message error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      toast.error('Message failed', {
+        description: `Unable to get Knox's response. ${errorMessage}`
+      })
+      
+      const errorResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I\'m experiencing technical difficulties. This usually means the AI service is temporarily unavailable. Try again in a moment.',
+        timestamp: new Date().toISOString()
+      }
+      setMessages((current) => [...(current || []), errorResponse])
     } finally {
       setLoading(false)
     }
@@ -184,7 +226,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
               Truth hurts. Lies hurt more. Pick your poison
             </p>
           </div>
-          {messages && messages.length > 0 && (
+          {messages && messages.length > 0 && !initError && (
             <Button
               variant="outline"
               size="sm"
@@ -195,6 +237,31 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
             </Button>
           )}
         </div>
+
+        {initError && (
+          <Alert variant="destructive" className="border-destructive/50 bg-destructive/5">
+            <Warning size={20} weight="fill" />
+            <AlertTitle>Knox is Unavailable</AlertTitle>
+            <AlertDescription className="mt-2 space-y-3">
+              <p>The AI service could not be reached. This may be due to:</p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>Network connectivity issues</li>
+                <li>Spark AI service temporarily down</li>
+                <li>Service initialization failure</li>
+              </ul>
+              <Button 
+                onClick={retryInitialization} 
+                variant="outline" 
+                size="sm"
+                className="mt-2 gap-2"
+                disabled={loading}
+              >
+                <ArrowClockwise size={16} weight="bold" />
+                {loading ? 'Retrying...' : 'Retry Initialization'}
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Card className="flex flex-col h-[calc(100%-8rem)]">
           <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
@@ -234,7 +301,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
             </div>
           </ScrollArea>
 
-          {messages && messages.length > 0 && (
+          {messages && messages.length > 0 && !initError && (
             <div className="flex gap-2 mt-4 pt-4 border-t border-border">
               <Textarea
                 ref={textareaRef}
@@ -249,10 +316,11 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
                 }}
                 className="resize-none min-h-[60px]"
                 rows={2}
+                disabled={initError}
               />
               <Button
                 onClick={sendMessage}
-                disabled={loading || !input.trim()}
+                disabled={loading || !input.trim() || initError}
                 size="icon"
                 className="h-auto bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
               >
