@@ -68,14 +68,30 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
         }
         
         if (data.text && data.author) {
+          const todayKey = getTodayKey()
+          const affirmationData: DailyAffirmation = {
+            text: data.text,
+            author: data.author,
+            date: todayKey
+          }
           setAffirmation({ text: data.text, author: data.author })
+          
+          await window.spark.kv.set('daily-affirmation', affirmationData)
         } else {
           throw new Error('Invalid affirmation structure')
         }
       } catch (error) {
         console.error('Failed to load affirmation:', error)
         const fallback = staticAffirmations[Math.floor(Math.random() * staticAffirmations.length)]
+        const todayKey = getTodayKey()
+        const affirmationData: DailyAffirmation = {
+          text: fallback.text,
+          author: fallback.author,
+          date: todayKey
+        }
         setAffirmation(fallback)
+        
+        await window.spark.kv.set('daily-affirmation', affirmationData)
       }
     }
 
