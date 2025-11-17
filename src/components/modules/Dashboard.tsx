@@ -155,10 +155,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   }, [knoxMessages])
 
   return (
-    <div className="pt-2 md:pt-4 px-4 md:px-6 space-y-6 md:space-y-8">
-      <div className="space-y-2">
+    <div className="pt-2 md:pt-4">
+      <div className="space-y-3 mb-12 md:mb-16">
         <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gradient-cyan">Dashboard</h1>
-        <p className="text-muted-foreground text-base md:text-lg">Your life in numbers</p>
+        <p className="text-sm md:text-base text-muted-foreground/60 font-normal">Your life in numbers</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
