@@ -349,16 +349,16 @@ export function Settings() {
                 {isSavingKey ? 'Encrypting...' : 'Save Encrypted Key'}
               </Button>
 
-              <div className="p-4 bg-muted rounded-lg space-y-2">
-                <h4 className="font-semibold text-sm flex items-center gap-2">
-                  <Check size={18} className="text-success" weight="bold" />
-                  Alternative: Environment Variables
+              <div className="p-3 md:p-4 bg-muted rounded-lg space-y-2">
+                <h4 className="font-semibold text-xs md:text-sm flex items-center gap-2">
+                  <Check size={18} className="text-success flex-shrink-0" weight="bold" />
+                  <span className="break-words">Alternative: Environment Variables</span>
                 </h4>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-xs md:text-sm">
                   <p className="text-muted-foreground">
                     For local development, you can also set the API key as an environment variable:
                   </p>
-                  <pre className="p-3 bg-background rounded border text-xs font-mono overflow-x-auto">
+                  <pre className="p-2 md:p-3 bg-background rounded border text-[10px] md:text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all">
 {`VITE_GEMINI_API_KEY=your_api_key_here`}
                   </pre>
                 </div>
