@@ -1,9 +1,18 @@
 import { gemini } from "../gemini/client"
 import type { AIProvider, AIRequest, AIResponse } from "./types"
+import { DEFAULT_GEMINI_MODEL } from "../gemini/config"
 
 export class AIRouter {
   async generate(request: AIRequest): Promise<AIResponse> {
-    const provider = request.provider || await this.getOptimalProvider(request)
+    let provider: AIProvider | undefined = request.provider;
+    if (!provider) {
+      try {
+        provider = await this.getOptimalProvider(request);
+      } catch (e) {
+        console.error("Failed to get optimal provider, defaulting to spark", e);
+        provider = "spark";
+      }
+    }
 
     try {
       return await this.callProvider(provider, request)
@@ -43,7 +52,7 @@ export class AIRouter {
         return {
           text: JSON.stringify(result),
           provider: "gemini",
-          model: request.model || "gemini-2.0-flash-exp",
+          model: request.model || DEFAULT_GEMINI_MODEL,
         }
       } else {
         const result = await gemini.generate(request.prompt, {

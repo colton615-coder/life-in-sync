@@ -5,12 +5,13 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { PaperPlaneTilt, LockKey, ArrowClockwise, Warning, Heart, CurrencyDollar } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { ChatMessage } from '@/lib/types'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
 import { SarcasticLoader } from '@/components/SarcasticLoader'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ai } from '@/lib/ai/provider'
 import { AIBadge } from '@/components/AIBadge'
+import { DEFAULT_GEMINI_MODEL } from '@/lib/gemini/config'
 
 export function Knox() {
   const [messages, setMessages] = useKV<ChatMessage[]>('knox-messages', [])
@@ -21,27 +22,7 @@ export function Knox() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  useEffect(() => {
-    if (!hasInitialized && (!messages || messages.length === 0)) {
-      setHasInitialized(true)
-      startSession()
-    }
-  }, [messages, hasInitialized])
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages, loading])
-
-  const retryInitialization = () => {
-    setInitError(null)
-    setHasInitialized(false)
-    setMessages([])
-    startSession()
-  }
-
-  const startSession = async () => {
+  const startSession = useCallback(async () => {
     setLoading(true)
     setInitError(null)
 
@@ -90,7 +71,7 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
       
       const response = await ai.generate({
         prompt: promptText,
-        model: 'gemini-1.5-flash',
+        model: DEFAULT_GEMINI_MODEL,
         temperature: 0.9,
         maxOutputTokens: 500
       })
@@ -129,7 +110,27 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
     } finally {
       setLoading(false)
     }
-  }
+  }, [setMessages])
+
+  useEffect(() => {
+    if (!hasInitialized && (!messages || messages.length === 0)) {
+      setHasInitialized(true)
+      startSession()
+    }
+  }, [messages, hasInitialized, startSession])
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [messages, loading])
+
+  const retryInitialization = useCallback(() => {
+    setInitError(null)
+    setHasInitialized(false)
+    setMessages([])
+    startSession()
+  }, [setMessages, startSession])
 
   const handleSendMessage = async (content: string, existingUserMessage?: ChatMessage) => {
     const userMessage = existingUserMessage || {
@@ -189,7 +190,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
 
       const response = await ai.generate({
         prompt: promptText,
-        model: 'gemini-1.5-flash',
+        model: DEFAULT_GEMINI_MODEL,
         temperature: 0.9,
         maxOutputTokens: 500
       })
@@ -247,12 +248,12 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
     await handleSendMessage(input)
   }
 
-  const clearSession = () => {
+  const clearSession = useCallback(() => {
     setMessages([])
     setHasInitialized(false)
     toast.success('Session cleared')
     startSession()
-  }
+  }, [setMessages, startSession])
 
   return (
     <>

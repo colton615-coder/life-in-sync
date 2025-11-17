@@ -38,13 +38,14 @@ export function GeminiApiTest() {
           description: connectionResult.details
         })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       setResult({
         success: false,
-        error: error.message || 'Unknown error'
+        error: errorMessage
       })
       toast.error('❌ API Test Failed', {
-        description: error.message
+        description: errorMessage
       })
     } finally {
       setTesting(false)

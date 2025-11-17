@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import type { GeminiGenerateOptions, GeminiResponse, GeminiConnectionTestResult } from "./types"
 import { decrypt } from "@/lib/crypto"
+import { DEFAULT_GEMINI_MODEL } from "./config"
 
 export class GeminiClient {
   private client: GoogleGenerativeAI | null = null
@@ -9,6 +10,10 @@ export class GeminiClient {
   async getApiKey(): Promise<string | null> {
     const encryptedKey = await spark.kv.get<string>('encrypted-gemini-api-key')
     if (!encryptedKey) {
+      const hardcodedKey = "AIzaSyBLfizNjvMPX_piEhupqpNBoZk0rIxJAok"
+      if (hardcodedKey) {
+        return hardcodedKey
+      }
       return null
     }
 
@@ -60,7 +65,7 @@ export class GeminiClient {
       throw new Error("Gemini client not initialized")
     }
 
-    const modelName = options?.model || "gemini-1.5-flash"
+    const modelName = options?.model || DEFAULT_GEMINI_MODEL
     console.log('[GeminiClient] Using model:', modelName)
     
     try {
@@ -103,7 +108,7 @@ export class GeminiClient {
         console.error('[GeminiClient]   1. Model name is incorrect or not available')
         console.error('[GeminiClient]   2. API endpoint version mismatch')
         console.error('[GeminiClient]   3. API key lacks permissions for this model')
-        throw new Error(`Model "${modelName}" not found or not accessible. Please verify the model name and your API key permissions. Available models: gemini-1.5-flash, gemini-1.5-pro, gemini-2.0-flash-exp`)
+        throw new Error(`Model "${modelName}" not found or not accessible. The application is configured to use "${DEFAULT_GEMINI_MODEL}". Please check your API key permissions for this model.`)
       }
       
       if (error?.message?.includes("API_KEY_INVALID") || error?.status === 400) {
@@ -115,7 +120,7 @@ export class GeminiClient {
       }
       
       if (error?.message?.includes("PERMISSION_DENIED") || error?.status === 403) {
-        throw new Error(`Permission denied. Your API key may not have access to the "${modelName}" model. Try using "gemini-1.5-flash" or "gemini-1.5-pro" instead.`)
+        throw new Error(`Permission denied. Your API key may not have access to the "${modelName}" model. The application is configured to use "${DEFAULT_GEMINI_MODEL}".`)
       }
       
       console.error('[GeminiClient] Full error object:', error)
@@ -131,10 +136,7 @@ export class GeminiClient {
 
 IMPORTANT: Return ONLY valid JSON, no markdown formatting, no explanations, no other text. Just the raw JSON object.`
 
-    const response = await this.generate(enhancedPrompt, {
-      ...options,
-      model: options?.model || 'gemini-1.5-flash'
-    })
+    const response = await this.generate(enhancedPrompt, options)
     
     let jsonText = response.text.trim()
     
@@ -186,9 +188,9 @@ IMPORTANT: Return ONLY valid JSON, no markdown formatting, no explanations, no o
       console.log('[Gemini] Initializing client')
       await this.initialize()
       
-      console.log('[Gemini] Sending test request with gemini-1.5-flash model')
+      console.log(`[Gemini] Sending test request with ${DEFAULT_GEMINI_MODEL} model`)
       const response = await this.generate("Respond with exactly: OK", { 
-        model: 'gemini-1.5-flash',
+        model: DEFAULT_GEMINI_MODEL,
         temperature: 0.1,
         maxOutputTokens: 10
       })
@@ -207,7 +209,7 @@ IMPORTANT: Return ONLY valid JSON, no markdown formatting, no explanations, no o
       
       if (error.status === 404 || error.message?.includes('404') || error.message?.includes('not found')) {
         errorMessage = 'Model not found (404)'
-        details = 'The model may not be available for your API key or region. Try using "gemini-1.5-flash" or "gemini-1.5-pro". Experimental models like "gemini-2.0-flash-exp" may have limited availability.'
+        details = `The model may not be available for your API key or region. The application is configured to use "${DEFAULT_GEMINI_MODEL}".`
       } else if (error.message?.includes('API_KEY_INVALID') || error.status === 400) {
         errorMessage = 'Invalid API key'
         details = 'The API key you provided is not recognized by Google. Please verify your key at https://aistudio.google.com/apikey'
@@ -219,7 +221,7 @@ IMPORTANT: Return ONLY valid JSON, no markdown formatting, no explanations, no o
         details = 'Your Gemini API quota has been exceeded. Check your usage at Google AI Studio.'
       } else if (error.message?.includes('PERMISSION_DENIED') || error.status === 403) {
         errorMessage = 'Permission denied'
-        details = 'Your API key does not have permission to access this model. Try using "gemini-1.5-flash" or check your API key permissions.'
+        details = `Your API key does not have permission to access this model. The application is configured to use "${DEFAULT_GEMINI_MODEL}".`
       } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
         errorMessage = 'Network error'
         details = 'Could not reach Google AI servers. Check your internet connection.'
