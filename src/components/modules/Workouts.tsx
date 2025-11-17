@@ -319,18 +319,13 @@ Difficulty levels: "beginner", "intermediate", "advanced"`
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <motion.div
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            <Button 
+              size="sm"
+              className="gap-1.5 h-9 px-4 bg-accent-vibrant hover:bg-accent-vibrant/90 text-white shadow-sm"
             >
-              <Button 
-                className="bg-accent-vibrant hover:bg-accent-vibrant/90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <Sparkle weight="fill" />
-                <span className="hidden sm:inline">⚡️ Generate</span>
-                <span className="sm:hidden">⚡️</span>
-              </Button>
-            </motion.div>
+              <Sparkle weight="fill" size={16} />
+              <span>Generate</span>
+            </Button>
           </DialogTrigger>
           <DialogContent className="neumorphic">
             <DialogHeader>

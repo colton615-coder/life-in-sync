@@ -390,16 +390,14 @@ export function Habits() {
           <p className="text-muted-foreground mt-1 text-sm font-normal">Same circus, different day</p>
         </div>
         {creationStep === 0 && (
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <Button
+            size="sm"
             onClick={() => setCreationStep(1)}
-            className="gap-2 px-6 md:px-8 h-14 md:h-16 rounded-2xl flex items-center justify-center font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
+            className="gap-1.5 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
           >
-            <Plus size={22} weight="bold" className="md:w-6 md:h-6" />
-            <span className="hidden sm:inline">New Habit</span>
-            <span className="sm:hidden">New</span>
-          </motion.button>
+            <Plus size={16} weight="bold" />
+            <span>New</span>
+          </Button>
         )}
       </div>
 
@@ -643,15 +641,13 @@ export function Habits() {
               <Fire size={48} weight="duotone" className="text-primary mx-auto mb-3 md:mb-4 md:w-14 md:h-14" />
               <h3 className="font-semibold text-lg md:text-xl mb-1 md:mb-2">No habits yet</h3>
               <p className="text-muted-foreground text-sm md:text-[15px] mb-4 md:mb-6">Start your first habit and build a streak!</p>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <Button
                 onClick={() => setCreationStep(1)}
-                className="gap-2 px-6 md:px-8 h-14 md:h-16 rounded-2xl inline-flex items-center justify-center font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
+                className="gap-2 h-10 px-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
               >
-                <Plus size={22} weight="bold" className="md:w-6 md:h-6" />
+                <Plus size={18} weight="bold" />
                 Create Your First Habit
-              </motion.button>
+              </Button>
             </Card>
           ) : filteredHabits.length === 0 ? (
             <Card className="text-center py-12 md:py-16">

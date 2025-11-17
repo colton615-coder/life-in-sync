@@ -282,15 +282,13 @@ CRITICAL RULES:
         {activeTab === 'expenses' && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="gap-2 px-6 md:px-8 h-14 md:h-16 rounded-2xl flex items-center justify-center font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
+              <Button
+                size="sm"
+                className="gap-1.5 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
               >
-                <Plus size={22} weight="bold" className="md:w-6 md:h-6" />
-                <span className="hidden sm:inline">Add Expense</span>
-                <span className="sm:hidden">Add</span>
-              </motion.button>
+                <Plus size={16} weight="bold" />
+                <span>Add</span>
+              </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] glass-card border-primary/30">
               <DialogHeader>

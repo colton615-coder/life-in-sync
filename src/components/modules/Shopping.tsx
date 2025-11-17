@@ -200,7 +200,7 @@ export function Shopping() {
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value)}
                 placeholder="What do you need to buy?"
-                className="h-16 text-lg pl-6 pr-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-purple-200/50 dark:border-purple-800/50 focus-visible:border-purple-500 focus-visible:ring-4 focus-visible:ring-purple-500/20 rounded-2xl shadow-lg transition-all duration-300"
+                className="h-12 text-base pl-5 pr-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-border/50 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 rounded-xl shadow-md transition-all duration-200"
                 autoFocus
               />
               {newItemName && (
@@ -215,12 +215,12 @@ export function Shopping() {
             </div>
             <Button
               type="submit"
-              size="lg"
-              className="h-16 px-8 gap-3 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-white hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 rounded-2xl font-semibold text-lg"
+              size="default"
+              className="h-12 px-6 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium shadow-md"
               disabled={!newItemName.trim()}
             >
-              <Plus className="w-6 h-6" weight="bold" />
-              <span className="hidden sm:inline">Add Item</span>
+              <Plus className="w-5 h-5" weight="bold" />
+              <span>Add</span>
             </Button>
           </form>
 
