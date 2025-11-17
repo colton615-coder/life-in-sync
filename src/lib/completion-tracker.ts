@@ -1,4 +1,55 @@
 import { getTodayKey } from './utils'
+import type { AIUsageStats } from './types'
+
+const AI_USAGE_STATS_KEY = 'ai-usage-stats'
+
+// --- AI Usage Tracking ---
+
+const MODEL_COSTS: Record<string, { input: number; output: number }> = {
+  'gpt-4o': { input: 5.0, output: 15.0 },
+  'gpt-4-turbo': { input: 10.0, output: 30.0 },
+  'gpt-3.5-turbo': { input: 0.5, output: 1.5 },
+  default: { input: 1.0, output: 3.0 },
+}
+
+function getModelCost(model: string) {
+  return MODEL_COSTS[model] || MODEL_COSTS.default
+}
+
+export async function getUsageStats(): Promise<AIUsageStats> {
+  return await window.spark.kv.get(AI_USAGE_STATS_KEY) ?? {
+    requests: 0,
+    tokens: 0,
+    cost: 0,
+    lastUpdated: new Date().toISOString(),
+  }
+}
+
+export async function trackAIUsage(
+  model: string,
+  promptTokens: number,
+  completionTokens: number
+): Promise<void> {
+  const stats = await getUsageStats()
+  const cost = getModelCost(model)
+
+  const promptCost = (promptTokens / 1_000_000) * cost.input
+  const completionCost = (completionTokens / 1_000_000) * cost.output
+
+  stats.requests += 1
+  stats.tokens += promptTokens + completionTokens
+  stats.cost += promptCost + completionCost
+  stats.lastUpdated = new Date().toISOString()
+
+  await window.spark.kv.set(AI_USAGE_STATS_KEY, stats)
+}
+
+export async function resetUsageStats(): Promise<void> {
+  await window.spark.kv.delete(AI_USAGE_STATS_KEY)
+}
+
+
+// --- Generic Completion Tracking ---
 
 export interface CompletionStats {
   totalCompleted: number
@@ -7,6 +58,7 @@ export interface CompletionStats {
   longestStreak: number
   lastCompletedDate?: string
 }
+
 
 export interface CompletableItem {
   id: string

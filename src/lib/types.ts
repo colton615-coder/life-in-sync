@@ -133,7 +133,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
-  provider?: 'spark' | 'gemini';
+  provider?: 'spark';
   model?: string;
 }
 
@@ -306,4 +306,11 @@ export interface SwingAnalysis {
   feedback?: SwingFeedback
   error?: string
   processingProgress?: number
+}
+
+export interface AIUsageStats {
+  requests: number;
+  tokens: number;
+  cost: number;
+  lastUpdated: string;
 }

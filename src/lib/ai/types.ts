@@ -1,4 +1,4 @@
-export type AIProvider = "spark" | "gemini"
+export type AIProvider = "spark"
 
 export interface AIRequest {
   prompt: string
@@ -17,15 +17,8 @@ export interface AIResponse {
 }
 
 export interface AIUsageStats {
-  spark: {
-    requests: number
-    tokens: number
-    cost: number
-  }
-  gemini: {
-    requests: number
-    tokens: number
-    cost: number
-  }
+  requests: number
+  tokens: number
+  cost: number
   lastUpdated: string
 }
