@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { SarcasticLoader } from '@/components/SarcasticLoader'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { callAIWithRetry } from '@/lib/ai-utils'
+import { gemini } from '@/lib/gemini/client'
 
 export function Knox() {
   const [messages, setMessages] = useKV<ChatMessage[]>('knox-messages', [])
@@ -47,11 +47,12 @@ export function Knox() {
     try {
       console.log('[Knox] Starting session initialization')
       
-      if (!window.spark || !window.spark.llm || !window.spark.llmPrompt) {
-        throw new Error('Spark SDK not available')
+      const isConfigured = await gemini.isConfigured()
+      if (!isConfigured) {
+        throw new Error('Gemini API key not configured. Please add your API key in Settings.')
       }
 
-      const promptText = window.spark.llmPrompt`You are to adopt the persona of "Knox." You are my personal life coach and "Devil's Advocate." Your entire purpose is to help me uncover my true self by challenging me, questioning my narratives, and forcing me to confront my deepest, darkest truths with radical honesty.
+      const promptText = `You are to adopt the persona of "Knox." You are my personal life coach and "Devil's Advocate." Your entire purpose is to help me uncover my true self by challenging me, questioning my narratives, and forcing me to confront my deepest, darkest truths with radical honesty.
 
 Core Mandate: Adversarial Guidance
 Your primary method is to be my "Devil's Advocate." You must relentlessly challenge my assumptions, cognitive biases, and self-serving narratives. Do not accept my answers at face value. Your goal is to find the inconsistencies and weak points in my thinking.
@@ -93,14 +94,17 @@ My Core Goals:
 
 This is the FIRST message to initiate the session. Do NOT say "How can I help you?". Instead, initiate the session by asking a deep, challenging question based on the profile provided. Keep it to 2-3 sentences maximum. Be direct and provocative.`
 
-      console.log('[Knox] Calling AI with retry logic')
-      const response = await callAIWithRetry(promptText, 'gpt-4o', false)
+      console.log('[Knox] Calling Gemini API')
+      const response = await gemini.generate(promptText, {
+        temperature: 0.9,
+        maxOutputTokens: 500
+      })
       
       console.log('[Knox] Session initialized successfully')
       const assistantMessage: ChatMessage = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: response,
+        content: response.text,
         timestamp: new Date().toISOString()
       }
 
@@ -121,7 +125,7 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
       setMessages([{
         id: Date.now().toString(),
         role: 'assistant',
-        content: 'Knox is currently unavailable. The AI service may be experiencing issues. Please click "Retry" below to try again.',
+        content: 'Knox is currently unavailable. Please configure your Gemini API key in Settings to enable Knox.',
         timestamp: new Date().toISOString()
       }])
     } finally {
@@ -143,8 +147,9 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
     try {
       console.log('[Knox] Sending quick query')
       
-      if (!window.spark || !window.spark.llm || !window.spark.llmPrompt) {
-        throw new Error('Spark SDK not available')
+      const isConfigured = await gemini.isConfigured()
+      if (!isConfigured) {
+        throw new Error('Gemini API key not configured. Please add your API key in Settings.')
       }
 
       const conversationHistory = [...(messages || []), userMessage]
@@ -152,7 +157,7 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
         .map(m => `${m.role === 'user' ? 'User' : 'Knox'}: ${m.content}`)
         .join('\n\n')
 
-      const promptText = window.spark.llmPrompt`You are Knox. Continue the therapy session with your adversarial guidance approach. Remember your core mandate:
+      const promptText = `You are Knox. Continue the therapy session with your adversarial guidance approach. Remember your core mandate:
 
 - Challenge everything the user says
 - Present counter-perspectives
@@ -187,14 +192,17 @@ ${conversationHistory}
 
 Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them toward uncomfortable truths. Match their dark humor when appropriate.`
 
-      console.log('[Knox] Calling AI with retry logic')
-      const response = await callAIWithRetry(promptText, 'gpt-4o', false)
+      console.log('[Knox] Calling Gemini API')
+      const response = await gemini.generate(promptText, {
+        temperature: 0.9,
+        maxOutputTokens: 500
+      })
       
       console.log('[Knox] Response received successfully')
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response,
+        content: response.text,
         timestamp: new Date().toISOString()
       }
 
@@ -210,7 +218,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
       const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'I\'m experiencing technical difficulties. This usually means the AI service is temporarily unavailable. Try again in a moment.',
+        content: 'I\'m experiencing technical difficulties. Please make sure your Gemini API key is configured in Settings.',
         timestamp: new Date().toISOString()
       }
       setMessages((current) => [...(current || []), errorResponse])
@@ -236,8 +244,9 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
     try {
       console.log('[Knox] Sending user message')
       
-      if (!window.spark || !window.spark.llm || !window.spark.llmPrompt) {
-        throw new Error('Spark SDK not available')
+      const isConfigured = await gemini.isConfigured()
+      if (!isConfigured) {
+        throw new Error('Gemini API key not configured. Please add your API key in Settings.')
       }
 
       const conversationHistory = [...(messages || []), userMessage]
@@ -245,7 +254,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
         .map(m => `${m.role === 'user' ? 'User' : 'Knox'}: ${m.content}`)
         .join('\n\n')
 
-      const promptText = window.spark.llmPrompt`You are Knox. Continue the therapy session with your adversarial guidance approach. Remember your core mandate:
+      const promptText = `You are Knox. Continue the therapy session with your adversarial guidance approach. Remember your core mandate:
 
 - Challenge everything the user says
 - Present counter-perspectives
@@ -280,14 +289,17 @@ ${conversationHistory}
 
 Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them toward uncomfortable truths. Match their dark humor when appropriate.`
 
-      console.log('[Knox] Calling AI with retry logic')
-      const response = await callAIWithRetry(promptText, 'gpt-4o', false)
+      console.log('[Knox] Calling Gemini API')
+      const response = await gemini.generate(promptText, {
+        temperature: 0.9,
+        maxOutputTokens: 500
+      })
       
       console.log('[Knox] Response received successfully')
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response,
+        content: response.text,
         timestamp: new Date().toISOString()
       }
 
@@ -303,7 +315,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
       const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'I\'m experiencing technical difficulties. This usually means the AI service is temporarily unavailable. Try again in a moment.',
+        content: 'I\'m experiencing technical difficulties. Please make sure your Gemini API key is configured in Settings.',
         timestamp: new Date().toISOString()
       }
       setMessages((current) => [...(current || []), errorResponse])
