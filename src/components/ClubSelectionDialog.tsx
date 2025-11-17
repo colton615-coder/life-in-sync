@@ -8,7 +8,7 @@ import { Check } from '@phosphor-icons/react'
 interface ClubSelectionDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelectClub: (club: GolfClub) => void
+  onSelectClub: (club: GolfClub | null) => void
 }
 
 const CLUB_CATEGORIES = {
@@ -22,6 +22,11 @@ const CLUB_CATEGORIES = {
 export function ClubSelectionDialog({ open, onOpenChange, onSelectClub }: ClubSelectionDialogProps) {
   const handleSelect = (club: GolfClub) => {
     onSelectClub(club)
+    onOpenChange(false)
+  }
+
+  const handleSkip = () => {
+    onSelectClub(null)
     onOpenChange(false)
   }
 
@@ -56,7 +61,7 @@ export function ClubSelectionDialog({ open, onOpenChange, onSelectClub }: ClubSe
         </div>
 
         <div className="flex justify-end pt-4">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" onClick={handleSkip}>
             Skip for now
           </Button>
         </div>

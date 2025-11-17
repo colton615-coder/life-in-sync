@@ -1,4 +1,4 @@
-import { SwingPoseData, SwingMetrics, SwingFeedback, SwingAnalysis } from '@/lib/types'
+import { SwingPoseData, SwingMetrics, SwingFeedback, SwingAnalysis, GolfClub } from '@/lib/types'
 
 interface MediaPipeLandmark {
   x: number
@@ -175,7 +175,7 @@ export function analyzePoseData(poseData: SwingPoseData[]): SwingMetrics {
   }
 }
 
-export async function generateFeedback(metrics: SwingMetrics): Promise<SwingFeedback> {
+export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | null = null): Promise<SwingFeedback> {
   const strengths: string[] = []
   const improvements: string[] = []
   const drills: SwingFeedback['drills'] = []
@@ -230,14 +230,16 @@ export async function generateFeedback(metrics: SwingMetrics): Promise<SwingFeed
 
   const overallScore = calculateOverallScore(metrics)
 
+  const clubContext = club ? `\nClub Used: ${club}` : ''
+
   const prompt = window.spark.llmPrompt`You are a professional golf instructor analyzing a student's swing. Based on these metrics:
 - Hip Rotation: ${metrics.hipRotation.total.toFixed(1)}°
 - Shoulder Rotation: ${metrics.shoulderRotation.total.toFixed(1)}°
 - Head Stability: ${metrics.headMovement.stability}
 - Weight Transfer: ${metrics.weightTransfer.rating}
-- Tempo Ratio: ${metrics.tempo.ratio.toFixed(2)}:1
+- Tempo Ratio: ${metrics.tempo.ratio.toFixed(2)}:1${clubContext}
 
-Provide a 2-3 sentence personalized insight focusing on the most important aspect to work on for improvement.`
+Provide a 2-3 sentence personalized insight focusing on the most important aspect to work on for improvement${club ? ` with this ${club}` : ''}.`
 
   const aiInsights = await window.spark.llm(prompt, 'gpt-4o')
 

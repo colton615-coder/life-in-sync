@@ -42,7 +42,7 @@ export function GolfSwing() {
   const [processingStatus, setProcessingStatus] = useState('')
   const [comparisonDialogOpen, setComparisonDialogOpen] = useState(false)
   const [clubSelectionOpen, setClubSelectionOpen] = useState(false)
-  const [pendingAnalysisId, setPendingAnalysisId] = useState<string | null>(null)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [selectedClubFilter, setSelectedClubFilter] = useState<string>('all')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -58,7 +58,7 @@ export function GolfSwing() {
     }
   }, [])
 
-  const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -72,13 +72,25 @@ export function GolfSwing() {
       return
     }
 
+    setPendingFile(file)
+    setClubSelectionOpen(true)
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const startAnalysis = async (club: GolfClub | null) => {
+    if (!pendingFile) return
+
     const analysisId = `swing-${Date.now()}`
-    const videoUrl = URL.createObjectURL(file)
+    const videoUrl = URL.createObjectURL(pendingFile)
 
     const newAnalysis: SwingAnalysis = {
       id: analysisId,
       videoId: analysisId,
       videoUrl,
+      club,
       status: 'uploading',
       uploadedAt: new Date().toISOString(),
       processingProgress: 0
@@ -90,7 +102,7 @@ export function GolfSwing() {
     setProcessingProgress(0)
 
     try {
-      const poseData = await simulateVideoProcessing(file, (progress, status) => {
+      const poseData = await simulateVideoProcessing(pendingFile, (progress, status) => {
         setProcessingProgress(progress)
         setProcessingStatus(status)
         setAnalyses(current => 
@@ -103,7 +115,7 @@ export function GolfSwing() {
       })
 
       const metrics = analyzePoseData(poseData)
-      const feedback = await generateFeedback(metrics)
+      const feedback = await generateFeedback(metrics, club)
 
       const completedAnalysis: SwingAnalysis = {
         ...newAnalysis,
@@ -119,9 +131,6 @@ export function GolfSwing() {
         (current || []).map(a => a.id === analysisId ? completedAnalysis : a)
       )
       setActiveAnalysis(completedAnalysis)
-      
-      setPendingAnalysisId(analysisId)
-      setClubSelectionOpen(true)
       
       toast.success('Swing analysis completed!', {
         description: `Overall score: ${feedback.overallScore}/100`
@@ -142,30 +151,12 @@ export function GolfSwing() {
       setIsProcessing(false)
       setProcessingProgress(0)
       setProcessingStatus('')
-    }
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      setPendingFile(null)
     }
   }
 
   const handleClubSelect = (club: GolfClub) => {
-    if (!pendingAnalysisId) return
-    
-    setAnalyses(current => 
-      (current || []).map(a => 
-        a.id === pendingAnalysisId ? { ...a, club } : a
-      )
-    )
-    
-    if (activeAnalysis?.id === pendingAnalysisId) {
-      setActiveAnalysis(prev => prev ? { ...prev, club } : null)
-    }
-    
-    setPendingAnalysisId(null)
-    toast.success('Club tagged', {
-      description: `Swing tagged as ${club}`
-    })
+    startAnalysis(club)
   }
 
   const handleDeleteAnalysis = (analysisId: string, e: React.MouseEvent) => {

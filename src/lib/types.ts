@@ -295,7 +295,7 @@ export interface SwingAnalysis {
   videoId: string
   videoUrl?: string
   thumbnailUrl?: string
-  club?: GolfClub
+  club: GolfClub | null
   status: 'uploading' | 'processing' | 'analyzing' | 'completed' | 'failed'
   uploadedAt: string
   processedAt?: string
