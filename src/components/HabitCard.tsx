@@ -95,6 +95,12 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
         <motion.button
           key={i}
           onClick={() => handleIconClick(i)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              handleIconClick(i)
+            }
+          }}
           whileHover={{ scale: 1.15, y: -6 }}
           whileTap={{ scale: 0.85 }}
           transition={{ type: 'spring', stiffness: 500, damping: 20 }}
@@ -105,6 +111,8 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
               ? 'glass-card bg-gradient-to-br from-accent-vibrant/30 via-accent-vibrant/30 to-secondary/30 border-2 shadow-2xl'
               : 'glass-morphic border border-border/40 hover:border-accent-vibrant/40 hover:bg-card/50'
           )}
+          aria-label={`${habit.name} progress indicator ${i + 1} of ${habit.targetCount || 1}, ${isFilled ? 'completed' : 'not completed'}. Click to ${isFilled ? 'decrease' : 'increase'} progress.`}
+          aria-pressed={isFilled}
         >
           <IconComponent
             weight={isFilled ? 'fill' : 'regular'}
@@ -114,6 +122,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
                 ? `${colorClass} drop-shadow-[0_0_12px_currentColor] brightness-125` 
                 : 'text-muted-foreground/60'
             )}
+            aria-hidden="true"
           />
           {isFilled && (
             <>
@@ -121,6 +130,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 className="absolute inset-0 rounded-2xl bg-gradient-to-br from-accent-vibrant/10 via-accent-vibrant/10 to-secondary/10"
+                aria-hidden="true"
               />
               <motion.div
                 animate={{
@@ -133,6 +143,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
                   ease: 'easeInOut',
                 }}
                 className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-transparent via-white/10 to-transparent"
+                aria-hidden="true"
               />
             </>
           )}
@@ -150,6 +161,9 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
       transition={{ duration: 0.4 }}
       style={style}
     >
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {habit.name}: {habit.currentProgress || 0} of {habit.targetCount || 1} completed{habit.streak > 0 ? `, ${habit.streak} day streak` : ''}
+      </div>
       <Card className={cn('glass-card p-6 md:p-8 shadow-2xl border-border/30 hover:border-accent-vibrant/30 transition-all duration-500', className)}>
         <div className="flex items-start justify-between mb-6">
           <div className="flex-1">
@@ -159,8 +173,9 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
               </h3>
               {habit.streak > 0 && (
                 <Badge variant="secondary" className="gap-1 px-3 py-1 glass-morphic border-secondary/30 animate-glow">
-                  <Fire weight="fill" className="text-destructive drop-shadow-[0_0_4px_currentColor]" />
+                  <Fire weight="fill" className="text-destructive drop-shadow-[0_0_4px_currentColor]" aria-hidden="true" />
                   <span className="font-semibold">{habit.streak}</span>
+                  <span className="sr-only">day streak</span>
                 </Badge>
               )}
             </div>
@@ -168,6 +183,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
               <span className="text-accent-vibrant font-semibold text-lg">{habit.currentProgress || 0}</span>
               <span className="text-muted-foreground/60 mx-1">/</span>
               <span className="text-foreground/80">{habit.targetCount || 1}</span>
+              <span className="sr-only"> completed</span>
             </p>
           </div>
           <div className="flex gap-2">
@@ -177,8 +193,9 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
                 size="icon"
                 onClick={handleEdit}
                 className="text-muted-foreground hover:text-accent-vibrant hover:bg-accent-vibrant/10 glass-morphic border border-transparent hover:border-accent-vibrant/30"
+                aria-label={`Edit ${habit.name} habit`}
               >
-                <PencilSimple size={20} weight="bold" />
+                <PencilSimple size={20} weight="bold" aria-hidden="true" />
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
@@ -187,8 +204,9 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
                 size="icon"
                 onClick={handleDelete}
                 className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 glass-morphic border border-transparent hover:border-destructive/30"
+                aria-label={`Delete ${habit.name} habit`}
               >
-                <Trash size={20} weight="bold" />
+                <Trash size={20} weight="bold" aria-hidden="true" />
               </Button>
             </motion.div>
           </div>

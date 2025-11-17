@@ -16,12 +16,16 @@ interface TabGroupProps {
 
 export function TabGroup({ tabs, activeTab, onChange, className }: TabGroupProps) {
   return (
-    <div className={cn('flex gap-1 p-1 bg-muted/50 rounded-xl w-fit', className)}>
+    <div className={cn('flex gap-1 p-1 bg-muted/50 rounded-xl w-fit', className)} role="tablist" aria-label="Tab navigation">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onChange(tab.id)}
           data-active={activeTab === tab.id}
+          role="tab"
+          aria-selected={activeTab === tab.id}
+          aria-controls={`${tab.id}-panel`}
+          tabIndex={activeTab === tab.id ? 0 : -1}
           className={cn(
             'px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
             'flex items-center gap-2',
@@ -30,7 +34,7 @@ export function TabGroup({ tabs, activeTab, onChange, className }: TabGroupProps
               : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
           )}
         >
-          {tab.icon && <span className="text-lg">{tab.icon}</span>}
+          {tab.icon && <span className="text-lg" aria-hidden="true">{tab.icon}</span>}
           {tab.label}
         </button>
       ))}

@@ -195,8 +195,9 @@ export function GolfSwing() {
           size="lg"
           onClick={() => fileInputRef.current?.click()}
           className="gap-2 text-lg px-8 py-6 rounded-xl"
+          aria-label="Upload your first golf swing video for analysis"
         >
-          <Upload size={24} weight="bold" />
+          <Upload size={24} weight="bold" aria-hidden="true" />
           Upload Your First Swing
         </Button>
 
@@ -227,6 +228,9 @@ export function GolfSwing() {
       animate={{ opacity: 1 }}
       className="flex flex-col items-center justify-center min-h-[60vh] px-6"
     >
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        Analyzing your swing. {processingProgress}% complete. {processingStatus}
+      </div>
       <Card className="w-full max-w-2xl glass-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -234,15 +238,15 @@ export function GolfSwing() {
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             >
-              <Sparkle size={24} weight="duotone" className="text-primary" />
+              <Sparkle size={24} weight="duotone" className="text-primary" aria-hidden="true" />
             </motion.div>
             Analyzing Your Swing
           </CardTitle>
           <CardDescription>{processingStatus}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Progress value={processingProgress} className="h-3" />
-          <p className="text-center text-2xl font-bold text-primary">
+          <Progress value={processingProgress} className="h-3" aria-label={`Analysis progress: ${processingProgress}%`} />
+          <p className="text-center text-2xl font-bold text-primary" aria-hidden="true">
             {processingProgress}%
           </p>
           <div className="text-sm text-muted-foreground text-center space-y-2">
@@ -484,7 +488,7 @@ export function GolfSwing() {
 
   const renderAnalysisList = () => (
     <ScrollArea className="h-[600px]">
-      <div className="space-y-3">
+      <div className="space-y-3" role="list" aria-label="Swing analysis history">
         {(analyses || []).map((analysis) => (
           <Card
             key={analysis.id}
@@ -493,6 +497,16 @@ export function GolfSwing() {
               activeAnalysis?.id === analysis.id && "border-primary"
             )}
             onClick={() => setActiveAnalysis(analysis)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                setActiveAnalysis(analysis)
+              }
+            }}
+            tabIndex={0}
+            role="listitem"
+            aria-label={`Swing analysis from ${new Date(analysis.uploadedAt).toLocaleDateString()} at ${new Date(analysis.uploadedAt).toLocaleTimeString()}, status: ${analysis.status}${analysis.feedback ? `, score: ${analysis.feedback.overallScore} out of 100` : ''}`}
+            aria-current={activeAnalysis?.id === analysis.id ? 'true' : undefined}
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-3">
@@ -513,6 +527,7 @@ export function GolfSwing() {
                       'secondary'
                     }
                     className="text-xs"
+                    aria-label={`Status: ${analysis.status}`}
                   >
                     {analysis.status}
                   </Badge>
@@ -521,8 +536,9 @@ export function GolfSwing() {
                     size="icon"
                     className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                     onClick={(e) => handleDeleteAnalysis(analysis.id, e)}
+                    aria-label={`Delete swing analysis from ${new Date(analysis.uploadedAt).toLocaleDateString()}`}
                   >
-                    <Trash size={16} weight="bold" />
+                    <Trash size={16} weight="bold" aria-hidden="true" />
                   </Button>
                 </div>
               </div>
@@ -577,8 +593,9 @@ export function GolfSwing() {
           onClick={() => fileInputRef.current?.click()}
           className="gap-2"
           size="lg"
+          aria-label="Upload new golf swing video for analysis"
         >
-          <Upload size={20} weight="bold" />
+          <Upload size={20} weight="bold" aria-hidden="true" />
           New Analysis
         </Button>
       </div>
@@ -592,7 +609,7 @@ export function GolfSwing() {
         <div className="lg:col-span-2">
           {activeAnalysis ? (
             <Tabs defaultValue="metrics" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-2" aria-label="Analysis view options">
                 <TabsTrigger value="metrics">Metrics</TabsTrigger>
                 <TabsTrigger value="feedback">Feedback & Drills</TabsTrigger>
               </TabsList>
@@ -603,6 +620,7 @@ export function GolfSwing() {
                       src={activeAnalysis.videoUrl}
                       controls
                       className="w-full aspect-video bg-black"
+                      aria-label="Your golf swing video recording"
                     />
                   </Card>
                 )}
@@ -614,7 +632,7 @@ export function GolfSwing() {
             </Tabs>
           ) : (
             <Alert>
-              <Play size={18} />
+              <Play size={18} aria-hidden="true" />
               <AlertDescription>
                 Select an analysis from the list to view details
               </AlertDescription>

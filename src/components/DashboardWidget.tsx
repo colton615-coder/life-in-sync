@@ -12,6 +12,32 @@ interface DashboardWidgetProps {
 }
 
 export function DashboardWidget({ title, icon, children, onClick, className }: DashboardWidgetProps) {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault()
+      onClick()
+    }
+  }
+
+  const widgetContent = (
+    <div className={cn(
+      "neumorphic-card h-full transition-all duration-300",
+      onClick && "hover:glow-border"
+    )}>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="icon-circle-glow flex items-center justify-center w-12 h-12" aria-hidden="true">
+          <div className="text-accent-foreground">
+            {icon}
+          </div>
+        </div>
+        <h3 className="widget-title flex-1">{title}</h3>
+      </div>
+      <div className="text-foreground">
+        {children}
+      </div>
+    </div>
+  )
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -20,28 +46,17 @@ export function DashboardWidget({ title, icon, children, onClick, className }: D
       whileTap={onClick ? { scale: 0.98 } : {}}
       transition={{ duration: 0.2, type: 'spring', stiffness: 300, damping: 20 }}
       onClick={onClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={onClick ? 0 : undefined}
+      role={onClick ? 'button' : undefined}
+      aria-label={onClick ? `View ${title} module` : undefined}
       className={cn(
         "w-full",
         onClick && "cursor-pointer group",
         className
       )}
     >
-      <div className={cn(
-        "neumorphic-card h-full transition-all duration-300",
-        onClick && "hover:glow-border"
-      )}>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="icon-circle-glow flex items-center justify-center w-12 h-12">
-            <div className="text-accent-foreground">
-              {icon}
-            </div>
-          </div>
-          <h3 className="widget-title flex-1">{title}</h3>
-        </div>
-        <div className="text-foreground">
-          {children}
-        </div>
-      </div>
+      {widgetContent}
     </motion.div>
   )
 }

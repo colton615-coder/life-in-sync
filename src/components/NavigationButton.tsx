@@ -25,6 +25,9 @@ export function NavigationButton({ onClick, isOpen }: NavigationButtonProps) {
             ? 'bg-primary text-primary-foreground shadow-primary/30' 
             : 'bg-card/90 backdrop-blur-xl border border-border/50 text-foreground hover:bg-card hover:border-border'
         )}
+        aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+        aria-expanded={isOpen}
+        aria-controls="navigation-drawer"
       >
         <motion.div
           animate={{ 
@@ -37,9 +40,9 @@ export function NavigationButton({ onClick, isOpen }: NavigationButtonProps) {
           }}
         >
           {isOpen ? (
-            <X size={24} weight="bold" className="md:w-7 md:h-7" />
+            <X size={24} weight="bold" className="md:w-7 md:h-7" aria-hidden="true" />
           ) : (
-            <List size={24} weight="bold" className="md:w-7 md:h-7" />
+            <List size={24} weight="bold" className="md:w-7 md:h-7" aria-hidden="true" />
           )}
         </motion.div>
       </motion.button>
