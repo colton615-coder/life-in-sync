@@ -28,6 +28,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 
+const HARDCODED_API_KEY = 'AIzaSyBLfizNjvMPX_piEhupqpNBoZk0rIxJAok'
+
 export function Settings() {
   const [preferredProvider, setPreferredProvider] = useKV<AIProvider | "auto">(
     "preferred-ai-provider",
@@ -49,7 +51,21 @@ export function Settings() {
   useEffect(() => {
     checkOwnership()
     loadUsageStats()
+    initializeHardcodedKey()
   }, [])
+
+  const initializeHardcodedKey = async () => {
+    if (!encryptedApiKey && HARDCODED_API_KEY) {
+      try {
+        console.log('[Settings] Auto-initializing hardcoded API key')
+        const encrypted = await encrypt(HARDCODED_API_KEY)
+        setEncryptedApiKey(encrypted)
+        console.log('[Settings] API key successfully encrypted and stored')
+      } catch (error) {
+        console.error('[Settings] Failed to encrypt hardcoded API key:', error)
+      }
+    }
+  }
 
   const checkOwnership = async () => {
     const user = await spark.user()
@@ -218,9 +234,9 @@ export function Settings() {
                 <div className="flex items-start gap-2">
                   <Check size={20} className="text-success mt-0.5 flex-shrink-0" weight="bold" />
                   <div className="space-y-2 flex-1">
-                    <p className="font-semibold text-sm">API Key Configured</p>
+                    <p className="font-semibold text-sm">API Key Configured & Active</p>
                     <p className="text-sm text-muted-foreground">
-                      Your Gemini API key is securely stored using AES-GCM encryption. The key is only decrypted in-memory when needed for AI requests.
+                      Your Gemini API key ({HARDCODED_API_KEY.slice(0, 8)}...{HARDCODED_API_KEY.slice(-4)}) is hardcoded and securely stored using AES-GCM encryption. Knox and other AI features are ready to use.
                     </p>
                   </div>
                 </div>
