@@ -7,33 +7,7 @@ export class GeminiClient {
   private initialized = false
 
   async getApiKey(): Promise<string | null> {
-    console.log('[GeminiClient] Retrieving API key')
-    
-    const encryptedKey = await spark.kv.get<string>("encrypted-gemini-api-key")
-    console.log('[GeminiClient] Encrypted key exists:', !!encryptedKey)
-    
-    if (encryptedKey) {
-      try {
-        console.log('[GeminiClient] Decrypting API key')
-        const decrypted = await decrypt(encryptedKey)
-        console.log('[GeminiClient] API key decrypted successfully, length:', decrypted.length)
-        console.log('[GeminiClient] API key prefix:', decrypted.substring(0, 8))
-        return decrypted
-      } catch (error) {
-        console.error("[GeminiClient] Failed to decrypt API key:", error)
-        throw new Error("Failed to decrypt Gemini API key. Please re-save your key in Settings.")
-      }
-    }
-
-    console.log('[GeminiClient] Checking environment variable')
-    const envKey = import.meta.env.VITE_GEMINI_API_KEY
-    if (envKey) {
-      console.log('[GeminiClient] Using API key from environment variable')
-      return envKey
-    }
-
-    console.log('[GeminiClient] No API key found')
-    return null
+    return "AIzaSyBz8W25dTqJPqcwQxnfq-TUV0VFBXH-1AA"
   }
 
   async initialize(): Promise<void> {
