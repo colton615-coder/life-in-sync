@@ -16,7 +16,7 @@ interface TabGroupProps {
 
 export function TabGroup({ tabs, activeTab, onChange, className }: TabGroupProps) {
   return (
-    <div className={cn('flex gap-1 p-1 bg-muted/50 rounded-xl w-fit', className)} role="tablist" aria-label="Tab navigation">
+    <div className={cn('flex gap-1 p-1 bg-muted/50 rounded-xl w-full md:w-fit', className)} role="tablist" aria-label="Tab navigation">
       {tabs.map((tab) => (
         <button
           key={tab.id}
@@ -27,15 +27,15 @@ export function TabGroup({ tabs, activeTab, onChange, className }: TabGroupProps
           aria-controls={`${tab.id}-panel`}
           tabIndex={activeTab === tab.id ? 0 : -1}
           className={cn(
-            'px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
-            'flex items-center gap-2',
+            'px-2.5 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-medium transition-all duration-200 flex-1 md:flex-initial whitespace-nowrap',
+            'flex items-center justify-center gap-1.5 md:gap-2',
             activeTab === tab.id
               ? 'bg-primary text-primary-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
           )}
         >
-          {tab.icon && <span className="text-lg" aria-hidden="true">{tab.icon}</span>}
-          {tab.label}
+          {tab.icon && <span className="text-sm md:text-lg flex-shrink-0" aria-hidden="true">{tab.icon}</span>}
+          <span className="truncate">{tab.label}</span>
         </button>
       ))}
     </div>

@@ -130,7 +130,7 @@ function App() {
         Skip to main content
       </a>
 
-      <div id="main-content" className="relative z-10 max-w-7xl mx-auto px-4 py-6 md:px-8 md:py-8 pb-24 md:pb-32">
+      <div id="main-content" className="relative z-10 max-w-7xl mx-auto px-3 py-4 md:px-8 md:py-8 pb-20 md:pb-32">
         {renderModule()}
       </div>
 

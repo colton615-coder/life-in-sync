@@ -299,16 +299,16 @@ CRITICAL RULES:
   }
 
   return (
-    <div className="space-y-8 md:space-y-12 animate-in fade-in duration-500">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+    <div className="space-y-6 md:space-y-12 animate-in fade-in duration-500">
+      <div className="flex items-center justify-between gap-3">
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="space-y-1.5"
+          className="space-y-1 flex-1 min-w-0"
         >
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gradient-cyan">Finance</h1>
-          <p className="text-sm md:text-base text-muted-foreground/60 font-normal">
+          <h1 className="text-2xl md:text-5xl font-bold tracking-tight text-gradient-cyan">Finance</h1>
+          <p className="text-xs md:text-base text-muted-foreground/60 font-normal line-clamp-1">
             Watch your dreams leak away, one transaction at a time
           </p>
         </motion.div>
@@ -323,23 +323,24 @@ CRITICAL RULES:
               >
                 <Button
                   size="sm"
-                  className="gap-1.5 h-8 px-3 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all"
+                  className="gap-1.5 h-8 px-2.5 md:px-3 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all flex-shrink-0"
                 >
                   <Plus size={16} weight="bold" />
-                  <span className="font-semibold text-sm">Add Expense</span>
+                  <span className="font-semibold text-xs md:text-sm hidden xs:inline">Add</span>
+                  <span className="font-semibold text-xs md:text-sm hidden sm:inline">Expense</span>
                 </Button>
               </motion.div>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] glass-card border-primary/30">
+            <DialogContent className="sm:max-w-[500px] glass-card border-primary/30 max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-2xl">Log New Expense</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-xl md:text-2xl">Log New Expense</DialogTitle>
+                <DialogDescription className="text-xs md:text-sm">
                   Track your spending and stay on budget
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-5 pt-4">
+              <div className="space-y-4 md:space-y-5 pt-3 md:pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="expense-amount" className="text-sm font-semibold">Amount</Label>
+                  <Label htmlFor="expense-amount" className="text-xs md:text-sm font-semibold">Amount</Label>
                   <Input
                     id="expense-amount"
                     type="number"
@@ -347,16 +348,16 @@ CRITICAL RULES:
                     placeholder="0.00"
                     value={newExpense.amount}
                     onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
-                    className="h-11 glass-morphic border-border/50 focus:border-primary"
+                    className="h-10 md:h-11 glass-morphic border-border/50 focus:border-primary text-base"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="expense-category" className="text-sm font-semibold">Category</Label>
+                  <Label htmlFor="expense-category" className="text-xs md:text-sm font-semibold">Category</Label>
                   <Select
                     value={newExpense.category}
                     onValueChange={(value) => setNewExpense({ ...newExpense, category: value })}
                   >
-                    <SelectTrigger id="expense-category" className="h-11 glass-morphic border-border/50">
+                    <SelectTrigger id="expense-category" className="h-10 md:h-11 glass-morphic border-border/50 text-base">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -367,7 +368,7 @@ CRITICAL RULES:
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="expense-description" className="text-sm font-semibold">Description (Optional)</Label>
+                  <Label htmlFor="expense-description" className="text-xs md:text-sm font-semibold">Description (Optional)</Label>
                   <AutocompleteInput
                     id="expense-description"
                     placeholder="What was this for?"
@@ -377,9 +378,9 @@ CRITICAL RULES:
                     maxSuggestions={5}
                   />
                 </div>
-                <div className="flex gap-3 pt-2">
-                  <Button onClick={addExpense} className="flex-1 h-11 shadow-md">Log Expense</Button>
-                  <Button variant="outline" onClick={() => setDialogOpen(false)} className="h-11">Cancel</Button>
+                <div className="flex gap-2 md:gap-3 pt-2">
+                  <Button onClick={addExpense} className="flex-1 h-10 md:h-11 shadow-md text-sm md:text-base">Log Expense</Button>
+                  <Button variant="outline" onClick={() => setDialogOpen(false)} className="h-10 md:h-11 text-sm md:text-base">Cancel</Button>
                 </div>
               </div>
             </DialogContent>
@@ -387,12 +388,12 @@ CRITICAL RULES:
         )}
       </div>
 
-      <div className="flex items-center gap-4 flex-wrap">
+      <div className="flex items-center gap-2 md:gap-4 -mx-3 md:mx-0 px-3 md:px-0">
         <TabGroup
           tabs={[
             { id: 'expenses', label: 'Expenses' },
-            { id: 'advisor', label: 'AI Financial Advisor', icon: <Sparkle weight="fill" size={16} /> },
-            ...(detailedBudget ? [{ id: 'budget', label: 'Your Budget' }] : []),
+            { id: 'advisor', label: 'AI Advisor', icon: <Sparkle weight="fill" size={14} /> },
+            ...(detailedBudget ? [{ id: 'budget', label: 'Budget' }] : []),
           ]}
           activeTab={activeTab}
           onChange={setActiveTab}
@@ -441,9 +442,9 @@ CRITICAL RULES:
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8"
           >
-            <NeumorphicCard className="border-primary/20 hover:border-primary/40 transition-all duration-300 p-8 md:p-10" animate={false}>
+            <NeumorphicCard className="border-primary/20 hover:border-primary/40 transition-all duration-300 p-5 md:p-10" animate={false}>
               <StatCard 
                 stats={[
                   { value: `$${totalSpent.toFixed(2)}`, label: 'This Month', gradient: 'from-primary to-primary/70' },
@@ -454,7 +455,7 @@ CRITICAL RULES:
             </NeumorphicCard>
 
             {categoryData.length > 0 ? (
-              <NeumorphicCard className="border-accent/20 p-8 md:p-10" animate={false}>
+              <NeumorphicCard className="border-accent/20 p-5 md:p-10" animate={false}>
                 <AccessibleChart
                   title="Spending by Category"
                   description="View your expenses broken down by category"
@@ -474,14 +475,14 @@ CRITICAL RULES:
                   ]}
                   ariaLabel={`Spending by category chart showing ${categoryData.length} categories with total spending of $${totalSpent.toFixed(2)}`}
                 >
-                  <ResponsiveContainer width="100%" height={200}>
+                  <ResponsiveContainer width="100%" height={180}>
                     <PieChart>
                       <Pie
                         data={categoryData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={55}
-                        outerRadius={85}
+                        innerRadius={50}
+                        outerRadius={75}
                         paddingAngle={3}
                         dataKey="value"
                       >
@@ -504,7 +505,7 @@ CRITICAL RULES:
                         formatter={(value: number) => `$${value.toFixed(2)}`}
                       />
                       <Legend 
-                        wrapperStyle={{ fontSize: '13px', fontWeight: 500 }}
+                        wrapperStyle={{ fontSize: '11px', fontWeight: 500 }}
                         iconType="circle"
                       />
                     </PieChart>
@@ -512,10 +513,10 @@ CRITICAL RULES:
                 </AccessibleChart>
               </NeumorphicCard>
             ) : (
-              <NeumorphicCard className="border-border/30 flex items-center justify-center text-center py-20 md:py-24" animate={false}>
-                <div className="px-6">
-                  <ChartPie size={56} weight="duotone" className="text-muted-foreground mx-auto mb-5 opacity-40" />
-                  <p className="text-base text-muted-foreground">Add expenses to see breakdown</p>
+              <NeumorphicCard className="border-border/30 flex items-center justify-center text-center py-16 md:py-24" animate={false}>
+                <div className="px-4 md:px-6">
+                  <ChartPie size={48} weight="duotone" className="text-muted-foreground mx-auto mb-4 md:mb-5 opacity-40 md:w-14 md:h-14" />
+                  <p className="text-sm md:text-base text-muted-foreground">Add expenses to see breakdown</p>
                 </div>
               </NeumorphicCard>
             )}
@@ -525,30 +526,31 @@ CRITICAL RULES:
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-14 md:mt-16"
+            className="mt-8 md:mt-16"
           >
-            <div className="flex items-center justify-between mb-8 md:mb-10">
-              <h2 className="text-lg md:text-2xl font-semibold flex items-center gap-2">
-                <TrendUp weight="fill" className="text-primary" size={22} />
-                Recent Expenses
+            <div className="flex items-center justify-between mb-6 md:mb-10 gap-3">
+              <h2 className="text-base md:text-2xl font-semibold flex items-center gap-2">
+                <TrendUp weight="fill" className="text-primary" size={18} />
+                <span className="hidden xs:inline">Recent Expenses</span>
+                <span className="xs:hidden">Expenses</span>
               </h2>
               {expenses && expenses.length > 0 && (
-                <Badge variant="secondary" className="text-xs md:text-sm px-2 md:px-3 py-0.5 md:py-1">
+                <Badge variant="secondary" className="text-[10px] md:text-sm px-2 md:px-3 py-0.5 md:py-1">
                   {expenses.length} total
                 </Badge>
               )}
             </div>
             {!expenses || expenses.length === 0 ? (
-              <NeumorphicCard className="border-border/30 text-center py-16 md:py-20" animate={false}>
+              <NeumorphicCard className="border-border/30 text-center py-12 md:py-20" animate={false}>
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.4 }}
-                  className="px-6"
+                  className="px-4 md:px-6"
                 >
-                  <CurrencyDollar size={56} weight="duotone" className="text-primary mx-auto mb-5 opacity-50 md:w-16 md:h-16" />
-                  <h3 className="font-semibold text-xl md:text-2xl mb-3">No expenses yet</h3>
-                  <p className="text-muted-foreground text-sm md:text-base max-w-sm mx-auto">
+                  <CurrencyDollar size={48} weight="duotone" className="text-primary mx-auto mb-4 md:mb-5 opacity-50 md:w-14 md:h-14" />
+                  <h3 className="font-semibold text-lg md:text-2xl mb-2 md:mb-3">No expenses yet</h3>
+                  <p className="text-muted-foreground text-xs md:text-base max-w-sm mx-auto">
                     Start tracking your spending to gain insights into your financial habits
                   </p>
                 </motion.div>
@@ -563,28 +565,28 @@ CRITICAL RULES:
                 renderItem={(expense) => {
                   const categoryIcon = CATEGORY_ICONS[expense.category] || '💵'
                   return (
-                    <div className="px-1 py-2">
-                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 p-6 md:p-7" animate={false}>
-                        <div className="flex items-center justify-between gap-3 md:gap-4">
-                          <div className="flex items-center gap-2.5 md:gap-3 flex-1">
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-lg md:text-xl">
+                    <div className="px-1 py-1.5">
+                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 p-4 md:p-7" animate={false}>
+                        <div className="flex items-center justify-between gap-2 md:gap-4">
+                          <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+                            <div className="w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-base md:text-xl">
                               {categoryIcon}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 md:gap-3 mb-1 flex-wrap">
-                                <span className="text-xl md:text-2xl font-semibold tabular-nums text-primary">
+                              <div className="flex items-center gap-1.5 md:gap-3 mb-0.5 md:mb-1 flex-wrap">
+                                <span className="text-base md:text-2xl font-semibold tabular-nums text-primary">
                                   ${expense.amount.toFixed(2)}
                                 </span>
-                                <Badge variant="secondary" className="text-[10px] md:text-xs">
+                                <Badge variant="secondary" className="text-[9px] md:text-xs px-1.5 md:px-2 py-0 md:py-0.5">
                                   {expense.category}
                                 </Badge>
                               </div>
                               {expense.description && (
-                                <p className="text-xs md:text-sm text-muted-foreground mb-1 md:mb-1.5 line-clamp-1">
+                                <p className="text-xs md:text-sm text-muted-foreground mb-0.5 md:mb-1.5 line-clamp-1">
                                   {expense.description}
                                 </p>
                               )}
-                              <p className="text-[10px] md:text-xs text-muted-foreground/70 font-medium">
+                              <p className="text-[9px] md:text-xs text-muted-foreground/70 font-medium">
                                 {new Date(expense.date).toLocaleDateString('en-US', { 
                                   month: 'short', 
                                   day: 'numeric', 
@@ -594,24 +596,24 @@ CRITICAL RULES:
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5 md:gap-1 flex-shrink-0">
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => openEditDialog(expense)}
-                              className="flex-shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors w-8 h-8"
+                              className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors w-7 h-7 md:w-8 md:h-8"
                               aria-label={`Edit expense: ${expense.description || expense.category} $${expense.amount.toFixed(2)}`}
                             >
-                              <PencilSimple size={16} className="md:w-5 md:h-5" aria-hidden="true" />
+                              <PencilSimple size={14} className="md:w-4 md:h-4" aria-hidden="true" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => deleteExpense(expense.id)}
-                              className="flex-shrink-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors w-8 h-8"
+                              className="text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors w-7 h-7 md:w-8 md:h-8"
                               aria-label={`Delete expense: ${expense.description || expense.category} $${expense.amount.toFixed(2)}`}
                             >
-                              <Trash size={16} className="md:w-5 md:h-5" aria-hidden="true" />
+                              <Trash size={14} className="md:w-4 md:h-4" aria-hidden="true" />
                             </Button>
                           </div>
                         </div>
@@ -625,33 +627,33 @@ CRITICAL RULES:
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid gap-5 md:gap-6"
+                className="grid gap-3 md:gap-6"
               >
                 {[...(expenses || [])].reverse().slice(0, 10).map((expense) => {
                   const categoryIcon = CATEGORY_ICONS[expense.category] || '💵'
                   return (
                     <motion.div key={expense.id} variants={item}>
-                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 p-6 md:p-7" animate={false}>
-                        <div className="flex items-center justify-between gap-3 md:gap-4">
-                          <div className="flex items-center gap-2.5 md:gap-3 flex-1">
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-lg md:text-xl">
+                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 p-4 md:p-7" animate={false}>
+                        <div className="flex items-center justify-between gap-2 md:gap-4">
+                          <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+                            <div className="w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-base md:text-xl">
                               {categoryIcon}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 md:gap-3 mb-1 flex-wrap">
-                                <span className="text-xl md:text-2xl font-semibold tabular-nums text-primary">
+                              <div className="flex items-center gap-1.5 md:gap-3 mb-0.5 md:mb-1 flex-wrap">
+                                <span className="text-base md:text-2xl font-semibold tabular-nums text-primary">
                                   ${expense.amount.toFixed(2)}
                                 </span>
-                                <Badge variant="secondary" className="text-[10px] md:text-xs">
+                                <Badge variant="secondary" className="text-[9px] md:text-xs px-1.5 md:px-2 py-0 md:py-0.5">
                                   {expense.category}
                                 </Badge>
                               </div>
                               {expense.description && (
-                                <p className="text-xs md:text-sm text-muted-foreground mb-1 md:mb-1.5 line-clamp-1">
+                                <p className="text-xs md:text-sm text-muted-foreground mb-0.5 md:mb-1.5 line-clamp-1">
                                   {expense.description}
                                 </p>
                               )}
-                              <p className="text-[10px] md:text-xs text-muted-foreground/70 font-medium">
+                              <p className="text-[9px] md:text-xs text-muted-foreground/70 font-medium">
                                 {new Date(expense.date).toLocaleDateString('en-US', { 
                                   month: 'short', 
                                   day: 'numeric', 
@@ -661,24 +663,24 @@ CRITICAL RULES:
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5 md:gap-1 flex-shrink-0">
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => openEditDialog(expense)}
-                              className="flex-shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors w-8 h-8"
+                              className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors w-7 h-7 md:w-8 md:h-8"
                               aria-label={`Edit expense: ${expense.description || expense.category} $${expense.amount.toFixed(2)}`}
                             >
-                              <PencilSimple size={16} className="md:w-5 md:h-5" aria-hidden="true" />
+                              <PencilSimple size={14} className="md:w-4 md:h-4" aria-hidden="true" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => deleteExpense(expense.id)}
-                              className="flex-shrink-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors w-8 h-8"
+                              className="text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors w-7 h-7 md:w-8 md:h-8"
                               aria-label={`Delete expense: ${expense.description || expense.category} $${expense.amount.toFixed(2)}`}
                             >
-                              <Trash size={16} className="md:w-5 md:h-5" aria-hidden="true" />
+                              <Trash size={14} className="md:w-4 md:h-4" aria-hidden="true" />
                             </Button>
                           </div>
                         </div>
