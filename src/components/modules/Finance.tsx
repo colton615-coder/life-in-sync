@@ -312,7 +312,7 @@ CRITICAL RULES:
         </p>
       </motion.div>
 
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex items-center justify-between gap-4 flex-wrap mb-10 md:mb-12">
         <TabGroup
           tabs={[
             { id: 'expenses', label: 'Expenses' },
@@ -432,9 +432,9 @@ CRITICAL RULES:
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8"
           >
-            <NeumorphicCard className="border-primary/20 hover:border-primary/40 transition-all duration-300 p-6 md:p-8" animate={false}>
+            <NeumorphicCard className="border-primary/20 hover:border-primary/40 transition-all duration-300 p-8 md:p-10" animate={false}>
               <StatCard 
                 stats={[
                   { value: `$${totalSpent.toFixed(2)}`, label: 'This Month', gradient: 'from-primary to-primary/70' },
@@ -445,7 +445,7 @@ CRITICAL RULES:
             </NeumorphicCard>
 
             {categoryData.length > 0 ? (
-              <NeumorphicCard className="border-accent/20 p-6 md:p-8" animate={false}>
+              <NeumorphicCard className="border-accent/20 p-8 md:p-10" animate={false}>
                 <AccessibleChart
                   title="Spending by Category"
                   description="View your expenses broken down by category"
@@ -503,9 +503,9 @@ CRITICAL RULES:
                 </AccessibleChart>
               </NeumorphicCard>
             ) : (
-              <NeumorphicCard className="border-border/30 flex items-center justify-center text-center py-16 md:py-20" animate={false}>
-                <div>
-                  <ChartPie size={56} weight="duotone" className="text-muted-foreground mx-auto mb-4 opacity-40" />
+              <NeumorphicCard className="border-border/30 flex items-center justify-center text-center py-20 md:py-24" animate={false}>
+                <div className="px-6">
+                  <ChartPie size={56} weight="duotone" className="text-muted-foreground mx-auto mb-5 opacity-40" />
                   <p className="text-base text-muted-foreground">Add expenses to see breakdown</p>
                 </div>
               </NeumorphicCard>
@@ -516,9 +516,9 @@ CRITICAL RULES:
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-10 md:mt-12"
+            className="mt-14 md:mt-16"
           >
-            <div className="flex items-center justify-between mb-6 md:mb-8">
+            <div className="flex items-center justify-between mb-8 md:mb-10">
               <h2 className="text-lg md:text-2xl font-semibold flex items-center gap-2">
                 <TrendUp weight="fill" className="text-primary" size={22} />
                 Recent Expenses
@@ -530,14 +530,15 @@ CRITICAL RULES:
               )}
             </div>
             {!expenses || expenses.length === 0 ? (
-              <NeumorphicCard className="border-border/30 text-center py-14 md:py-16" animate={false}>
+              <NeumorphicCard className="border-border/30 text-center py-16 md:py-20" animate={false}>
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.4 }}
+                  className="px-6"
                 >
-                  <CurrencyDollar size={56} weight="duotone" className="text-primary mx-auto mb-4 md:mb-5 opacity-50 md:w-16 md:h-16" />
-                  <h3 className="font-semibold text-xl md:text-2xl mb-2">No expenses yet</h3>
+                  <CurrencyDollar size={56} weight="duotone" className="text-primary mx-auto mb-5 opacity-50 md:w-16 md:h-16" />
+                  <h3 className="font-semibold text-xl md:text-2xl mb-3">No expenses yet</h3>
                   <p className="text-muted-foreground text-sm md:text-base max-w-sm mx-auto">
                     Start tracking your spending to gain insights into your financial habits
                   </p>
@@ -553,8 +554,8 @@ CRITICAL RULES:
                 renderItem={(expense) => {
                   const categoryIcon = CATEGORY_ICONS[expense.category] || '💵'
                   return (
-                    <div className="px-1 py-1.5">
-                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 p-5 md:p-6" animate={false}>
+                    <div className="px-1 py-2">
+                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 p-6 md:p-7" animate={false}>
                         <div className="flex items-center justify-between gap-3 md:gap-4">
                           <div className="flex items-center gap-2.5 md:gap-3 flex-1">
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-lg md:text-xl">
@@ -615,13 +616,13 @@ CRITICAL RULES:
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid gap-4 md:gap-5"
+                className="grid gap-5 md:gap-6"
               >
                 {[...(expenses || [])].reverse().slice(0, 10).map((expense) => {
                   const categoryIcon = CATEGORY_ICONS[expense.category] || '💵'
                   return (
                     <motion.div key={expense.id} variants={item}>
-                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 p-5 md:p-6" animate={false}>
+                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 p-6 md:p-7" animate={false}>
                         <div className="flex items-center justify-between gap-3 md:gap-4">
                           <div className="flex items-center gap-2.5 md:gap-3 flex-1">
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-lg md:text-xl">
