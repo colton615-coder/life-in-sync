@@ -129,12 +129,12 @@ export interface DetailedBudget {
 }
 
 export interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: string
-  provider?: 'spark' | 'gemini'
-  model?: string
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+  provider?: 'spark' | 'gemini';
+  model?: string;
 }
 
 export interface Exercise {
