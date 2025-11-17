@@ -189,6 +189,24 @@ Animations should feel smooth, polished, and physics-based—like premium automo
   - Reduced card padding (16px) and font sizes on mobile
   - Single column grid layout below 768px
 
+## Accessibility & UX Improvements
+
+### Chart Accessibility
+All data visualizations include text-based alternatives via the `AccessibleChart` component:
+- **Data Table Toggle**: Users can switch between visual charts and accessible data tables
+- **Screen Reader Support**: Proper ARIA labels and semantic markup
+- **Keyboard Navigation**: All chart controls are fully keyboard accessible
+- **Format Options**: Custom column formatters for readable data display
+- **Implementation**: Finance module's spending breakdown chart demonstrates the pattern
+
+### Component Library Consolidation
+Standardized card components to single source of truth:
+- **Primary Component**: `NeumorphicCard` for all card-based UI elements
+- **Features**: Hover effects, pressed states, inset variants, glow borders, optional animations
+- **Deprecated**: Old `Card.tsx` component replaced with NeumorphicCard
+- **Consistency**: Uniform neumorphic styling across all modules
+- **Documentation**: See `COMPONENT_CONSOLIDATION.md` for migration guide
+
 ## AI Integration
 
 ### Dual Provider Architecture
@@ -228,7 +246,7 @@ The app supports two AI providers with intelligent routing and automatic fallbac
   - `ai/usage-tracker.ts` - Cost and usage monitoring
   - `gemini/client.ts` - Gemini API wrapper
   - `ai/examples.ts` - Pre-built helper functions
-- **Components**: AIBadge for provider indication
+- **Components**: AIBadge for provider indication, AccessibleChart for data viz
 - **Module**: Settings page for configuration (owner-only)
 
 ### Security Considerations

@@ -1,4 +1,4 @@
-import { Card } from '../Card'
+import { NeumorphicCard } from '../NeumorphicCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,6 +19,7 @@ import { TabGroup } from '@/components/TabGroup'
 import { AIButton } from '@/components/AIButton'
 import { SarcasticProgress } from '@/components/SarcasticLoader'
 import { StatCard } from '@/components/StatCard'
+import { AccessibleChart } from '@/components/AccessibleChart'
 
 const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Other']
 const COLORS = ['#5fd4f4', '#9d7fff', '#6ee7b7', '#fbbf24', '#fb923c', '#f87171', '#94a3b8']
@@ -359,7 +360,7 @@ CRITICAL RULES:
       {activeTab === 'advisor' ? (
         <>
           {isGeneratingBudget ? (
-            <Card className="glass-card border-primary/30 py-12 md:py-16">
+            <NeumorphicCard className="border-primary/30 py-12 md:py-16" animate={false}>
               <div className="max-w-lg mx-auto space-y-8">
                 <div className="flex justify-center">
                   <motion.div
@@ -375,7 +376,7 @@ CRITICAL RULES:
                 </div>
                 <SarcasticProgress />
               </div>
-            </Card>
+            </NeumorphicCard>
           ) : detailedBudget && financialProfile ? (
             <DetailedBudgetDisplay budget={detailedBudget} onStartOver={handleStartOver} />
           ) : (
@@ -400,7 +401,7 @@ CRITICAL RULES:
             transition={{ duration: 0.5, delay: 0.2 }}
             className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4"
           >
-            <Card className="glass-card border-primary/20 hover:border-primary/40 transition-all duration-300">
+            <NeumorphicCard className="border-primary/20 hover:border-primary/40 transition-all duration-300" animate={false}>
               <StatCard 
                 stats={[
                   { value: `$${totalSpent.toFixed(2)}`, label: 'This Month', gradient: 'from-primary to-primary/70' },
@@ -408,57 +409,73 @@ CRITICAL RULES:
                   { value: categoryData.length, label: 'Categories' }
                 ]}
               />
-            </Card>
+            </NeumorphicCard>
 
             {categoryData.length > 0 ? (
-              <Card className="glass-card border-accent/20">
-                <div className="flex items-center gap-2 mb-3 md:mb-4">
-                  <ChartPie size={20} weight="fill" className="text-accent md:w-6 md:h-6" />
-                  <h3 className="font-semibold text-base md:text-lg">Spending by Category</h3>
-                </div>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={55}
-                      outerRadius={85}
-                      paddingAngle={3}
-                      dataKey="value"
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={COLORS[index % COLORS.length]}
-                          stroke="transparent"
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'oklch(0.22 0.03 265)',
-                        border: '1px solid oklch(0.35 0.03 265)',
-                        borderRadius: '0.75rem',
-                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-                        color: 'oklch(0.95 0.01 265)'
-                      }}
-                      formatter={(value: number) => `$${value.toFixed(2)}`}
-                    />
-                    <Legend 
-                      wrapperStyle={{ fontSize: '13px', fontWeight: 500 }}
-                      iconType="circle"
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Card>
+              <NeumorphicCard className="border-accent/20" animate={false}>
+                <AccessibleChart
+                  title="Spending by Category"
+                  description="View your expenses broken down by category"
+                  data={categoryData}
+                  columns={[
+                    { key: 'name', label: 'Category' },
+                    { 
+                      key: 'value', 
+                      label: 'Amount', 
+                      format: (val) => `$${Number(val).toFixed(2)}` 
+                    },
+                    { 
+                      key: 'value', 
+                      label: 'Percentage', 
+                      format: (val) => `${((Number(val) / totalSpent) * 100).toFixed(1)}%` 
+                    }
+                  ]}
+                  ariaLabel={`Spending by category chart showing ${categoryData.length} categories with total spending of $${totalSpent.toFixed(2)}`}
+                >
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie
+                        data={categoryData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={55}
+                        outerRadius={85}
+                        paddingAngle={3}
+                        dataKey="value"
+                      >
+                        {categoryData.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={COLORS[index % COLORS.length]}
+                            stroke="transparent"
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'oklch(0.22 0.03 265)',
+                          border: '1px solid oklch(0.35 0.03 265)',
+                          borderRadius: '0.75rem',
+                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+                          color: 'oklch(0.95 0.01 265)'
+                        }}
+                        formatter={(value: number) => `$${value.toFixed(2)}`}
+                      />
+                      <Legend 
+                        wrapperStyle={{ fontSize: '13px', fontWeight: 500 }}
+                        iconType="circle"
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </AccessibleChart>
+              </NeumorphicCard>
             ) : (
-              <Card className="glass-card border-border/30 flex items-center justify-center text-center py-12">
+              <NeumorphicCard className="border-border/30 flex items-center justify-center text-center py-12" animate={false}>
                 <div>
                   <ChartPie size={48} weight="duotone" className="text-muted-foreground mx-auto mb-3 opacity-40" />
                   <p className="text-sm text-muted-foreground">Add expenses to see breakdown</p>
                 </div>
-              </Card>
+              </NeumorphicCard>
             )}
           </motion.div>
 
@@ -479,7 +496,7 @@ CRITICAL RULES:
               )}
             </div>
             {!expenses || expenses.length === 0 ? (
-              <Card className="glass-card border-border/30 text-center py-14 md:py-16">
+              <NeumorphicCard className="border-border/30 text-center py-14 md:py-16" animate={false}>
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -491,7 +508,7 @@ CRITICAL RULES:
                     Start tracking your spending to gain insights into your financial habits
                   </p>
                 </motion.div>
-              </Card>
+              </NeumorphicCard>
             ) : (
               <motion.div 
                 variants={container}
@@ -503,7 +520,7 @@ CRITICAL RULES:
                   const categoryIcon = CATEGORY_ICONS[expense.category] || '💵'
                   return (
                     <motion.div key={expense.id} variants={item}>
-                      <Card className="glass-card hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
+                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10" animate={false}>
                         <div className="flex items-center justify-between gap-3 md:gap-4">
                           <div className="flex items-center gap-2.5 md:gap-3 flex-1">
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-lg md:text-xl">
@@ -552,7 +569,7 @@ CRITICAL RULES:
                             </Button>
                           </div>
                         </div>
-                      </Card>
+                      </NeumorphicCard>
                     </motion.div>
                   )
                 })}

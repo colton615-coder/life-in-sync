@@ -1,4 +1,4 @@
-import { Card } from './Card'
+import { NeumorphicCard } from './NeumorphicCard'
 import { Badge } from './ui/badge'
 import { CheckCircle, Fire, Target, TrendUp } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
@@ -18,7 +18,7 @@ interface StatsCardProps {
 
 export function StatsCard({ title, stats, className }: StatsCardProps) {
   return (
-    <Card className={cn('glass-card border-primary/20 p-4', className)}>
+    <NeumorphicCard className={cn('border-primary/20 p-4', className)} animate={false}>
       <div className="flex items-center justify-between gap-6">
         <motion.div
           whileHover={{ scale: 1.02 }}
@@ -83,6 +83,6 @@ export function StatsCard({ title, stats, className }: StatsCardProps) {
           </div>
         </motion.div>
       </div>
-    </Card>
+    </NeumorphicCard>
   )
 }
