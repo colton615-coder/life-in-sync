@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
-import type { GeminiGenerateOptions, GeminiResponse } from "./types"
+import type { GeminiGenerateOptions, GeminiResponse, GeminiConnectionTestResult } from "./types"
 import { decrypt } from "@/lib/crypto"
 
 export class GeminiClient {
@@ -108,13 +108,80 @@ IMPORTANT: Return ONLY valid JSON, no markdown formatting, no explanations, no o
     }
   }
 
-  async testConnection(): Promise<boolean> {
+  async testConnection(): Promise<GeminiConnectionTestResult> {
     try {
-      await this.generate("Say hello", { temperature: 0.1 })
-      return true
-    } catch (error) {
-      console.error("Gemini connection test failed:", error)
-      return false
+      console.log('[Gemini] Starting connection test')
+      
+      const apiKey = await this.getApiKey()
+      if (!apiKey) {
+        return {
+          success: false,
+          error: 'No API key configured',
+          details: 'Please add your Gemini API key in the settings above.'
+        }
+      }
+      
+      console.log('[Gemini] API key retrieved, length:', apiKey.length)
+      
+      if (apiKey.length < 20) {
+        return {
+          success: false,
+          error: 'API key appears invalid',
+          details: 'The API key is too short. Please verify you copied the complete key from Google AI Studio.'
+        }
+      }
+      
+      if (!apiKey.startsWith('AI')) {
+        return {
+          success: false,
+          error: 'API key format incorrect',
+          details: 'Gemini API keys should start with "AI". Please verify your key.'
+        }
+      }
+      
+      console.log('[Gemini] Initializing client')
+      await this.initialize()
+      
+      console.log('[Gemini] Sending test request')
+      const response = await this.generate("Respond with exactly: OK", { 
+        temperature: 0.1,
+        maxOutputTokens: 10
+      })
+      
+      console.log('[Gemini] Test response:', response.text)
+      
+      return {
+        success: true,
+        details: `Connected successfully using ${response.model}`
+      }
+    } catch (error: any) {
+      console.error('[Gemini] Connection test failed:', error)
+      
+      let errorMessage = 'Connection failed'
+      let details = ''
+      
+      if (error.message?.includes('API_KEY_INVALID')) {
+        errorMessage = 'Invalid API key'
+        details = 'The API key you provided is not recognized by Google. Please verify your key at https://aistudio.google.com/apikey'
+      } else if (error.message?.includes('decrypt')) {
+        errorMessage = 'Decryption failed'
+        details = 'Could not decrypt your stored API key. Please remove and re-add your key.'
+      } else if (error.message?.includes('quota')) {
+        errorMessage = 'API quota exceeded'
+        details = 'Your Gemini API quota has been exceeded. Check your usage at Google AI Studio.'
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        errorMessage = 'Network error'
+        details = 'Could not reach Google AI servers. Check your internet connection.'
+      } else if (error.message) {
+        errorMessage = 'Connection error'
+        details = error.message
+      }
+      
+      return {
+        success: false,
+        error: errorMessage,
+        details
+      }
     }
   }
 }

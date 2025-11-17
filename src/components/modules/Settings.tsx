@@ -105,17 +105,29 @@ export function Settings() {
     setTestResult(null)
 
     try {
-      const success = await gemini.testConnection()
-      setTestResult(success ? 'success' : 'error')
+      const result = await gemini.testConnection()
+      setTestResult(result.success ? 'success' : 'error')
       
-      if (success) {
-        toast.success("✓ Gemini connection successful!")
+      if (result.success) {
+        triggerHaptic('success')
+        playSound('success')
+        toast.success("✓ Gemini connection successful!", {
+          description: result.details || 'Your API key is working correctly'
+        })
       } else {
-        toast.error("✗ Gemini connection failed")
+        triggerHaptic('error')
+        playSound('error')
+        toast.error(`✗ ${result.error || 'Connection failed'}`, {
+          description: result.details || 'Please check your API key and try again'
+        })
       }
     } catch (error: any) {
       setTestResult('error')
-      toast.error(`Connection failed: ${error.message}`)
+      triggerHaptic('error')
+      playSound('error')
+      toast.error(`Connection test error`, {
+        description: error.message || 'An unexpected error occurred'
+      })
     } finally {
       setIsTesting(false)
     }

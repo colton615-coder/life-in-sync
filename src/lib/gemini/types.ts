@@ -17,3 +17,9 @@ export interface GeminiError {
   message: string
   status: number
 }
+
+export interface GeminiConnectionTestResult {
+  success: boolean
+  error?: string
+  details?: string
+}
