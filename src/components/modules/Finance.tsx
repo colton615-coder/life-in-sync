@@ -544,6 +544,73 @@ CRITICAL RULES:
                   </p>
                 </motion.div>
               </NeumorphicCard>
+            ) : expenses.length > 50 ? (
+              <VirtualList
+                items={[...(expenses || [])].reverse()}
+                itemHeight={100}
+                containerHeight={600}
+                overscan={5}
+                className="rounded-xl"
+                renderItem={(expense) => {
+                  const categoryIcon = CATEGORY_ICONS[expense.category] || '💵'
+                  return (
+                    <div className="px-1 py-1.5">
+                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10" animate={false}>
+                        <div className="flex items-center justify-between gap-3 md:gap-4">
+                          <div className="flex items-center gap-2.5 md:gap-3 flex-1">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-lg md:text-xl">
+                              {categoryIcon}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 md:gap-3 mb-1 flex-wrap">
+                                <span className="text-xl md:text-2xl font-semibold tabular-nums text-primary">
+                                  ${expense.amount.toFixed(2)}
+                                </span>
+                                <Badge variant="secondary" className="text-[10px] md:text-xs">
+                                  {expense.category}
+                                </Badge>
+                              </div>
+                              {expense.description && (
+                                <p className="text-xs md:text-sm text-muted-foreground mb-1 md:mb-1.5 line-clamp-1">
+                                  {expense.description}
+                                </p>
+                              )}
+                              <p className="text-[10px] md:text-xs text-muted-foreground/70 font-medium">
+                                {new Date(expense.date).toLocaleDateString('en-US', { 
+                                  month: 'short', 
+                                  day: 'numeric', 
+                                  year: 'numeric',
+                                  weekday: 'short'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openEditDialog(expense)}
+                              className="flex-shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors w-8 h-8"
+                              aria-label={`Edit expense: ${expense.description || expense.category} $${expense.amount.toFixed(2)}`}
+                            >
+                              <PencilSimple size={16} className="md:w-5 md:h-5" aria-hidden="true" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => deleteExpense(expense.id)}
+                              className="flex-shrink-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors w-8 h-8"
+                              aria-label={`Delete expense: ${expense.description || expense.category} $${expense.amount.toFixed(2)}`}
+                            >
+                              <Trash size={16} className="md:w-5 md:h-5" aria-hidden="true" />
+                            </Button>
+                          </div>
+                        </div>
+                      </NeumorphicCard>
+                    </div>
+                  )
+                }}
+              />
             ) : (
               <motion.div 
                 variants={container}
@@ -591,16 +658,18 @@ CRITICAL RULES:
                               size="icon"
                               onClick={() => openEditDialog(expense)}
                               className="flex-shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors w-8 h-8"
+                              aria-label={`Edit expense: ${expense.description || expense.category} $${expense.amount.toFixed(2)}`}
                             >
-                              <PencilSimple size={16} className="md:w-5 md:h-5" />
+                              <PencilSimple size={16} className="md:w-5 md:h-5" aria-hidden="true" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => deleteExpense(expense.id)}
                               className="flex-shrink-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors w-8 h-8"
+                              aria-label={`Delete expense: ${expense.description || expense.category} $${expense.amount.toFixed(2)}`}
                             >
-                              <Trash size={16} className="md:w-5 md:h-5" />
+                              <Trash size={16} className="md:w-5 md:h-5" aria-hidden="true" />
                             </Button>
                           </div>
                         </div>

@@ -15,6 +15,7 @@ import { Calendar } from '@/components/modules/Calendar'
 import { Settings } from '@/components/modules/Settings'
 import { GolfSwing } from '@/components/modules/GolfSwing'
 import { Connections } from '@/components/modules/Connections'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 function App() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
@@ -35,29 +36,77 @@ function App() {
   const renderModule = () => {
     switch (activeModule) {
       case 'dashboard':
-        return <Dashboard onNavigate={handleModuleChange} />
+        return (
+          <ErrorBoundary>
+            <Dashboard onNavigate={handleModuleChange} />
+          </ErrorBoundary>
+        )
       case 'habits':
-        return <Habits />
+        return (
+          <ErrorBoundary>
+            <Habits />
+          </ErrorBoundary>
+        )
       case 'finance':
-        return <Finance />
+        return (
+          <ErrorBoundary>
+            <Finance />
+          </ErrorBoundary>
+        )
       case 'tasks':
-        return <Tasks />
+        return (
+          <ErrorBoundary>
+            <Tasks />
+          </ErrorBoundary>
+        )
       case 'workouts':
-        return <Workouts />
+        return (
+          <ErrorBoundary>
+            <Workouts />
+          </ErrorBoundary>
+        )
       case 'knox':
-        return <Knox />
+        return (
+          <ErrorBoundary>
+            <Knox />
+          </ErrorBoundary>
+        )
       case 'shopping':
-        return <Shopping />
+        return (
+          <ErrorBoundary>
+            <Shopping />
+          </ErrorBoundary>
+        )
       case 'calendar':
-        return <Calendar />
+        return (
+          <ErrorBoundary>
+            <Calendar />
+          </ErrorBoundary>
+        )
       case 'vault':
-        return <GolfSwing />
+        return (
+          <ErrorBoundary>
+            <GolfSwing />
+          </ErrorBoundary>
+        )
       case 'connections':
-        return <Connections />
+        return (
+          <ErrorBoundary>
+            <Connections />
+          </ErrorBoundary>
+        )
       case 'settings':
-        return <Settings />
+        return (
+          <ErrorBoundary>
+            <Settings />
+          </ErrorBoundary>
+        )
       default:
-        return <Dashboard onNavigate={handleModuleChange} />
+        return (
+          <ErrorBoundary>
+            <Dashboard onNavigate={handleModuleChange} />
+          </ErrorBoundary>
+        )
     }
   }
 
