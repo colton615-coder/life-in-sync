@@ -18,7 +18,8 @@ import {
   Sparkle,
   Lightning,
   ArrowRight,
-  Trash
+  Trash,
+  ArrowsLeftRight
 } from '@phosphor-icons/react'
 import { SwingAnalysis } from '@/lib/types'
 import { useKV } from '@github/spark/hooks'
@@ -27,6 +28,7 @@ import { simulateVideoProcessing, analyzePoseData, generateFeedback } from '@/li
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { VideoPlayerWithTimeline } from '@/components/VideoPlayerWithTimeline'
+import { SwingComparisonDialog } from '@/components/SwingComparisonDialog'
 
 export function GolfSwing() {
   const [analyses, setAnalyses] = useKV<SwingAnalysis[]>('golf-swing-analyses', [])
@@ -34,6 +36,7 @@ export function GolfSwing() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingProgress, setProcessingProgress] = useState(0)
   const [processingStatus, setProcessingStatus] = useState('')
+  const [comparisonDialogOpen, setComparisonDialogOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -590,15 +593,28 @@ export function GolfSwing() {
             AI-powered swing analysis with professional feedback
           </p>
         </div>
-        <Button
-          onClick={() => fileInputRef.current?.click()}
-          className="gap-2"
-          size="lg"
-          aria-label="Upload new golf swing video for analysis"
-        >
-          <Upload size={20} weight="bold" aria-hidden="true" />
-          New Analysis
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => setComparisonDialogOpen(true)}
+            variant="outline"
+            className="gap-2"
+            size="lg"
+            disabled={(analyses || []).filter(a => a.status === 'completed' && a.metrics && a.feedback).length < 2}
+            aria-label="Compare two swing analyses"
+          >
+            <ArrowsLeftRight size={20} weight="bold" aria-hidden="true" />
+            Compare
+          </Button>
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            className="gap-2"
+            size="lg"
+            aria-label="Upload new golf swing video for analysis"
+          >
+            <Upload size={20} weight="bold" aria-hidden="true" />
+            New Analysis
+          </Button>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -644,6 +660,12 @@ export function GolfSwing() {
         accept="video/*"
         onChange={handleVideoUpload}
         className="hidden"
+      />
+
+      <SwingComparisonDialog
+        open={comparisonDialogOpen}
+        onOpenChange={setComparisonDialogOpen}
+        analyses={analyses || []}
       />
     </div>
   )
