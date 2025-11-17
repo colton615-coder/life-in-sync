@@ -28,6 +28,7 @@ import { SwingAnalysis, GolfClub } from '@/lib/types'
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
 import { simulateVideoProcessing, analyzePoseData, generateFeedback } from '@/lib/golf/swing-analyzer'
+import { validateVideoFile, formatFileSize, getVideoCompressionTips } from '@/lib/golf/video-utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { VideoPlayerWithTimeline } from '@/components/VideoPlayerWithTimeline'
@@ -67,18 +68,22 @@ export function GolfSwing() {
 
     console.log('File selected:', file.name, file.type, file.size)
 
-    if (!file.type.startsWith('video/')) {
-      toast.error('Please upload a video file', {
-        description: `File type ${file.type} is not supported`
+    const validation = validateVideoFile(file)
+
+    if (!validation.isValid) {
+      const compressionTips = getVideoCompressionTips(validation.fileSizeMB)
+      toast.error(validation.error || 'Invalid video file', {
+        description: compressionTips.length > 0 
+          ? `Tip: ${compressionTips[0]}` 
+          : `File size: ${formatFileSize(validation.fileSize)}`
       })
       return
     }
 
-    if (file.size > 100 * 1024 * 1024) {
-      toast.error('Video file too large (max 100MB)', {
-        description: `File size: ${(file.size / 1024 / 1024).toFixed(2)}MB`
+    if (validation.warning) {
+      toast.info('Large video detected', {
+        description: validation.warning + ` Estimated processing time: ~${validation.estimatedProcessingTime}s`
       })
-      return
     }
 
     console.log('Opening club selection dialog')
@@ -256,7 +261,7 @@ export function GolfSwing() {
         </Button>
 
         <p className="text-xs md:text-sm text-muted-foreground mt-4">
-          Accepts video files up to 100MB
+          Accepts video files up to 500MB (MP4, MOV, AVI, etc.)
         </p>
 
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">

@@ -86,11 +86,11 @@ A comprehensive personal dashboard application that integrates habit tracking, f
 - **Success criteria**: Interface feels like a physical notepad, add/edit/delete operations are instant with smooth animations, items persist between sessions using useKV, inline editing feels natural, completed items remain visible but visually de-emphasized, all interactions are polished with subtle hover states and satisfying micro-interactions
 
 ### Golf Swing Analyzer Module
-- **Functionality**: Professional AI-powered golf swing analysis using pose estimation to extract 3D landmarks, compute critical metrics (spine angle, hip rotation, head movement, swing plane, tempo, weight transfer), and generate personalized feedback with drill recommendations
+- **Functionality**: Professional AI-powered golf swing analysis using pose estimation to extract 3D landmarks, compute critical metrics (spine angle, hip rotation, head movement, swing plane, tempo, weight transfer), and generate personalized feedback with drill recommendations. Supports large video files up to 500MB for high-quality analysis.
 - **Purpose**: Provide golfers with instant, professional-grade swing analysis without expensive coaching sessions, enabling data-driven improvement through actionable insights
 - **Trigger**: User navigates to Golf Swing module (formerly Vault) from navigation drawer
-- **Progression**: User uploads swing video (MP4, MOV, etc.) → Video processes with real-time progress display (uploading → extracting frames → pose estimation → analyzing mechanics → generating AI insights) → Completed analysis displays with video playback, detailed metrics dashboard, strengths/improvements breakdown, AI-generated insights, and personalized practice drills → User can upload multiple swings and compare progress over time → Historical analyses persist in sidebar for easy access
-- **Success criteria**: Video upload accepts common formats under 100MB, processing completes in under 30 seconds with accurate progress feedback, pose estimation detects key body landmarks reliably, metrics calculations are accurate and meaningful, AI feedback is specific and actionable, drill recommendations target actual weaknesses, interface is intuitive for non-technical users, all data persists between sessions, video playback is smooth, comparison view shows improvement trends
+- **Progression**: User uploads swing video (MP4, MOV, AVI, etc. up to 500MB) → Video processes with real-time progress display (uploading → extracting frames → pose estimation → analyzing mechanics → generating AI insights) → Large files (>200MB) show extended processing notification → Completed analysis displays with video playback, detailed metrics dashboard, strengths/improvements breakdown, AI-generated insights, and personalized practice drills → User can upload multiple swings and compare progress over time → Historical analyses persist in sidebar for easy access
+- **Success criteria**: Video upload accepts common formats under 500MB with informative feedback for large files, processing completes with accurate progress feedback, pose estimation detects key body landmarks reliably, metrics calculations are accurate and meaningful, AI feedback is specific and actionable, drill recommendations target actual weaknesses, interface is intuitive for non-technical users, all data persists between sessions, video playback is smooth, comparison view shows improvement trends
 
 ## Edge Case Handling
 - **Empty States**: Show welcoming prompt "Start your first habit!" with animated icon when no habits exist; "Upload Your First Swing" for golf analyzer
@@ -102,7 +102,8 @@ A comprehensive personal dashboard application that integrates habit tracking, f
 - **Data Loss Prevention**: Confirm before deleting habits; show toast with undo option
 - **Theme Transitions**: Smooth color transitions when switching themes; no jarring flashes
 - **System Theme Changes**: Automatically adapt when user changes OS theme preference (when system theme is selected)
-- **Video Upload Errors**: Validate file type and size before processing, show clear error messages for unsupported formats or files too large
+- **Video Upload Errors**: Validate file type and size before processing, show clear error messages for unsupported formats or files exceeding 500MB limit with guidance to compress video
+- **Large Video Files**: Files over 200MB show informative notification about extended processing time, graceful handling of memory constraints
 - **Processing Failures**: Graceful error handling with retry option, error state persists in analysis list
 - **Incomplete Analysis**: Partial results saved if analysis fails mid-process, user can delete and retry
 - **No Video Selected**: File input validates selection before starting upload process
