@@ -73,7 +73,7 @@ export class GeminiClient {
           topP: options?.topP,
           topK: options?.topK,
         },
-      }) as any
+      })
 
       console.log('[GeminiClient] Sending request to Gemini API...')
       const result = await model.generateContent(prompt)
@@ -92,13 +92,11 @@ export class GeminiClient {
       }
     } catch (error: unknown) {
       console.error('[GeminiClient] ❌ Generate request failed')
-      const err = error as any
+      const err = error as Error
       console.error('[GeminiClient] Error type:', err?.constructor?.name)
       console.error('[GeminiClient] Error message:', err?.message)
-      console.error('[GeminiClient] Error status:', err?.status)
-      console.error('[GeminiClient] Error details:', err?.errorDetails)
       
-      if (err?.status === 404 || err?.message?.includes('404')) {
+      if ((err as any).status === 404 || err?.message?.includes('404')) {
         console.error('[GeminiClient] 404 Error - Model not found or incorrect endpoint')
         console.error('[GeminiClient] Requested model:', modelName)
         console.error('[GeminiClient] This usually means:')
@@ -108,15 +106,15 @@ export class GeminiClient {
         throw new Error(`Model "${modelName}" not found or not accessible. The application is configured to use "${DEFAULT_GEMINI_MODEL}". Please check your API key permissions for this model.`)
       }
       
-      if (err?.message?.includes("API_KEY_INVALID") || err?.status === 400) {
+      if (err?.message?.includes("API_KEY_INVALID") || (err as any).status === 400) {
         throw new Error("Invalid Gemini API key. Please check your configuration in Settings.")
       }
       
-      if (err?.message?.includes("quota") || err?.status === 429) {
+      if (err?.message?.includes("quota") || (err as any).status === 429) {
         throw new Error(`Gemini API quota exceeded. ${err.message}`)
       }
       
-      if (err?.message?.includes("PERMISSION_DENIED") || err?.status === 403) {
+      if (err?.message?.includes("PERMISSION_DENIED") || (err as any).status === 403) {
         throw new Error(`Permission denied. Your API key may not have access to the "${modelName}" model. The application is configured to use "${DEFAULT_GEMINI_MODEL}".`)
       }
       
@@ -201,23 +199,23 @@ IMPORTANT: Return ONLY valid JSON, no markdown formatting, no explanations, no o
     } catch (error: unknown) {
       console.error('[Gemini] Connection test failed:', error)
       
-      const err = error as any
+      const err = error as Error
       let errorMessage = 'Connection failed'
       let details = ''
       
-      if (err.status === 404 || err.message?.includes('404') || err.message?.includes('not found')) {
+      if ((err as any).status === 404 || err.message?.includes('404') || err.message?.includes('not found')) {
         errorMessage = 'Model not found (404)'
         details = `The model may not be available for your API key or region. The application is configured to use "${DEFAULT_GEMINI_MODEL}".`
-      } else if (err.message?.includes('API_KEY_INVALID') || err.status === 400) {
+      } else if (err.message?.includes('API_KEY_INVALID') || (err as any).status === 400) {
         errorMessage = 'Invalid API key'
         details = 'The API key you provided is not recognized by Google. Please verify your key at https://aistudio.google.com/apikey'
       } else if (err.message?.includes('decrypt')) {
         errorMessage = 'Decryption failed'
         details = 'Could not decrypt your stored API key. Please remove and re-add your key.'
-      } else if (err.message?.includes('quota') || err.status === 429) {
+      } else if (err.message?.includes('quota') || (err as any).status === 429) {
         errorMessage = 'API quota exceeded'
         details = 'Your Gemini API quota has been exceeded. Check your usage at Google AI Studio.'
-      } else if (err.message?.includes('PERMISSION_DENIED') || err.status === 403) {
+      } else if (err.message?.includes('PERMISSION_DENIED') || (err as any).status === 403) {
         errorMessage = 'Permission denied'
         details = `Your API key does not have permission to access this model. The application is configured to use "${DEFAULT_GEMINI_MODEL}".`
       } else if (err.message?.includes('network') || err.message?.includes('fetch')) {

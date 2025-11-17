@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { Key, Sparkle, Brain, TestTube, Check, X, Vibrate, SpeakerHigh, ShieldCheck, Trash, Warning } from '@phosphor-icons/react'
+import { Key, Sparkle, Brain, TestTube, Check, X, Vibrate, SpeakerHigh, ShieldCheck, Trash, Warning, ClipboardText } from '@phosphor-icons/react'
 import { gemini } from '@/lib/gemini/client'
 import { getUsageStats, resetUsageStats } from '@/lib/ai/usage-tracker'
 import type { AIProvider, AIUsageStats } from '@/lib/ai/types'
@@ -40,6 +40,7 @@ export function Settings() {
   const [isSavingKey, setIsSavingKey] = useState(false)
   const [hapticEnabled, setHapticEnabled] = useKV<boolean>('settings-haptic-enabled', true)
   const [soundEnabled, setSoundEnabled] = useKV<boolean>('settings-sound-enabled', false)
+  const [safeModeEnabled, setSafeModeEnabled] = useKV<boolean>('settings-safe-mode-enabled', true)
   const [isOwner, setIsOwner] = useState(false)
   const [isTesting, setIsTesting] = useState(false)
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null)
@@ -52,6 +53,31 @@ export function Settings() {
     checkOwnership()
     loadUsageStats()
   }, [])
+
+  const handlePasteFromClipboard = async () => {
+    if (!navigator.clipboard?.readText) {
+      toast.error('Clipboard access not supported', {
+        description: 'Your browser does not support securely reading from the clipboard.',
+      })
+      return
+    }
+
+    try {
+      const text = await navigator.clipboard.readText()
+      if (text && text.trim()) {
+        setApiKeyInput(text.trim())
+        toast.success('API Key pasted from clipboard')
+        triggerHaptic('selection')
+      } else {
+        toast.warning('Clipboard is empty or contains only whitespace')
+      }
+    } catch (error) {
+      console.error('Failed to read from clipboard:', error)
+      toast.error('Failed to paste from clipboard', {
+        description: 'Permission to read from clipboard may have been denied. Please check your browser settings.',
+      })
+    }
+  }
 
 
   const checkOwnership = async () => {
@@ -143,6 +169,16 @@ export function Settings() {
   }
 
   const handleClearAllData = async () => {
+    if (safeModeEnabled) {
+      const confirmation = prompt('To disable safe mode and delete all data, type "DELETE" and click OK.')
+      if (confirmation !== 'DELETE') {
+        toast.warning('Data deletion cancelled', {
+          description: 'You must type "DELETE" to confirm.'
+        })
+        return
+      }
+    }
+
     try {
       const dataKeys = [
         'habits',
@@ -304,18 +340,24 @@ export function Settings() {
 
               <div className="space-y-2">
                 <Label htmlFor="api-key-input">Gemini API Key</Label>
-                <Input
-                  id="api-key-input"
-                  type="password"
-                  placeholder="Enter your Gemini API key"
-                  value={apiKeyInput}
-                  onChange={(e) => setApiKeyInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSaveApiKey()
-                    }
-                  }}
-                />
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="api-key-input"
+                    type="password"
+                    placeholder="Enter or paste your Gemini API key"
+                    value={apiKeyInput}
+                    onChange={(e) => setApiKeyInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSaveApiKey()
+                      }
+                    }}
+                    className="flex-1"
+                  />
+                  <Button variant="outline" size="icon" onClick={handlePasteFromClipboard} aria-label="Paste API key from clipboard">
+                    <ClipboardText size={18} />
+                  </Button>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Get your API key from{" "}
                   <a
@@ -529,6 +571,39 @@ export function Settings() {
                 Error
               </Button>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="elevated-card">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="text-primary" size={24} />
+            <CardTitle>Safety & Security</CardTitle>
+          </div>
+          <CardDescription>
+            Extra layers of protection for your account and data
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="safe-mode-toggle" className="text-base font-medium cursor-pointer flex items-center gap-2">
+                <ShieldCheck size={20} className="text-primary" />
+                Safe Mode
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Require extra confirmation for destructive actions like deleting all data.
+              </p>
+            </div>
+            <Switch
+              id="safe-mode-toggle"
+              checked={safeModeEnabled}
+              onCheckedChange={(checked) => {
+                setSafeModeEnabled(checked)
+                toast.success(`Safe Mode ${checked ? 'enabled' : 'disabled'}`)
+              }}
+            />
           </div>
         </CardContent>
       </Card>
