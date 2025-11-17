@@ -9,19 +9,22 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { AIButton } from '@/components/AIButton'
 import { SarcasticLoader } from '@/components/SarcasticLoader'
-import { callAIWithRetry, parseAIJsonResponse, validateAIResponse } from '@/lib/ai-utils'
+import { callAIWithRetry, parseAIJsonResponse } from '@/lib/ai-utils'
+import { z } from 'zod'
 
-interface BudgetRecommendation {
-  category: string
-  recommended: number
-  reasoning: string
-}
+const BudgetRecommendationSchema = z.object({
+  category: z.string(),
+  recommended: z.number(),
+  reasoning: z.string(),
+});
 
-interface GeneratedBudget {
-  totalBudget: number
-  recommendations: BudgetRecommendation[]
-  tips: string[]
-}
+const GeneratedBudgetSchema = z.object({
+  totalBudget: z.number(),
+  recommendations: z.array(BudgetRecommendationSchema),
+  tips: z.array(z.string()),
+});
+
+type GeneratedBudget = z.infer<typeof GeneratedBudgetSchema>;
 
 export function AIBudgetGenerator() {
   const [income, setIncome] = useState('')
@@ -83,10 +86,15 @@ Ensure all recommended amounts sum to the total budget. Be realistic and practic
 
       const response = await callAIWithRetry(promptText, 'gpt-4o', true)
       const parsed = parseAIJsonResponse<{ budget: GeneratedBudget }>(response, 'budget structure')
-      
-      validateAIResponse(parsed, ['budget', 'budget.recommendations', 'budget.tips'])
 
-      setGeneratedBudget(parsed.budget)
+      const validationResult = GeneratedBudgetSchema.safeParse(parsed.budget)
+
+      if (!validationResult.success) {
+        console.error("Zod validation error:", validationResult.error.flatten());
+        throw new Error('AI returned data in an unexpected format.');
+      }
+
+      setGeneratedBudget(validationResult.data)
       toast.success('Budget generated successfully!')
     } catch (error) {
       console.error('[Budget] Generation error:', error)
