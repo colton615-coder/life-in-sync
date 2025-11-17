@@ -8,12 +8,8 @@ export class GeminiClient {
   private initialized = false
 
   async getApiKey(): Promise<string | null> {
-    const encryptedKey = await spark.kv.get<string>('encrypted-gemini-api-key')
+    const encryptedKey = await window.spark.kv.get<string>('encrypted-gemini-api-key')
     if (!encryptedKey) {
-      const hardcodedKey = "AIzaSyBLfizNjvMPX_piEhupqpNBoZk0rIxJAok"
-      if (hardcodedKey) {
-        return hardcodedKey
-      }
       return null
     }
 
@@ -22,7 +18,7 @@ export class GeminiClient {
       return decryptedKey
     } catch (error) {
       console.error('[GeminiClient] Failed to decrypt API key:', error)
-      await spark.kv.delete('encrypted-gemini-api-key')
+      await window.spark.kv.delete('encrypted-gemini-api-key')
       throw new Error('Failed to decrypt API key. Please re-enter your key in Settings.')
     }
   }
