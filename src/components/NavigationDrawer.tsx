@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   LockKey,
   ChatsCircle,
+  LinkSimple,
   X
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
@@ -30,6 +31,7 @@ const modules: NavModule[] = [
   { icon: ShoppingCart, label: 'Shopping', id: 'shopping' },
   { icon: CalendarDots, label: 'Calendar', id: 'calendar' },
   { icon: LockKey, label: 'Golf Swing', id: 'vault' },
+  { icon: LinkSimple, label: 'Connections', id: 'connections' },
   { icon: Gear, label: 'Settings', id: 'settings' },
 ]
 

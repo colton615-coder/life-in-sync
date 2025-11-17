@@ -10,6 +10,7 @@ export type Module =
   | 'shopping'
   | 'calendar'
   | 'vault'
+  | 'connections'
   | 'settings'
   | 'history'
 

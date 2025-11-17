@@ -14,6 +14,7 @@ import { Shopping } from '@/components/modules/Shopping'
 import { Calendar } from '@/components/modules/Calendar'
 import { Settings } from '@/components/modules/Settings'
 import { GolfSwing } from '@/components/modules/GolfSwing'
+import { Connections } from '@/components/modules/Connections'
 
 function App() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
@@ -51,6 +52,8 @@ function App() {
         return <Calendar />
       case 'vault':
         return <GolfSwing />
+      case 'connections':
+        return <Connections />
       case 'settings':
         return <Settings />
       default:
