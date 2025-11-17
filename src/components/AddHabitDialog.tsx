@@ -15,7 +15,7 @@ interface AddHabitDialogProps {
   onAddHabit: (habit: Omit<Habit, 'id' | 'currentProgress' | 'streak'>) => void
 }
 
-const iconOptions: { value: HabitIcon; Icon: any; label: string }[] = [
+const iconOptions: { value: HabitIcon; Icon: React.ElementType; label: string }[] = [
   { value: 'droplet', Icon: Drop, label: 'Water' },
   { value: 'book', Icon: BookOpen, label: 'Reading' },
   { value: 'dumbbell', Icon: Barbell, label: 'Exercise' },
@@ -100,10 +100,6 @@ export function AddHabitDialog({ open, onOpenChange, onAddHabit }: AddHabitDialo
   const canProceedToStep2 = () => {
     const error = validateName(name)
     return !error
-  }
-
-  const canProceedToStep3 = () => {
-    return true
   }
 
   const canSubmit = () => {

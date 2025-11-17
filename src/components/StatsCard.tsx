@@ -1,11 +1,9 @@
 import { NeumorphicCard } from './NeumorphicCard'
-import { Badge } from './ui/badge'
 import { CheckCircle, Fire, Target, TrendUp } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 interface StatsCardProps {
-  title: string
   stats: {
     total: number
     active: number
@@ -16,7 +14,7 @@ interface StatsCardProps {
   className?: string
 }
 
-export function StatsCard({ title, stats, className }: StatsCardProps) {
+export function StatsCard({ stats, className }: StatsCardProps) {
   return (
     <NeumorphicCard className={cn('border-primary/20 p-4', className)} animate={false}>
       <div className="flex items-center justify-between gap-6">

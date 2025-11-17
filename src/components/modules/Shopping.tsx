@@ -267,7 +267,7 @@ export function Shopping() {
                       </h3>
                     </div>
                   )}
-                  {activeItems.map((item, index) => {
+                  {activeItems.map((item) => {
                     const itemContent = (
                       <div
                         className={cn(
@@ -388,7 +388,7 @@ export function Shopping() {
                           Clear Completed
                         </Button>
                       </div>
-                      {completedItems.map((item, index) => (
+                      {completedItems.map((item) => (
                         <motion.div
                           key={item.id}
                           initial={{ opacity: 0 }}

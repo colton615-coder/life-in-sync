@@ -75,7 +75,7 @@ export function IconPicker({ value, onChange, className }: IconPickerProps) {
   ]
 
   const getIconComponent = (iconName: string) => {
-    const IconComponent = (Icons as any)[iconName]
+    const IconComponent = (Icons as Record<string, React.ElementType>)[iconName]
     return IconComponent || Icons.Target
   }
 

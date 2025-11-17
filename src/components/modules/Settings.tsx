@@ -15,7 +15,7 @@ import { getUsageStats, resetUsageStats } from '@/lib/ai/usage-tracker'
 import type { AIProvider, AIUsageStats } from '@/lib/ai/types'
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
 import { useSoundEffects } from '@/hooks/use-sound-effects'
-import { encrypt, decrypt } from '@/lib/crypto'
+import { encrypt } from '@/lib/crypto'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -124,12 +124,12 @@ export function Settings() {
           description: result.details || 'Please check your API key and try again'
         })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setTestResult('error')
       triggerHaptic('error')
       playSound('error')
       toast.error(`Connection test error`, {
-        description: error.message || 'An unexpected error occurred'
+        description: error instanceof Error ? error.message : 'An unexpected error occurred'
       })
     } finally {
       setIsTesting(false)

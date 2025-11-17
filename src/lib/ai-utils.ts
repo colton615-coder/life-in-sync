@@ -40,7 +40,7 @@ async function safeSparkLLMCall(
     return response
   } catch (error) {
     console.error('[Safe LLM Call] ❌ Call failed')
-    console.error('[Safe LLM Call] Error type:', error?.constructor?.name)
+    console.error('[Safe LLM Call] Error type:', (error as Error)?.constructor?.name)
     console.error('[Safe LLM Call] Error message:', error instanceof Error ? error.message : String(error))
     
     if (error instanceof TypeError && error.message.includes('fetch')) {
@@ -138,10 +138,10 @@ export function parseAIJsonResponse<T>(response: string, expectedStructure?: str
     }
     
     console.log('[JSON Parse] Checking for truncated/malformed JSON')
-    let openBraces = (cleanedResponse.match(/{/g) || []).length
-    let closeBraces = (cleanedResponse.match(/}/g) || []).length
-    let openBrackets = (cleanedResponse.match(/\[/g) || []).length
-    let closeBrackets = (cleanedResponse.match(/\]/g) || []).length
+    const openBraces = (cleanedResponse.match(/{/g) || []).length;
+    let closeBraces = (cleanedResponse.match(/}/g) || []).length;
+    const openBrackets = (cleanedResponse.match(/\[/g) || []).length;
+    let closeBrackets = (cleanedResponse.match(/]/g) || []).length;
     
     console.log('[JSON Parse] Balance check:', { openBraces, closeBraces, openBrackets, closeBrackets })
     
@@ -164,7 +164,7 @@ export function parseAIJsonResponse<T>(response: string, expectedStructure?: str
     const lastQuoteIndex = cleanedResponse.lastIndexOf('"')
     if (lastQuoteIndex !== -1) {
       const afterLastQuote = cleanedResponse.substring(lastQuoteIndex + 1).trim()
-      if (afterLastQuote && !afterLastQuote.match(/^[\s,\}\]]*$/)) {
+      if (afterLastQuote && !afterLastQuote.match(/^[s,}]*$/)) {
         console.warn('[JSON Parse] Possible unterminated string detected, truncating')
         console.warn('[JSON Parse] Content after last quote:', afterLastQuote.substring(0, 50))
         cleanedResponse = cleanedResponse.substring(0, lastQuoteIndex + 1)
@@ -217,12 +217,12 @@ export function parseAIJsonResponse<T>(response: string, expectedStructure?: str
   }
 }
 
-export function validateAIResponse(data: any, requiredFields: string[]): void {
+export function validateAIResponse(data: unknown, requiredFields: string[]): void {
   const missingFields: string[] = []
-  
+
   for (const field of requiredFields) {
     const fieldPath = field.split('.')
-    let current = data
+    let current: Record<string, unknown> | unknown = data
     let fieldExists = true
     
     for (const part of fieldPath) {

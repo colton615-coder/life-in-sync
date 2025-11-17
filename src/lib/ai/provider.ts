@@ -16,7 +16,7 @@ export class AIRouter {
 
     try {
       return await this.callProvider(provider, request)
-    } catch (primaryError: any) {
+    } catch (primaryError: unknown) {
       console.error(`${provider} failed:`, primaryError)
 
       const fallbackProvider: AIProvider = provider === "gemini" ? "spark" : "gemini"
@@ -24,10 +24,12 @@ export class AIRouter {
       try {
         console.log(`Falling back to ${fallbackProvider}...`)
         return await this.callProvider(fallbackProvider, request)
-      } catch (fallbackError: any) {
+      } catch (fallbackError: unknown) {
         console.error(`${fallbackProvider} also failed:`, fallbackError)
+        const pError = primaryError as Error
+        const fError = fallbackError as Error
         throw new Error(
-          `All AI providers failed. Primary: ${primaryError.message}, Fallback: ${fallbackError.message}`
+          `All AI providers failed. Primary: ${pError.message}, Fallback: ${fError.message}`
         )
       }
     }
@@ -81,7 +83,7 @@ export class AIRouter {
 
   private async getOptimalProvider(request: AIRequest): Promise<AIProvider> {
     const preferred = await spark.kv.get<AIProvider>("preferred-ai-provider")
-    if (preferred && preferred !== ("auto" as any)) {
+    if (preferred && preferred !== "auto") {
       const isGeminiConfigured = await gemini.isConfigured()
       if (preferred === "gemini" && !isGeminiConfigured) {
         return "spark"

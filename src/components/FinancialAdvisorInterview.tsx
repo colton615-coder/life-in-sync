@@ -11,7 +11,6 @@ import { ChatsCircle, ArrowRight, ArrowLeft, Sparkle, Check } from '@phosphor-ic
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { FinancialProfile } from '@/lib/types'
-import { useKV } from '@github/spark/hooks'
 
 interface FinancialAdvisorInterviewProps {
   onComplete: (profile: FinancialProfile) => void
@@ -44,7 +43,7 @@ export function FinancialAdvisorInterview({ onComplete }: FinancialAdvisorInterv
     concerns: ''
   })
 
-  const updateField = (field: string, value: any) => {
+  const updateField = (field: keyof typeof formData, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 

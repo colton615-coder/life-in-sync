@@ -1,9 +1,6 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { GolfClub } from '@/lib/types'
-import { cn } from '@/lib/utils'
-import { Check } from '@phosphor-icons/react'
 
 interface ClubSelectionDialogProps {
   open: boolean

@@ -73,7 +73,6 @@ export function Sparkline({
     )
   }
 
-  const isPositiveTrend = data.length >= 2 && data[data.length - 1] >= data[0]
 
   return (
     <svg

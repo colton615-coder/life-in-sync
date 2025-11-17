@@ -27,7 +27,7 @@ interface ShoppingItemCardProps {
   onDelete: (id: string) => void
 }
 
-const categoryIcons: Record<string, any> = {
+const categoryIcons: Record<string, React.ElementType> = {
   'Groceries': Carrot,
   'Household': House,
   'Personal Care': Bathtub,
@@ -35,12 +35,6 @@ const categoryIcons: Record<string, any> = {
   'Clothing': TShirt,
   'Electronics': GameController,
   'Other': Package,
-}
-
-const priorityColors = {
-  low: 'bg-muted text-muted-foreground border-muted',
-  medium: 'bg-accent/20 text-accent-foreground border-accent/30',
-  high: 'bg-destructive/20 text-destructive border-destructive/30',
 }
 
 export function ShoppingItemCard({

@@ -8,7 +8,7 @@ export function useModuleCommunication(moduleId: Module) {
 
   const emit = useCallback((
     type: ModuleEventType,
-    data: Record<string, any>,
+    data: Record<string, unknown>,
     targetModule?: Module,
     options?: { priority?: 'low' | 'medium' | 'high', silent?: boolean }
   ) => {
@@ -21,7 +21,7 @@ export function useModuleCommunication(moduleId: Module) {
     })
   }, [moduleId])
 
-  const broadcastCompletion = useCallback((itemType: string, itemName: string, metadata?: Record<string, any>) => {
+  const broadcastCompletion = useCallback((itemType: string, itemName: string, metadata?: Record<string, unknown>) => {
     const eventTypeMap: Record<string, ModuleEventType> = {
       habit: 'habit_completed',
       workout: 'workout_completed',
@@ -38,7 +38,7 @@ export function useModuleCommunication(moduleId: Module) {
     })
   }, [emit])
 
-  const shareData = useCallback((dataType: string, data: any, targetModule?: Module) => {
+  const shareData = useCallback((dataType: string, data: unknown, targetModule?: Module) => {
     emit('data_shared', {
       dataType,
       sharedData: data,
@@ -46,14 +46,14 @@ export function useModuleCommunication(moduleId: Module) {
     }, targetModule)
   }, [emit])
 
-  const triggerCrossModule = useCallback((targetModule: Module, action: string, payload: any) => {
+  const triggerCrossModule = useCallback((targetModule: Module, action: string, payload: unknown) => {
     emit('cross_module_trigger', {
       action,
       payload
     }, targetModule, { priority: 'high' })
   }, [emit])
 
-  const celebrateMilestone = useCallback((milestone: string, details: Record<string, any>) => {
+  const celebrateMilestone = useCallback((milestone: string, details: Record<string, unknown>) => {
     emit('milestone_achieved', {
       milestone,
       details,

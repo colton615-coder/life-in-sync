@@ -271,20 +271,8 @@ export function Habits() {
     return false
   }
 
-  const getTodayProgress = (habit: Habit): string => {
-    const todayEntry = getTodayEntry(habit)
-    if (!todayEntry) return ''
-
-    if (habit.trackingType === 'numerical') {
-      return `${todayEntry.value || 0} / ${habit.target} ${habit.unit}`
-    } else if (habit.trackingType === 'time') {
-      return `${todayEntry.minutes || 0} / ${habit.target} min`
-    }
-    return ''
-  }
-
   const getIconComponent = (iconName: HabitIcon, habitName?: string) => {
-    const IconComponent = (Icons as any)[iconName]
+    const IconComponent = (Icons as Record<string, React.ElementType>)[iconName]
     if (IconComponent) return IconComponent
     
     if (!habitName) return Icons.Target
@@ -664,7 +652,6 @@ export function Habits() {
             >
               {filteredHabits.map((habit) => {
                 const completed = isCompletedToday(habit)
-                const progress = getTodayProgress(habit)
                 const IconComponent = getIconComponent(habit.icon || 'Drop', habit.name)
                 const todayEntry = getTodayEntry(habit)
                 const currentValue = todayEntry 

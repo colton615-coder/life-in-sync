@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { CircleNotch } from '@phosphor-icons/react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 interface SarcasticLoaderProps {
   className?: string
@@ -62,20 +62,27 @@ interface SarcasticProgressProps {
 }
 
 export function SarcasticProgress({ className = '' }: SarcasticProgressProps) {
-  const [progress, setProgress] = useState(0)
-  const [message, setMessage] = useState('')
-  const [messageIndex, setMessageIndex] = useState(0)
+  const PROGRESS_MESSAGES = useMemo(
+    () => [
+      [0, "Polishing the chrome..."],
+      [10, "Reticulating splines..."],
+      [20, "Aligning the dilithium crystals... with a hammer."],
+      [30, "Charging the flux capacitor... to 87."],
+      [40, "It's not a bug, it's an undocumented feature."],
+      [50, "Dividing by zero..."],
+      [60, "Are we there yet?"],
+      [70, "I'm not slow, I'm just enjoying the scenery."],
+      [80, "Just one more thing..."],
+      [90, "Almost there... I think."],
+      [95, "Okay, maybe I am a little slow."],
+      [100, "Done! Finally."],
+    ],
+    []
+  );
 
-  const PROGRESS_MESSAGES = [
-    { at: 0, text: "Starting... reluctantly..." },
-    { at: 15, text: "This better be worth it..." },
-    { at: 30, text: "Still going, somehow..." },
-    { at: 45, text: "Halfway there (allegedly)..." },
-    { at: 60, text: "The AI is thinking deep thoughts..." },
-    { at: 75, text: "Almost done pretending to work..." },
-    { at: 90, text: "Just kidding, a bit more..." },
-    { at: 95, text: "Now we're really almost done..." },
-  ]
+  const [progress, setProgress] = useState(0)
+  const [message, setMessage] = useState(PROGRESS_MESSAGES[0][1])
+  const [messageIndex, setMessageIndex] = useState(0)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -95,14 +102,14 @@ export function SarcasticProgress({ className = '' }: SarcasticProgressProps) {
   useEffect(() => {
     const currentMessage = PROGRESS_MESSAGES.find((m, idx) => {
       const nextMessage = PROGRESS_MESSAGES[idx + 1]
-      return progress >= m.at && (!nextMessage || progress < nextMessage.at)
+      return progress >= (m[0] as number) && (!nextMessage || progress < (nextMessage[0] as number))
     })
 
-    if (currentMessage && currentMessage.text !== message) {
-      setMessage(currentMessage.text)
+    if (currentMessage && currentMessage[1] !== message) {
+      setMessage(currentMessage[1])
       setMessageIndex(prev => prev + 1)
     }
-  }, [progress])
+  }, [progress, message, PROGRESS_MESSAGES])
 
   return (
     <div className={`space-y-3 ${className}`}>

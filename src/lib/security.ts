@@ -35,7 +35,7 @@ export function sanitizeForLLM(input: string | undefined | null): string {
   return sanitized.trim()
 }
 
-export function parseAIResponse(response: string): any {
+export function parseAIResponse(response: string): unknown {
   if (!response || typeof response !== 'string') {
     throw new Error('Invalid AI response: empty or not a string')
   }

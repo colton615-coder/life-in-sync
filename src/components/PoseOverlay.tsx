@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { SwingPoseData, SwingLandmark } from '@/lib/types'
+import { SwingPoseData } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 interface PoseOverlayProps {

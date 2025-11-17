@@ -162,7 +162,7 @@ export function Tasks() {
     return { label: format(date, 'MMM d'), color: 'text-muted-foreground', bgColor: 'bg-muted', urgent: false }
   }
 
-  const { activeTasks, completedTasks, overdueTasks, todayTasks } = (() => {
+  const { activeTasks, completedTasks, overdueTasks } = (() => {
     const active: Task[] = []
     const completed: Task[] = []
     const overdue: Task[] = []
@@ -238,17 +238,6 @@ export function Tasks() {
 
     return sortTasks(tasksToFilter)
   })()
-
-  const getPriorityIcon = (priority: Task['priority']) => {
-    switch (priority) {
-      case 'high':
-        return <Fire size={18} weight="fill" className="text-destructive" />
-      case 'medium':
-        return <Lightning size={18} weight="fill" className="text-accent" />
-      case 'low':
-        return <Sparkle size={18} weight="fill" className="text-success" />
-    }
-  }
 
   const getPriorityLabel = (priority: Task['priority']) => {
     switch (priority) {

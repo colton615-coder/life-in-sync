@@ -2,7 +2,6 @@ import { Habit } from '@/lib/types'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { Calendar } from '@/components/ui/calendar'
-import { CheckCircle } from '@phosphor-icons/react'
 import { useState } from 'react'
 
 interface HistoryDialogProps {

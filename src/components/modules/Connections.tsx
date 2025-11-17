@@ -14,13 +14,13 @@ import {
   CheckCircle,
   Fire,
   Trophy,
-  Activity
+  Pulse
 } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
-const moduleIcons: Record<Module, any> = {
-  dashboard: Activity,
+const moduleIcons: Record<Module, React.ElementType> = {
+  dashboard: Pulse,
   habits: CheckCircle,
   workouts: Lightning,
   tasks: CheckCircle,
@@ -60,9 +60,20 @@ const eventTypeLabels: Record<ModuleEventType, string> = {
   cross_module_trigger: 'Cross-Action'
 }
 
+interface ConnectionStats {
+  totalEvents: number;
+  byType: Record<ModuleEventType, number>;
+  byModule: Record<Module, number>;
+}
+
+interface EventData {
+  itemName?: string;
+  milestone?: string;
+}
+
 export function Connections() {
   const [events, setEvents] = useState<ModuleEvent[]>([])
-  const [stats, setStats] = useState<any>(null)
+  const [stats, setStats] = useState<ConnectionStats | null>(null)
   const [liveMode, setLiveMode] = useState(true)
 
   useEffect(() => {
@@ -196,6 +207,7 @@ export function Connections() {
                   {events.slice(0, 20).map((event, index) => {
                     const SourceIcon = moduleIcons[event.sourceModule]
                     const TargetIcon = event.targetModule ? moduleIcons[event.targetModule] : null
+                    const eventData = event.data as EventData
 
                     return (
                       <motion.div
@@ -210,7 +222,7 @@ export function Connections() {
                             <div className={cn('icon-circle w-10 h-10', moduleColors[event.sourceModule])}>
                               <SourceIcon size={20} weight="bold" />
                             </div>
-                            {event.targetModule && (
+                            {event.targetModule && TargetIcon && (
                               <>
                                 <ArrowsLeftRight size={16} className="text-muted-foreground" />
                                 <div className={cn('icon-circle w-10 h-10', moduleColors[event.targetModule])}>
@@ -237,15 +249,15 @@ export function Connections() {
                               )}
                             </p>
 
-                            {event.data.itemName && (
+                            {eventData.itemName && (
                               <p className="text-sm text-foreground font-medium">
-                                {event.data.itemName}
+                                {eventData.itemName}
                               </p>
                             )}
 
-                            {event.data.milestone && (
+                            {eventData.milestone && (
                               <p className="text-sm text-primary font-medium">
-                                🎉 {event.data.milestone}
+                                🎉 {eventData.milestone}
                               </p>
                             )}
 

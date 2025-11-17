@@ -21,7 +21,6 @@ import { clearAllAppData } from '@/lib/clear-data'
 function App() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [dataCleared, setDataCleared] = useState(false)
 
   useEffect(() => {
     const clearData = async () => {
@@ -29,7 +28,6 @@ function App() {
       if (!hasCleared) {
         await clearAllAppData()
         localStorage.setItem('data-cleared-v1', 'true')
-        setDataCleared(true)
       }
     }
     clearData()
