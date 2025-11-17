@@ -236,9 +236,31 @@ Difficulty levels: "beginner", "intermediate", "advanced"`
       console.error('[Workout Generation] Full error object:', error)
       console.log('====================================')
       
-      const errorMessage = error instanceof Error ? error.message : 'Failed to generate workout'
-      toast.error('Generation Failed', {
-        description: errorMessage
+      let errorMessage = 'Failed to generate workout'
+      let errorTitle = 'Generation Failed'
+      
+      if (error instanceof SyntaxError) {
+        console.error('[Workout Generation] JSON Parse Error detected - invalid response from server')
+        errorTitle = 'Server Error'
+        errorMessage = 'The AI service returned an invalid response. This may be due to high server load or a temporary issue. Please try again in a moment.'
+      } else if (error instanceof Error) {
+        if (error.message.includes('AI service returned invalid response')) {
+          errorTitle = 'Service Error'
+          errorMessage = error.message
+        } else if (error.message.includes('Network') || error.message.includes('fetch')) {
+          errorTitle = 'Network Error'
+          errorMessage = 'Unable to reach the AI service. Please check your connection and try again.'
+        } else if (error.message.includes('timeout')) {
+          errorTitle = 'Timeout Error'
+          errorMessage = 'The request took too long. Please try again with a simpler workout description.'
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
+      toast.error(errorTitle, {
+        description: errorMessage,
+        duration: 5000
       })
     } finally {
       setGenerating(false)
