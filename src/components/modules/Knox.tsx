@@ -16,14 +16,16 @@ export function Knox() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [initError, setInitError] = useState(false)
+  const [hasInitialized, setHasInitialized] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    if (!messages || messages.length === 0) {
+    if (!hasInitialized && (!messages || messages.length === 0)) {
+      setHasInitialized(true)
       startSession()
     }
-  }, [])
+  }, [messages, hasInitialized])
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -33,6 +35,7 @@ export function Knox() {
 
   const retryInitialization = () => {
     setInitError(false)
+    setHasInitialized(false)
     setMessages([])
     startSession()
   }
@@ -311,6 +314,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
 
   const clearSession = () => {
     setMessages([])
+    setHasInitialized(false)
     toast.success('Session cleared')
     startSession()
   }
