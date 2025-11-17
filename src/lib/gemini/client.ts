@@ -7,36 +7,52 @@ export class GeminiClient {
   private initialized = false
 
   async getApiKey(): Promise<string | null> {
+    console.log('[GeminiClient] Retrieving API key')
+    
     const encryptedKey = await spark.kv.get<string>("encrypted-gemini-api-key")
+    console.log('[GeminiClient] Encrypted key exists:', !!encryptedKey)
+    
     if (encryptedKey) {
       try {
-        return await decrypt(encryptedKey)
+        console.log('[GeminiClient] Decrypting API key')
+        const decrypted = await decrypt(encryptedKey)
+        console.log('[GeminiClient] API key decrypted successfully, length:', decrypted.length)
+        console.log('[GeminiClient] API key prefix:', decrypted.substring(0, 8))
+        return decrypted
       } catch (error) {
-        console.error("Failed to decrypt API key:", error)
+        console.error("[GeminiClient] Failed to decrypt API key:", error)
         throw new Error("Failed to decrypt Gemini API key. Please re-save your key in Settings.")
       }
     }
 
+    console.log('[GeminiClient] Checking environment variable')
     const envKey = import.meta.env.VITE_GEMINI_API_KEY
     if (envKey) {
+      console.log('[GeminiClient] Using API key from environment variable')
       return envKey
     }
 
+    console.log('[GeminiClient] No API key found')
     return null
   }
 
   async initialize(): Promise<void> {
     if (this.initialized && this.client) {
+      console.log('[GeminiClient] Already initialized, skipping')
       return
     }
 
+    console.log('[GeminiClient] Initializing client')
     const apiKey = await this.getApiKey()
     if (!apiKey) {
+      console.error('[GeminiClient] No API key available')
       throw new Error("Gemini API key not configured. Please add your API key in Settings.")
     }
 
+    console.log('[GeminiClient] Creating GoogleGenerativeAI client')
     this.client = new GoogleGenerativeAI(apiKey)
     this.initialized = true
+    console.log('[GeminiClient] Client initialized successfully')
   }
 
   async isConfigured(): Promise<boolean> {
@@ -48,14 +64,21 @@ export class GeminiClient {
     prompt: string,
     options?: GeminiGenerateOptions
   ): Promise<GeminiResponse> {
+    console.log('[GeminiClient] Starting generate request')
+    console.log('[GeminiClient] Options:', options)
+    console.log('[GeminiClient] Prompt length:', prompt.length)
+    
     await this.initialize()
 
     if (!this.client) {
       throw new Error("Gemini client not initialized")
     }
 
+    const modelName = options?.model || "gemini-1.5-flash"
+    console.log('[GeminiClient] Using model:', modelName)
+    
     const model = this.client.getGenerativeModel({
-      model: options?.model || "gemini-1.5-flash",
+      model: modelName,
       generationConfig: {
         temperature: options?.temperature ?? 0.7,
         maxOutputTokens: options?.maxOutputTokens,
@@ -65,18 +88,31 @@ export class GeminiClient {
     })
 
     try {
+      console.log('[GeminiClient] Sending request to Gemini API...')
       const result = await model.generateContent(prompt)
+      console.log('[GeminiClient] Received response from Gemini API')
+      
       const response = result.response
       const text = response.text()
+      console.log('[GeminiClient] Response text length:', text.length)
+      console.log('[GeminiClient] Response preview:', text.substring(0, 150))
+      console.log('[GeminiClient] Finish reason:', response.candidates?.[0]?.finishReason)
 
       return {
         text,
-        model: options?.model || "gemini-1.5-flash",
+        model: modelName,
         finishReason: response.candidates?.[0]?.finishReason,
       }
     } catch (error: any) {
+      console.error('[GeminiClient] Generate request failed:', error)
+      console.error('[GeminiClient] Error message:', error.message)
+      console.error('[GeminiClient] Error stack:', error.stack)
+      
       if (error.message?.includes("API_KEY_INVALID")) {
         throw new Error("Invalid Gemini API key. Please check your configuration in Settings.")
+      }
+      if (error.message?.includes("quota") || error.message?.includes("429")) {
+        throw new Error(`Gemini API quota exceeded. ${error.message}`)
       }
       throw error
     }

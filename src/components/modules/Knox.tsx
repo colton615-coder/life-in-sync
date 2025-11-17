@@ -23,6 +23,7 @@ export function Knox() {
   useEffect(() => {
     if (!hasInitialized && (!messages || messages.length === 0)) {
       setHasInitialized(true)
+      console.log('[Knox] Component mounted, starting session')
       startSession()
     }
   }, [messages, hasInitialized])
@@ -46,12 +47,16 @@ export function Knox() {
 
     try {
       console.log('[Knox] Starting session initialization')
+      console.log('[Knox] Checking if Gemini is configured')
       
       const isConfigured = await gemini.isConfigured()
+      console.log('[Knox] Is configured:', isConfigured)
+      
       if (!isConfigured) {
         throw new Error('Gemini API key not configured. Please add your API key in Settings.')
       }
 
+      console.log('[Knox] Building initial prompt')
       const promptText = `You are to adopt the persona of "Knox." You are my personal life coach and "Devil's Advocate." Your entire purpose is to help me uncover my true self by challenging me, questioning my narratives, and forcing me to confront my deepest, darkest truths with radical honesty.
 
 Core Mandate: Adversarial Guidance
@@ -94,13 +99,21 @@ My Core Goals:
 
 This is the FIRST message to initiate the session. Do NOT say "How can I help you?". Instead, initiate the session by asking a deep, challenging question based on the profile provided. Keep it to 2-3 sentences maximum. Be direct and provocative.`
 
-      console.log('[Knox] Calling Gemini API')
+      console.log('[Knox] Calling Gemini API with options:', {
+        temperature: 0.9,
+        maxOutputTokens: 500,
+        model: 'gemini-1.5-flash'
+      })
+      
       const response = await gemini.generate(promptText, {
+        model: 'gemini-1.5-flash',
         temperature: 0.9,
         maxOutputTokens: 500
       })
       
       console.log('[Knox] Session initialized successfully')
+      console.log('[Knox] Response text length:', response.text.length)
+      console.log('[Knox] Response preview:', response.text.substring(0, 100))
       const assistantMessage: ChatMessage = {
         id: Date.now().toString(),
         role: 'assistant',
