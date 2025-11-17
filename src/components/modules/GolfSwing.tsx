@@ -17,7 +17,8 @@ import {
   ChartBar,
   Sparkle,
   Lightning,
-  ArrowRight
+  ArrowRight,
+  Trash
 } from '@phosphor-icons/react'
 import { SwingAnalysis } from '@/lib/types'
 import { useKV } from '@github/spark/hooks'
@@ -119,6 +120,38 @@ export function GolfSwing() {
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+  }
+
+  const handleDeleteAnalysis = (analysisId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    const analysisToDelete = analyses?.find(a => a.id === analysisId)
+    if (!analysisToDelete) return
+
+    setAnalyses(current => {
+      const updated = (current || []).filter(a => a.id !== analysisId)
+      
+      if (activeAnalysis?.id === analysisId) {
+        const remainingAnalyses = updated.filter(a => a.status === 'completed')
+        if (remainingAnalyses.length > 0) {
+          setActiveAnalysis(remainingAnalyses[0])
+        } else if (updated.length > 0) {
+          setActiveAnalysis(updated[0])
+        } else {
+          setActiveAnalysis(null)
+        }
+      }
+      
+      return updated
+    })
+
+    if (analysisToDelete.videoUrl) {
+      URL.revokeObjectURL(analysisToDelete.videoUrl)
+    }
+
+    toast.success('Analysis deleted', {
+      description: 'Swing analysis has been removed'
+    })
   }
 
   const renderEmptyState = () => (
@@ -450,8 +483,8 @@ export function GolfSwing() {
             onClick={() => setActiveAnalysis(analysis)}
           >
             <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
                   <CardTitle className="text-base">
                     Swing Analysis
                   </CardTitle>
@@ -460,16 +493,26 @@ export function GolfSwing() {
                     {new Date(analysis.uploadedAt).toLocaleTimeString()}
                   </CardDescription>
                 </div>
-                <Badge
-                  variant={
-                    analysis.status === 'completed' ? 'default' :
-                    analysis.status === 'failed' ? 'destructive' :
-                    'secondary'
-                  }
-                  className="text-xs"
-                >
-                  {analysis.status}
-                </Badge>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Badge
+                    variant={
+                      analysis.status === 'completed' ? 'default' :
+                      analysis.status === 'failed' ? 'destructive' :
+                      'secondary'
+                    }
+                    className="text-xs"
+                  >
+                    {analysis.status}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={(e) => handleDeleteAnalysis(analysis.id, e)}
+                  >
+                    <Trash size={16} weight="bold" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             {analysis.feedback && (
