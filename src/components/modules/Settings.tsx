@@ -9,18 +9,22 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { Key, Sparkle, Brain, TestTube, Check, X, Vibrate, SpeakerHigh } from '@phosphor-icons/react'
+import { Key, Sparkle, Brain, TestTube, Check, X, Vibrate, SpeakerHigh, ShieldCheck } from '@phosphor-icons/react'
 import { gemini } from '@/lib/gemini/client'
 import { getUsageStats, resetUsageStats } from '@/lib/ai/usage-tracker'
 import type { AIProvider, AIUsageStats } from '@/lib/ai/types'
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
 import { useSoundEffects } from '@/hooks/use-sound-effects'
+import { encrypt, decrypt } from '@/lib/crypto'
 
 export function Settings() {
   const [preferredProvider, setPreferredProvider] = useKV<AIProvider | "auto">(
     "preferred-ai-provider",
     "auto"
   )
+  const [encryptedApiKey, setEncryptedApiKey] = useKV<string | null>('encrypted-gemini-api-key', null)
+  const [apiKeyInput, setApiKeyInput] = useState('')
+  const [isSavingKey, setIsSavingKey] = useState(false)
   const [hapticEnabled, setHapticEnabled] = useKV<boolean>('settings-haptic-enabled', true)
   const [soundEnabled, setSoundEnabled] = useKV<boolean>('settings-sound-enabled', false)
   const [isOwner, setIsOwner] = useState(false)
@@ -44,6 +48,45 @@ export function Settings() {
   const loadUsageStats = async () => {
     const stats = await getUsageStats()
     setUsageStats(stats)
+  }
+
+  const handleSaveApiKey = async () => {
+    if (!apiKeyInput.trim()) {
+      toast.error('Please enter an API key')
+      return
+    }
+
+    if (apiKeyInput.trim().length < 20) {
+      toast.error('API key appears to be invalid (too short)')
+      return
+    }
+
+    setIsSavingKey(true)
+    try {
+      const encrypted = await encrypt(apiKeyInput.trim())
+      setEncryptedApiKey(encrypted)
+      setApiKeyInput('')
+      triggerHaptic('success')
+      playSound('success')
+      toast.success('API key saved securely', {
+        description: 'Your key is encrypted using Web Crypto API'
+      })
+    } catch (error) {
+      console.error('Failed to encrypt API key:', error)
+      triggerHaptic('error')
+      playSound('error')
+      toast.error('Failed to save API key', {
+        description: 'Encryption failed. Please try again.'
+      })
+    } finally {
+      setIsSavingKey(false)
+    }
+  }
+
+  const handleRemoveApiKey = () => {
+    setEncryptedApiKey(null)
+    setApiKeyInput('')
+    toast.success('API key removed')
   }
 
   const handleTestConnection = async () => {
@@ -95,88 +138,154 @@ export function Settings() {
         </p>
       </div>
 
-      <Card className="elevated-card border-destructive/30">
+      <Card className="elevated-card border-primary/20">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Key className="text-destructive" size={24} />
+            <ShieldCheck className="text-primary" size={24} />
             <CardTitle>Gemini API Configuration</CardTitle>
           </div>
           <CardDescription>
-            For security reasons, API keys must be set as environment variables during development.
+            Your API key is encrypted using Web Crypto API before storage. Never stored in plain text.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg space-y-3">
-            <div className="flex items-start gap-2">
-              <X size={20} className="text-destructive mt-0.5 flex-shrink-0" weight="bold" />
-              <div className="space-y-2 flex-1">
-                <p className="font-semibold text-sm">Client-Side Storage is Insecure</p>
-                <p className="text-sm text-muted-foreground">
-                  Storing API keys in the browser exposes them to potential theft through XSS attacks, browser extensions, or anyone with access to developer tools.
-                </p>
+          {encryptedApiKey ? (
+            <div className="space-y-4">
+              <div className="p-4 bg-success/10 border border-success/30 rounded-lg space-y-3">
+                <div className="flex items-start gap-2">
+                  <Check size={20} className="text-success mt-0.5 flex-shrink-0" weight="bold" />
+                  <div className="space-y-2 flex-1">
+                    <p className="font-semibold text-sm">API Key Configured</p>
+                    <p className="text-sm text-muted-foreground">
+                      Your Gemini API key is securely stored using AES-GCM encryption. The key is only decrypted in-memory when needed for AI requests.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-muted rounded-lg space-y-2">
+                <h4 className="font-semibold text-sm">Security Features</h4>
+                <ul className="space-y-1 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-success" weight="bold" />
+                    AES-GCM 256-bit encryption
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-success" weight="bold" />
+                    Device-specific key derivation (PBKDF2)
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-success" weight="bold" />
+                    No plain-text storage
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-success" weight="bold" />
+                    In-memory decryption only
+                  </li>
+                </ul>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleTestConnection}
+                  disabled={isTesting}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <TestTube size={16} />
+                  {isTesting ? "Testing..." : "Test Connection"}
+                </Button>
+                
+                <Button
+                  onClick={handleRemoveApiKey}
+                  variant="destructive"
+                  className="gap-2"
+                >
+                  <X size={16} />
+                  Remove Key
+                </Button>
+
+                {testResult === 'success' && (
+                  <Badge variant="default" className="gap-1 ml-auto">
+                    <Check size={14} />
+                    Connected
+                  </Badge>
+                )}
+                {testResult === 'error' && (
+                  <Badge variant="destructive" className="gap-1 ml-auto">
+                    <X size={14} />
+                    Failed
+                  </Badge>
+                )}
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="p-4 bg-accent/10 border border-accent/30 rounded-lg space-y-3">
+                <div className="flex items-start gap-2">
+                  <Key size={20} className="text-accent mt-0.5 flex-shrink-0" />
+                  <div className="space-y-2 flex-1">
+                    <p className="font-semibold text-sm">Secure Client-Side Encryption</p>
+                    <p className="text-sm text-muted-foreground">
+                      Your API key will be encrypted using the Web Crypto API with AES-GCM before being stored. 
+                      It's never stored in plain text and is only decrypted in-memory when making AI requests.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-          <div className="p-4 bg-muted rounded-lg space-y-3">
-            <h4 className="font-semibold text-sm flex items-center gap-2">
-              <Check size={18} className="text-success" weight="bold" />
-              Secure Configuration for Local Development
-            </h4>
-            <div className="space-y-2 text-sm">
-              <p className="text-muted-foreground">
-                Create a <code className="px-1.5 py-0.5 bg-background rounded text-xs font-mono">.env</code> file in your project root:
-              </p>
-              <pre className="p-3 bg-background rounded border text-xs font-mono overflow-x-auto">
+              <div className="space-y-2">
+                <Label htmlFor="api-key-input">Gemini API Key</Label>
+                <Input
+                  id="api-key-input"
+                  type="password"
+                  placeholder="Enter your Gemini API key"
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSaveApiKey()
+                    }
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Get your API key from{" "}
+                  <a
+                    href="https://aistudio.google.com/apikey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Google AI Studio
+                  </a>
+                </p>
+              </div>
+
+              <Button
+                onClick={handleSaveApiKey}
+                disabled={isSavingKey || !apiKeyInput.trim()}
+                className="w-full gap-2"
+              >
+                <ShieldCheck size={16} />
+                {isSavingKey ? 'Encrypting...' : 'Save Encrypted Key'}
+              </Button>
+
+              <div className="p-4 bg-muted rounded-lg space-y-2">
+                <h4 className="font-semibold text-sm flex items-center gap-2">
+                  <Check size={18} className="text-success" weight="bold" />
+                  Alternative: Environment Variables
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <p className="text-muted-foreground">
+                    For local development, you can also set the API key as an environment variable:
+                  </p>
+                  <pre className="p-3 bg-background rounded border text-xs font-mono overflow-x-auto">
 {`VITE_GEMINI_API_KEY=your_api_key_here`}
-              </pre>
-              <p className="text-muted-foreground">
-                Get your API key from{" "}
-                <a
-                  href="https://aistudio.google.com/apikey"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  Google AI Studio
-                </a>
-              </p>
-              <p className="text-muted-foreground mt-3">
-                The app will automatically read from <code className="px-1.5 py-0.5 bg-background rounded text-xs font-mono">import.meta.env.VITE_GEMINI_API_KEY</code> at runtime.
-              </p>
+                  </pre>
+                </div>
+              </div>
             </div>
-          </div>
-
-          <div className="p-4 bg-accent/10 border border-accent/30 rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              <strong className="text-foreground">Note:</strong> For production deployments, configure the environment variable through your hosting platform's dashboard (Vercel, Netlify, etc.) rather than committing it to version control.
-            </p>
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              onClick={handleTestConnection}
-              disabled={isTesting}
-              variant="outline"
-              className="gap-2"
-            >
-              <TestTube size={16} />
-              {isTesting ? "Testing..." : "Test Connection"}
-            </Button>
-            
-            {testResult === 'success' && (
-              <Badge variant="default" className="gap-1">
-                <Check size={14} />
-                Connected
-              </Badge>
-            )}
-            {testResult === 'error' && (
-              <Badge variant="destructive" className="gap-1">
-                <X size={14} />
-                Failed
-              </Badge>
-            )}
-          </div>
+          )}
         </CardContent>
       </Card>
 

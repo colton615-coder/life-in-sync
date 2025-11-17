@@ -24,7 +24,7 @@ import { AutocompleteInput } from '@/components/AutocompleteInput'
 import { VirtualList } from '@/components/VirtualList'
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
 import { useSoundEffects } from '@/hooks/use-sound-effects'
-import { sanitizeForLLM } from '@/lib/utils'
+import { sanitizeForLLM, parseAIResponse } from '@/lib/security'
 
 const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Other']
 const COLORS = ['#5fd4f4', '#9d7fff', '#6ee7b7', '#fbbf24', '#fb923c', '#f87171', '#94a3b8']
@@ -219,13 +219,7 @@ CRITICAL RULES:
         throw new Error('Invalid response from AI service')
       }
 
-      let parsed
-      try {
-        parsed = JSON.parse(response)
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError, 'Response:', response)
-        throw new Error('Failed to parse AI response')
-      }
+      const parsed = parseAIResponse(response)
       
       if (!parsed.budget || !parsed.budget.allocations) {
         console.error('Invalid budget structure:', parsed)

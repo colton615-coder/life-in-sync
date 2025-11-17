@@ -1,16 +1,36 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import type { GeminiGenerateOptions, GeminiResponse } from "./types"
+import { decrypt } from "@/lib/crypto"
 
 export class GeminiClient {
   private client: GoogleGenerativeAI | null = null
   private initialized = false
+
+  async getApiKey(): Promise<string | null> {
+    const encryptedKey = await spark.kv.get<string>("encrypted-gemini-api-key")
+    if (encryptedKey) {
+      try {
+        return await decrypt(encryptedKey)
+      } catch (error) {
+        console.error("Failed to decrypt API key:", error)
+        throw new Error("Failed to decrypt Gemini API key. Please re-save your key in Settings.")
+      }
+    }
+
+    const envKey = import.meta.env.VITE_GEMINI_API_KEY
+    if (envKey) {
+      return envKey
+    }
+
+    return null
+  }
 
   async initialize(): Promise<void> {
     if (this.initialized && this.client) {
       return
     }
 
-    const apiKey = await spark.kv.get<string>("gemini-api-key")
+    const apiKey = await this.getApiKey()
     if (!apiKey) {
       throw new Error("Gemini API key not configured. Please add your API key in Settings.")
     }
@@ -20,7 +40,7 @@ export class GeminiClient {
   }
 
   async isConfigured(): Promise<boolean> {
-    const apiKey = await spark.kv.get<string>("gemini-api-key")
+    const apiKey = await this.getApiKey()
     return !!apiKey
   }
 
