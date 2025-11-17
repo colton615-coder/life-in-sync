@@ -322,11 +322,11 @@ CRITICAL RULES:
                 transition={{ duration: 0.3, delay: 0.1 }}
               >
                 <Button
-                  size="default"
-                  className="gap-2 h-10 px-5 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all"
+                  size="sm"
+                  className="gap-1.5 h-8 px-3 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all"
                 >
-                  <Plus size={18} weight="bold" />
-                  <span className="font-semibold">Add Expense</span>
+                  <Plus size={16} weight="bold" />
+                  <span className="font-semibold text-sm">Add Expense</span>
                 </Button>
               </motion.div>
             </DialogTrigger>
