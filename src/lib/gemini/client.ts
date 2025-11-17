@@ -7,9 +7,19 @@ export class GeminiClient {
   private initialized = false
 
   async getApiKey(): Promise<string | null> {
-    // KNOX_DEV_WARNING: Key is hardcoded for speed.
-    // DO NOT COMMIT OR DEPLOY THIS.
-    return "AIzaSyBLfizNjvMPX_piEhupqpNBoZk0rIxJAok"
+    const encryptedKey = await spark.kv.get<string>('encrypted-gemini-api-key')
+    if (!encryptedKey) {
+      return null
+    }
+
+    try {
+      const decryptedKey = await decrypt(encryptedKey)
+      return decryptedKey
+    } catch (error) {
+      console.error('[GeminiClient] Failed to decrypt API key:', error)
+      await spark.kv.delete('encrypted-gemini-api-key')
+      throw new Error('Failed to decrypt API key. Please re-enter your key in Settings.')
+    }
   }
 
   async initialize(): Promise<void> {
