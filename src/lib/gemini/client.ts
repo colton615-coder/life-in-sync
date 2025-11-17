@@ -7,7 +7,9 @@ export class GeminiClient {
   private initialized = false
 
   async getApiKey(): Promise<string | null> {
-    return "AIzaSyBz8W25dTqJPqcwQxnfq-TUV0VFBXH-1AA"
+    // KNOX_DEV_WARNING: Key is hardcoded for speed.
+    // DO NOT COMMIT OR DEPLOY THIS.
+    return "AIzaSyBLfizNjvMPX_piEhupqpNBoZk0rIxJAok"
   }
 
   async initialize(): Promise<void> {
