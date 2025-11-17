@@ -26,6 +26,7 @@ import { toast } from 'sonner'
 import { simulateVideoProcessing, analyzePoseData, generateFeedback } from '@/lib/golf/swing-analyzer'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { VideoPlayerWithTimeline } from '@/components/VideoPlayerWithTimeline'
 
 export function GolfSwing() {
   const [analyses, setAnalyses] = useKV<SwingAnalysis[]>('golf-swing-analyses', [])
@@ -615,14 +616,10 @@ export function GolfSwing() {
               </TabsList>
               <TabsContent value="metrics" className="space-y-6 mt-6">
                 {activeAnalysis.videoUrl && (
-                  <Card className="glass-card overflow-hidden">
-                    <video
-                      src={activeAnalysis.videoUrl}
-                      controls
-                      className="w-full aspect-video bg-black"
-                      aria-label="Your golf swing video recording"
-                    />
-                  </Card>
+                  <VideoPlayerWithTimeline 
+                    videoUrl={activeAnalysis.videoUrl}
+                    poseData={activeAnalysis.poseData}
+                  />
                 )}
                 {renderMetrics()}
               </TabsContent>
