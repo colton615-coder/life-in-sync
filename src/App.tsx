@@ -129,26 +129,22 @@ function App() {
       <a href="#main-content" className="skip-to-content">
         Skip to main content
       </a>
-
-      <div id="main-content" className="relative z-10 max-w-7xl mx-auto px-3 py-4 md:px-8 md:py-8 pb-20 md:pb-32">
+      <div id="main-content" className="md:px-8 md:py-8 pb-20 md:pb-32 text-5xl">
         {renderModule()}
       </div>
-
       <NavigationButton 
         onClick={() => setDrawerOpen(!drawerOpen)}
         isOpen={drawerOpen}
       />
-
       <NavigationDrawer
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         activeModule={activeModule}
         onModuleChange={handleModuleChange}
       />
-
       <Toaster position="top-right" richColors />
     </div>
-  )
+  );
 }
 
 export default App
