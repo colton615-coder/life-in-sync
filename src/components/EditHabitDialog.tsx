@@ -74,7 +74,7 @@ export function EditHabitDialog({ open, onOpenChange, habit, onEditHabit }: Edit
 
           <div className="space-y-3">
             <Label className="text-foreground font-semibold">Interface Icon</Label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3" role="group" aria-label="Icon selection">
               {iconOptions.map(({ value, Icon, label }, index) => (
                 <motion.button
                   key={value}
@@ -91,8 +91,10 @@ export function EditHabitDialog({ open, onOpenChange, habit, onEditHabit }: Edit
                       ? 'glass-card border-accent bg-accent/20 text-accent neon-glow'
                       : 'glass-morphic border-border/50 hover:border-accent/50 text-muted-foreground hover:text-foreground'
                   )}
+                  aria-label={`Select ${label} icon`}
+                  aria-pressed={selectedIcon === value}
                 >
-                  <Icon weight={selectedIcon === value ? 'fill' : 'regular'} className="w-8 h-8" />
+                  <Icon weight={selectedIcon === value ? 'fill' : 'regular'} className="w-8 h-8" aria-hidden="true" />
                   <span className="text-sm font-medium">{label}</span>
                 </motion.button>
               ))}

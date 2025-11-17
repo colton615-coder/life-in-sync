@@ -63,7 +63,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-6 md:px-8 md:py-8 pb-24 md:pb-32">
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
+
+      <div id="main-content" className="relative z-10 max-w-7xl mx-auto px-4 py-6 md:px-8 md:py-8 pb-24 md:pb-32">
         {renderModule()}
       </div>
 

@@ -33,6 +33,52 @@
     white-space: nowrap;
     border-width: 0;
   }
+
+  *:focus-visible {
+    outline: 3px solid oklch(0.68 0.19 211);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  [role="tab"]:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 3px solid oklch(0.68 0.19 211);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px oklch(0.68 0.19 211 / 0.2);
+  }
+
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 3px solid oklch(0.68 0.19 211);
+    outline-offset: 2px;
+    border-color: oklch(0.68 0.19 211);
+    box-shadow: 0 0 0 4px oklch(0.68 0.19 211 / 0.2), 
+                inset 0 0 0 1px oklch(0.68 0.19 211);
+  }
+
+  .skip-to-content {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    background: oklch(0.68 0.19 211);
+    color: oklch(0.98 0.005 240);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 4px 20px oklch(0.68 0.19 211 / 0.5);
+    transition: top 0.3s ease;
+  }
+
+  .skip-to-content:focus {
+    top: 20px;
+  }
 }
 
 :root {
@@ -443,4 +489,21 @@
   color: oklch(0.50 0.01 240);
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-glow-pulse,
+  .animate-slide-up,
+  .animate-float {
+    animation: none !important;
+  }
 }

@@ -452,8 +452,9 @@ export function Tasks() {
             <button
               onClick={() => setSearchQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center hover:bg-muted transition-colors"
+              aria-label="Clear search"
             >
-              <X size={14} />
+              <X size={14} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -574,6 +575,7 @@ export function Tasks() {
                           className="flex-shrink-0 mt-1"
                           whileTap={{ scale: 0.9 }}
                           whileHover={{ scale: 1.05 }}
+                          aria-label={task.completed ? `Mark "${task.title}" as incomplete` : `Mark "${task.title}" as complete`}
                         >
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
                             task.completed 
@@ -584,6 +586,7 @@ export function Tasks() {
                               size={24}
                               weight={task.completed ? 'fill' : 'regular'}
                               className={task.completed ? 'text-success' : 'text-muted-foreground group-hover:text-primary transition-colors'}
+                              aria-hidden="true"
                             />
                           </div>
                         </motion.button>
@@ -643,8 +646,9 @@ export function Tasks() {
                               deleteTask(task.id)
                             }}
                             className="w-10 h-10 rounded-xl flex items-center justify-center neumorphic-button text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                            aria-label={`Delete task "${task.title}"`}
                           >
-                            <Trash size={18} weight="bold" />
+                            <Trash size={18} weight="bold" aria-hidden="true" />
                           </motion.button>
                         </div>
                       </div>
