@@ -18,36 +18,31 @@ export function GeminiApiTest() {
     setResult(null)
 
     try {
-      console.log('[GeminiApiTest] Starting API test...')
-      
-      const response = await gemini.generate(
-        'Respond with exactly "API key working!" and nothing else.',
-        {
-          model: 'gemini-1.5-flash',
-          temperature: 0.1,
-          maxOutputTokens: 50
-        }
-      )
+      const connectionResult = await gemini.testConnection()
 
-      console.log('[GeminiApiTest] ✅ Success! Response:', response.text)
-      
-      setResult({
-        success: true,
-        response: response.text
-      })
-
-      toast.success('✅ API Key is working!', {
-        description: `Response: ${response.text}`
-      })
-
+      if (connectionResult.success) {
+        setResult({
+          success: true,
+          response: connectionResult.details
+        })
+        toast.success('✅ API Key is working!', {
+          description: connectionResult.details
+        })
+      } else {
+        setResult({
+          success: false,
+          error: connectionResult.error,
+          response: connectionResult.details
+        })
+        toast.error(`❌ API Test Failed: ${connectionResult.error}`, {
+          description: connectionResult.details
+        })
+      }
     } catch (error: any) {
-      console.error('[GeminiApiTest] ❌ Failed:', error)
-      
       setResult({
         success: false,
         error: error.message || 'Unknown error'
       })
-
       toast.error('❌ API Test Failed', {
         description: error.message
       })
@@ -64,7 +59,7 @@ export function GeminiApiTest() {
           <CardTitle>API Key Test</CardTitle>
         </div>
         <CardDescription>
-          Test the hardcoded Gemini API key by making a real API call
+          Test your configured Gemini API key by making a real API call.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -102,11 +97,11 @@ export function GeminiApiTest() {
               )}
               <div className="space-y-2 flex-1">
                 <p className="font-semibold text-sm">
-                  {result.success ? 'API Call Successful!' : 'API Call Failed'}
+                  {result.success ? 'Connection Successful!' : 'Connection Failed'}
                 </p>
-                {result.success && result.response && (
+                {result.response && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">API Response:</p>
+                    <p className="text-xs text-muted-foreground">Details:</p>
                     <p className="text-sm font-mono bg-background/50 p-2 rounded">
                       {result.response}
                     </p>
@@ -125,14 +120,6 @@ export function GeminiApiTest() {
           </div>
         )}
 
-        <div className="p-3 bg-muted rounded-lg">
-          <p className="text-xs text-muted-foreground">
-            <strong>Hardcoded Key:</strong> AIzaSyBLfizNjvMPX_piEhupqpNBoZk0rIxJAok
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            This key is hardcoded in <code className="text-xs">src/lib/gemini/client.ts</code>
-          </p>
-        </div>
       </CardContent>
     </Card>
   )

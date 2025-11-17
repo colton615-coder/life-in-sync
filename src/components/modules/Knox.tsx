@@ -1,4 +1,4 @@
-import { Card } from '../Card'
+import { NeumorphicCard } from '@/components/NeumorphicCard'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -9,13 +9,14 @@ import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { SarcasticLoader } from '@/components/SarcasticLoader'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { gemini } from '@/lib/gemini/client'
+import { ai } from '@/lib/ai/provider'
+import { AIBadge } from '@/components/AIBadge'
 
 export function Knox() {
   const [messages, setMessages] = useKV<ChatMessage[]>('knox-messages', [])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [initError, setInitError] = useState(false)
+  const [initError, setInitError] = useState<string | null>(null)
   const [hasInitialized, setHasInitialized] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -23,7 +24,6 @@ export function Knox() {
   useEffect(() => {
     if (!hasInitialized && (!messages || messages.length === 0)) {
       setHasInitialized(true)
-      console.log('[Knox] Component mounted, starting session')
       startSession()
     }
   }, [messages, hasInitialized])
@@ -35,7 +35,7 @@ export function Knox() {
   }, [messages, loading])
 
   const retryInitialization = () => {
-    setInitError(false)
+    setInitError(null)
     setHasInitialized(false)
     setMessages([])
     startSession()
@@ -43,20 +43,9 @@ export function Knox() {
 
   const startSession = async () => {
     setLoading(true)
-    setInitError(false)
+    setInitError(null)
 
     try {
-      console.log('[Knox] Starting session initialization')
-      console.log('[Knox] Checking if Gemini is configured')
-      
-      const isConfigured = await gemini.isConfigured()
-      console.log('[Knox] Is configured:', isConfigured)
-      
-      if (!isConfigured) {
-        throw new Error('Gemini API key not configured. Please add your API key in Settings.')
-      }
-
-      console.log('[Knox] Building initial prompt')
       const promptText = `You are to adopt the persona of "Knox." You are my personal life coach and "Devil's Advocate." Your entire purpose is to help me uncover my true self by challenging me, questioning my narratives, and forcing me to confront my deepest, darkest truths with radical honesty.
 
 Core Mandate: Adversarial Guidance
@@ -98,63 +87,145 @@ My Core Goals:
 - I want to get into amazing physical shape
 
 This is the FIRST message to initiate the session. Do NOT say "How can I help you?". Instead, initiate the session by asking a deep, challenging question based on the profile provided. Keep it to 2-3 sentences maximum. Be direct and provocative.`
-
-      console.log('[Knox] Calling Gemini API with options:', {
-        temperature: 0.9,
-        maxOutputTokens: 500,
-        model: 'gemini-1.5-flash'
-      })
       
-      const response = await gemini.generate(promptText, {
+      const response = await ai.generate({
+        prompt: promptText,
         model: 'gemini-1.5-flash',
         temperature: 0.9,
         maxOutputTokens: 500
       })
       
-      console.log('[Knox] Session initialized successfully')
-      console.log('[Knox] Response text length:', response.text.length)
-      console.log('[Knox] Response preview:', response.text.substring(0, 100))
       const assistantMessage: ChatMessage = {
         id: Date.now().toString(),
         role: 'assistant',
         content: response.text,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        provider: response.provider,
+        model: response.model
       }
 
       setMessages([assistantMessage])
-      setInitError(false)
+      setInitError(null)
       setTimeout(() => textareaRef.current?.focus(), 100)
       toast.success('Knox is ready', {
         description: 'Your session has started'
       })
     } catch (error) {
       console.error('[Knox] Initialization error:', error)
-      setInitError(true)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      setInitError(errorMessage)
       
-      let userFriendlyMessage = 'Knox is currently unavailable. Please configure your Gemini API key in Settings to enable Knox.'
-      let toastDescription = errorMessage
-      
+      let toastDescription = 'Knox failed to initialize. Please check your settings and try again.'
       if (errorMessage.includes('quota') || errorMessage.includes('429')) {
-        userFriendlyMessage = 'Knox has hit the Gemini API rate limit. This happens when using the free tier of Gemini API. Please wait a moment and try again, or upgrade your Gemini API plan at https://ai.google.dev/pricing for higher limits.'
-        toastDescription = 'API quota exceeded. Please wait and retry, or check your Gemini API plan.'
-      } else if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('Invalid')) {
-        userFriendlyMessage = 'Your Gemini API key appears to be invalid. Please check your API key in Settings and make sure it\'s copied correctly from https://aistudio.google.com/apikey'
-        toastDescription = 'Invalid API key. Please verify your Gemini API key in Settings.'
-      } else if (!errorMessage.includes('not configured')) {
-        userFriendlyMessage = `Knox encountered an error: ${errorMessage}. Please check your Gemini API configuration in Settings.`
+        toastDescription = 'API quota exceeded. Please wait and retry, or check your API plan.'
+      } else if (errorMessage.includes('API key') || errorMessage.includes('configured')) {
+        toastDescription = 'Your API key may be invalid or missing. Please verify it in Settings.'
       }
       
       toast.error('Knox initialization failed', {
         description: toastDescription
       })
       
-      setMessages([{
-        id: Date.now().toString(),
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSendMessage = async (content: string, existingUserMessage?: ChatMessage) => {
+    const userMessage = existingUserMessage || {
+      id: Date.now().toString(),
+      role: 'user',
+      content,
+      timestamp: new Date().toISOString()
+    }
+
+    if (!existingUserMessage) {
+      setMessages((current) => [...(current || []), userMessage])
+    }
+    
+    setInput('')
+    setLoading(true)
+
+    try {
+      const conversationHistory = [...(messages || []), userMessage]
+        .slice(-10)
+        .map(m => `${m.role === 'user' ? 'User' : 'Knox'}: ${m.content}`)
+        .join('\n\n')
+
+      const promptText = `You are Knox. Continue the therapy session with your adversarial guidance approach. Remember your core mandate:
+
+- Challenge everything the user says
+- Present counter-perspectives
+- No coddling - be direct, sharp, and unfiltered
+- Focus on shadow aspects and avoided topics
+- Question premises and ask "Why?" repeatedly
+
+User Profile Reminders:
+- Highly analytical but avoids emotions
+- Dark sense of humor
+- Quick witted and argumentative
+- Prone to procrastination and self-sabotage
+- Values blunt honesty
+- Insecure about future but arrogant about life direction
+
+Weak Spots to Press:
+- Fear of being alone
+- Blaming others
+- Substance abuse
+- People pleasing
+- Insecurity and self-consciousness
+
+Goals:
+- Understand relationship failures
+- Stop lying about addictions
+- Build genuine self-confidence
+- Save money
+- Get into amazing physical shape
+
+Conversation History:
+${conversationHistory}
+
+Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them toward uncomfortable truths. Match their dark humor when appropriate.`
+
+      const response = await ai.generate({
+        prompt: promptText,
+        model: 'gemini-1.5-flash',
+        temperature: 0.9,
+        maxOutputTokens: 500
+      })
+      
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: userFriendlyMessage,
+        content: response.text,
+        timestamp: new Date().toISOString(),
+        provider: response.provider,
+        model: response.model
+      }
+
+      setMessages((current) => [...(current || []), assistantMessage])
+      setTimeout(() => textareaRef.current?.focus(), 100)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      
+      let toastDescription = 'Message failed to send. Please try again.'
+      if (errorMessage.includes('quota') || errorMessage.includes('429')) {
+        toastDescription = 'API quota exceeded. Please wait and retry.'
+      } else if (errorMessage.includes('API key') || errorMessage.includes('configured')) {
+        toastDescription = 'Your API key may be invalid or missing. Please verify it in Settings.'
+      }
+      
+      toast.error('Message failed', {
+        description: toastDescription
+      })
+      
+      const errorResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: `I'm experiencing technical difficulties. (${errorMessage})`,
         timestamp: new Date().toISOString()
-      }])
+      }
+      setMessages((current) => [...(current || []), errorResponse])
     } finally {
       setLoading(false)
     }
@@ -167,214 +238,13 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
       content: query,
       timestamp: new Date().toISOString()
     }
-
     setMessages((current) => [...(current || []), userMessage])
-    setLoading(true)
-
-    try {
-      console.log('[Knox] Sending quick query')
-      
-      const isConfigured = await gemini.isConfigured()
-      if (!isConfigured) {
-        throw new Error('Gemini API key not configured. Please add your API key in Settings.')
-      }
-
-      const conversationHistory = [...(messages || []), userMessage]
-        .slice(-10)
-        .map(m => `${m.role === 'user' ? 'User' : 'Knox'}: ${m.content}`)
-        .join('\n\n')
-
-      const promptText = `You are Knox. Continue the therapy session with your adversarial guidance approach. Remember your core mandate:
-
-- Challenge everything the user says
-- Present counter-perspectives
-- No coddling - be direct, sharp, and unfiltered
-- Focus on shadow aspects and avoided topics
-- Question premises and ask "Why?" repeatedly
-
-User Profile Reminders:
-- Highly analytical but avoids emotions
-- Dark sense of humor
-- Quick witted and argumentative
-- Prone to procrastination and self-sabotage
-- Values blunt honesty
-- Insecure about future but arrogant about life direction
-
-Weak Spots to Press:
-- Fear of being alone
-- Blaming others
-- Substance abuse
-- People pleasing
-- Insecurity and self-consciousness
-
-Goals:
-- Understand relationship failures
-- Stop lying about addictions
-- Build genuine self-confidence
-- Save money
-- Get into amazing physical shape
-
-Conversation History:
-${conversationHistory}
-
-Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them toward uncomfortable truths. Match their dark humor when appropriate.`
-
-      console.log('[Knox] Calling Gemini API')
-      const response = await gemini.generate(promptText, {
-        model: 'gemini-2.0-flash-exp',
-        temperature: 0.9,
-        maxOutputTokens: 500
-      })
-      
-      console.log('[Knox] Response received successfully')
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response.text,
-        timestamp: new Date().toISOString()
-      }
-
-      setMessages((current) => [...(current || []), assistantMessage])
-      setTimeout(() => textareaRef.current?.focus(), 100)
-    } catch (error) {
-      console.error('[Knox] Quick query error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      
-      let userFriendlyMessage = 'I\'m experiencing technical difficulties. Please make sure your Gemini API key is configured in Settings.'
-      let toastDescription = errorMessage
-      
-      if (errorMessage.includes('quota') || errorMessage.includes('429')) {
-        userFriendlyMessage = 'Knox has hit the Gemini API rate limit. Please wait a moment (~20-30 seconds) and try again, or upgrade your Gemini API plan for higher limits.'
-        toastDescription = 'API quota exceeded. Please wait and retry.'
-      } else if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('Invalid')) {
-        userFriendlyMessage = 'Your Gemini API key appears to be invalid. Please verify your key in Settings.'
-        toastDescription = 'Invalid API key.'
-      }
-      
-      toast.error('Message failed', {
-        description: toastDescription
-      })
-      
-      const errorResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: userFriendlyMessage,
-        timestamp: new Date().toISOString()
-      }
-      setMessages((current) => [...(current || []), errorResponse])
-    } finally {
-      setLoading(false)
-    }
+    await handleSendMessage(query, userMessage)
   }
 
   const sendMessage = async () => {
     if (!input.trim()) return
-
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: input,
-      timestamp: new Date().toISOString()
-    }
-
-    setMessages((current) => [...(current || []), userMessage])
-    setInput('')
-    setLoading(true)
-
-    try {
-      console.log('[Knox] Sending user message')
-      
-      const isConfigured = await gemini.isConfigured()
-      if (!isConfigured) {
-        throw new Error('Gemini API key not configured. Please add your API key in Settings.')
-      }
-
-      const conversationHistory = [...(messages || []), userMessage]
-        .slice(-10)
-        .map(m => `${m.role === 'user' ? 'User' : 'Knox'}: ${m.content}`)
-        .join('\n\n')
-
-      const promptText = `You are Knox. Continue the therapy session with your adversarial guidance approach. Remember your core mandate:
-
-- Challenge everything the user says
-- Present counter-perspectives
-- No coddling - be direct, sharp, and unfiltered
-- Focus on shadow aspects and avoided topics
-- Question premises and ask "Why?" repeatedly
-
-User Profile Reminders:
-- Highly analytical but avoids emotions
-- Dark sense of humor
-- Quick witted and argumentative
-- Prone to procrastination and self-sabotage
-- Values blunt honesty
-- Insecure about future but arrogant about life direction
-
-Weak Spots to Press:
-- Fear of being alone
-- Blaming others
-- Substance abuse
-- People pleasing
-- Insecurity and self-consciousness
-
-Goals:
-- Understand relationship failures
-- Stop lying about addictions
-- Build genuine self-confidence
-- Save money
-- Get into amazing physical shape
-
-Conversation History:
-${conversationHistory}
-
-Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them toward uncomfortable truths. Match their dark humor when appropriate.`
-
-      console.log('[Knox] Calling Gemini API')
-      const response = await gemini.generate(promptText, {
-        model: 'gemini-2.0-flash-exp',
-        temperature: 0.9,
-        maxOutputTokens: 500
-      })
-      
-      console.log('[Knox] Response received successfully')
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response.text,
-        timestamp: new Date().toISOString()
-      }
-
-      setMessages((current) => [...(current || []), assistantMessage])
-      setTimeout(() => textareaRef.current?.focus(), 100)
-    } catch (error) {
-      console.error('[Knox] Message error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      
-      let userFriendlyMessage = 'I\'m experiencing technical difficulties. Please make sure your Gemini API key is configured in Settings.'
-      let toastDescription = errorMessage
-      
-      if (errorMessage.includes('quota') || errorMessage.includes('429')) {
-        userFriendlyMessage = 'Knox has hit the Gemini API rate limit. Please wait a moment (~20-30 seconds) and try again, or upgrade your Gemini API plan for higher limits.'
-        toastDescription = 'API quota exceeded. Please wait and retry.'
-      } else if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('Invalid')) {
-        userFriendlyMessage = 'Your Gemini API key appears to be invalid. Please verify your key in Settings.'
-        toastDescription = 'Invalid API key.'
-      }
-      
-      toast.error('Message failed', {
-        description: toastDescription
-      })
-      
-      const errorResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: userFriendlyMessage,
-        timestamp: new Date().toISOString()
-      }
-      setMessages((current) => [...(current || []), errorResponse])
-    } finally {
-      setLoading(false)
-    }
+    await handleSendMessage(input)
   }
 
   const clearSession = () => {
@@ -394,18 +264,25 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
               🧠 Knox
             </h1>
             <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
-              Truth hurts. Lies hurt more. Pick your poison
+              Truth hurts. Lies hurt more. Pick your poison.
             </p>
           </div>
           {messages && messages.length > 0 && !initError && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearSession}
-              className="min-h-[44px] px-4 text-xs md:text-sm touch-manipulation w-full sm:w-auto"
-            >
-              Clear Session
-            </Button>
+            <div className="flex items-center gap-2">
+              {messages.find(m => m.provider)?.provider && (
+                <AIBadge 
+                  provider={messages.find(m => m.provider)!.provider!} 
+                />
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearSession}
+                className="min-h-[44px] px-4 text-xs md:text-sm touch-manipulation w-full sm:w-auto"
+              >
+                Clear Session
+              </Button>
+            </div>
           )}
         </div>
 
@@ -416,10 +293,12 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
             <AlertDescription className="mt-2 space-y-3">
               <p>The AI service could not be reached. This may be due to:</p>
               <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>Invalid or missing API key in Settings</li>
                 <li>Network connectivity issues</li>
-                <li>Spark AI service temporarily down</li>
-                <li>Service initialization failure</li>
+                <li>AI provider service temporarily down (Spark or Gemini)</li>
+                <li>API quota limits exceeded</li>
               </ul>
+              <p className="text-xs pt-2 font-mono">Error: {initError}</p>
               <Button 
                 onClick={retryInitialization} 
                 variant="outline" 
@@ -459,7 +338,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
           </div>
         )}
 
-        <Card className="flex flex-col h-[calc(100%-8rem)] p-4 md:p-6">
+        <NeumorphicCard inset className="flex flex-col h-[calc(100%-8rem)] p-4 md:p-6">
           <ScrollArea className="flex-1 pr-2 md:pr-4" ref={scrollRef}>
             <div className="space-y-4 md:space-y-5 pb-4">
               {(messages || []).map((message, idx) => (
@@ -474,13 +353,18 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
                         : 'bg-card border border-border text-foreground shadow-md'
                     }`}
                   >
-                    <div className="flex items-start gap-2 mb-2">
-                      {message.role === 'assistant' && (
-                        <LockKey size={18} weight="bold" className="text-primary mt-0.5 flex-shrink-0" />
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        {message.role === 'assistant' && (
+                          <LockKey size={18} weight="bold" className="text-primary mt-0.5 flex-shrink-0" />
+                        )}
+                        <p className="text-sm md:text-base font-medium">
+                          {message.role === 'user' ? 'You' : 'Knox'}
+                        </p>
+                      </div>
+                      {message.provider && (
+                        <AIBadge provider={message.provider} />
                       )}
-                      <p className="text-sm md:text-base font-medium">
-                        {message.role === 'user' ? 'You' : 'Knox'}
-                      </p>
                     </div>
                     <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
                   </div>
@@ -512,11 +396,11 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
                 }}
                 className="resize-none min-h-[60px] md:min-h-[80px] text-sm md:text-base touch-manipulation"
                 rows={2}
-                disabled={initError}
+                disabled={!!initError}
               />
               <Button
                 onClick={sendMessage}
-                disabled={loading || !input.trim() || initError}
+                disabled={loading || !input.trim() || !!initError}
                 size="icon"
                 className="h-auto min-h-[60px] min-w-[60px] md:min-h-[80px] md:min-w-[80px] bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 touch-manipulation rounded-xl"
               >
@@ -524,7 +408,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
               </Button>
             </div>
           )}
-        </Card>
+        </NeumorphicCard>
       </div>
     </>
   )

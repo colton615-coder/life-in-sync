@@ -133,6 +133,8 @@ export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   timestamp: string
+  provider?: 'spark' | 'gemini'
+  model?: string
 }
 
 export interface Exercise {
