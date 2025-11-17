@@ -381,21 +381,21 @@ export function Habits() {
   }
 
   return (
-    <div className="pt-2 md:pt-4 space-y-3 md:space-y-4 animate-in fade-in duration-500">
+    <div className="pt-4 md:pt-6 space-y-4 md:space-y-5 animate-in fade-in duration-500 px-1 md:px-0">
       {showConfetti && <Confetti />}
       
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">🔥 Habits</h1>
-          <p className="text-muted-foreground mt-1 text-sm font-normal">Same circus, different day</p>
+          <p className="text-muted-foreground mt-1.5 md:mt-1 text-sm md:text-base font-normal">Same circus, different day</p>
         </div>
         {creationStep === 0 && (
           <Button
-            size="sm"
+            size="default"
             onClick={() => setCreationStep(1)}
-            className="gap-1.5 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+            className="gap-2 h-11 md:h-9 px-5 md:px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
           >
-            <Plus size={16} weight="bold" />
+            <Plus size={18} weight="bold" className="md:w-4 md:h-4" />
             <span>New</span>
           </Button>
         )}
@@ -409,11 +409,11 @@ export function Habits() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="glass-card border-primary/30 shadow-xl p-3 md:p-6">
-              <div className="flex items-start justify-between mb-3 md:mb-5">
-                <div className="flex items-center gap-2 md:gap-3">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full glass-card border-primary/30 flex items-center justify-center">
-                    <Sparkle weight="fill" className="text-primary" size={16} />
+            <Card className="glass-card border-primary/30 shadow-xl p-4 md:p-6">
+              <div className="flex items-start justify-between mb-4 md:mb-5">
+                <div className="flex items-center gap-2.5 md:gap-3">
+                  <div className="w-9 h-9 md:w-10 md:h-10 rounded-full glass-card border-primary/30 flex items-center justify-center">
+                    <Sparkle weight="fill" className="text-primary" size={18} />
                   </div>
                   <div>
                     <h3 className="font-semibold text-base md:text-lg">Create New Habit</h3>
@@ -424,9 +424,9 @@ export function Habits() {
                   variant="ghost"
                   size="icon"
                   onClick={resetCreation}
-                  className="text-muted-foreground hover:text-foreground h-8 w-8 md:h-10 md:w-10"
+                  className="text-muted-foreground hover:text-foreground h-9 w-9 md:h-10 md:w-10"
                 >
-                  <X size={18} className="md:w-5 md:h-5" />
+                  <X size={20} className="md:w-5 md:h-5" />
                 </Button>
               </div>
 

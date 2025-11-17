@@ -290,18 +290,18 @@ export function Tasks() {
   }, [])
 
   return (
-    <div className="pt-2 md:pt-4 space-y-4 md:space-y-6 animate-in fade-in duration-500">
+    <div className="pt-4 md:pt-6 space-y-5 md:space-y-6 animate-in fade-in duration-500 px-1 md:px-0">
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex items-start justify-between gap-3 md:gap-4 flex-wrap"
+        className="flex items-start justify-between gap-4"
       >
-        <div className="space-y-0.5 md:space-y-1">
+        <div className="space-y-1 md:space-y-1.5">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-br from-primary via-primary to-accent bg-clip-text text-transparent">
             ✅ Tasks
           </h1>
-          <p className="text-muted-foreground text-sm font-normal">
+          <p className="text-muted-foreground text-sm md:text-base font-normal">
             The void stares back, but these still need doing
           </p>
         </div>
@@ -311,10 +311,10 @@ export function Tasks() {
         }}>
           <DialogTrigger asChild>
             <Button
-              size="sm"
-              className="gap-1.5 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+              size="default"
+              className="gap-2 h-11 md:h-9 px-5 md:px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
             >
-              <Plus size={16} weight="bold" />
+              <Plus size={18} weight="bold" className="md:w-4 md:h-4" />
               <span>New</span>
               <span className="hidden md:inline text-xs opacity-70">⌘K</span>
             </Button>

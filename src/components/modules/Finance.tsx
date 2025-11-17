@@ -299,16 +299,16 @@ CRITICAL RULES:
   }
 
   return (
-    <div className="space-y-6 md:space-y-12 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between gap-3">
+    <div className="space-y-5 md:space-y-8 animate-in fade-in duration-500 px-1 md:px-0 pt-4 md:pt-0">
+      <div className="flex items-center justify-between gap-4">
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="space-y-1 flex-1 min-w-0"
+          className="space-y-1.5 md:space-y-2 flex-1 min-w-0"
         >
-          <h1 className="text-2xl md:text-5xl font-bold tracking-tight text-gradient-cyan">Finance</h1>
-          <p className="text-xs md:text-base text-muted-foreground/60 font-normal line-clamp-1">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-gradient-cyan">Finance</h1>
+          <p className="text-sm md:text-base text-muted-foreground/60 font-normal line-clamp-2">
             Watch your dreams leak away, one transaction at a time
           </p>
         </motion.div>
@@ -322,12 +322,11 @@ CRITICAL RULES:
                 transition={{ duration: 0.3, delay: 0.1 }}
               >
                 <Button
-                  size="sm"
-                  className="gap-1.5 h-8 px-2.5 md:px-3 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all flex-shrink-0"
+                  size="default"
+                  className="gap-2 h-11 md:h-9 px-5 md:px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all flex-shrink-0"
                 >
-                  <Plus size={16} weight="bold" />
-                  <span className="font-semibold text-xs md:text-sm hidden xs:inline">Add</span>
-                  <span className="font-semibold text-xs md:text-sm hidden sm:inline">Expense</span>
+                  <Plus size={18} weight="bold" className="md:w-4 md:h-4" />
+                  <span className="font-semibold">Add</span>
                 </Button>
               </motion.div>
             </DialogTrigger>

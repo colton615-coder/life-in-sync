@@ -112,7 +112,7 @@ export function Shopping() {
   const completionRate = allItems.length > 0 ? Math.round((completedItems.length / allItems.length) * 100) : 0
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 relative">
+    <div className="max-w-3xl mx-auto space-y-6 md:space-y-8 relative px-2 md:px-0 pt-4 md:pt-0">
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '0s' }} />
         <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-cyan-500/20 via-blue-500/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
@@ -152,26 +152,26 @@ export function Shopping() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="pt-2 md:pt-4 text-center space-y-4"
+        className="pt-2 md:pt-4 text-center space-y-5 md:space-y-6"
       >
         <motion.div 
-          className="flex items-center justify-center gap-3"
+          className="flex items-center justify-center gap-4"
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
-          <div className="rounded-3xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 p-4 shadow-2xl shadow-purple-500/30 relative overflow-hidden">
+          <div className="rounded-3xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 p-5 md:p-6 shadow-2xl shadow-purple-500/30 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
-            <ShoppingCart className="w-10 h-10 text-white relative z-10" weight="duotone" />
+            <ShoppingCart className="w-10 h-10 md:w-12 md:h-12 text-white relative z-10" weight="duotone" />
           </div>
         </motion.div>
         <div>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
             Shopping List 2.0
           </h1>
-          <p className="text-lg text-muted-foreground mt-2 flex items-center justify-center gap-2">
-            <Lightning className="w-4 h-4 text-yellow-500" weight="fill" />
+          <p className="text-base md:text-lg text-muted-foreground mt-2.5 md:mt-3 flex items-center justify-center gap-2">
+            <Lightning className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" weight="fill" />
             Capitalism made pretty
-            <Sparkle className="w-4 h-4 text-pink-500" weight="fill" />
+            <Sparkle className="w-4 h-4 md:w-5 md:h-5 text-pink-500" weight="fill" />
           </p>
         </div>
 

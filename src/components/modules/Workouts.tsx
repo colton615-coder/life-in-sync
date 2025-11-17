@@ -318,24 +318,24 @@ Difficulty levels: "beginner", "intermediate", "advanced"`
   }
 
   return (
-    <div className="pt-2 md:pt-4 space-y-4 md:space-y-6">
+    <div className="pt-4 md:pt-6 space-y-5 md:space-y-6 px-1 md:px-0">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Barbell weight="duotone" className="text-primary" size={32} />
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2.5">
+            <Barbell weight="duotone" className="text-primary" size={28} />
             Workouts
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Build strength, one rep at a time</p>
+          <p className="text-muted-foreground mt-1.5 md:mt-1 text-sm md:text-base">Build strength, one rep at a time</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button 
-                size="sm"
-                className="gap-1.5 h-9 px-4 button-glow"
+                size="default"
+                className="gap-2 h-11 md:h-9 px-5 md:px-4 button-glow"
               >
-                <Sparkle weight="fill" size={16} />
-                <span className="hidden sm:inline">Generate</span>
+                <Sparkle weight="fill" size={18} className="md:w-4 md:h-4" />
+                <span>Generate</span>
               </Button>
             </motion.div>
           </DialogTrigger>
