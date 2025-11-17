@@ -299,21 +299,29 @@ CRITICAL RULES:
   }
 
   return (
-    <div className="pt-2 md:pt-4 space-y-3 md:space-y-5 animate-in fade-in duration-500">
+    <div className="space-y-8 md:space-y-12 animate-in fade-in duration-500">
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex items-start justify-between gap-2 md:gap-4 flex-wrap"
+        className="space-y-1.5"
       >
-        <div className="space-y-0.5">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
-            💰 Finance
-          </h1>
-          <p className="text-muted-foreground text-sm font-normal">
-            Watch your dreams leak away, one transaction at a time
-          </p>
-        </div>
+        <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gradient-cyan">Finance</h1>
+        <p className="text-sm md:text-base text-muted-foreground/60 font-normal">
+          Watch your dreams leak away, one transaction at a time
+        </p>
+      </motion.div>
+
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <TabGroup
+          tabs={[
+            { id: 'expenses', label: 'Expenses' },
+            { id: 'advisor', label: 'AI Financial Advisor', icon: <Sparkle weight="fill" size={16} /> },
+            ...(detailedBudget ? [{ id: 'budget', label: 'Your Budget' }] : []),
+          ]}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+        />
         {activeTab === 'expenses' && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
@@ -380,17 +388,7 @@ CRITICAL RULES:
             </DialogContent>
           </Dialog>
         )}
-      </motion.div>
-
-      <TabGroup
-        tabs={[
-          { id: 'expenses', label: 'Expenses' },
-          { id: 'advisor', label: 'AI Financial Advisor', icon: <Sparkle weight="fill" size={16} /> },
-          ...(detailedBudget ? [{ id: 'budget', label: 'Your Budget' }] : []),
-        ]}
-        activeTab={activeTab}
-        onChange={setActiveTab}
-      />
+      </div>
 
       {activeTab === 'advisor' ? (
         <>
@@ -434,9 +432,9 @@ CRITICAL RULES:
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6"
           >
-            <NeumorphicCard className="border-primary/20 hover:border-primary/40 transition-all duration-300" animate={false}>
+            <NeumorphicCard className="border-primary/20 hover:border-primary/40 transition-all duration-300 p-6 md:p-8" animate={false}>
               <StatCard 
                 stats={[
                   { value: `$${totalSpent.toFixed(2)}`, label: 'This Month', gradient: 'from-primary to-primary/70' },
@@ -447,7 +445,7 @@ CRITICAL RULES:
             </NeumorphicCard>
 
             {categoryData.length > 0 ? (
-              <NeumorphicCard className="border-accent/20" animate={false}>
+              <NeumorphicCard className="border-accent/20 p-6 md:p-8" animate={false}>
                 <AccessibleChart
                   title="Spending by Category"
                   description="View your expenses broken down by category"
@@ -505,10 +503,10 @@ CRITICAL RULES:
                 </AccessibleChart>
               </NeumorphicCard>
             ) : (
-              <NeumorphicCard className="border-border/30 flex items-center justify-center text-center py-12" animate={false}>
+              <NeumorphicCard className="border-border/30 flex items-center justify-center text-center py-16 md:py-20" animate={false}>
                 <div>
-                  <ChartPie size={48} weight="duotone" className="text-muted-foreground mx-auto mb-3 opacity-40" />
-                  <p className="text-sm text-muted-foreground">Add expenses to see breakdown</p>
+                  <ChartPie size={56} weight="duotone" className="text-muted-foreground mx-auto mb-4 opacity-40" />
+                  <p className="text-base text-muted-foreground">Add expenses to see breakdown</p>
                 </div>
               </NeumorphicCard>
             )}
@@ -518,8 +516,9 @@ CRITICAL RULES:
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-10 md:mt-12"
           >
-            <div className="flex items-center justify-between mb-4 md:mb-5">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
               <h2 className="text-lg md:text-2xl font-semibold flex items-center gap-2">
                 <TrendUp weight="fill" className="text-primary" size={22} />
                 Recent Expenses
@@ -555,7 +554,7 @@ CRITICAL RULES:
                   const categoryIcon = CATEGORY_ICONS[expense.category] || '💵'
                   return (
                     <div className="px-1 py-1.5">
-                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10" animate={false}>
+                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 p-5 md:p-6" animate={false}>
                         <div className="flex items-center justify-between gap-3 md:gap-4">
                           <div className="flex items-center gap-2.5 md:gap-3 flex-1">
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-lg md:text-xl">
@@ -616,13 +615,13 @@ CRITICAL RULES:
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid gap-2.5 md:gap-3"
+                className="grid gap-4 md:gap-5"
               >
                 {[...(expenses || [])].reverse().slice(0, 10).map((expense) => {
                   const categoryIcon = CATEGORY_ICONS[expense.category] || '💵'
                   return (
                     <motion.div key={expense.id} variants={item}>
-                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10" animate={false}>
+                      <NeumorphicCard className="hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 p-5 md:p-6" animate={false}>
                         <div className="flex items-center justify-between gap-3 md:gap-4">
                           <div className="flex items-center gap-2.5 md:gap-3 flex-1">
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-lg md:text-xl">
