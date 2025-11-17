@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 
 type SoundType = 'success' | 'complete' | 'delete' | 'tap' | 'error' | 'notification'
@@ -12,6 +12,15 @@ export function useSoundEffects() {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
     }
     return audioContextRef.current
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close()
+        audioContextRef.current = null
+      }
+    }
   }, [])
 
   const playTone = useCallback((frequency: number, duration: number, type: OscillatorType = 'sine', volume: number = 0.3) => {

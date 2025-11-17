@@ -58,14 +58,15 @@ export function Settings() {
   }
 
   const handleSaveApiKey = async () => {
-    if (!apiKey.trim()) {
+    const trimmedKey = apiKey?.trim() || ''
+    if (!trimmedKey) {
       toast.error("Please enter an API key")
       return
     }
 
     try {
-      await setApiKey(apiKey)
-      setMaskedKey(maskApiKey(apiKey))
+      await setApiKey(trimmedKey)
+      setMaskedKey(maskApiKey(trimmedKey))
       toast.success("Gemini API key saved successfully")
     } catch (error) {
       toast.error("Failed to save API key")

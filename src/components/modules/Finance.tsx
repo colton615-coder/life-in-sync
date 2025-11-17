@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, CurrencyDollar, Trash, ChartPie, PencilSimple, Sparkle, TrendUp, Wallet } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { Expense, FinancialProfile, DetailedBudget } from '@/lib/types'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -59,7 +59,7 @@ export function Finance() {
     return (expenses || []).map(e => e.description).filter(Boolean)
   }, [expenses])
 
-  const addExpense = () => {
+  const addExpense = useCallback(() => {
     if (!newExpense.amount || parseFloat(newExpense.amount) <= 0) {
       toast.error('Please enter a valid amount')
       triggerHaptic('error')
@@ -81,30 +81,30 @@ export function Finance() {
     triggerHaptic('success')
     playSound('success')
     toast.success('Expense logged!')
-  }
+  }, [newExpense, setExpenses, triggerHaptic, playSound])
 
-  const editExpense = (expenseId: string, updates: Partial<Expense>) => {
+  const editExpense = useCallback((expenseId: string, updates: Partial<Expense>) => {
     setExpenses((current) => 
       (current || []).map(e => 
         e.id === expenseId ? { ...e, ...updates } : e
       )
     )
     toast.success('Expense updated!')
-  }
+  }, [setExpenses])
 
-  const deleteExpense = (expenseId: string) => {
+  const deleteExpense = useCallback((expenseId: string) => {
     setExpenses((current) => (current || []).filter(e => e.id !== expenseId))
     triggerHaptic('medium')
     playSound('delete')
     toast.success('Expense deleted')
-  }
+  }, [setExpenses, triggerHaptic, playSound])
 
-  const openEditDialog = (expense: Expense) => {
+  const openEditDialog = useCallback((expense: Expense) => {
     setSelectedExpense(expense)
     setEditDialogOpen(true)
-  }
+  }, [])
 
-  const handleProfileComplete = async (profile: FinancialProfile) => {
+  const handleProfileComplete = useCallback(async (profile: FinancialProfile) => {
     setFinancialProfile(profile)
     setIsGeneratingBudget(true)
     
@@ -244,26 +244,40 @@ CRITICAL RULES:
     } finally {
       setIsGeneratingBudget(false)
     }
-  }
+  }, [setFinancialProfile, setDetailedBudget, setActiveTab, setIsGeneratingBudget])
 
-  const handleStartOver = () => {
+  const handleStartOver = useCallback(() => {
     setFinancialProfile(null)
     setDetailedBudget(null)
     setActiveTab('advisor')
-  }
+  }, [setFinancialProfile, setDetailedBudget, setActiveTab])
 
-  const monthExpenses = (expenses || []).filter(e => {
-    const expenseDate = new Date(e.date)
+  const monthExpenses = useMemo(() => {
+    if (!expenses) return []
     const now = new Date()
-    return expenseDate.getMonth() === now.getMonth() && expenseDate.getFullYear() === now.getFullYear()
-  })
+    const currentMonth = now.getMonth()
+    const currentYear = now.getFullYear()
+    
+    return expenses.filter(e => {
+      const [year, month, day] = e.date.split('-').map(Number)
+      const expenseDate = new Date(year, month - 1, day)
+      return expenseDate.getMonth() === currentMonth && 
+             expenseDate.getFullYear() === currentYear
+    })
+  }, [expenses])
 
-  const totalSpent = monthExpenses.reduce((sum, e) => sum + e.amount, 0)
+  const totalSpent = useMemo(() => 
+    monthExpenses.reduce((sum, e) => sum + e.amount, 0), 
+    [monthExpenses]
+  )
 
-  const categoryData = CATEGORIES.map(category => {
-    const total = monthExpenses.filter(e => e.category === category).reduce((sum, e) => sum + e.amount, 0)
-    return { name: category, value: total }
-  }).filter(d => d.value > 0)
+  const categoryData = useMemo(() => 
+    CATEGORIES.map(category => {
+      const total = monthExpenses.filter(e => e.category === category).reduce((sum, e) => sum + e.amount, 0)
+      return { name: category, value: total }
+    }).filter(d => d.value > 0), 
+    [monthExpenses]
+  )
 
   const container = {
     hidden: { opacity: 0 },

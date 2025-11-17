@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useDebounce } from './use-debounce'
 
 interface AutocompleteOptions {
   maxSuggestions?: number
   minInputLength?: number
   caseSensitive?: boolean
+  debounceMs?: number
 }
 
 export function useAutocomplete(
@@ -15,26 +17,27 @@ export function useAutocomplete(
     maxSuggestions = 5,
     minInputLength = 1,
     caseSensitive = false,
+    debounceMs = 150,
   } = options
 
   const [suggestions, setSuggestions] = useState<string[]>([])
+  const debouncedInput = useDebounce(currentInput, debounceMs)
 
   const uniqueData = useMemo(() => {
     return Array.from(new Set(historicalData.filter(Boolean)))
   }, [historicalData])
 
-  useEffect(() => {
-    if (!currentInput || currentInput.length < minInputLength) {
-      setSuggestions([])
-      return
+  const filteredSuggestions = useMemo(() => {
+    if (!debouncedInput || debouncedInput.length < minInputLength) {
+      return []
     }
 
-    const query = caseSensitive ? currentInput : currentInput.toLowerCase()
+    const query = caseSensitive ? debouncedInput : debouncedInput.toLowerCase()
     
     const matches = uniqueData
       .filter(item => {
         const compareItem = caseSensitive ? item : item.toLowerCase()
-        return compareItem.includes(query) && item !== currentInput
+        return compareItem.includes(query) && item !== debouncedInput
       })
       .sort((a, b) => {
         const aLower = caseSensitive ? a : a.toLowerCase()
@@ -48,8 +51,12 @@ export function useAutocomplete(
       })
       .slice(0, maxSuggestions)
 
-    setSuggestions(matches)
-  }, [currentInput, uniqueData, maxSuggestions, minInputLength, caseSensitive])
+    return matches
+  }, [debouncedInput, uniqueData, maxSuggestions, minInputLength, caseSensitive])
+
+  useEffect(() => {
+    setSuggestions(filteredSuggestions)
+  }, [filteredSuggestions])
 
   return suggestions
 }
