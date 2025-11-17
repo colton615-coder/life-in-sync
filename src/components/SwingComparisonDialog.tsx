@@ -18,7 +18,8 @@ import {
   TrendUp,
   Target,
   Lightning,
-  Info
+  Info,
+  Backpack
 } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
@@ -85,6 +86,7 @@ export function SwingComparisonDialog({ open, onOpenChange, analyses }: SwingCom
 
 Swing 1 (Earlier):
 - Upload Date: ${selectedSwing1.uploadedAt}
+- Club: ${selectedSwing1.club || 'Not specified'}
 - Overall Score: ${selectedSwing1.feedback!.overallScore}/100
 - Metrics:
   * Hip Rotation: Backswing ${selectedSwing1.metrics!.hipRotation.backswing.toFixed(1)}°, Impact ${selectedSwing1.metrics!.hipRotation.impact.toFixed(1)}°, Total ${selectedSwing1.metrics!.hipRotation.total.toFixed(1)}°
@@ -100,6 +102,7 @@ Swing 1 (Earlier):
 
 Swing 2 (Later):
 - Upload Date: ${selectedSwing2.uploadedAt}
+- Club: ${selectedSwing2.club || 'Not specified'}
 - Overall Score: ${selectedSwing2.feedback!.overallScore}/100
 - Metrics:
   * Hip Rotation: Backswing ${selectedSwing2.metrics!.hipRotation.backswing.toFixed(1)}°, Impact ${selectedSwing2.metrics!.hipRotation.impact.toFixed(1)}°, Total ${selectedSwing2.metrics!.hipRotation.total.toFixed(1)}°
@@ -112,6 +115,8 @@ Swing 2 (Later):
 - AI Feedback: ${selectedSwing2.feedback!.aiInsights}
 - Strengths: ${selectedSwing2.feedback!.strengths.join(', ')}
 - Areas to Improve: ${selectedSwing2.feedback!.improvements.join(', ')}
+
+${selectedSwing1.club && selectedSwing2.club && selectedSwing1.club !== selectedSwing2.club ? `Note: These swings used different clubs (${selectedSwing1.club} vs ${selectedSwing2.club}), so some differences may be expected due to club selection rather than swing mechanics.` : ''}
 
 Provide a detailed comparison report in JSON format with the following structure:
 {
@@ -201,8 +206,17 @@ Focus on biomechanical relationships - explain HOW one change affects another (e
                     <CardTitle className="text-sm">
                       {new Date(analysis.uploadedAt).toLocaleDateString()}
                     </CardTitle>
-                    <CardDescription className="text-xs">
-                      {new Date(analysis.uploadedAt).toLocaleTimeString()}
+                    <CardDescription className="text-xs flex items-center gap-2">
+                      <span>{new Date(analysis.uploadedAt).toLocaleTimeString()}</span>
+                      {analysis.club && (
+                        <>
+                          <span>•</span>
+                          <span className="flex items-center gap-1">
+                            <Backpack size={12} />
+                            {analysis.club}
+                          </span>
+                        </>
+                      )}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
@@ -237,8 +251,17 @@ Focus on biomechanical relationships - explain HOW one change affects another (e
                     <CardTitle className="text-sm">
                       {new Date(analysis.uploadedAt).toLocaleDateString()}
                     </CardTitle>
-                    <CardDescription className="text-xs">
-                      {new Date(analysis.uploadedAt).toLocaleTimeString()}
+                    <CardDescription className="text-xs flex items-center gap-2">
+                      <span>{new Date(analysis.uploadedAt).toLocaleTimeString()}</span>
+                      {analysis.club && (
+                        <>
+                          <span>•</span>
+                          <span className="flex items-center gap-1">
+                            <Backpack size={12} />
+                            {analysis.club}
+                          </span>
+                        </>
+                      )}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">

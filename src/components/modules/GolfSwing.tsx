@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   Upload, 
   Video, 
@@ -19,9 +20,11 @@ import {
   Lightning,
   ArrowRight,
   Trash,
-  ArrowsLeftRight
+  ArrowsLeftRight,
+  Backpack,
+  Tag
 } from '@phosphor-icons/react'
-import { SwingAnalysis } from '@/lib/types'
+import { SwingAnalysis, GolfClub } from '@/lib/types'
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
 import { simulateVideoProcessing, analyzePoseData, generateFeedback } from '@/lib/golf/swing-analyzer'
@@ -29,6 +32,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { VideoPlayerWithTimeline } from '@/components/VideoPlayerWithTimeline'
 import { SwingComparisonDialog } from '@/components/SwingComparisonDialog'
+import { ClubSelectionDialog } from '@/components/ClubSelectionDialog'
 
 export function GolfSwing() {
   const [analyses, setAnalyses] = useKV<SwingAnalysis[]>('golf-swing-analyses', [])
@@ -37,6 +41,9 @@ export function GolfSwing() {
   const [processingProgress, setProcessingProgress] = useState(0)
   const [processingStatus, setProcessingStatus] = useState('')
   const [comparisonDialogOpen, setComparisonDialogOpen] = useState(false)
+  const [clubSelectionOpen, setClubSelectionOpen] = useState(false)
+  const [pendingAnalysisId, setPendingAnalysisId] = useState<string | null>(null)
+  const [selectedClubFilter, setSelectedClubFilter] = useState<string>('all')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -112,6 +119,10 @@ export function GolfSwing() {
         (current || []).map(a => a.id === analysisId ? completedAnalysis : a)
       )
       setActiveAnalysis(completedAnalysis)
+      
+      setPendingAnalysisId(analysisId)
+      setClubSelectionOpen(true)
+      
       toast.success('Swing analysis completed!', {
         description: `Overall score: ${feedback.overallScore}/100`
       })
@@ -136,6 +147,25 @@ export function GolfSwing() {
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+  }
+
+  const handleClubSelect = (club: GolfClub) => {
+    if (!pendingAnalysisId) return
+    
+    setAnalyses(current => 
+      (current || []).map(a => 
+        a.id === pendingAnalysisId ? { ...a, club } : a
+      )
+    )
+    
+    if (activeAnalysis?.id === pendingAnalysisId) {
+      setActiveAnalysis(prev => prev ? { ...prev, club } : null)
+    }
+    
+    setPendingAnalysisId(null)
+    toast.success('Club tagged', {
+      description: `Swing tagged as ${club}`
+    })
   }
 
   const handleDeleteAnalysis = (analysisId: string, e: React.MouseEvent) => {
@@ -515,9 +545,17 @@ export function GolfSwing() {
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <CardTitle className="text-base">
-                    Swing Analysis
-                  </CardTitle>
+                  <div className="flex items-center gap-2 mb-1">
+                    <CardTitle className="text-base">
+                      Swing Analysis
+                    </CardTitle>
+                    {analysis.club && (
+                      <Badge variant="outline" className="text-xs gap-1">
+                        <Backpack size={12} weight="fill" />
+                        {analysis.club}
+                      </Badge>
+                    )}
+                  </div>
                   <CardDescription className="text-xs">
                     {new Date(analysis.uploadedAt).toLocaleDateString()} at{' '}
                     {new Date(analysis.uploadedAt).toLocaleTimeString()}
@@ -562,6 +600,165 @@ export function GolfSwing() {
       </div>
     </ScrollArea>
   )
+
+  const renderProgressTab = () => {
+    const completedAnalyses = (analyses || []).filter(a => a.status === 'completed' && a.feedback)
+    
+    const filteredAnalyses = selectedClubFilter === 'all'
+      ? completedAnalyses
+      : completedAnalyses.filter(a => a.club === selectedClubFilter)
+    
+    const availableClubs = Array.from(new Set(
+      completedAnalyses.map(a => a.club).filter((club): club is GolfClub => !!club)
+    )).sort()
+
+    if (completedAnalyses.length === 0) {
+      return (
+        <Alert className="mt-6">
+          <ChartBar size={18} />
+          <AlertDescription>
+            Complete at least one swing analysis to see your progress over time
+          </AlertDescription>
+        </Alert>
+      )
+    }
+
+    const chartData = filteredAnalyses
+      .sort((a, b) => new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime())
+      .map((analysis, idx) => ({
+        index: idx + 1,
+        score: analysis.feedback!.overallScore,
+        date: new Date(analysis.uploadedAt).toLocaleDateString(),
+        club: analysis.club || 'Untagged'
+      }))
+
+    const avgScore = chartData.length > 0
+      ? Math.round(chartData.reduce((sum, d) => sum + d.score, 0) / chartData.length)
+      : 0
+
+    const latestScore = chartData.length > 0 ? chartData[chartData.length - 1].score : 0
+    const firstScore = chartData.length > 0 ? chartData[0].score : 0
+    const improvement = latestScore - firstScore
+
+    return (
+      <div className="space-y-6 mt-6">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-semibold">Score Progress</h3>
+            <p className="text-sm text-muted-foreground">Track your improvement over time</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Backpack size={20} className="text-muted-foreground" />
+            <Select value={selectedClubFilter} onValueChange={setSelectedClubFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by club" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Clubs</SelectItem>
+                {availableClubs.map(club => (
+                  <SelectItem key={club} value={club}>
+                    {club}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4">
+          <Card className="glass-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm text-muted-foreground">Average Score</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{avgScore}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Across {filteredAnalyses.length} swing{filteredAnalyses.length !== 1 ? 's' : ''}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm text-muted-foreground">Latest Score</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{latestScore}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Most recent analysis
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm text-muted-foreground">Improvement</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={cn(
+                "text-3xl font-bold",
+                improvement > 0 ? "text-success" : improvement < 0 ? "text-destructive" : "text-muted-foreground"
+              )}>
+                {improvement > 0 ? '+' : ''}{improvement}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Since first analysis
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle>Score Over Time</CardTitle>
+            <CardDescription>
+              {selectedClubFilter === 'all' 
+                ? 'Overall swing performance' 
+                : `${selectedClubFilter} swing performance`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {chartData.length > 0 ? (
+              <div className="space-y-4">
+                <div className="h-[300px] flex items-end justify-between gap-2">
+                  {chartData.map((data, idx) => {
+                    const height = (data.score / 100) * 100
+                    return (
+                      <div key={idx} className="flex-1 flex flex-col items-center gap-2">
+                        <div className="w-full flex flex-col items-center">
+                          <div className="text-xs font-medium text-primary mb-1">{data.score}</div>
+                          <div 
+                            className="w-full bg-primary rounded-t-lg transition-all hover:bg-primary/80 relative group"
+                            style={{ height: `${height}%`, minHeight: '20px' }}
+                          >
+                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-popover border border-border rounded px-2 py-1 text-xs whitespace-nowrap pointer-events-none z-10">
+                              {data.date}
+                              {data.club !== 'Untagged' && (
+                                <div className="text-muted-foreground">{data.club}</div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground">#{data.index}</div>
+                      </div>
+                    )
+                  })}
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-4">
+                  <span>Analysis Number</span>
+                  <span>Score (0-100)</span>
+                </div>
+              </div>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                No data to display
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   if (isProcessing) {
     return renderProcessingState()
@@ -624,33 +821,53 @@ export function GolfSwing() {
         </div>
 
         <div className="lg:col-span-2">
-          {activeAnalysis ? (
-            <Tabs defaultValue="metrics" className="w-full">
-              <TabsList className="grid w-full grid-cols-2" aria-label="Analysis view options">
-                <TabsTrigger value="metrics">Metrics</TabsTrigger>
-                <TabsTrigger value="feedback">Feedback & Drills</TabsTrigger>
-              </TabsList>
-              <TabsContent value="metrics" className="space-y-6 mt-6">
-                {activeAnalysis.videoUrl && (
-                  <VideoPlayerWithTimeline 
-                    videoUrl={activeAnalysis.videoUrl}
-                    poseData={activeAnalysis.poseData}
-                  />
-                )}
-                {renderMetrics()}
-              </TabsContent>
-              <TabsContent value="feedback" className="space-y-6 mt-6">
-                {renderFeedback()}
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <Alert>
-              <Play size={18} aria-hidden="true" />
-              <AlertDescription>
-                Select an analysis from the list to view details
-              </AlertDescription>
-            </Alert>
-          )}
+          <Tabs defaultValue="metrics" className="w-full">
+            <TabsList className="grid w-full grid-cols-3" aria-label="Analysis view options">
+              <TabsTrigger value="metrics">Metrics</TabsTrigger>
+              <TabsTrigger value="feedback">Feedback & Drills</TabsTrigger>
+              <TabsTrigger value="progress">
+                <div className="flex items-center gap-1.5">
+                  <TrendUp size={16} weight="bold" />
+                  Progress
+                </div>
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="metrics" className="space-y-6 mt-6">
+              {activeAnalysis ? (
+                <>
+                  {activeAnalysis.videoUrl && (
+                    <VideoPlayerWithTimeline 
+                      videoUrl={activeAnalysis.videoUrl}
+                      poseData={activeAnalysis.poseData}
+                    />
+                  )}
+                  {renderMetrics()}
+                </>
+              ) : (
+                <Alert>
+                  <Play size={18} aria-hidden="true" />
+                  <AlertDescription>
+                    Select an analysis from the list to view details
+                  </AlertDescription>
+                </Alert>
+              )}
+            </TabsContent>
+            <TabsContent value="feedback" className="space-y-6 mt-6">
+              {activeAnalysis ? (
+                renderFeedback()
+              ) : (
+                <Alert>
+                  <Play size={18} aria-hidden="true" />
+                  <AlertDescription>
+                    Select an analysis from the list to view details
+                  </AlertDescription>
+                </Alert>
+              )}
+            </TabsContent>
+            <TabsContent value="progress">
+              {renderProgressTab()}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
@@ -666,6 +883,12 @@ export function GolfSwing() {
         open={comparisonDialogOpen}
         onOpenChange={setComparisonDialogOpen}
         analyses={analyses || []}
+      />
+
+      <ClubSelectionDialog
+        open={clubSelectionOpen}
+        onOpenChange={setClubSelectionOpen}
+        onSelectClub={handleClubSelect}
       />
     </div>
   )

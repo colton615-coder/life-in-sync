@@ -270,11 +270,32 @@ export interface SwingFeedback {
   aiInsights: string
 }
 
+export type GolfClub = 
+  | 'Driver' 
+  | '3-Wood' 
+  | '5-Wood'
+  | '3-Hybrid'
+  | '4-Hybrid'
+  | '5-Hybrid'
+  | '3-Iron'
+  | '4-Iron'
+  | '5-Iron'
+  | '6-Iron'
+  | '7-Iron'
+  | '8-Iron'
+  | '9-Iron'
+  | 'PW'
+  | 'GW'
+  | 'SW'
+  | 'LW'
+  | 'Putter'
+
 export interface SwingAnalysis {
   id: string
   videoId: string
   videoUrl?: string
   thumbnailUrl?: string
+  club?: GolfClub
   status: 'uploading' | 'processing' | 'analyzing' | 'completed' | 'failed'
   uploadedAt: string
   processedAt?: string
