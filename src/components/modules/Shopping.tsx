@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { StatCard } from '@/components/StatCard'
+import { SwipeableItem } from '@/components/SwipeableItem'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 export function Shopping() {
   const [items, setItems] = useKV<ShoppingItem[]>('shopping-items', [])
@@ -18,6 +20,7 @@ export function Shopping() {
   const [confetti, setConfetti] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const editInputRef = useRef<HTMLInputElement>(null)
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     if (editingId && editInputRef.current) {
@@ -264,21 +267,8 @@ export function Shopping() {
                       </h3>
                     </div>
                   )}
-                  {activeItems.map((item, index) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, x: -30, scale: 0.9 }}
-                      animate={{ opacity: 1, x: 0, scale: 1 }}
-                      exit={{ opacity: 0, x: 30, scale: 0.8 }}
-                      transition={{
-                        duration: 0.3,
-                        delay: index * 0.03,
-                        type: "spring",
-                        stiffness: 200
-                      }}
-                      layout
-                      className="group"
-                    >
+                  {activeItems.map((item, index) => {
+                    const itemContent = (
                       <div
                         className={cn(
                           'flex items-center gap-4 p-4 rounded-2xl transition-all duration-300',
@@ -319,7 +309,10 @@ export function Shopping() {
                           </label>
                         )}
 
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                        <div className={cn(
+                          "flex items-center gap-1 transition-all duration-200",
+                          isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                        )}>
                           {editingId !== item.id && (
                             <>
                               <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
@@ -332,22 +325,52 @@ export function Shopping() {
                                   <PencilSimple className="w-5 h-5" weight="duotone" />
                                 </Button>
                               </motion.div>
-                              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDeleteItem(item.id)}
-                                  className="h-10 w-10 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 rounded-xl transition-colors"
-                                >
-                                  <Trash className="w-5 h-5" weight="duotone" />
-                                </Button>
-                              </motion.div>
+                              {!isMobile && (
+                                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleDeleteItem(item.id)}
+                                    className="h-10 w-10 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 rounded-xl transition-colors"
+                                  >
+                                    <Trash className="w-5 h-5" weight="duotone" />
+                                  </Button>
+                                </motion.div>
+                              )}
                             </>
                           )}
                         </div>
                       </div>
-                    </motion.div>
-                  ))}
+                    )
+
+                    return (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, x: -30, scale: 0.9 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        exit={{ opacity: 0, x: 30, scale: 0.8 }}
+                        transition={{
+                          duration: 0.3,
+                          delay: index * 0.03,
+                          type: "spring",
+                          stiffness: 200
+                        }}
+                        layout
+                        className="group"
+                      >
+                        {isMobile && editingId !== item.id ? (
+                          <SwipeableItem
+                            onDelete={() => handleDeleteItem(item.id)}
+                            deleteThreshold={80}
+                          >
+                            {itemContent}
+                          </SwipeableItem>
+                        ) : (
+                          itemContent
+                        )}
+                      </motion.div>
+                    )
+                  })}
 
                   {completedItems.length > 0 && (
                     <>

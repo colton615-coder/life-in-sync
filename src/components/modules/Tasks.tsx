@@ -16,6 +16,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format, isToday, isTomorrow, isThisWeek, parseISO, isBefore, startOfDay } from 'date-fns'
 import { Calendar } from '@/components/ui/calendar'
 import { StatCard } from '@/components/StatCard'
+import { SwipeableItem } from '@/components/SwipeableItem'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 type SortOption = 'priority' | 'dueDate' | 'createdAt' | 'title'
 type ViewMode = 'all' | 'active' | 'completed'
@@ -27,6 +29,7 @@ export function Tasks() {
   const [filterTab, setFilterTab] = useState<ViewMode>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('priority')
+  const isMobile = useIsMobile()
   const [newTask, setNewTask] = useState({ 
     title: '', 
     description: '',
@@ -553,90 +556,85 @@ export function Tasks() {
               {filteredTasks.map((task) => {
                 const dueDateInfo = task.dueDate ? getDueDateInfo(task.dueDate) : null
                 
-                return (
-                  <motion.div 
-                    key={task.id} 
-                    variants={item}
-                    layout
-                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                const taskContent = (
+                  <NeumorphicCard 
+                    className={`group hover:shadow-lg transition-all duration-300 ${
+                      task.completed ? 'opacity-60' : ''
+                    } ${dueDateInfo?.urgent && !task.completed ? 'ring-2 ring-destructive/20' : ''}`}
+                    hover={!task.completed}
                   >
-                    <NeumorphicCard 
-                      className={`group hover:shadow-lg transition-all duration-300 ${
-                        task.completed ? 'opacity-60' : ''
-                      } ${dueDateInfo?.urgent && !task.completed ? 'ring-2 ring-destructive/20' : ''}`}
-                      hover={!task.completed}
-                    >
-                      <div className="flex items-start gap-4">
-                        <motion.button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            toggleTask(task.id)
-                          }}
-                          className="flex-shrink-0 mt-1"
-                          whileTap={{ scale: 0.9 }}
-                          whileHover={{ scale: 1.05 }}
-                          aria-label={task.completed ? `Mark "${task.title}" as incomplete` : `Mark "${task.title}" as complete`}
-                        >
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                            task.completed 
-                              ? 'bg-gradient-to-br from-success/30 to-success/10 neumorphic-inset' 
-                              : 'neumorphic-button hover:shadow-md'
+                    <div className="flex items-start gap-4">
+                      <motion.button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleTask(task.id)
+                        }}
+                        className="flex-shrink-0 mt-1"
+                        whileTap={{ scale: 0.9 }}
+                        whileHover={{ scale: 1.05 }}
+                        aria-label={task.completed ? `Mark "${task.title}" as incomplete` : `Mark "${task.title}" as complete`}
+                      >
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                          task.completed 
+                            ? 'bg-gradient-to-br from-success/30 to-success/10 neumorphic-inset' 
+                            : 'neumorphic-button hover:shadow-md'
+                        }`}>
+                          <CheckCircle
+                            size={24}
+                            weight={task.completed ? 'fill' : 'regular'}
+                            className={task.completed ? 'text-success' : 'text-muted-foreground group-hover:text-primary transition-colors'}
+                            aria-hidden="true"
+                          />
+                        </div>
+                      </motion.button>
+
+                      <motion.div 
+                        className="flex-1 min-w-0 pt-1 cursor-pointer"
+                        onClick={() => openEditDialog(task)}
+                        whileHover={{ x: 2 }}
+                      >
+                        <div className="flex items-start gap-2 mb-2">
+                          <h3 className={`font-semibold text-lg leading-tight flex-1 ${
+                            task.completed ? 'line-through text-muted-foreground' : 'text-foreground'
                           }`}>
-                            <CheckCircle
-                              size={24}
-                              weight={task.completed ? 'fill' : 'regular'}
-                              className={task.completed ? 'text-success' : 'text-muted-foreground group-hover:text-primary transition-colors'}
-                              aria-hidden="true"
-                            />
-                          </div>
-                        </motion.button>
+                            {task.title}
+                          </h3>
+                        </div>
 
-                        <motion.div 
-                          className="flex-1 min-w-0 pt-1 cursor-pointer"
-                          onClick={() => openEditDialog(task)}
-                          whileHover={{ x: 2 }}
-                        >
-                          <div className="flex items-start gap-2 mb-2">
-                            <h3 className={`font-semibold text-lg leading-tight flex-1 ${
-                              task.completed ? 'line-through text-muted-foreground' : 'text-foreground'
-                            }`}>
-                              {task.title}
-                            </h3>
+                        {task.description && (
+                          <p className={`text-sm mb-3 leading-relaxed ${
+                            task.completed ? 'text-muted-foreground/60' : 'text-muted-foreground'
+                          }`}>
+                            {task.description}
+                          </p>
+                        )}
+
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide ${
+                            task.priority === 'high' ? 'bg-destructive/15 text-destructive' :
+                            task.priority === 'medium' ? 'bg-accent/15 text-accent' :
+                            'bg-success/15 text-success'
+                          }`}>
+                            {getPriorityLabel(task.priority)}
                           </div>
 
-                          {task.description && (
-                            <p className={`text-sm mb-3 leading-relaxed ${
-                              task.completed ? 'text-muted-foreground/60' : 'text-muted-foreground'
-                            }`}>
-                              {task.description}
-                            </p>
+                          {dueDateInfo && (
+                            <div className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 ${dueDateInfo.bgColor} ${dueDateInfo.color}`}>
+                              <CalendarBlank size={12} weight="bold" />
+                              {dueDateInfo.label}
+                            </div>
                           )}
 
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide ${
-                              task.priority === 'high' ? 'bg-destructive/15 text-destructive' :
-                              task.priority === 'medium' ? 'bg-accent/15 text-accent' :
-                              'bg-success/15 text-success'
-                            }`}>
-                              {getPriorityLabel(task.priority)}
+                          {task.completed && task.completedAt && (
+                            <div className="px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 bg-success/10 text-success">
+                              <CheckCircle size={12} weight="fill" />
+                              Completed
                             </div>
+                          )}
+                        </div>
+                      </motion.div>
 
-                            {dueDateInfo && (
-                              <div className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 ${dueDateInfo.bgColor} ${dueDateInfo.color}`}>
-                                <CalendarBlank size={12} weight="bold" />
-                                {dueDateInfo.label}
-                              </div>
-                            )}
-
-                            {task.completed && task.completedAt && (
-                              <div className="px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 bg-success/10 text-success">
-                                <CheckCircle size={12} weight="fill" />
-                                Completed
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
-
+                      {!isMobile && (
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -648,11 +646,31 @@ export function Tasks() {
                             className="w-10 h-10 rounded-xl flex items-center justify-center neumorphic-button text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                             aria-label={`Delete task "${task.title}"`}
                           >
-                            <Trash size={18} weight="bold" aria-hidden="true" />
+                            <Trash size={20} weight="bold" />
                           </motion.button>
                         </div>
-                      </div>
-                    </NeumorphicCard>
+                      )}
+                    </div>
+                  </NeumorphicCard>
+                )
+                
+                return (
+                  <motion.div 
+                    key={task.id} 
+                    variants={item}
+                    layout
+                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                  >
+                    {isMobile ? (
+                      <SwipeableItem
+                        onDelete={() => deleteTask(task.id)}
+                        deleteThreshold={80}
+                      >
+                        {taskContent}
+                      </SwipeableItem>
+                    ) : (
+                      taskContent
+                    )}
                   </motion.div>
                 )
               })}

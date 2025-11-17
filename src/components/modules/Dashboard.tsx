@@ -15,6 +15,7 @@ import { useKV } from '@github/spark/hooks'
 import { useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { Sparkline, TrendIndicator } from '@/components/Sparkline'
 
 interface DashboardProps {
   onNavigate: (module: Module) => void
@@ -56,12 +57,34 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     const percentComplete = totalHabits > 0 ? Math.floor((completedToday / totalHabits) * 100) : 0
     const averageStreak = totalHabits > 0 ? Math.floor(totalStreak / totalHabits) : 0
 
+    const last7Days: number[] = []
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      const dateStr = date.toISOString().split('T')[0]
+      let completedOnDate = 0
+      allHabits.forEach(habit => {
+        const entry = habit.entries?.find(e => e.date === dateStr)
+        if (entry) {
+          if (habit.trackingType === 'boolean' && entry.completed) {
+            completedOnDate++
+          } else if (habit.trackingType === 'numerical' && habit.target && entry.value && entry.value >= habit.target) {
+            completedOnDate++
+          } else if (habit.trackingType === 'time' && habit.target && entry.minutes && entry.minutes >= habit.target) {
+            completedOnDate++
+          }
+        }
+      })
+      last7Days.push(totalHabits > 0 ? (completedOnDate / totalHabits) * 100 : 0)
+    }
+
     return { 
       total: totalHabits, 
       completedToday, 
       percentComplete,
       longestStreak,
-      averageStreak
+      averageStreak,
+      trend7Days: last7Days
     }
   }, [habits, today])
 
@@ -154,7 +177,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <Progress value={habitStats.percentComplete} className="h-1.5" />
             <div className="grid grid-cols-2 gap-2 pt-1">
               <div>
-                <div className="text-xl font-semibold text-primary">{habitStats.longestStreak}</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-xl font-semibold text-primary">{habitStats.longestStreak}</div>
+                  {habitStats.trend7Days.length > 0 && (
+                    <TrendIndicator data={habitStats.trend7Days} showPercentage={false} />
+                  )}
+                </div>
                 <div className="text-xs text-muted-foreground font-normal">Best Streak</div>
               </div>
               <div>
@@ -162,6 +190,18 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 <div className="text-xs text-muted-foreground font-normal">Avg Streak</div>
               </div>
             </div>
+            {habitStats.trend7Days.length > 0 && (
+              <div className="pt-2 border-t border-border">
+                <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Last 7 Days</div>
+                <Sparkline 
+                  data={habitStats.trend7Days} 
+                  width={120} 
+                  height={32}
+                  color="oklch(0.68 0.19 211)"
+                  strokeWidth={2}
+                />
+              </div>
+            )}
           </div>
         </DashboardWidget>
 
