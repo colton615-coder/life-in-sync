@@ -182,10 +182,10 @@ export function Calendar() {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
         
         <div className="relative p-6 md:p-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-            <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-8">
+            <div className="flex items-center gap-3 md:gap-4 flex-wrap">
               <motion.h2 
-                className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+                className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
                 layoutId="month-year"
               >
                 {MONTHS[month]} {year}
@@ -194,53 +194,55 @@ export function Calendar() {
                 variant="outline" 
                 size="sm"
                 onClick={goToToday}
-                className="border-2 border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:border-purple-300 rounded-xl"
+                className="border-2 border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:border-purple-300 rounded-xl min-h-[44px] px-4 touch-manipulation"
               >
-                <Lightning className="w-4 h-4 mr-1" weight="fill" />
-                Today
+                <Lightning className="w-4 h-4 md:mr-1" weight="fill" />
+                <span className="hidden md:inline ml-1">Today</span>
               </Button>
             </div>
 
-            <div className="flex gap-3">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <div className="flex gap-3 w-full md:w-auto">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 md:flex-initial">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={goToPreviousMonth}
-                  className="h-12 w-12 rounded-xl border-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300"
+                  className="h-14 w-full md:w-14 min-w-[44px] rounded-xl border-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 touch-manipulation"
                 >
-                  <CaretLeft className="w-5 h-5" weight="bold" />
+                  <CaretLeft className="w-6 h-6" weight="bold" />
                 </Button>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 md:flex-initial">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={goToNextMonth}
-                  className="h-12 w-12 rounded-xl border-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300"
+                  className="h-14 w-full md:w-14 min-w-[44px] rounded-xl border-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 touch-manipulation"
                 >
-                  <CaretRight className="w-5 h-5" weight="bold" />
+                  <CaretRight className="w-6 h-6" weight="bold" />
                 </Button>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 md:flex-initial">
                 <Button 
                   onClick={handleAddEvent} 
-                  className="h-12 px-6 gap-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 rounded-xl font-semibold"
+                  className="h-14 w-full md:w-auto px-6 gap-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 rounded-xl font-semibold touch-manipulation"
                 >
                   <Plus className="w-5 h-5" weight="bold" />
                   <span className="hidden sm:inline">Add Event</span>
+                  <span className="sm:hidden">Add</span>
                 </Button>
               </motion.div>
             </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-3 md:gap-4">
+          <div className="grid grid-cols-7 gap-2 md:gap-3 lg:gap-4">
             {DAYS.map(day => (
               <div
                 key={day}
-                className="text-center text-xs md:text-sm font-bold text-muted-foreground uppercase tracking-wider p-2"
+                className="text-center text-xs md:text-sm font-bold text-muted-foreground uppercase tracking-wider p-2 md:p-3"
               >
-                {day}
+                <span className="hidden sm:inline">{day}</span>
+                <span className="sm:hidden">{day.charAt(0)}</span>
               </div>
             ))}
 
@@ -261,7 +263,7 @@ export function Calendar() {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
-                    whileHover={{ scale: 1.1, zIndex: 10 }}
+                    whileHover={{ scale: 1.05, zIndex: 10 }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ 
                       delay: index * 0.008,
@@ -273,9 +275,9 @@ export function Calendar() {
                     onMouseEnter={() => setHoveredDay(day)}
                     onMouseLeave={() => setHoveredDay(null)}
                     className={cn(
-                      'aspect-square p-2 rounded-2xl relative overflow-hidden',
-                      'flex flex-col items-center justify-center gap-1',
-                      'transition-all duration-300 group',
+                      'aspect-square min-h-[48px] md:min-h-[56px] p-2 md:p-3 rounded-xl md:rounded-2xl relative overflow-hidden',
+                      'flex flex-col items-center justify-center gap-0.5 md:gap-1',
+                      'transition-all duration-300 group touch-manipulation',
                       today 
                         ? 'bg-gradient-to-br from-orange-500 to-red-500 text-white font-bold shadow-xl shadow-orange-500/50' 
                         : hasEvents
@@ -293,15 +295,15 @@ export function Calendar() {
                     )}
                     
                     <span className={cn(
-                      'text-base md:text-lg font-bold relative z-10',
+                      'text-sm md:text-base lg:text-lg font-bold relative z-10',
                       today ? 'text-white' : 'text-foreground'
                     )}>
                       {day}
                     </span>
                     
                     {hasEvents && (
-                      <div className="flex gap-1 flex-wrap justify-center items-center relative z-10">
-                        {dayEvents.slice(0, 4).map((event, idx) => {
+                      <div className="flex gap-0.5 md:gap-1 flex-wrap justify-center items-center relative z-10">
+                        {dayEvents.slice(0, 3).map((event, idx) => {
                           const colors = getCategoryColor(event.category)
                           return (
                             <motion.div
@@ -310,19 +312,19 @@ export function Calendar() {
                               animate={{ scale: 1 }}
                               transition={{ delay: index * 0.008 + idx * 0.05 }}
                               className={cn(
-                                'w-2 h-2 rounded-full',
+                                'w-1.5 h-1.5 md:w-2 md:h-2 rounded-full',
                                 colors.bg,
                                 isHovered && 'shadow-lg'
                               )}
                             />
                           )
                         })}
-                        {dayEvents.length > 4 && (
+                        {dayEvents.length > 3 && (
                           <Badge 
                             variant="secondary" 
-                            className="text-[8px] px-1 py-0 h-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0"
+                            className="text-[8px] px-1 py-0 h-3 md:h-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0"
                           >
-                            +{dayEvents.length - 4}
+                            +{dayEvents.length - 3}
                           </Badge>
                         )}
                       </div>

@@ -387,7 +387,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
   return (
     <>
       <div className="pt-2 md:pt-4 space-y-4 md:space-y-6 h-[calc(100vh-8rem)] md:h-[calc(100vh-12rem)]">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
               <LockKey size={32} weight="duotone" className="text-primary" />
@@ -402,7 +402,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
               variant="outline"
               size="sm"
               onClick={clearSession}
-              className="text-xs"
+              className="min-h-[44px] px-4 text-xs md:text-sm touch-manipulation w-full sm:w-auto"
             >
               Clear Session
             </Button>
@@ -424,7 +424,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
                 onClick={retryInitialization} 
                 variant="outline" 
                 size="sm"
-                className="mt-2 gap-2"
+                className="mt-2 gap-2 min-h-[44px] px-4 touch-manipulation"
                 disabled={loading}
               >
                 <ArrowClockwise size={16} weight="bold" />
@@ -435,61 +435,61 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
         )}
 
         {messages && messages.length > 0 && !initError && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2 md:gap-3">
             <Button
               onClick={() => sendQuickQuery("I keep making the same mistakes in my relationships. Why do I keep choosing people who aren't good for me?")}
               disabled={loading}
               variant="outline"
               size="sm"
-              className="gap-2 text-xs bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-pink-300/30 hover:border-pink-400/50 transition-all"
+              className="gap-2 text-xs md:text-sm bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-pink-300/30 hover:border-pink-400/50 transition-all min-h-[44px] px-4 touch-manipulation w-full sm:w-auto"
             >
-              <Heart size={16} weight="duotone" className="text-pink-500" />
-              Ask About Relationship Patterns
+              <Heart size={16} weight="duotone" className="text-pink-500 flex-shrink-0" />
+              <span className="truncate">Ask About Relationship Patterns</span>
             </Button>
             <Button
               onClick={() => sendQuickQuery("I need help understanding my spending patterns. Why can't I seem to save money no matter how much I make?")}
               disabled={loading}
               variant="outline"
               size="sm"
-              className="gap-2 text-xs bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-300/30 hover:border-green-400/50 transition-all"
+              className="gap-2 text-xs md:text-sm bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-300/30 hover:border-green-400/50 transition-all min-h-[44px] px-4 touch-manipulation w-full sm:w-auto"
             >
-              <CurrencyDollar size={16} weight="duotone" className="text-green-600" />
-              Ask About Money Habits
+              <CurrencyDollar size={16} weight="duotone" className="text-green-600 flex-shrink-0" />
+              <span className="truncate">Ask About Money Habits</span>
             </Button>
           </div>
         )}
 
-        <Card className="flex flex-col h-[calc(100%-8rem)]">
-          <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
-            <div className="space-y-4 pb-4">
+        <Card className="flex flex-col h-[calc(100%-8rem)] p-4 md:p-6">
+          <ScrollArea className="flex-1 pr-2 md:pr-4" ref={scrollRef}>
+            <div className="space-y-4 md:space-y-5 pb-4">
               {(messages || []).map((message, idx) => (
                 <div
                   key={idx}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-lg p-4 ${
+                    className={`max-w-[90%] md:max-w-[85%] rounded-2xl p-4 md:p-5 ${
                       message.role === 'user'
                         ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/10'
                         : 'bg-card border border-border text-foreground shadow-md'
                     }`}
                   >
-                    <div className="flex items-start gap-2 mb-1">
+                    <div className="flex items-start gap-2 mb-2">
                       {message.role === 'assistant' && (
-                        <LockKey size={16} weight="bold" className="text-primary mt-0.5 flex-shrink-0" />
+                        <LockKey size={18} weight="bold" className="text-primary mt-0.5 flex-shrink-0" />
                       )}
-                      <p className="text-sm font-medium">
+                      <p className="text-sm md:text-base font-medium">
                         {message.role === 'user' ? 'You' : 'Knox'}
                       </p>
                     </div>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                    <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
                   </div>
                 </div>
               ))}
 
               {loading && (
                 <div className="flex justify-start">
-                  <div className="bg-card border border-border rounded-lg p-4 shadow-md max-w-[85%]">
+                  <div className="bg-card border border-border rounded-2xl p-4 md:p-5 shadow-md max-w-[90%] md:max-w-[85%]">
                     <SarcasticLoader className="justify-start" />
                   </div>
                 </div>
@@ -498,7 +498,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
           </ScrollArea>
 
           {messages && messages.length > 0 && !initError && (
-            <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+            <div className="flex gap-2 md:gap-3 mt-4 pt-4 border-t border-border">
               <Textarea
                 ref={textareaRef}
                 placeholder="Share what's really on your mind..."
@@ -510,7 +510,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
                     sendMessage()
                   }
                 }}
-                className="resize-none min-h-[60px]"
+                className="resize-none min-h-[60px] md:min-h-[80px] text-sm md:text-base touch-manipulation"
                 rows={2}
                 disabled={initError}
               />
@@ -518,9 +518,9 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
                 onClick={sendMessage}
                 disabled={loading || !input.trim() || initError}
                 size="icon"
-                className="h-auto bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
+                className="h-auto min-h-[60px] min-w-[60px] md:min-h-[80px] md:min-w-[80px] bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 touch-manipulation rounded-xl"
               >
-                <PaperPlaneTilt size={20} weight="fill" />
+                <PaperPlaneTilt size={24} weight="fill" />
               </Button>
             </div>
           )}
