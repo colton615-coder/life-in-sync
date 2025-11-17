@@ -58,7 +58,7 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-background/90 backdrop-blur-md z-[100]"
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100]"
               onClick={onClose}
             />
 
@@ -68,18 +68,18 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
               exit={{ x: '-100%' }}
               transition={{ 
                 type: 'spring',
-                damping: 30,
-                stiffness: 300,
+                damping: 25,
+                stiffness: 250,
               }}
-              className="fixed left-0 top-0 h-full w-80 max-w-[85vw] z-[101] bg-card border-r-2 border-border shadow-2xl flex flex-col"
+              className="fixed left-0 top-0 h-full w-72 max-w-[85vw] z-[101] bg-card/95 backdrop-blur-xl border-r border-border/50 shadow-2xl flex flex-col"
             >
-              <div className="p-6 border-b-2 border-border">
-                <div className="flex items-center justify-between mb-6">
+              <div className="p-5 border-b border-border/30">
+                <div className="flex items-center justify-between mb-4">
                   <motion.h2 
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="text-2xl font-bold text-gradient-cyan"
+                    className="text-xl font-semibold text-gradient-cyan"
                   >
                     Command Center
                   </motion.h2>
@@ -87,12 +87,12 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.1 }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={onClose}
-                    className="w-10 h-10 rounded-full button-neumorphic flex items-center justify-center"
+                    className="w-8 h-8 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors flex items-center justify-center"
                   >
-                    <X size={20} weight="bold" className="text-foreground" />
+                    <X size={18} weight="bold" className="text-foreground" />
                   </motion.button>
                 </div>
                 
@@ -100,13 +100,13 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
-                  className="widget-title"
+                  className="text-xs font-medium text-muted-foreground uppercase tracking-wider"
                 >
                   Modules
                 </motion.p>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-neumorphic">
+              <div className="flex-1 overflow-y-auto p-3 space-y-1 scrollbar-neumorphic">
                 {modules.map((module, index) => {
                   const IconComponent = module.icon
                   const isActive = activeModule === module.id
@@ -117,46 +117,38 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                       initial={{ opacity: 0, x: -30 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ 
-                        delay: 0.05 * index,
+                        delay: 0.03 * index,
                         type: 'spring',
                         stiffness: 300,
-                        damping: 30
+                        damping: 25
                       }}
                     >
                       <button
                         className={cn(
-                          'w-full h-14 rounded-2xl transition-all duration-200 relative flex items-center gap-4 px-4',
+                          'w-full h-11 rounded-xl transition-all duration-200 relative flex items-center gap-3 px-3 group',
                           isActive
-                            ? 'button-glow text-accent-foreground'
-                            : 'button-neumorphic text-foreground hover:text-primary'
+                            ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                            : 'text-foreground/70 hover:text-foreground hover:bg-secondary/50'
                         )}
                         onClick={() => handleModuleClick(module.id)}
                       >
-                        {isActive && (
-                          <motion.div
-                            layoutId="activeModule"
-                            className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-accent-foreground rounded-r-full"
-                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                          />
-                        )}
-                        
                         <div className={cn(
-                          "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
-                          isActive ? "bg-accent-foreground/10" : ""
+                          "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors",
+                          isActive ? "bg-primary-foreground/10" : "bg-transparent group-hover:bg-background/50"
                         )}>
                           <IconComponent 
-                            size={22}
+                            size={20}
                             weight={isActive ? 'fill' : 'regular'}
                           />
                         </div>
-                        <span className="font-semibold text-sm flex-1 text-left">
+                        <span className="font-medium text-sm flex-1 text-left">
                           {module.label}
                         </span>
                         {isActive && (
                           <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-2 h-2 rounded-full bg-accent-foreground glow-shadow"
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="w-1.5 h-1.5 rounded-full bg-primary-foreground"
                           />
                         )}
                       </button>
@@ -165,17 +157,17 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                 })}
               </div>
 
-              <div className="p-6 border-t-2 border-border">
+              <div className="p-5 border-t border-border/30">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
+                  transition={{ delay: 0.2 }}
                   className="text-center"
                 >
-                  <p className="font-bold text-gradient-cyan text-xl tracking-tight">
+                  <p className="font-bold text-gradient-cyan text-lg tracking-tight">
                     LiFE-iN-SYNC
                   </p>
-                  <p className="mt-1 widget-title">
+                  <p className="mt-0.5 text-xs font-medium text-muted-foreground">
                     Personal Command Center
                   </p>
                 </motion.div>
