@@ -1,3 +1,60 @@
+async function safeSparkLLMCall(
+  promptText: string,
+  model: string = 'gpt-4o',
+  jsonMode: boolean = false
+): Promise<string> {
+  console.log('[Safe LLM Call] Initiating Spark LLM request')
+  console.log('[Safe LLM Call] Model:', model, '| JSON Mode:', jsonMode)
+  
+  try {
+    const response = await window.spark.llm(promptText, model, jsonMode)
+    
+    console.log('[Safe LLM Call] ✅ Response received')
+    console.log('[Safe LLM Call] Response type:', typeof response)
+    console.log('[Safe LLM Call] Response length:', response?.length || 0)
+    
+    if (!response) {
+      console.error('[Safe LLM Call] ❌ Empty response from Spark LLM')
+      throw new Error('AI service returned empty response')
+    }
+    
+    if (typeof response !== 'string') {
+      console.error('[Safe LLM Call] ❌ Invalid response type:', typeof response)
+      throw new Error(`AI service returned invalid type: ${typeof response}`)
+    }
+    
+    console.log('[Safe LLM Call] Response preview (first 200 chars):', response.substring(0, 200))
+    
+    if (jsonMode) {
+      console.log('[Safe LLM Call] Validating JSON response...')
+      try {
+        JSON.parse(response)
+        console.log('[Safe LLM Call] ✅ Valid JSON response confirmed')
+      } catch (jsonError) {
+        console.error('[Safe LLM Call] ❌ JSON validation failed')
+        console.error('[Safe LLM Call] Raw response that failed:', response)
+        throw new Error(`AI returned invalid JSON: ${jsonError instanceof Error ? jsonError.message : 'Parse error'}`)
+      }
+    }
+    
+    return response
+  } catch (error) {
+    console.error('[Safe LLM Call] ❌ Call failed')
+    console.error('[Safe LLM Call] Error type:', error?.constructor?.name)
+    console.error('[Safe LLM Call] Error message:', error instanceof Error ? error.message : String(error))
+    
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to reach AI service. Please check your connection.')
+    }
+    
+    if (error instanceof SyntaxError) {
+      throw new Error('AI service returned malformed response. The server may be experiencing issues.')
+    }
+    
+    throw error
+  }
+}
+
 export async function callAIWithRetry(
   promptText: string,
   model: string = 'gpt-4o',
@@ -8,56 +65,43 @@ export async function callAIWithRetry(
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`[AI Call] Attempt ${attempt}/${maxRetries}`)
-      console.log(`[AI Call] Model: ${model}, JSON Mode: ${jsonMode}`)
-      console.log(`[AI Call] Prompt length: ${promptText.length} characters`)
+      console.log(`[AI Retry] 🔄 Attempt ${attempt}/${maxRetries}`)
+      console.log(`[AI Retry] Prompt length: ${promptText.length} characters`)
       
-      const response = await window.spark.llm(promptText, model, jsonMode)
+      const response = await safeSparkLLMCall(promptText, model, jsonMode)
       
-      if (!response) {
-        throw new Error('AI service returned empty response')
-      }
-      
-      if (typeof response !== 'string') {
-        console.error('[AI Call] Invalid response type:', typeof response, response)
-        throw new Error(`AI service returned invalid type: ${typeof response}`)
-      }
-      
-      console.log(`[AI Call] Success on attempt ${attempt}`)
-      console.log(`[AI Call] Response length: ${response.length} characters`)
-      
+      console.log(`[AI Retry] ✅ Success on attempt ${attempt}`)
       return response
+      
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error))
-      console.error(`[AI Call] Attempt ${attempt}/${maxRetries} failed:`, lastError.message)
-      console.error('[AI Call] Full error object:', error)
-      console.error('[AI Call] Error stack:', lastError.stack)
+      console.error(`[AI Retry] ❌ Attempt ${attempt}/${maxRetries} failed:`, lastError.message)
       
       if (error instanceof SyntaxError) {
-        console.error('[AI Call] JSON Parse Error detected - the API returned invalid JSON')
-        console.error('[AI Call] This usually means:')
-        console.error('[AI Call]   1. The server returned HTML error page instead of JSON')
-        console.error('[AI Call]   2. The response was truncated/incomplete')
-        console.error('[AI Call]   3. Network timeout occurred mid-response')
+        console.error('[AI Retry] JSON Parse Error - Server returned non-JSON response')
+        console.error('[AI Retry] Possible causes:')
+        console.error('[AI Retry]   - HTML error page returned instead of JSON')
+        console.error('[AI Retry]   - Response truncated mid-stream')
+        console.error('[AI Retry]   - Server timeout or crash')
       }
       
       if (attempt < maxRetries) {
         const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000)
-        console.log(`[AI Call] Retrying in ${delay}ms...`)
+        console.log(`[AI Retry] ⏳ Retrying in ${delay}ms...`)
         await new Promise(resolve => setTimeout(resolve, delay))
       }
     }
   }
   
-  console.error('[AI Call] All attempts failed')
-  console.error('[AI Call] Final error details:', {
+  console.error('[AI Retry] ❌ All attempts exhausted')
+  console.error('[AI Retry] Final error:', {
     message: lastError?.message,
     name: lastError?.name,
     stack: lastError?.stack
   })
   
   if (lastError instanceof SyntaxError) {
-    throw new Error('AI service returned invalid response. The server may be experiencing issues. Please try again in a moment.')
+    throw new Error('AI service returned invalid response after multiple attempts. Please try again later.')
   }
   
   throw new Error(`AI call failed after ${maxRetries} attempts: ${lastError?.message || 'Unknown error'}`)

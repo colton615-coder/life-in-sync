@@ -102,11 +102,11 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
       console.log('[Knox] Calling Gemini API with options:', {
         temperature: 0.9,
         maxOutputTokens: 500,
-        model: 'gemini-2.0-flash-exp'
+        model: 'gemini-1.5-flash'
       })
       
       const response = await gemini.generate(promptText, {
-        model: 'gemini-2.0-flash-exp',
+        model: 'gemini-1.5-flash',
         temperature: 0.9,
         maxOutputTokens: 500
       })
