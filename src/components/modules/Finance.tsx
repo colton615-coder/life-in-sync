@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, CurrencyDollar, Trash, ChartPie, PencilSimple, Sparkle, TrendUp, Wallet } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { Expense, FinancialProfile, DetailedBudget } from '@/lib/types'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -20,6 +20,10 @@ import { AIButton } from '@/components/AIButton'
 import { SarcasticProgress } from '@/components/SarcasticLoader'
 import { StatCard } from '@/components/StatCard'
 import { AccessibleChart } from '@/components/AccessibleChart'
+import { AutocompleteInput } from '@/components/AutocompleteInput'
+import { VirtualList } from '@/components/VirtualList'
+import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
+import { useSoundEffects } from '@/hooks/use-sound-effects'
 
 const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Other']
 const COLORS = ['#5fd4f4', '#9d7fff', '#6ee7b7', '#fbbf24', '#fb923c', '#f87171', '#94a3b8']
@@ -48,10 +52,18 @@ export function Finance() {
     category: 'Food',
     description: ''
   })
+  const { triggerHaptic } = useHapticFeedback()
+  const { playSound } = useSoundEffects()
+
+  const historicalDescriptions = useMemo(() => {
+    return (expenses || []).map(e => e.description).filter(Boolean)
+  }, [expenses])
 
   const addExpense = () => {
     if (!newExpense.amount || parseFloat(newExpense.amount) <= 0) {
       toast.error('Please enter a valid amount')
+      triggerHaptic('error')
+      playSound('error')
       return
     }
 
@@ -66,6 +78,8 @@ export function Finance() {
     setExpenses((current) => [...(current || []), expense])
     setNewExpense({ amount: '', category: 'Food', description: '' })
     setDialogOpen(false)
+    triggerHaptic('success')
+    playSound('success')
     toast.success('Expense logged!')
   }
 
@@ -80,6 +94,8 @@ export function Finance() {
 
   const deleteExpense = (expenseId: string) => {
     setExpenses((current) => (current || []).filter(e => e.id !== expenseId))
+    triggerHaptic('medium')
+    playSound('delete')
     toast.success('Expense deleted')
   }
 
@@ -329,12 +345,13 @@ CRITICAL RULES:
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="expense-description" className="text-sm font-semibold">Description (Optional)</Label>
-                  <Input
+                  <AutocompleteInput
                     id="expense-description"
                     placeholder="What was this for?"
                     value={newExpense.description}
-                    onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
-                    className="h-11 glass-morphic border-border/50 focus:border-primary"
+                    onValueChange={(value) => setNewExpense({ ...newExpense, description: value })}
+                    historicalData={historicalDescriptions}
+                    maxSuggestions={5}
                   />
                 </div>
                 <div className="flex gap-3 pt-2">

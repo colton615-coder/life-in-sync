@@ -7,11 +7,14 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { Key, Sparkle, Brain, TestTube, Check, X } from '@phosphor-icons/react'
+import { Key, Sparkle, Brain, TestTube, Check, X, Vibrate, SpeakerHigh } from '@phosphor-icons/react'
 import { gemini } from '@/lib/gemini/client'
 import { getUsageStats, resetUsageStats } from '@/lib/ai/usage-tracker'
 import type { AIProvider, AIUsageStats } from '@/lib/ai/types'
+import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
+import { useSoundEffects } from '@/hooks/use-sound-effects'
 
 export function Settings() {
   const [apiKey, setApiKey, deleteApiKey] = useKV<string>("gemini-api-key", "")
@@ -19,11 +22,16 @@ export function Settings() {
     "preferred-ai-provider",
     "auto"
   )
+  const [hapticEnabled, setHapticEnabled] = useKV<boolean>('settings-haptic-enabled', true)
+  const [soundEnabled, setSoundEnabled] = useKV<boolean>('settings-sound-enabled', false)
   const [isOwner, setIsOwner] = useState(false)
   const [isTesting, setIsTesting] = useState(false)
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null)
   const [usageStats, setUsageStats] = useState<AIUsageStats | null>(null)
   const [maskedKey, setMaskedKey] = useState("")
+  
+  const { triggerHaptic } = useHapticFeedback()
+  const { playSound } = useSoundEffects()
 
   useEffect(() => {
     checkOwnership()
@@ -256,6 +264,118 @@ export function Settings() {
                 <span>• Automatic:</span>
                 <span>Intelligently routes by task</span>
               </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="elevated-card">
+        <CardHeader>
+          <CardTitle>User Experience Settings</CardTitle>
+          <CardDescription>
+            Customize haptic feedback and sound effects for interactions
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Vibrate className="text-primary" size={20} />
+                <Label htmlFor="haptic-toggle" className="text-base font-medium cursor-pointer">
+                  Haptic Feedback
+                </Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Subtle vibrations for key actions like completing habits or deleting items
+              </p>
+            </div>
+            <Switch
+              id="haptic-toggle"
+              checked={hapticEnabled}
+              onCheckedChange={(checked) => {
+                setHapticEnabled(checked)
+                if (checked) {
+                  triggerHaptic('selection')
+                  toast.success('Haptic feedback enabled')
+                } else {
+                  toast.success('Haptic feedback disabled')
+                }
+              }}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <SpeakerHigh className="text-accent" size={20} />
+                <Label htmlFor="sound-toggle" className="text-base font-medium cursor-pointer">
+                  Sound Effects
+                </Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Optional audio feedback for major interactions and completions
+              </p>
+            </div>
+            <Switch
+              id="sound-toggle"
+              checked={soundEnabled}
+              onCheckedChange={(checked) => {
+                setSoundEnabled(checked)
+                if (checked) {
+                  playSound('success')
+                  toast.success('Sound effects enabled')
+                } else {
+                  toast.success('Sound effects disabled')
+                }
+              }}
+            />
+          </div>
+
+          <div className="p-4 bg-muted rounded-lg space-y-2">
+            <h4 className="font-medium text-sm">Test Feedback</h4>
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  triggerHaptic('light')
+                  playSound('tap')
+                }}
+              >
+                Light Tap
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  triggerHaptic('success')
+                  playSound('success')
+                }}
+              >
+                Success
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  triggerHaptic('warning')
+                  playSound('complete')
+                }}
+              >
+                Complete
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  triggerHaptic('error')
+                  playSound('error')
+                }}
+              >
+                Error
+              </Button>
             </div>
           </div>
         </CardContent>
