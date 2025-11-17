@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { GeminiApiTest } from '@/components/GeminiApiTest'
 
 const HARDCODED_API_KEY = 'AIzaSyBLfizNjvMPX_piEhupqpNBoZk0rIxJAok'
 
@@ -216,6 +217,8 @@ export function Settings() {
           Configure the machinery of your digital existence
         </p>
       </div>
+
+      <GeminiApiTest />
 
       <Card className="elevated-card border-primary/20">
         <CardHeader>
