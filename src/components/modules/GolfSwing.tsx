@@ -13,7 +13,6 @@ import {
   TrendUp,
   Target,
   CheckCircle,
-  XCircle,
   Play,
   ChartBar,
   Sparkle,
@@ -21,15 +20,14 @@ import {
   ArrowRight,
   Trash,
   ArrowsLeftRight,
-  Backpack,
-  Tag
+  Backpack
 } from '@phosphor-icons/react'
 import { SwingAnalysis, GolfClub } from '@/lib/types'
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
 import { simulateVideoProcessing, analyzePoseData, generateFeedback } from '@/lib/golf/swing-analyzer'
 import { validateVideoFile, formatFileSize, getVideoCompressionTips } from '@/lib/golf/video-utils'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { VideoPlayerWithTimeline } from '@/components/VideoPlayerWithTimeline'
 import { SwingComparisonDialog } from '@/components/SwingComparisonDialog'
@@ -57,7 +55,7 @@ export function GolfSwing() {
         })
       }
     }
-  }, [])
+  }, [analyses])
 
   const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]

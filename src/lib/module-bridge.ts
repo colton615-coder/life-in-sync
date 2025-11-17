@@ -15,7 +15,7 @@ export interface ModuleEvent {
   sourceModule: Module
   targetModule?: Module
   timestamp: string
-  data: Record<string, any>
+  data: Record<string, unknown>
   metadata?: {
     triggerId?: string
     priority?: 'low' | 'medium' | 'high'
@@ -36,19 +36,25 @@ export interface ModuleConnection {
 
 export interface ModuleAction {
   type: 'create_task' | 'log_habit' | 'create_event' | 'show_celebration' | 'custom'
-  config: Record<string, any>
+  config: Record<string, unknown>
 }
 
 export interface ModuleCondition {
   field: string
   operator: 'equals' | 'greater_than' | 'less_than' | 'contains'
-  value: any
+  value: unknown
+}
+
+export interface ConnectionStats {
+  totalEvents: number
+  byType: Record<ModuleEventType, number>
+  byModule: Record<Module, number>
 }
 
 export interface SharedData {
   moduleId: Module
   dataType: string
-  data: any
+  data: unknown
   sharedAt: string
   expiresAt?: string
 }
@@ -146,12 +152,11 @@ class ModuleBridge {
     this.eventHistory = []
   }
 
-  getStats() {
+  getStats(): ConnectionStats {
     const stats = {
       totalEvents: this.eventHistory.length,
       byType: {} as Record<ModuleEventType, number>,
       byModule: {} as Record<Module, number>,
-      recentEvents: this.eventHistory.slice(0, 10)
     }
 
     this.eventHistory.forEach(event => {

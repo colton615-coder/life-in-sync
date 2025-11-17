@@ -16,7 +16,7 @@ import {
 import { cn } from '@/lib/utils'
 
 interface NavModule {
-  icon: any
+  icon: React.ElementType
   label: string
   id: string
 }

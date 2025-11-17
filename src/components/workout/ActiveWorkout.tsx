@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { WorkoutPlan, Exercise } from '@/lib/types'
+import { useState, useEffect, useCallback } from 'react'
+import { WorkoutPlan } from '@/lib/types'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -29,6 +29,14 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
   const [timeLeft, setTimeLeft] = useState(currentExercise.duration || 0)
   const nextExercise = workout.exercises[currentExerciseIndex + 1]
 
+  const goToNextExercise = useCallback(() => {
+    if (currentExerciseIndex < workout.exercises.length - 1) {
+      setCurrentExerciseIndex(prev => prev + 1)
+    } else {
+      onFinish(true)
+    }
+  }, [currentExerciseIndex, workout.exercises, onFinish])
+
   useEffect(() => {
     if (isPaused || isPauseModalOpen || currentExercise.type !== 'time') return
 
@@ -43,19 +51,11 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
 
     return () => clearInterval(timer)
    
-  }, [timeLeft, isPaused, isPauseModalOpen, currentExercise.type, currentExerciseIndex])
+  }, [timeLeft, isPaused, isPauseModalOpen, currentExercise.type, currentExerciseIndex, goToNextExercise])
 
   useEffect(() => {
     setTimeLeft(workout.exercises[currentExerciseIndex].duration || 0)
   }, [currentExerciseIndex, workout.exercises])
-
-  const goToNextExercise = () => {
-    if (currentExerciseIndex < workout.exercises.length - 1) {
-      setCurrentExerciseIndex(prev => prev + 1)
-    } else {
-      onFinish(true)
-    }
-  }
 
   const handleSkip = () => {
     goToNextExercise()

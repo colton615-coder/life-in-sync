@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Habit, HabitIcon } from '@/lib/types'
+import { Habit } from '@/lib/types'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -39,7 +38,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
 
   const getIconComponent = () => {
     if (!habit.icon) return Drop
-    const IconComponent = (Icons as any)[habit.icon]
+    const IconComponent = (Icons as Record<string, React.ElementType>)[habit.icon]
     if (IconComponent) return IconComponent
     
     const name = habit.name.toLowerCase()

@@ -1,8 +1,8 @@
 import { Card } from './Card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Sparkle, TrendUp, Target, Lightbulb, ChartBar, CalendarBlank, ArrowsClockwise, CheckCircle, CurrencyCircleDollar } from '@phosphor-icons/react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Sparkle, TrendUp, Target, Lightbulb, ChartBar, CalendarBlank, ArrowsClockwise, CheckCircle } from '@phosphor-icons/react'
+import { motion } from 'framer-motion'
 import { DetailedBudget } from '@/lib/types'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
@@ -31,8 +31,8 @@ export function DetailedBudgetDisplay({ budget, onStartOver }: DetailedBudgetDis
   }
 
   const allocationEntries = Object.entries(budget.allocations)
-    .filter(([_, amount]) => amount > 0)
-    .sort(([_, a], [__, b]) => b - a)
+    .filter(([, amount]) => amount > 0)
+    .sort(([, a], [, b]) => b - a)
 
   const getCategoryIcon = (category: string) => {
     const icons: Record<string, React.ReactNode> = {

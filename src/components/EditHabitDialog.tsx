@@ -15,7 +15,7 @@ interface EditHabitDialogProps {
   onEditHabit: (habitId: string, updates: Partial<Habit>) => void
 }
 
-const iconOptions: { value: HabitIcon; Icon: any; label: string }[] = [
+const iconOptions: { value: HabitIcon; Icon: React.ElementType; label: string }[] = [
   { value: 'droplet', Icon: Drop, label: 'Water' },
   { value: 'book', Icon: BookOpen, label: 'Reading' },
   { value: 'dumbbell', Icon: Barbell, label: 'Exercise' },

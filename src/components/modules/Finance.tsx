@@ -4,19 +4,18 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, CurrencyDollar, Trash, ChartPie, PencilSimple, Sparkle, TrendUp, Wallet } from '@phosphor-icons/react'
+import { Plus, CurrencyDollar, Trash, ChartPie, PencilSimple, Sparkle, TrendUp } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { Expense, FinancialProfile, DetailedBudget } from '@/lib/types'
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
 import { EditExpenseDialog } from '@/components/EditExpenseDialog'
 import { FinancialAdvisorInterview } from '@/components/FinancialAdvisorInterview'
 import { DetailedBudgetDisplay } from '@/components/DetailedBudgetDisplay'
 import { TabGroup } from '@/components/TabGroup'
-import { AIButton } from '@/components/AIButton'
 import { SarcasticProgress } from '@/components/SarcasticLoader'
 import { StatCard } from '@/components/StatCard'
 import { AccessibleChart } from '@/components/AccessibleChart'
@@ -106,7 +105,7 @@ export function Finance() {
   }, [])
 
   const handleProfileComplete = useCallback(async (profile: FinancialProfile) => {
-    setFinancialProfile((current) => profile)
+    setFinancialProfile(() => profile)
     setIsGeneratingBudget(true)
     
     try {
@@ -234,7 +233,7 @@ CRITICAL RULES:
         createdAt: new Date().toISOString()
       }
       
-      setDetailedBudget((current) => budget)
+      setDetailedBudget(() => budget)
       setActiveTab('budget')
       toast.success('Your personalized budget is ready!', {
         description: 'Review your AI-generated financial plan below'
@@ -251,8 +250,8 @@ CRITICAL RULES:
   }, [setFinancialProfile, setDetailedBudget, setActiveTab, setIsGeneratingBudget])
 
   const handleStartOver = useCallback(() => {
-    setFinancialProfile((current) => null)
-    setDetailedBudget((current) => null)
+    setFinancialProfile(() => null)
+    setDetailedBudget(() => null)
     setActiveTab('advisor')
   }, [setFinancialProfile, setDetailedBudget, setActiveTab])
 

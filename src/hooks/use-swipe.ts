@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, TouchEvent, MouseEvent } from 'react'
+import { useRef, useState, TouchEvent, MouseEvent } from 'react'
 
 interface SwipeHandlers {
   onSwipeLeft?: () => void

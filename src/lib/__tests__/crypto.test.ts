@@ -2,9 +2,9 @@ import { describe, it, expect, beforeAll } from 'vitest'
 import { encrypt, decrypt } from '../crypto'
 
 describe('crypto functions', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     if (typeof globalThis.crypto === 'undefined') {
-      const { webcrypto } = require('node:crypto')
+      const { webcrypto } = await import('node:crypto')
       globalThis.crypto = webcrypto as Crypto
     }
   })
@@ -219,7 +219,7 @@ describe('crypto functions', () => {
 
   describe('error handling', () => {
     it('should handle encryption failure gracefully', async () => {
-      await expect(encrypt(null as any)).rejects.toThrow()
+      await expect(encrypt(null as unknown as string)).rejects.toThrow()
     })
 
     it('should provide meaningful error message on decryption failure', async () => {

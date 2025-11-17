@@ -17,11 +17,12 @@ import { GolfSwing } from '@/components/modules/GolfSwing'
 import { Connections } from '@/components/modules/Connections'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { clearAllAppData } from '@/lib/clear-data'
+import { LoadingScreen } from './components/LoadingScreen'
 
 function App() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [dataCleared, setDataCleared] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const clearData = async () => {
@@ -29,7 +30,6 @@ function App() {
       if (!hasCleared) {
         await clearAllAppData()
         localStorage.setItem('data-cleared-v1', 'true')
-        setDataCleared(true)
       }
     }
     clearData()
@@ -122,6 +122,10 @@ function App() {
           </ErrorBoundary>
         )
     }
+  }
+
+  if (isLoading) {
+    return <LoadingScreen onLoadComplete={() => setIsLoading(false)} />
   }
 
   return (

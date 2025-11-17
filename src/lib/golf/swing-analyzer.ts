@@ -1,15 +1,10 @@
-import { SwingPoseData, SwingMetrics, SwingFeedback, SwingAnalysis, GolfClub } from '@/lib/types'
+import { SwingPoseData, SwingMetrics, SwingFeedback, GolfClub } from '@/lib/types'
 
 interface MediaPipeLandmark {
   x: number
   y: number
   z: number
   visibility: number
-}
-
-interface MediaPipeResult {
-  poseLandmarks: MediaPipeLandmark[]
-  poseWorldLandmarks?: MediaPipeLandmark[]
 }
 
 const LANDMARK_INDICES = {
@@ -28,19 +23,6 @@ const LANDMARK_INDICES = {
   RIGHT_WRIST: 16,
   LEFT_ELBOW: 13,
   RIGHT_ELBOW: 14,
-}
-
-function calculateAngle(p1: MediaPipeLandmark, p2: MediaPipeLandmark, p3: MediaPipeLandmark): number {
-  const radians = Math.atan2(p3.y - p2.y, p3.x - p2.x) - Math.atan2(p1.y - p2.y, p1.x - p2.x)
-  let angle = Math.abs(radians * 180.0 / Math.PI)
-  if (angle > 180.0) {
-    angle = 360 - angle
-  }
-  return angle
-}
-
-function calculateDistance(p1: MediaPipeLandmark, p2: MediaPipeLandmark): number {
-  return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2) + Math.pow(p2.z - p1.z, 2))
 }
 
 function detectSwingPhase(frame: number, totalFrames: number): 'address' | 'backswing' | 'impact' | 'followThrough' {

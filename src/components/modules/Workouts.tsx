@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
-import { WorkoutPlan, CompletedWorkout, PersonalRecord } from '@/lib/types'
+import { WorkoutPlan, CompletedWorkout } from '@/lib/types'
 import { toast } from 'sonner'
 import { ActiveWorkout } from '../workout/ActiveWorkout'
 import { WorkoutSummary } from '../workout/WorkoutSummary'
@@ -23,7 +23,6 @@ type WorkoutStage = 'planning' | 'active' | 'summary'
 export function Workouts() {
   const [workoutPlans, setWorkoutPlans] = useKV<WorkoutPlan[]>('workout-plans', [])
   const [completedWorkouts, setCompletedWorkouts] = useKV<CompletedWorkout[]>('completed-workouts', [])
-  const [prs, setPrs] = useKV<PersonalRecord[]>('personal-records', [])
   
   const [dialogOpen, setDialogOpen] = useState(false)
   const [generating, setGenerating] = useState(false)
@@ -121,7 +120,7 @@ Difficulty levels: "beginner", "intermediate", "advanced"`
       console.log('[Workout Generation] Response length:', response?.length)
       console.log('[Workout Generation] First 500 chars:', response?.substring(0, 500))
       console.log('[Workout Generation] Step 4: Parsing JSON response')
-      const data = parseAIJsonResponse<{ workoutPlan: any }>(response, 'workoutPlan structure')
+      const data = parseAIJsonResponse<{ workoutPlan: Record<string, unknown> }>(response, 'workoutPlan structure')
       
       console.log('[Workout Generation] Step 5: Parsed data structure')
       console.log('[Workout Generation] Data keys:', Object.keys(data))
@@ -154,7 +153,7 @@ Difficulty levels: "beginner", "intermediate", "advanced"`
       }
 
       console.log('[Workout Generation] Step 8: Processing exercises')
-      data.workoutPlan.exercises.forEach((ex: any, idx: number) => {
+      data.workoutPlan.exercises.forEach((ex: Record<string, unknown>, idx: number) => {
         console.log(`[Workout Generation] Exercise ${idx + 1}:`, {
           name: ex.name,
           type: ex.type,
@@ -166,7 +165,7 @@ Difficulty levels: "beginner", "intermediate", "advanced"`
       })
 
       console.log('[Workout Generation] Step 9: Calculating total duration')
-      const totalDuration = data.workoutPlan.exercises.reduce((acc: number, ex: any) => {
+      const totalDuration = data.workoutPlan.exercises.reduce((acc: number, ex: Record<string, unknown>) => {
         if (ex.type === 'time') {
           const duration = ex.duration || 0
           console.log(`[Workout Generation] Time-based exercise "${ex.name}": ${duration}s`)
@@ -189,7 +188,7 @@ Difficulty levels: "beginner", "intermediate", "advanced"`
         id: Date.now().toString(),
         name: data.workoutPlan.name || 'Custom Workout',
         focus: data.workoutPlan.focus || 'General Fitness',
-        exercises: data.workoutPlan.exercises.map((ex: any) => ({
+        exercises: data.workoutPlan.exercises.map((ex: Record<string, unknown>) => ({
           ...ex,
           sets: ex.sets || 3,
           reps: ex.reps || 10,

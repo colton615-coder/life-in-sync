@@ -80,8 +80,7 @@ export function VideoPlayerWithTimeline({
   videoUrl, 
   poseData, 
   className,
-  showPoseOverlay = true,
-  showPoseControls = false
+  showPoseOverlay = true
 }: VideoPlayerWithTimelineProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -90,10 +89,10 @@ export function VideoPlayerWithTimeline({
   const [markers, setMarkers] = useState<TimelineMarker[]>([])
   const [activeMarker, setActiveMarker] = useState<TimelineMarker | null>(null)
   const [hoveredMarker, setHoveredMarker] = useState<TimelineMarker | null>(null)
-  const [showSkeleton, setShowSkeleton] = useState(true)
-  const [showKeypoints, setShowKeypoints] = useState(true)
-  const [lineWidth, setLineWidth] = useState(3)
-  const [keypointRadius, setKeypointRadius] = useState(5)
+  const [showSkeleton] = useState(true)
+  const [showKeypoints] = useState(true)
+  const [lineWidth] = useState(3)
+  const [keypointRadius] = useState(5)
 
   useEffect(() => {
     const video = videoRef.current

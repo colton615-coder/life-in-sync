@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react'
 import { Button } from './ui/button'
-import { Table, Eye, EyeSlash } from '@phosphor-icons/react'
+import { Table, EyeSlash } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
@@ -16,7 +16,7 @@ interface AccessibleChartProps {
   columns: {
     key: string
     label: string
-    format?: (value: any) => string
+    format?: (value: string | number) => string
   }[]
   className?: string
   ariaLabel?: string
