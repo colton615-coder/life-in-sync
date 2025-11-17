@@ -483,6 +483,15 @@
   color: oklch(0.55 0.01 240);
 }
 
+.dashboard-card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: oklch(0.55 0.01 240);
+  font-family: var(--font-display);
+}
+
 .data-label {
   font-size: 0.75rem;
   font-weight: 500;

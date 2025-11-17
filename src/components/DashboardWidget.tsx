@@ -21,19 +21,21 @@ export function DashboardWidget({ title, icon, children, onClick, className }: D
 
   const widgetContent = (
     <div className={cn(
-      "neumorphic-card h-full transition-all duration-300",
+      "neumorphic-card h-full min-h-[280px] transition-all duration-300",
       onClick && "hover:glow-border"
     )}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="icon-circle-glow flex items-center justify-center w-12 h-12" aria-hidden="true">
-          <div className="text-accent-foreground">
-            {icon}
+      <div className="p-5 md:p-6 h-full flex flex-col">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="icon-circle-glow flex items-center justify-center w-12 h-12" aria-hidden="true">
+            <div className="text-accent-foreground">
+              {icon}
+            </div>
           </div>
+          <h3 className="dashboard-card-title flex-1">{title}</h3>
         </div>
-        <h3 className="widget-title flex-1">{title}</h3>
-      </div>
-      <div className="text-foreground">
-        {children}
+        <div className="text-foreground flex-1">
+          {children}
+        </div>
       </div>
     </div>
   )

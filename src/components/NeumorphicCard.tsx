@@ -24,7 +24,7 @@ export function NeumorphicCard({
   animate = true
 }: NeumorphicCardProps) {
   const classes = cn(
-    'rounded-2xl md:rounded-3xl bg-card p-4 md:p-6',
+    'rounded-2xl md:rounded-3xl bg-card',
     inset ? 'neumorphic-inset' : 'neumorphic-card',
     hover && !pressed && 'cursor-pointer',
     glow && 'glow-border',
