@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Habit, HabitIcon } from '@/lib/types'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -8,6 +9,7 @@ import * as Icons from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
+import { ConfirmationDialog } from './ConfirmationDialog'
 
 interface HabitCardProps {
   habit: Habit
@@ -33,6 +35,8 @@ const iconColors = [
 const getIconColor = (index: number) => iconColors[index % iconColors.length]
 
 export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog, className, style }: HabitCardProps) {
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+
   const getIconComponent = () => {
     if (!habit.icon) return Drop
     const IconComponent = (Icons as any)[habit.icon]
@@ -62,10 +66,12 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
   const isComplete = (habit.currentProgress || 0) >= (habit.targetCount || 1)
 
   const handleDelete = () => {
-    if (confirm(`Delete "${habit.name}"?`)) {
-      onDelete(habit.id)
-      toast.success('Habit deleted')
-    }
+    setDeleteConfirmOpen(true)
+  }
+
+  const confirmDelete = () => {
+    onDelete(habit.id)
+    toast.success('Habit deleted')
   }
 
   const handleEdit = () => {
@@ -240,6 +246,17 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
           </motion.div>
         )}
       </Card>
+
+      <ConfirmationDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete Habit?"
+        description={`Are you sure you want to delete "${habit.name}"? This action cannot be undone and will remove all progress history.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="destructive"
+        onConfirm={confirmDelete}
+      />
     </motion.div>
   )
 }
