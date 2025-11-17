@@ -6,6 +6,7 @@ import { Slider } from '@/components/ui/slider'
 import { Play, Pause, SkipBack, SkipForward } from '@phosphor-icons/react'
 import { SwingPoseData } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { PoseOverlay } from '@/components/PoseOverlay'
 
 interface TimelineMarker {
   id: string
@@ -20,6 +21,8 @@ interface VideoPlayerWithTimelineProps {
   videoUrl: string
   poseData?: SwingPoseData[]
   className?: string
+  showPoseOverlay?: boolean
+  showPoseControls?: boolean
 }
 
 function detectSwingPhase(frame: number, totalFrames: number): 'address' | 'backswing' | 'impact' | 'followThrough' {
@@ -73,7 +76,13 @@ function generateTimelineMarkers(poseData: SwingPoseData[], videoDuration: numbe
   return markers
 }
 
-export function VideoPlayerWithTimeline({ videoUrl, poseData, className }: VideoPlayerWithTimelineProps) {
+export function VideoPlayerWithTimeline({ 
+  videoUrl, 
+  poseData, 
+  className,
+  showPoseOverlay = true,
+  showPoseControls = false
+}: VideoPlayerWithTimelineProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -81,6 +90,10 @@ export function VideoPlayerWithTimeline({ videoUrl, poseData, className }: Video
   const [markers, setMarkers] = useState<TimelineMarker[]>([])
   const [activeMarker, setActiveMarker] = useState<TimelineMarker | null>(null)
   const [hoveredMarker, setHoveredMarker] = useState<TimelineMarker | null>(null)
+  const [showSkeleton, setShowSkeleton] = useState(true)
+  const [showKeypoints, setShowKeypoints] = useState(true)
+  const [lineWidth, setLineWidth] = useState(3)
+  const [keypointRadius, setKeypointRadius] = useState(5)
 
   useEffect(() => {
     const video = videoRef.current
@@ -175,6 +188,17 @@ export function VideoPlayerWithTimeline({ videoUrl, poseData, className }: Video
           onClick={togglePlayPause}
           aria-label="Golf swing video player"
         />
+        
+        {poseData && poseData.length > 0 && showPoseOverlay && (
+          <PoseOverlay 
+            videoRef={videoRef} 
+            poseData={poseData}
+            showSkeleton={showSkeleton}
+            showKeypoints={showKeypoints}
+            lineWidth={lineWidth}
+            keypointRadius={keypointRadius}
+          />
+        )}
         
         {activeMarker && (
           <div 
