@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavigationDrawer } from '@/components/NavigationDrawer'
 import { NavigationButton } from '@/components/NavigationButton'
 import { Toaster } from '@/components/ui/sonner'
@@ -16,10 +16,24 @@ import { Settings } from '@/components/modules/Settings'
 import { GolfSwing } from '@/components/modules/GolfSwing'
 import { Connections } from '@/components/modules/Connections'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { clearAllAppData } from '@/lib/clear-data'
 
 function App() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [dataCleared, setDataCleared] = useState(false)
+
+  useEffect(() => {
+    const clearData = async () => {
+      const hasCleared = localStorage.getItem('data-cleared-v1')
+      if (!hasCleared) {
+        await clearAllAppData()
+        localStorage.setItem('data-cleared-v1', 'true')
+        setDataCleared(true)
+      }
+    }
+    clearData()
+  }, [])
 
   const handleModuleChange = (moduleId: string) => {
     setActiveModule(moduleId as Module)
