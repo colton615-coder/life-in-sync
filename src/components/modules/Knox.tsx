@@ -102,11 +102,11 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
       console.log('[Knox] Calling Gemini API with options:', {
         temperature: 0.9,
         maxOutputTokens: 500,
-        model: 'gemini-1.5-flash'
+        model: 'gemini-2.0-flash-exp'
       })
       
       const response = await gemini.generate(promptText, {
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.0-flash-exp',
         temperature: 0.9,
         maxOutputTokens: 500
       })
@@ -221,7 +221,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
 
       console.log('[Knox] Calling Gemini API')
       const response = await gemini.generate(promptText, {
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.0-flash-exp',
         temperature: 0.9,
         maxOutputTokens: 500
       })
@@ -331,7 +331,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
 
       console.log('[Knox] Calling Gemini API')
       const response = await gemini.generate(promptText, {
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.0-flash-exp',
         temperature: 0.9,
         maxOutputTokens: 500
       })

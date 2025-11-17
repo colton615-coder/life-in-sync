@@ -74,7 +74,7 @@ export class GeminiClient {
       throw new Error("Gemini client not initialized")
     }
 
-    const modelName = options?.model || "gemini-1.5-flash"
+    const modelName = options?.model || "gemini-2.0-flash-exp"
     console.log('[GeminiClient] Using model:', modelName)
     
     const model = this.client.getGenerativeModel({
