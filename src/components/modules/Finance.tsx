@@ -24,6 +24,7 @@ import { AutocompleteInput } from '@/components/AutocompleteInput'
 import { VirtualList } from '@/components/VirtualList'
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
 import { useSoundEffects } from '@/hooks/use-sound-effects'
+import { sanitizeForLLM } from '@/lib/utils'
 
 const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Other']
 const COLORS = ['#5fd4f4', '#9d7fff', '#6ee7b7', '#fbbf24', '#fb923c', '#f87171', '#94a3b8']
@@ -105,31 +106,40 @@ export function Finance() {
   }, [])
 
   const handleProfileComplete = useCallback(async (profile: FinancialProfile) => {
-    setFinancialProfile(profile)
+    setFinancialProfile((current) => profile)
     setIsGeneratingBudget(true)
     
     try {
       const totalIncome = profile.monthlyIncome + (profile.partnerIncome || 0)
       
+      const safeLocation = sanitizeForLLM(profile.location)
+      const safeHousingType = sanitizeForLLM(profile.housingType)
+      const safeDebtTypes = profile.debtTypes?.map(d => sanitizeForLLM(d)).join(', ') || ''
+      const safeFinancialGoals = profile.financialGoals.map(g => sanitizeForLLM(g)).join(', ')
+      const safeRiskTolerance = sanitizeForLLM(profile.riskTolerance)
+      const safeSpendingHabits = sanitizeForLLM(profile.spendingHabits)
+      const safeMajorExpenses = sanitizeForLLM(profile.majorExpenses)
+      const safeConcerns = sanitizeForLLM(profile.concerns)
+      
       const promptText = window.spark.llmPrompt`You are an expert financial advisor. Based on the following detailed financial profile, create a comprehensive, personalized budget plan.
 
 FINANCIAL PROFILE:
 - Total Monthly Income: $${totalIncome}
-- Location: ${profile.location}
+- Location: ${safeLocation}
 - Dependents: ${profile.dependents}
-- Housing: ${profile.housingType} ($${profile.monthlyHousingCost}/month)
+- Housing: ${safeHousingType} ($${profile.monthlyHousingCost}/month)
 - Has Debt: ${profile.hasDebt ? 'Yes' : 'No'}
-${profile.hasDebt ? `- Debt Types: ${profile.debtTypes?.join(', ')}
+${profile.hasDebt ? `- Debt Types: ${safeDebtTypes}
 - Total Debt: $${profile.totalDebtAmount}
 - Current Monthly Payment: $${profile.monthlyDebtPayment}` : ''}
-- Financial Goals: ${profile.financialGoals.join(', ')}
-- Risk Tolerance: ${profile.riskTolerance}
+- Financial Goals: ${safeFinancialGoals}
+- Risk Tolerance: ${safeRiskTolerance}
 - Emergency Fund Goal: ${profile.emergencyFundMonths} months
 - Current Savings: $${profile.currentSavings || 0}
 - Has Retirement: ${profile.hasRetirement ? 'Yes' : 'No'}
-- Spending Habits: ${profile.spendingHabits}
-${profile.majorExpenses ? `- Upcoming Expenses: ${profile.majorExpenses}` : ''}
-${profile.concerns ? `- Concerns: ${profile.concerns}` : ''}
+- Spending Habits: ${safeSpendingHabits}
+${safeMajorExpenses ? `- Upcoming Expenses: ${safeMajorExpenses}` : ''}
+${safeConcerns ? `- Concerns: ${safeConcerns}` : ''}
 
 Create a detailed budget allocation for ALL of these categories:
 - housing: Monthly housing cost (rent/mortgage)
@@ -195,7 +205,7 @@ RETURN ONLY VALID JSON (no markdown, no code blocks) in this EXACT format:
 
 CRITICAL RULES:
 1. All allocation amounts must be realistic and sum to approximately the total income
-2. Consider their location's cost of living (${profile.location})
+2. Consider their location's cost of living (${safeLocation})
 3. Prioritize emergency fund if current savings are low
 4. If they have high-interest debt, allocate more to debt payment
 5. Account for their ${profile.dependents} dependent(s) in food, healthcare, etc.
@@ -230,7 +240,7 @@ CRITICAL RULES:
         createdAt: new Date().toISOString()
       }
       
-      setDetailedBudget(budget)
+      setDetailedBudget((current) => budget)
       setActiveTab('budget')
       toast.success('Your personalized budget is ready!', {
         description: 'Review your AI-generated financial plan below'
@@ -247,8 +257,8 @@ CRITICAL RULES:
   }, [setFinancialProfile, setDetailedBudget, setActiveTab, setIsGeneratingBudget])
 
   const handleStartOver = useCallback(() => {
-    setFinancialProfile(null)
-    setDetailedBudget(null)
+    setFinancialProfile((current) => null)
+    setDetailedBudget((current) => null)
     setActiveTab('advisor')
   }, [setFinancialProfile, setDetailedBudget, setActiveTab])
 

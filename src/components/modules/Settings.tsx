@@ -17,7 +17,6 @@ import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
 import { useSoundEffects } from '@/hooks/use-sound-effects'
 
 export function Settings() {
-  const [apiKey, setApiKey, deleteApiKey] = useKV<string>("gemini-api-key", "")
   const [preferredProvider, setPreferredProvider] = useKV<AIProvider | "auto">(
     "preferred-ai-provider",
     "auto"
@@ -28,7 +27,6 @@ export function Settings() {
   const [isTesting, setIsTesting] = useState(false)
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null)
   const [usageStats, setUsageStats] = useState<AIUsageStats | null>(null)
-  const [maskedKey, setMaskedKey] = useState("")
   
   const { triggerHaptic } = useHapticFeedback()
   const { playSound } = useSoundEffects()
@@ -36,11 +34,7 @@ export function Settings() {
   useEffect(() => {
     checkOwnership()
     loadUsageStats()
-    
-    if (apiKey) {
-      setMaskedKey(maskApiKey(apiKey))
-    }
-  }, [apiKey])
+  }, [])
 
   const checkOwnership = async () => {
     const user = await spark.user()
@@ -50,27 +44,6 @@ export function Settings() {
   const loadUsageStats = async () => {
     const stats = await getUsageStats()
     setUsageStats(stats)
-  }
-
-  const maskApiKey = (key: string): string => {
-    if (!key || key.length < 8) return ""
-    return key.slice(0, 4) + "•".repeat(20) + key.slice(-4)
-  }
-
-  const handleSaveApiKey = async () => {
-    const trimmedKey = apiKey?.trim() || ''
-    if (!trimmedKey) {
-      toast.error("Please enter an API key")
-      return
-    }
-
-    try {
-      await setApiKey(trimmedKey)
-      setMaskedKey(maskApiKey(trimmedKey))
-      toast.success("Gemini API key saved successfully")
-    } catch (error) {
-      toast.error("Failed to save API key")
-    }
   }
 
   const handleTestConnection = async () => {
@@ -100,12 +73,6 @@ export function Settings() {
     toast.success("Usage statistics reset")
   }
 
-  const handleRemoveApiKey = async () => {
-    await deleteApiKey()
-    setMaskedKey("")
-    toast.success("API key removed")
-  }
-
   if (!isOwner) {
     return (
       <div className="pt-2 md:pt-4 space-y-6">
@@ -128,61 +95,68 @@ export function Settings() {
         </p>
       </div>
 
-      <Card className="elevated-card">
+      <Card className="elevated-card border-destructive/30">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Key className="text-primary" size={24} />
+            <Key className="text-destructive" size={24} />
             <CardTitle>Gemini API Configuration</CardTitle>
           </div>
           <CardDescription>
-            Connect your Google Gemini API to enable advanced AI features.
-            Get your API key from{" "}
-            <a
-              href="https://aistudio.google.com/apikey"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              Google AI Studio
-            </a>
+            For security reasons, API keys must be set as environment variables during development.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="gemini-api-key">API Key</Label>
-            <div className="flex gap-2">
-              <Input
-                id="gemini-api-key"
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your Gemini API key"
-                className="font-mono text-sm"
-              />
-              <Button onClick={handleSaveApiKey} variant="default">
-                Save
-              </Button>
-            </div>
-            {maskedKey && (
-              <div className="flex items-center justify-between p-3 bg-muted rounded-md">
-                <code className="text-sm text-muted-foreground">{maskedKey}</code>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRemoveApiKey}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <X size={16} />
-                  Remove
-                </Button>
+          <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg space-y-3">
+            <div className="flex items-start gap-2">
+              <X size={20} className="text-destructive mt-0.5 flex-shrink-0" weight="bold" />
+              <div className="space-y-2 flex-1">
+                <p className="font-semibold text-sm">Client-Side Storage is Insecure</p>
+                <p className="text-sm text-muted-foreground">
+                  Storing API keys in the browser exposes them to potential theft through XSS attacks, browser extensions, or anyone with access to developer tools.
+                </p>
               </div>
-            )}
+            </div>
+          </div>
+
+          <div className="p-4 bg-muted rounded-lg space-y-3">
+            <h4 className="font-semibold text-sm flex items-center gap-2">
+              <Check size={18} className="text-success" weight="bold" />
+              Secure Configuration for Local Development
+            </h4>
+            <div className="space-y-2 text-sm">
+              <p className="text-muted-foreground">
+                Create a <code className="px-1.5 py-0.5 bg-background rounded text-xs font-mono">.env</code> file in your project root:
+              </p>
+              <pre className="p-3 bg-background rounded border text-xs font-mono overflow-x-auto">
+{`VITE_GEMINI_API_KEY=your_api_key_here`}
+              </pre>
+              <p className="text-muted-foreground">
+                Get your API key from{" "}
+                <a
+                  href="https://aistudio.google.com/apikey"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Google AI Studio
+                </a>
+              </p>
+              <p className="text-muted-foreground mt-3">
+                The app will automatically read from <code className="px-1.5 py-0.5 bg-background rounded text-xs font-mono">import.meta.env.VITE_GEMINI_API_KEY</code> at runtime.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 bg-accent/10 border border-accent/30 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              <strong className="text-foreground">Note:</strong> For production deployments, configure the environment variable through your hosting platform's dashboard (Vercel, Netlify, etc.) rather than committing it to version control.
+            </p>
           </div>
 
           <div className="flex gap-2">
             <Button
               onClick={handleTestConnection}
-              disabled={!apiKey || isTesting}
+              disabled={isTesting}
               variant="outline"
               className="gap-2"
             >
@@ -239,11 +213,11 @@ export function Settings() {
                     <span>Spark LLM (GPT-4o)</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="gemini" disabled={!apiKey}>
+                <SelectItem value="gemini">
                   <div className="flex items-center gap-2">
                     <Brain size={16} />
                     <span>Google Gemini 2.5</span>
-                    {!apiKey && <Badge variant="outline" className="ml-2 text-xs">Not configured</Badge>}
+                    <Badge variant="outline" className="ml-2 text-xs">Requires env var</Badge>
                   </div>
                 </SelectItem>
               </SelectContent>
