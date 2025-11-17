@@ -60,18 +60,28 @@ export function GolfSwing() {
 
   const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (!file) return
+    if (!file) {
+      console.log('No file selected')
+      return
+    }
+
+    console.log('File selected:', file.name, file.type, file.size)
 
     if (!file.type.startsWith('video/')) {
-      toast.error('Please upload a video file')
+      toast.error('Please upload a video file', {
+        description: `File type ${file.type} is not supported`
+      })
       return
     }
 
     if (file.size > 100 * 1024 * 1024) {
-      toast.error('Video file too large (max 100MB)')
+      toast.error('Video file too large (max 100MB)', {
+        description: `File size: ${(file.size / 1024 / 1024).toFixed(2)}MB`
+      })
       return
     }
 
+    console.log('Opening club selection dialog')
     setPendingFile(file)
     setClubSelectionOpen(true)
 
@@ -81,7 +91,13 @@ export function GolfSwing() {
   }
 
   const startAnalysis = async (club: GolfClub | null) => {
-    if (!pendingFile) return
+    if (!pendingFile) {
+      console.error('No pending file to analyze')
+      toast.error('No video file selected')
+      return
+    }
+
+    console.log('Starting analysis for:', pendingFile.name, 'with club:', club)
 
     const analysisId = `swing-${Date.now()}`
     const videoUrl = URL.createObjectURL(pendingFile)
@@ -101,8 +117,14 @@ export function GolfSwing() {
     setIsProcessing(true)
     setProcessingProgress(0)
 
+    toast.info('Starting swing analysis...', {
+      description: 'This will take a few seconds'
+    })
+
     try {
+      console.log('Processing video...')
       const poseData = await simulateVideoProcessing(pendingFile, (progress, status) => {
+        console.log(`Progress: ${progress}% - ${status}`)
         setProcessingProgress(progress)
         setProcessingStatus(status)
         setAnalyses(current => 
@@ -114,7 +136,10 @@ export function GolfSwing() {
         )
       })
 
+      console.log('Analyzing pose data...')
       const metrics = analyzePoseData(poseData)
+      
+      console.log('Generating AI feedback...')
       const feedback = await generateFeedback(metrics, club)
 
       const completedAnalysis: SwingAnalysis = {
@@ -132,11 +157,12 @@ export function GolfSwing() {
       )
       setActiveAnalysis(completedAnalysis)
       
+      console.log('Analysis completed successfully!')
       toast.success('Swing analysis completed!', {
         description: `Overall score: ${feedback.overallScore}/100`
       })
     } catch (error) {
-      console.error('Analysis failed:', error)
+      console.error('Analysis failed with error:', error)
       setAnalyses(current => 
         (current || []).map(a => 
           a.id === analysisId 
@@ -145,7 +171,7 @@ export function GolfSwing() {
         )
       )
       toast.error('Analysis failed', {
-        description: 'Please try again with a different video'
+        description: error instanceof Error ? error.message : 'Please try again with a different video'
       })
     } finally {
       setIsProcessing(false)
@@ -195,9 +221,9 @@ export function GolfSwing() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6"
+      className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 md:px-6"
     >
-      <div className="glass-card rounded-3xl p-12 max-w-2xl">
+      <div className="glass-card rounded-3xl p-8 md:p-12 max-w-2xl w-full">
         <motion.div
           animate={{ 
             rotateY: [0, 10, -10, 0],
@@ -208,23 +234,30 @@ export function GolfSwing() {
           <Video size={80} weight="duotone" className="text-primary mx-auto" />
         </motion.div>
         
-        <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+        <h2 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
           AI-Powered Golf Swing Analysis
         </h2>
         
-        <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
+        <p className="text-muted-foreground text-base md:text-lg mb-8 leading-relaxed">
           Technology can't fix your slice, but at least it'll tell you exactly how bad it is
         </p>
 
         <Button
           size="lg"
-          onClick={() => fileInputRef.current?.click()}
-          className="gap-2 text-lg px-8 py-6 rounded-xl"
+          onClick={() => {
+            console.log('Upload button clicked')
+            fileInputRef.current?.click()
+          }}
+          className="gap-2 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 rounded-xl shadow-lg hover:shadow-xl transition-all"
           aria-label="Upload your first golf swing video for analysis"
         >
           <Upload size={24} weight="bold" aria-hidden="true" />
           Upload Your First Swing
         </Button>
+
+        <p className="text-xs md:text-sm text-muted-foreground mt-4">
+          Accepts video files up to 100MB
+        </p>
 
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
           <div className="flex flex-col gap-2">
@@ -771,36 +804,40 @@ export function GolfSwing() {
   }
 
   return (
-    <div className="pt-2 md:pt-4 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="pt-2 md:pt-4 space-y-4 md:space-y-6 px-4 md:px-0">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
             ⛳ Golf Swing Analyzer
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm md:text-base text-muted-foreground mt-1">
             AI-powered swing analysis with professional feedback
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <Button
             onClick={() => setComparisonDialogOpen(true)}
             variant="outline"
-            className="gap-2"
+            className="gap-2 flex-1 md:flex-none"
             size="lg"
             disabled={(analyses || []).filter(a => a.status === 'completed' && a.metrics && a.feedback).length < 2}
             aria-label="Compare two swing analyses"
           >
             <ArrowsLeftRight size={20} weight="bold" aria-hidden="true" />
-            Compare
+            <span className="hidden sm:inline">Compare</span>
           </Button>
           <Button
-            onClick={() => fileInputRef.current?.click()}
-            className="gap-2"
+            onClick={() => {
+              console.log('New Analysis button clicked')
+              fileInputRef.current?.click()
+            }}
+            className="gap-2 flex-1 md:flex-none"
             size="lg"
             aria-label="Upload new golf swing video for analysis"
           >
             <Upload size={20} weight="bold" aria-hidden="true" />
-            New Analysis
+            <span className="hidden sm:inline">New Analysis</span>
+            <span className="sm:hidden">Upload</span>
           </Button>
         </div>
       </div>
