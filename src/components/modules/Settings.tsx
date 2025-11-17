@@ -9,13 +9,24 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { Key, Sparkle, Brain, TestTube, Check, X, Vibrate, SpeakerHigh, ShieldCheck } from '@phosphor-icons/react'
+import { Key, Sparkle, Brain, TestTube, Check, X, Vibrate, SpeakerHigh, ShieldCheck, Trash, Warning } from '@phosphor-icons/react'
 import { gemini } from '@/lib/gemini/client'
 import { getUsageStats, resetUsageStats } from '@/lib/ai/usage-tracker'
 import type { AIProvider, AIUsageStats } from '@/lib/ai/types'
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
 import { useSoundEffects } from '@/hooks/use-sound-effects'
 import { encrypt, decrypt } from '@/lib/crypto'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 export function Settings() {
   const [preferredProvider, setPreferredProvider] = useKV<AIProvider | "auto">(
@@ -114,6 +125,46 @@ export function Settings() {
     await resetUsageStats()
     await loadUsageStats()
     toast.success("Usage statistics reset")
+  }
+
+  const handleClearAllData = async () => {
+    try {
+      const dataKeys = [
+        'habits',
+        'expenses',
+        'financial-profile',
+        'detailed-budget',
+        'tasks',
+        'workout-plans',
+        'completed-workouts',
+        'personal-records',
+        'knox-messages',
+        'shopping-items',
+        'calendar-events',
+        'golf-swing-analyses'
+      ]
+
+      for (const key of dataKeys) {
+        await spark.kv.delete(key)
+      }
+
+      triggerHaptic('success')
+      playSound('success')
+      toast.success('All data cleared', {
+        description: 'Your app has been reset to a fresh state'
+      })
+      
+      setTimeout(() => {
+        window.location.reload()
+      }, 1500)
+    } catch (error) {
+      console.error('Failed to clear data:', error)
+      triggerHaptic('error')
+      playSound('error')
+      toast.error('Failed to clear data', {
+        description: 'Please try again'
+      })
+    }
   }
 
   if (!isOwner) {
@@ -536,6 +587,72 @@ export function Settings() {
           </CardContent>
         </Card>
       )}
+
+      <Card className="elevated-card border-destructive/20">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Warning className="text-destructive" size={24} />
+            <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          </div>
+          <CardDescription>
+            Irreversible actions that will permanently delete your data
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-4 bg-destructive/5 border border-destructive/20 rounded-lg space-y-3">
+            <h4 className="font-semibold text-sm flex items-center gap-2">
+              <Trash className="text-destructive" size={18} />
+              Clear All Data
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              This will permanently delete all your habits, expenses, tasks, workouts, calendar events, shopping items, Knox conversations, and golf swing analyses. This action cannot be undone.
+            </p>
+          </div>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="w-full gap-2">
+                <Trash size={16} />
+                Clear All Data
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <Warning className="text-destructive" size={24} />
+                  Are you absolutely sure?
+                </AlertDialogTitle>
+                <AlertDialogDescription className="space-y-2">
+                  <p>
+                    This action cannot be undone. This will permanently delete:
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    <li>All habits and their tracking history</li>
+                    <li>All expenses and financial profiles</li>
+                    <li>All tasks and calendar events</li>
+                    <li>All workout plans and completed workouts</li>
+                    <li>All Knox conversations</li>
+                    <li>All shopping lists</li>
+                    <li>All golf swing analyses</li>
+                  </ul>
+                  <p className="font-semibold pt-2">
+                    Your app will be reset to a fresh state, as if you just installed it.
+                  </p>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleClearAllData}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Yes, delete everything
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
+      </Card>
     </div>
   )
 }

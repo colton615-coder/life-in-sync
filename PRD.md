@@ -1,6 +1,8 @@
-# Habit Tracker PRD
+# Command Center - Personal Dashboard PRD
 
-A visual habit tracking application where users set daily goals (like drinking 8 glasses of water) and tap interactive icons throughout the day to mark progress, with celebration animations upon completion to reinforce positive behavior. The app features a global completion tracking system that separates completed items from active items across all modules, enabling rich analytics and data-driven insights.
+> **Deployment Status**: ✅ Ready for Production - All mock and sample data has been cleared. The app starts with a clean slate and includes a data reset feature in Settings for users who want to start fresh.
+
+A comprehensive personal dashboard application that integrates habit tracking, financial management, task management, workout planning, AI coaching (Knox), shopping lists, calendar events, and golf swing analysis. The app features a neumorphic dark theme with glassmorphic elements, providing a modern and cohesive user experience across all modules.
 
 **Experience Qualities**:
 1. **Satisfying** - Each tap provides immediate visual feedback with icons filling up, creating a dopamine-rewarding experience
