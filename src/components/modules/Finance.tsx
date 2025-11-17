@@ -300,38 +300,35 @@ CRITICAL RULES:
 
   return (
     <div className="space-y-8 md:space-y-12 animate-in fade-in duration-500">
-      <motion.div 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="space-y-1.5"
-      >
-        <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gradient-cyan">Finance</h1>
-        <p className="text-sm md:text-base text-muted-foreground/60 font-normal">
-          Watch your dreams leak away, one transaction at a time
-        </p>
-      </motion.div>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="space-y-1.5"
+        >
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gradient-cyan">Finance</h1>
+          <p className="text-sm md:text-base text-muted-foreground/60 font-normal">
+            Watch your dreams leak away, one transaction at a time
+          </p>
+        </motion.div>
 
-      <div className="flex items-center justify-between gap-4 flex-wrap mb-10 md:mb-12">
-        <TabGroup
-          tabs={[
-            { id: 'expenses', label: 'Expenses' },
-            { id: 'advisor', label: 'AI Financial Advisor', icon: <Sparkle weight="fill" size={16} /> },
-            ...(detailedBudget ? [{ id: 'budget', label: 'Your Budget' }] : []),
-          ]}
-          activeTab={activeTab}
-          onChange={setActiveTab}
-        />
         {activeTab === 'expenses' && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button
-                size="sm"
-                className="gap-1.5 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
               >
-                <Plus size={16} weight="bold" />
-                <span>Add</span>
-              </Button>
+                <Button
+                  size="default"
+                  className="gap-2 h-10 px-5 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all"
+                >
+                  <Plus size={18} weight="bold" />
+                  <span className="font-semibold">Add Expense</span>
+                </Button>
+              </motion.div>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] glass-card border-primary/30">
               <DialogHeader>
@@ -388,6 +385,18 @@ CRITICAL RULES:
             </DialogContent>
           </Dialog>
         )}
+      </div>
+
+      <div className="flex items-center gap-4 flex-wrap">
+        <TabGroup
+          tabs={[
+            { id: 'expenses', label: 'Expenses' },
+            { id: 'advisor', label: 'AI Financial Advisor', icon: <Sparkle weight="fill" size={16} /> },
+            ...(detailedBudget ? [{ id: 'budget', label: 'Your Budget' }] : []),
+          ]}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+        />
       </div>
 
       {activeTab === 'advisor' ? (
