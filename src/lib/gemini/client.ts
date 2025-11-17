@@ -55,7 +55,7 @@ export class GeminiClient {
     }
 
     const model = this.client.getGenerativeModel({
-      model: options?.model || "gemini-2.0-flash-exp",
+      model: options?.model || "gemini-1.5-flash",
       generationConfig: {
         temperature: options?.temperature ?? 0.7,
         maxOutputTokens: options?.maxOutputTokens,
@@ -71,7 +71,7 @@ export class GeminiClient {
 
       return {
         text,
-        model: options?.model || "gemini-2.0-flash-exp",
+        model: options?.model || "gemini-1.5-flash",
         finishReason: response.candidates?.[0]?.finishReason,
       }
     } catch (error: any) {

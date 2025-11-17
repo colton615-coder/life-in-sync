@@ -118,14 +118,28 @@ This is the FIRST message to initiate the session. Do NOT say "How can I help yo
       console.error('[Knox] Initialization error:', error)
       setInitError(true)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      
+      let userFriendlyMessage = 'Knox is currently unavailable. Please configure your Gemini API key in Settings to enable Knox.'
+      let toastDescription = errorMessage
+      
+      if (errorMessage.includes('quota') || errorMessage.includes('429')) {
+        userFriendlyMessage = 'Knox has hit the Gemini API rate limit. This happens when using the free tier of Gemini API. Please wait a moment and try again, or upgrade your Gemini API plan at https://ai.google.dev/pricing for higher limits.'
+        toastDescription = 'API quota exceeded. Please wait and retry, or check your Gemini API plan.'
+      } else if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('Invalid')) {
+        userFriendlyMessage = 'Your Gemini API key appears to be invalid. Please check your API key in Settings and make sure it\'s copied correctly from https://aistudio.google.com/apikey'
+        toastDescription = 'Invalid API key. Please verify your Gemini API key in Settings.'
+      } else if (!errorMessage.includes('not configured')) {
+        userFriendlyMessage = `Knox encountered an error: ${errorMessage}. Please check your Gemini API configuration in Settings.`
+      }
+      
       toast.error('Knox initialization failed', {
-        description: errorMessage
+        description: toastDescription
       })
       
       setMessages([{
         id: Date.now().toString(),
         role: 'assistant',
-        content: 'Knox is currently unavailable. Please configure your Gemini API key in Settings to enable Knox.',
+        content: userFriendlyMessage,
         timestamp: new Date().toISOString()
       }])
     } finally {
@@ -194,6 +208,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
 
       console.log('[Knox] Calling Gemini API')
       const response = await gemini.generate(promptText, {
+        model: 'gemini-1.5-flash',
         temperature: 0.9,
         maxOutputTokens: 500
       })
@@ -211,14 +226,26 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
     } catch (error) {
       console.error('[Knox] Quick query error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      
+      let userFriendlyMessage = 'I\'m experiencing technical difficulties. Please make sure your Gemini API key is configured in Settings.'
+      let toastDescription = errorMessage
+      
+      if (errorMessage.includes('quota') || errorMessage.includes('429')) {
+        userFriendlyMessage = 'Knox has hit the Gemini API rate limit. Please wait a moment (~20-30 seconds) and try again, or upgrade your Gemini API plan for higher limits.'
+        toastDescription = 'API quota exceeded. Please wait and retry.'
+      } else if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('Invalid')) {
+        userFriendlyMessage = 'Your Gemini API key appears to be invalid. Please verify your key in Settings.'
+        toastDescription = 'Invalid API key.'
+      }
+      
       toast.error('Message failed', {
-        description: errorMessage
+        description: toastDescription
       })
       
       const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'I\'m experiencing technical difficulties. Please make sure your Gemini API key is configured in Settings.',
+        content: userFriendlyMessage,
         timestamp: new Date().toISOString()
       }
       setMessages((current) => [...(current || []), errorResponse])
@@ -291,6 +318,7 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
 
       console.log('[Knox] Calling Gemini API')
       const response = await gemini.generate(promptText, {
+        model: 'gemini-1.5-flash',
         temperature: 0.9,
         maxOutputTokens: 500
       })
@@ -308,14 +336,26 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
     } catch (error) {
       console.error('[Knox] Message error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      
+      let userFriendlyMessage = 'I\'m experiencing technical difficulties. Please make sure your Gemini API key is configured in Settings.'
+      let toastDescription = errorMessage
+      
+      if (errorMessage.includes('quota') || errorMessage.includes('429')) {
+        userFriendlyMessage = 'Knox has hit the Gemini API rate limit. Please wait a moment (~20-30 seconds) and try again, or upgrade your Gemini API plan for higher limits.'
+        toastDescription = 'API quota exceeded. Please wait and retry.'
+      } else if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('Invalid')) {
+        userFriendlyMessage = 'Your Gemini API key appears to be invalid. Please verify your key in Settings.'
+        toastDescription = 'Invalid API key.'
+      }
+      
       toast.error('Message failed', {
-        description: errorMessage
+        description: toastDescription
       })
       
       const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'I\'m experiencing technical difficulties. Please make sure your Gemini API key is configured in Settings.',
+        content: userFriendlyMessage,
         timestamp: new Date().toISOString()
       }
       setMessages((current) => [...(current || []), errorResponse])
