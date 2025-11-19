@@ -134,16 +134,17 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                           className={cn(
                             'w-full h-11 rounded-xl transition-all duration-200 relative flex items-center gap-3 px-3 group',
                             isActive
-                              ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                              ? 'text-primary shadow-lg shadow-primary/20'
                               : 'text-foreground/70 hover:text-foreground hover:bg-secondary/50'
                           )}
+                          style={isActive ? { backgroundColor: 'rgba(255, 199, 77, 0.15)' } : undefined}
                           onClick={() => handleModuleClick(module.id)}
                           aria-label={`${module.label} module${isActive ? ', currently active' : ''}`}
                           aria-current={isActive ? 'page' : undefined}
                         >
                           <div className={cn(
                             "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors",
-                            isActive ? "bg-primary-foreground/10" : "bg-transparent group-hover:bg-background/50"
+                            isActive ? "text-primary" : "bg-transparent group-hover:bg-background/50"
                           )}>
                             <IconComponent 
                               size={20}

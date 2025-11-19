@@ -12,7 +12,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    background: oklch(0.22 0.01 240);
+    background: var(--color-surface-base);
+    color: var(--color-text-default);
     min-height: 100vh;
   }
   
@@ -82,17 +83,26 @@
 }
 
 :root {
-  --background: oklch(0.22 0.01 240);
-  --foreground: oklch(0.95 0.005 240);
+  /* Mystic Amethyst Theme - Semantic Color Variables */
+  --color-surface-base: #1E122C;
+  --color-surface-elevated: #2F1F3D;
+  --color-text-default: #F5F0FF;
+  --color-brand-primary: #FFC74D;
+  --color-state-success: #4DC7B3;
+  --color-text-on-brand: #111111;
   
-  --card: oklch(0.26 0.01 240);
-  --card-foreground: oklch(0.95 0.005 240);
+  /* Map to existing semantic variables */
+  --background: var(--color-surface-base);
+  --foreground: var(--color-text-default);
   
-  --popover: oklch(0.24 0.01 240);
-  --popover-foreground: oklch(0.95 0.005 240);
+  --card: var(--color-surface-elevated);
+  --card-foreground: var(--color-text-default);
   
-  --primary: oklch(0.68 0.19 211);
-  --primary-foreground: oklch(0.98 0.005 240);
+  --popover: var(--color-surface-elevated);
+  --popover-foreground: var(--color-text-default);
+  
+  --primary: var(--color-brand-primary);
+  --primary-foreground: var(--color-text-on-brand);
   
   --secondary: oklch(0.30 0.015 240);
   --secondary-foreground: oklch(0.90 0.01 240);
@@ -100,35 +110,35 @@
   --muted: oklch(0.28 0.01 240);
   --muted-foreground: oklch(0.55 0.01 240);
   
-  --accent: oklch(0.68 0.19 211);
-  --accent-foreground: oklch(0.98 0.005 240);
+  --accent: var(--color-brand-primary);
+  --accent-foreground: var(--color-text-on-brand);
   
-  --success: oklch(0.65 0.16 150);
-  --success-foreground: oklch(0.22 0.01 240);
+  --success: var(--color-state-success);
+  --success-foreground: var(--color-surface-base);
   
   --destructive: oklch(0.60 0.22 25);
   --destructive-foreground: oklch(0.98 0.005 240);
   
   --border: oklch(0.32 0.015 240);
   --input: oklch(0.30 0.015 240);
-  --ring: oklch(0.68 0.19 211);
+  --ring: var(--color-brand-primary);
   
   --radius: 0.75rem;
   
-  --chart-1: oklch(0.68 0.19 211);
+  --chart-1: var(--color-brand-primary);
   --chart-2: oklch(0.60 0.18 280);
-  --chart-3: oklch(0.55 0.18 180);
+  --chart-3: var(--color-state-success);
   --chart-4: oklch(0.65 0.15 320);
   --chart-5: oklch(0.58 0.16 40);
   
-  --sidebar: oklch(0.24 0.01 240);
-  --sidebar-foreground: oklch(0.95 0.005 240);
-  --sidebar-primary: oklch(0.68 0.19 211);
-  --sidebar-primary-foreground: oklch(0.98 0.005 240);
+  --sidebar: var(--color-surface-elevated);
+  --sidebar-foreground: var(--color-text-default);
+  --sidebar-primary: var(--color-brand-primary);
+  --sidebar-primary-foreground: var(--color-text-on-brand);
   --sidebar-accent: oklch(0.30 0.015 240);
   --sidebar-accent-foreground: oklch(0.90 0.01 240);
   --sidebar-border: oklch(0.32 0.015 240);
-  --sidebar-ring: oklch(0.68 0.19 211);
+  --sidebar-ring: var(--color-brand-primary);
   
   --shadow-neumorphic-1: 8px 8px 16px oklch(0.18 0.01 240);
   --shadow-neumorphic-2: -8px -8px 16px oklch(0.28 0.015 240);
@@ -235,28 +245,29 @@
 }
 
 .neumorphic-card {
-  background: oklch(0.26 0.01 240);
-  border: 1px solid oklch(0.30 0.015 240);
+  background: var(--color-surface-elevated);
+  border: 1px solid rgba(255, 199, 77, 0.1);
   border-radius: var(--radius);
   box-shadow: 
-    8px 8px 16px oklch(0.18 0.01 240),
-    -4px -4px 12px oklch(0.28 0.015 240);
+    8px 8px 16px rgba(0, 0, 0, 0.3),
+    -4px -4px 12px rgba(255, 255, 255, 0.02);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .neumorphic-card:hover {
   box-shadow: 
-    12px 12px 24px oklch(0.18 0.01 240),
-    -6px -6px 16px oklch(0.28 0.015 240);
+    12px 12px 24px rgba(0, 0, 0, 0.4),
+    -6px -6px 16px rgba(255, 255, 255, 0.03),
+    0 0 20px rgba(255, 199, 77, 0.1);
   transform: translateY(-2px);
 }
 
 .neumorphic-inset {
-  background: oklch(0.24 0.01 240);
-  border: 1px solid oklch(0.28 0.01 240);
+  background: var(--color-surface-base);
+  border: 1px solid rgba(0, 0, 0, 0.3);
   box-shadow: 
-    inset 4px 4px 8px oklch(0.18 0.01 240),
-    inset -2px -2px 6px oklch(0.28 0.015 240);
+    inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.02);
 }
 
 .glow-border {
@@ -269,7 +280,7 @@
   inset: -2px;
   border-radius: inherit;
   padding: 2px;
-  background: linear-gradient(135deg, oklch(0.68 0.19 211), oklch(0.60 0.18 280));
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-state-success));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -283,7 +294,7 @@
 }
 
 .glow-shadow {
-  box-shadow: 0 0 20px oklch(0.68 0.19 211 / 0.3);
+  box-shadow: 0 0 20px rgba(255, 199, 77, 0.3);
 }
 
 .glow-shadow-strong {
@@ -301,48 +312,52 @@
 }
 
 .text-gradient-cyan {
-  background: linear-gradient(135deg, oklch(0.68 0.19 211), oklch(0.75 0.18 200));
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-state-success));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .button-neumorphic {
-  background: oklch(0.26 0.01 240);
-  border: 1px solid oklch(0.30 0.015 240);
+  background: var(--color-surface-elevated);
+  border: 1px solid rgba(255, 199, 77, 0.1);
   box-shadow: 
-    6px 6px 12px oklch(0.18 0.01 240),
-    -3px -3px 8px oklch(0.28 0.015 240);
+    6px 6px 12px rgba(0, 0, 0, 0.3),
+    -3px -3px 8px rgba(255, 255, 255, 0.02);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .button-neumorphic:hover {
   box-shadow: 
-    4px 4px 8px oklch(0.18 0.01 240),
-    -2px -2px 6px oklch(0.28 0.015 240);
+    4px 4px 8px rgba(0, 0, 0, 0.3),
+    -2px -2px 6px rgba(255, 255, 255, 0.02);
   transform: translateY(1px);
 }
 
 .button-neumorphic:active {
   box-shadow: 
-    inset 3px 3px 6px oklch(0.18 0.01 240),
-    inset -2px -2px 4px oklch(0.28 0.015 240);
+    inset 3px 3px 6px rgba(0, 0, 0, 0.4),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.02);
   transform: translateY(2px);
 }
 
+.btn-primary,
 .button-glow {
-  background: oklch(0.68 0.19 211);
-  border: 1px solid oklch(0.72 0.20 211);
+  background: var(--color-brand-primary);
+  color: var(--color-text-on-brand);
+  border: 1px solid rgba(255, 199, 77, 0.3);
   box-shadow: 
-    0 0 15px oklch(0.68 0.19 211 / 0.3),
-    0 4px 12px oklch(0.18 0.01 240);
+    0 0 15px rgba(255, 199, 77, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.3);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.btn-primary:hover,
 .button-glow:hover {
+  background: #E6B445;
   box-shadow: 
-    0 0 25px oklch(0.68 0.19 211 / 0.5),
-    0 6px 16px oklch(0.18 0.01 240);
+    0 0 25px rgba(255, 199, 77, 0.5),
+    0 6px 16px rgba(0, 0, 0, 0.4);
   transform: translateY(-2px);
 }
 
@@ -360,26 +375,27 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: oklch(0.26 0.01 240);
-  border: 1px solid oklch(0.30 0.015 240);
+  background: var(--color-surface-elevated);
+  border: 1px solid rgba(255, 199, 77, 0.1);
   box-shadow: 
-    6px 6px 12px oklch(0.18 0.01 240),
-    -3px -3px 8px oklch(0.28 0.015 240);
+    6px 6px 12px rgba(0, 0, 0, 0.3),
+    -3px -3px 8px rgba(255, 255, 255, 0.02);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .icon-circle:hover {
   box-shadow: 
-    4px 4px 8px oklch(0.18 0.01 240),
-    -2px -2px 6px oklch(0.28 0.015 240);
+    4px 4px 8px rgba(0, 0, 0, 0.3),
+    -2px -2px 6px rgba(255, 255, 255, 0.02);
 }
 
 .icon-circle-glow {
-  background: oklch(0.68 0.19 211);
-  border: 1px solid oklch(0.72 0.20 211);
+  background: var(--color-brand-primary);
+  color: var(--color-text-on-brand);
+  border: 1px solid rgba(255, 199, 77, 0.3);
   box-shadow: 
-    0 0 20px oklch(0.68 0.19 211 / 0.4),
-    0 4px 12px oklch(0.18 0.01 240);
+    0 0 20px rgba(255, 199, 77, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .progress-ring {
@@ -389,23 +405,23 @@
 
 .progress-ring-circle {
   transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  stroke: oklch(0.68 0.19 211);
+  stroke: var(--color-state-success);
   stroke-linecap: round;
-  filter: drop-shadow(0 0 8px oklch(0.68 0.19 211 / 0.5));
+  filter: drop-shadow(0 0 8px rgba(77, 199, 179, 0.5));
 }
 
 .slider-track {
-  background: oklch(0.24 0.01 240);
+  background: var(--color-surface-base);
   border-radius: var(--radius-full);
   box-shadow: 
-    inset 3px 3px 6px oklch(0.18 0.01 240),
-    inset -2px -2px 4px oklch(0.28 0.015 240);
+    inset 3px 3px 6px rgba(0, 0, 0, 0.4),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.02);
 }
 
 .slider-fill {
-  background: linear-gradient(90deg, oklch(0.68 0.19 211), oklch(0.72 0.20 200));
+  background: linear-gradient(90deg, var(--color-brand-primary), var(--color-state-success));
   border-radius: var(--radius-full);
-  box-shadow: 0 0 10px oklch(0.68 0.19 211 / 0.4);
+  box-shadow: 0 0 10px rgba(255, 199, 77, 0.4);
 }
 
 .mode-button {
@@ -415,28 +431,28 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: oklch(0.26 0.01 240);
-  border: 1px solid oklch(0.30 0.015 240);
+  background: var(--color-surface-elevated);
+  border: 1px solid rgba(255, 199, 77, 0.1);
   box-shadow: 
-    6px 6px 12px oklch(0.18 0.01 240),
-    -3px -3px 8px oklch(0.28 0.015 240);
+    6px 6px 12px rgba(0, 0, 0, 0.3),
+    -3px -3px 8px rgba(255, 255, 255, 0.02);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 
 .mode-button:hover {
   box-shadow: 
-    4px 4px 8px oklch(0.18 0.01 240),
-    -2px -2px 6px oklch(0.28 0.015 240);
+    4px 4px 8px rgba(0, 0, 0, 0.3),
+    -2px -2px 6px rgba(255, 255, 255, 0.02);
 }
 
 .mode-button.active {
-  background: oklch(0.68 0.19 211);
-  border: 1px solid oklch(0.72 0.20 211);
+  background: var(--color-brand-primary);
+  color: var(--color-text-on-brand);
+  border: 1px solid rgba(255, 199, 77, 0.3);
   box-shadow: 
-    0 0 20px oklch(0.68 0.19 211 / 0.4),
-    inset 0 0 10px oklch(0.72 0.20 211 / 0.3);
-  color: oklch(0.98 0.005 240);
+    0 0 20px rgba(255, 199, 77, 0.4),
+    inset 0 0 10px rgba(255, 199, 77, 0.3);
 }
 
 .scrollbar-neumorphic {
