@@ -43,9 +43,9 @@ export function AIButton({ children, loading = false, icon, size = 'md', variant
     }
 
     const variantClasses = {
-      default: 'text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50',
-      ghost: 'text-foreground bg-transparent border border-purple-500/30 hover:bg-purple-500/10 hover:border-purple-500/50',
-      outline: 'text-purple-600 dark:text-purple-400 bg-transparent border-2 border-purple-500 hover:bg-purple-500/10'
+      default: 'text-[var(--color-text-on-brand)] bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-state-success)] hover:shadow-2xl hover:shadow-[var(--color-brand-primary)]/50',
+      ghost: 'text-foreground bg-transparent border border-[var(--color-brand-primary)]/30 hover:bg-[var(--color-brand-primary)]/10 hover:border-[var(--color-brand-primary)]/50',
+      outline: 'text-[var(--color-brand-primary)] bg-transparent border-2 border-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/10'
     }
 
     useEffect(() => {

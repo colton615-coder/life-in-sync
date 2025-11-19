@@ -72,7 +72,7 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                 damping: 25,
                 stiffness: 250,
               }}
-              className="fixed left-0 top-0 h-full w-72 max-w-[85vw] z-[101] bg-card/95 backdrop-blur-xl border-r border-border/50 shadow-2xl flex flex-col"
+              className="fixed left-0 top-0 h-full w-72 max-w-[85vw] z-[101] sidebar-nav backdrop-blur-xl border-r border-border/50 shadow-2xl flex flex-col"
               role="dialog"
               aria-label="Navigation menu"
               aria-modal="true"
@@ -83,7 +83,7 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="text-xl font-semibold text-gradient-cyan"
+                    className="text-xl font-semibold text-gradient-primary"
                     id="navigation-title"
                   >
                     Command Center
@@ -132,9 +132,9 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                       >
                         <button
                           className={cn(
-                            'w-full h-11 rounded-xl transition-all duration-200 relative flex items-center gap-3 px-3 group',
+                            'w-full h-11 rounded-xl transition-all duration-200 relative flex items-center gap-3 px-3 group sidebar-item',
                             isActive
-                              ? 'text-primary shadow-lg shadow-primary/20'
+                              ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
                               : 'text-foreground/70 hover:text-foreground hover:bg-secondary/50'
                           )}
                           style={isActive ? { backgroundColor: 'rgba(255, 199, 77, 0.15)' } : undefined}
@@ -177,7 +177,7 @@ export function NavigationDrawer({ isOpen, onClose, activeModule, onModuleChange
                   transition={{ delay: 0.2 }}
                   className="text-center"
                 >
-                  <p className="font-bold text-gradient-cyan text-lg tracking-tight">
+                  <p className="font-bold text-gradient-primary text-lg tracking-tight">
                     LiFE-iN-SYNC
                   </p>
                   <p className="mt-0.5 text-xs font-medium text-muted-foreground">

@@ -177,7 +177,7 @@ export function Calendar() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/80 via-white/60 to-white/40 dark:from-gray-900/80 dark:via-gray-900/60 dark:to-gray-900/40 backdrop-blur-xl border border-white/20 shadow-2xl"
+        className="relative overflow-hidden rounded-3xl glass-card backdrop-blur-xl border border-white/20 shadow-2xl"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
         
@@ -282,7 +282,7 @@ export function Calendar() {
                         ? 'bg-gradient-to-br from-orange-500 to-red-500 text-white font-bold shadow-xl shadow-orange-500/50' 
                         : hasEvents
                         ? 'bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-800/40 dark:hover:to-pink-800/40 border-2 border-purple-200/50 dark:border-purple-700/50'
-                        : 'bg-white/60 dark:bg-gray-800/60 hover:bg-gradient-to-br hover:from-blue-100 hover:to-cyan-100 dark:hover:from-blue-900/30 dark:hover:to-cyan-900/30 border-2 border-transparent hover:border-blue-200/50',
+                        : 'glass-morphic hover:bg-gradient-to-br hover:from-blue-500/20 hover:to-cyan-500/20 border-2 border-transparent hover:border-blue-500/30',
                       'backdrop-blur-sm'
                     )}
                   >

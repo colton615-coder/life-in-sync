@@ -191,7 +191,7 @@ export function Shopping() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/80 via-white/60 to-white/40 dark:from-gray-900/80 dark:via-gray-900/60 dark:to-gray-900/40 backdrop-blur-xl border border-white/20 shadow-2xl"
+        className="relative overflow-hidden rounded-3xl glass-card backdrop-blur-xl border border-white/20 shadow-2xl"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 via-purple-500/5 to-blue-500/5" />
         
@@ -203,7 +203,7 @@ export function Shopping() {
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value)}
                 placeholder="What do you need to buy?"
-                className="h-12 text-base pl-5 pr-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-border/50 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 rounded-xl shadow-md transition-all duration-200"
+                className="h-12 text-base pl-5 pr-4 glass-morphic backdrop-blur-sm border-2 border-border/50 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 rounded-xl shadow-md transition-all duration-200"
                 autoFocus
               />
               {newItemName && (
@@ -272,7 +272,7 @@ export function Shopping() {
                       <div
                         className={cn(
                           'flex items-center gap-4 p-4 rounded-2xl transition-all duration-300',
-                          'bg-gradient-to-r from-white/50 to-white/30 dark:from-gray-800/50 dark:to-gray-800/30',
+                          'glass-morphic',
                           'hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20',
                           'hover:shadow-lg hover:scale-[1.02] border border-transparent hover:border-purple-200/50'
                         )}

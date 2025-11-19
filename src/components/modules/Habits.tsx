@@ -658,22 +658,7 @@ export function Habits() {
                   ? (habit.trackingType === 'numerical' ? (todayEntry.value || 0) : (todayEntry.minutes || 0))
                   : 0
                 
-                const iconColors = [
-                  'text-cyan-400',
-                  'text-blue-400', 
-                  'text-purple-400',
-                  'text-pink-400',
-                  'text-rose-400',
-                  'text-orange-400',
-                  'text-amber-400',
-                  'text-yellow-400',
-                  'text-lime-400',
-                  'text-green-400',
-                  'text-emerald-400',
-                  'text-teal-400',
-                ]
-                
-                const iconColor = iconColors[parseInt(habit.id) % iconColors.length]
+                const iconColor = 'text-success'
                 
                 return (
                   <motion.div key={habit.id} variants={item}>
@@ -690,19 +675,19 @@ export function Habits() {
                               className={cn(
                                 'w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl flex items-center justify-center border-2 transition-all',
                                 completed 
-                                  ? 'glass-card border-primary bg-primary/20 shadow-lg shadow-primary/30' 
+                                  ? 'glass-card border-success bg-success/20 shadow-lg shadow-success/30' 
                                   : 'glass-morphic border-border/50'
                               )}
                             >
                               <IconComponent
                                 size={28}
                                 weight={completed ? 'fill' : 'regular'}
-                                className={cn('transition-all md:hidden', completed ? iconColor : 'text-muted-foreground')}
+                                className={cn('transition-all md:hidden', completed ? 'text-success' : 'text-muted-foreground')}
                               />
                               <IconComponent
                                 size={36}
                                 weight={completed ? 'fill' : 'regular'}
-                                className={cn('transition-all hidden md:block', completed ? iconColor : 'text-muted-foreground')}
+                                className={cn('transition-all hidden md:block', completed ? 'text-success' : 'text-muted-foreground')}
                               />
                             </motion.div>
                           </button>
@@ -712,19 +697,19 @@ export function Habits() {
                               className={cn(
                                 'w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl flex items-center justify-center border-2 transition-all',
                                 completed 
-                                  ? 'glass-card border-primary bg-primary/20 shadow-lg shadow-primary/30' 
+                                  ? 'glass-card border-success bg-success/20 shadow-lg shadow-success/30' 
                                   : 'glass-morphic border-border/50'
                               )}
                             >
                               <IconComponent
                                 size={28}
                                 weight={completed ? 'fill' : 'regular'}
-                                className={cn('transition-all md:hidden', completed ? iconColor : 'text-muted-foreground')}
+                                className={cn('transition-all md:hidden', completed ? 'text-success' : 'text-muted-foreground')}
                               />
                               <IconComponent
                                 size={36}
                                 weight={completed ? 'fill' : 'regular'}
-                                className={cn('transition-all hidden md:block', completed ? iconColor : 'text-muted-foreground')}
+                                className={cn('transition-all hidden md:block', completed ? 'text-success' : 'text-muted-foreground')}
                               />
                             </motion.div>
                           </div>
@@ -774,7 +759,7 @@ export function Habits() {
                           
                           <div className="flex items-center gap-2 md:gap-3">
                             <div className="flex items-center gap-1 md:gap-1.5">
-                              <Fire weight="fill" className="text-orange-500" size={14} />
+                              <Fire weight="fill" className="text-[color:var(--color-accent-gold)]" size={14} />
                               <motion.span 
                                 key={`${habit.id}-${habit.streak}`}
                                 animate={animatingStreak === habit.id ? {
@@ -789,7 +774,7 @@ export function Habits() {
                               <span className="font-normal text-xs md:text-sm">day streak</span>
                             </div>
                             {completed && (
-                              <Badge variant="outline" className="text-[10px] md:text-xs border-primary/30 text-primary glass-morphic px-1.5 py-0">
+                              <Badge variant="outline" className="text-[10px] md:text-xs border-success/30 text-success glass-morphic px-1.5 py-0">
                                 ✓ Done today
                               </Badge>
                             )}
