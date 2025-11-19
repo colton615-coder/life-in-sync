@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { SwingAnalysis } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { callAIWithRetry, parseAIJsonResponse, validateAIResponse } from '@/lib/ai-utils'
 import { 
   Sparkle, 
   CheckCircle, 
@@ -52,6 +53,55 @@ interface SwingComparisonDialogProps {
   analyses: SwingAnalysis[]
 }
 
+const toRecord = (value: unknown): Record<string, unknown> | null =>
+  typeof value === 'object' && value !== null ? value as Record<string, unknown> : null
+
+const VALID_IMPACT_VALUES = new Set(['High', 'Medium', 'Low'])
+
+const normalizeMetricChanges = (items: unknown): ComparisonReport['improvements'] => {
+  if (!Array.isArray(items)) return []
+
+  return items.map((item) => {
+    const record = toRecord(item)
+    const rawImpact = typeof record?.impact === 'string' ? record.impact : null
+    const impact = rawImpact && VALID_IMPACT_VALUES.has(rawImpact) ? rawImpact : 'Medium'
+
+    return {
+      metric: typeof record?.metric === 'string' ? record.metric : 'Metric',
+      change: typeof record?.change === 'string' ? record.change : 'N/A',
+      impact,
+      reason: typeof record?.reason === 'string' ? record.reason : 'Details unavailable.'
+    }
+  })
+}
+
+const normalizeUnchangedMetrics = (items: unknown): ComparisonReport['unchanged'] => {
+  if (!Array.isArray(items)) return []
+
+  return items.map((item) => {
+    const record = toRecord(item)
+
+    return {
+      metric: typeof record?.metric === 'string' ? record.metric : 'Metric',
+      note: typeof record?.note === 'string' ? record.note : 'No additional notes.'
+    }
+  })
+}
+
+const normalizeRecommendations = (items: unknown): string[] => {
+  if (!Array.isArray(items)) return []
+  return items
+    .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    .map((item) => item.trim())
+}
+
+const normalizeProgressScore = (value: unknown): number => {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return 0
+  }
+  return Math.min(100, Math.max(0, Math.round(value)))
+}
+
 export function SwingComparisonDialog({ open, onOpenChange, analyses }: SwingComparisonDialogProps) {
   const [selectedSwing1, setSelectedSwing1] = useState<SwingAnalysis | null>(null)
   const [selectedSwing2, setSelectedSwing2] = useState<SwingAnalysis | null>(null)
@@ -81,6 +131,10 @@ export function SwingComparisonDialog({ open, onOpenChange, analyses }: SwingCom
     }, 200)
 
     try {
+      if (!window.spark || !window.spark.llm || !window.spark.llmPrompt) {
+        throw new Error('Spark AI is unavailable. Please reload the page and try again.')
+      }
+
       const prompt = window.spark.llmPrompt`You are an expert golf instructor analyzing two golf swings to provide detailed, actionable feedback on progress.
 
 Swing 1 (Earlier):
@@ -153,14 +207,34 @@ Provide a detailed comparison report in JSON format with the following structure
 
 Focus on biomechanical relationships - explain HOW one change affects another (e.g., "The 12° increase in hip rotation created more torque, which naturally improved head stability by reducing compensatory movements"). Be specific with numbers and causality.`
 
-      const response = await window.spark.llm(prompt, 'gpt-4o', true)
-      const report = JSON.parse(response) as ComparisonReport
+      const response = await callAIWithRetry(prompt, 'gpt-4o', true)
+      const parsedReport = parseAIJsonResponse<Partial<ComparisonReport>>(response, 'Comparison report object with summary, improvements, regressions, unchanged, recommendations, progressScore, keyTakeaway')
+
+      validateAIResponse(parsedReport, [
+        'summary',
+        'improvements',
+        'regressions',
+        'unchanged',
+        'recommendations',
+        'progressScore',
+        'keyTakeaway'
+      ])
+
+      const normalizedReport: ComparisonReport = {
+        summary: typeof parsedReport.summary === 'string' ? parsedReport.summary : 'No summary provided.',
+        improvements: normalizeMetricChanges(parsedReport.improvements),
+        regressions: normalizeMetricChanges(parsedReport.regressions),
+        unchanged: normalizeUnchangedMetrics(parsedReport.unchanged),
+        recommendations: normalizeRecommendations(parsedReport.recommendations),
+        progressScore: normalizeProgressScore(parsedReport.progressScore),
+        keyTakeaway: typeof parsedReport.keyTakeaway === 'string' ? parsedReport.keyTakeaway : 'Keep refining the fundamentals for more consistent swings.'
+      }
 
       clearInterval(progressInterval)
       setComparisonProgress(100)
 
       setTimeout(() => {
-        setComparisonReport(report)
+        setComparisonReport(normalizedReport)
         setIsComparing(false)
       }, 300)
 
@@ -168,12 +242,12 @@ Focus on biomechanical relationships - explain HOW one change affects another (e
         description: 'Your detailed swing analysis is ready'
       })
     } catch (error) {
-      clearInterval(progressInterval)
       console.error('Comparison failed:', error)
-      toast.error('Comparison failed', {
-        description: 'Unable to generate comparison report. Please try again.'
-      })
+      const description = error instanceof Error ? error.message : 'Unable to generate comparison report. Please try again.'
+      toast.error('Comparison failed', { description })
       setIsComparing(false)
+    } finally {
+      clearInterval(progressInterval)
     }
   }
 

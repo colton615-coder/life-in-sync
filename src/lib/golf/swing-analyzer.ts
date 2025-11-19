@@ -1,3 +1,4 @@
+import { callAIWithRetry } from '@/lib/ai-utils'
 import { SwingPoseData, SwingMetrics, SwingFeedback, GolfClub } from '@/lib/types'
 
 interface MediaPipeLandmark {
@@ -214,7 +215,11 @@ export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | n
 
   const clubContext = club ? `\nClub Used: ${club}` : ''
 
-  const prompt = window.spark.llmPrompt`You are a professional golf instructor analyzing a student's swing. Based on these metrics:
+  let aiInsights = 'AI insights unavailable at this time.'
+
+  try {
+    if (window.spark && window.spark.llm && window.spark.llmPrompt) {
+      const prompt = window.spark.llmPrompt`You are a professional golf instructor analyzing a student's swing. Based on these metrics:
 - Hip Rotation: ${metrics.hipRotation.total.toFixed(1)}°
 - Shoulder Rotation: ${metrics.shoulderRotation.total.toFixed(1)}°
 - Head Stability: ${metrics.headMovement.stability}
@@ -223,7 +228,16 @@ export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | n
 
 Provide a 2-3 sentence personalized insight focusing on the most important aspect to work on for improvement${club ? ` with this ${club}` : ''}.`
 
-  const aiInsights = await window.spark.llm(prompt, 'gpt-4o')
+      const response = await callAIWithRetry(prompt, 'gpt-4o', false)
+      if (response) {
+        aiInsights = response
+      }
+    } else {
+      console.warn('Spark AI is unavailable for generating golf feedback insights')
+    }
+  } catch (error) {
+    console.error('Failed to generate AI insights:', error)
+  }
 
   return {
     overallScore,
