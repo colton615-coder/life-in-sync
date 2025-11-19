@@ -113,8 +113,8 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
             'w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center transition-all duration-300',
             'cursor-pointer relative overflow-hidden',
             isFilled
-              ? 'glass-card bg-gradient-to-br from-accent-vibrant/30 via-accent-vibrant/30 to-secondary/30 border-2 shadow-2xl'
-              : 'glass-morphic border border-border/40 hover:border-accent-vibrant/40 hover:bg-card/50'
+              ? 'glass-card bg-gradient-to-br from-success/30 via-success/30 to-secondary/30 border-2 shadow-2xl'
+              : 'glass-morphic border border-border/40 hover:border-success/40 hover:bg-card/50'
           )}
           aria-label={`${habit.name} progress indicator ${i + 1} of ${habit.targetCount || 1}, ${isFilled ? 'completed' : 'not completed'}. Click to ${isFilled ? 'decrease' : 'increase'} progress.`}
           aria-pressed={isFilled}
@@ -124,7 +124,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
             className={cn(
               'w-11 h-11 md:w-14 md:h-14 transition-all duration-300',
               isFilled 
-                ? `${colorClass} drop-shadow-[0_0_12px_currentColor] brightness-125` 
+                ? `text-success drop-shadow-[0_0_12px_currentColor] brightness-125` 
                 : 'text-muted-foreground/60'
             )}
             aria-hidden="true"
@@ -134,7 +134,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="absolute inset-0 rounded-2xl bg-gradient-to-br from-accent-vibrant/10 via-accent-vibrant/10 to-secondary/10"
+                className="absolute inset-0 rounded-2xl bg-gradient-to-br from-success/10 via-success/10 to-secondary/10"
                 aria-hidden="true"
               />
               <motion.div
@@ -169,7 +169,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {habit.name}: {habit.currentProgress || 0} of {habit.targetCount || 1} completed{habit.streak > 0 ? `, ${habit.streak} day streak` : ''}
       </div>
-      <Card className={cn('glass-card p-6 md:p-8 shadow-2xl border-border/30 hover:border-accent-vibrant/30 transition-all duration-500', className)}>
+      <Card className={cn('glass-card p-6 md:p-8 shadow-2xl border-border/30 hover:border-success/30 transition-all duration-500', className)}>
         <div className="flex items-start justify-between mb-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2 flex-wrap">
@@ -185,7 +185,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
               )}
             </div>
             <p className="text-muted-foreground text-base">
-              <span className="text-accent-vibrant font-semibold text-lg">{habit.currentProgress || 0}</span>
+              <span className="text-success font-semibold text-lg">{habit.currentProgress || 0}</span>
               <span className="text-muted-foreground/60 mx-1">/</span>
               <span className="text-foreground/80">{habit.targetCount || 1}</span>
               <span className="sr-only"> completed</span>
@@ -197,7 +197,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
                 variant="ghost"
                 size="icon"
                 onClick={handleEdit}
-                className="text-muted-foreground hover:text-accent-vibrant hover:bg-accent-vibrant/10 glass-morphic border border-transparent hover:border-accent-vibrant/30"
+                className="text-muted-foreground hover:text-success hover:bg-success/10 glass-morphic border border-transparent hover:border-success/30"
                 aria-label={`Edit ${habit.name} habit`}
               >
                 <PencilSimple size={20} weight="bold" aria-hidden="true" />
@@ -220,7 +220,7 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
         <div className="mb-6 relative">
           <Progress value={progressPercent} className="h-3 glass-morphic" />
           <div 
-            className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-accent-vibrant via-accent-vibrant to-accent-vibrant transition-all duration-500"
+            className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-success via-success to-success transition-all duration-500"
             style={{ width: `${progressPercent}%`, boxShadow: '0 0 20px currentColor' }}
           />
         </div>
@@ -234,9 +234,9 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-            className="mt-6 p-4 glass-card bg-gradient-to-r from-success/20 to-accent-vibrant/20 border-success/30 rounded-xl text-center relative overflow-hidden"
+            className="mt-6 p-4 glass-card bg-gradient-to-r from-success/20 to-success/20 border-success/30 rounded-xl text-center relative overflow-hidden"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-success/10 via-transparent to-accent-vibrant/10 animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
+            <div className="absolute inset-0 bg-gradient-to-r from-success/10 via-transparent to-success/10 animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
             <p className="text-success font-semibold relative z-10 flex items-center justify-center gap-2">
               <span className="text-2xl">✨</span>
               Goal Achieved

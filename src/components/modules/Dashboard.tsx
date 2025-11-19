@@ -157,7 +157,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   return (
     <div className="pt-2 md:pt-4">
       <div className="space-y-3 mb-12 md:mb-16">
-        <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gradient-cyan">Dashboard</h1>
+        <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gradient-primary">Dashboard</h1>
         <p className="text-sm md:text-base text-muted-foreground/60 font-normal">Your life in numbers</p>
       </div>
 
@@ -197,7 +197,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   data={habitStats.trend7Days} 
                   width={120} 
                   height={32}
-                  color="oklch(0.68 0.19 211)"
+                  color="#FFC74D"
                   strokeWidth={2}
                 />
               </div>
