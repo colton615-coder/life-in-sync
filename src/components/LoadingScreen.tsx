@@ -45,6 +45,24 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
     setLoadingMessage(randomMessage)
 
     const loadAffirmation = async () => {
+      // Try to load existing affirmation from KV first for instant display
+      try {
+        const todayKey = getTodayKey()
+        const existing = await window.spark.kv.get('daily-affirmation') as DailyAffirmation | null
+        if (existing && existing.date === todayKey) {
+             setAffirmation({ text: existing.text, author: existing.author })
+             // If we have an existing affirmation, we can load faster
+             setTimeout(() => {
+                 setIsLoading(false)
+                 onLoadComplete()
+             }, 800)
+             return;
+        }
+      } catch (e) {
+          // ignore error
+      }
+
+      // If no existing affirmation or different day, fetch new one in background
       try {
         const promptText = window.spark.llmPrompt`Generate a single inspirational quote or Bible verse for daily motivation. Return the result as valid JSON in the following format:
 {
@@ -75,34 +93,26 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
             date: todayKey
           }
           setAffirmation({ text: data.text, author: data.author })
-          
           await window.spark.kv.set('daily-affirmation', affirmationData)
-        } else {
-          throw new Error('Invalid affirmation structure')
         }
       } catch (error) {
         console.error('Failed to load affirmation:', error)
         const fallback = staticAffirmations[Math.floor(Math.random() * staticAffirmations.length)]
-        const todayKey = getTodayKey()
-        const affirmationData: DailyAffirmation = {
-          text: fallback.text,
-          author: fallback.author,
-          date: todayKey
-        }
         setAffirmation(fallback)
-        
-        await window.spark.kv.set('daily-affirmation', affirmationData)
       }
     }
 
-    loadAffirmation()
+    // Start loading affirmation
+    loadAffirmation();
 
+    // Reduced artificial delay from 3800ms to 1000ms for first load feel,
+    // or faster if affirmation loads earlier.
     const timer = setTimeout(() => {
       setIsLoading(false)
       setTimeout(() => {
         onLoadComplete()
-      }, 800)
-    }, 3800)
+      }, 500)
+    }, 1500)
 
     return () => clearTimeout(timer)
   }, [onLoadComplete])
@@ -113,9 +123,10 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.5 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-background"
         >
+           {/* Background blobs */}
           <div className="absolute inset-0 overflow-hidden">
             <motion.div
               animate={{
@@ -183,13 +194,13 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
                   key="affirmation"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 0.8 }}
+                  transition={{ delay: 0.1, duration: 0.5 }}
                   className="space-y-6"
                 >
                   <motion.blockquote
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.6, duration: 0.8 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
                     className="text-2xl md:text-3xl font-medium text-foreground leading-relaxed"
                   >
                     "{affirmation.text}"
@@ -198,7 +209,7 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
                   <motion.cite
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.9, duration: 0.6 }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
                     className="block text-lg text-muted-foreground not-italic"
                   >
                     — {affirmation.author}
@@ -210,7 +221,7 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.2, duration: 0.6 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
               className="space-y-4"
             >
               <p className="text-sm text-muted-foreground italic">{loadingMessage}</p>

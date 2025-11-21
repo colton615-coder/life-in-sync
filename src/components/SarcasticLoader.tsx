@@ -1,135 +1,81 @@
-import { motion } from 'framer-motion'
-import { CircleNotch } from '@phosphor-icons/react'
-import { useState, useEffect, useMemo } from 'react'
 
-interface SarcasticLoaderProps {
-  className?: string
-  size?: number
-}
+import { motion } from 'framer-motion'
+import { Spinner } from '@phosphor-icons/react'
+import { useState, useEffect } from 'react'
+import { Progress } from '@/components/ui/progress'
 
 const SARCASTIC_MESSAGES = [
-  "Convincing AI this is important...",
-  "Teaching robots to count calories...",
-  "Asking ChatGPT to do math...",
-  "Pretending to work hard...",
-  "Consulting the algorithm gods...",
-  "Making it look fancy...",
-  "Generating professional excuses...",
-  "Doing the thing you could've done yourself...",
-  "Summoning digital wisdom...",
-  "Calculating your hopes and dreams...",
-  "Running very complex calculations (not really)...",
-  "Avoiding actual work, AI-style...",
-  "Teaching a computer to be smart...",
-  "Beep boop beep... (that's computer for 'wait')...",
-  "Consulting with artificial intelligence (emphasis on artificial)...",
-  "Making you wait for no reason...",
-  "Justifying my existence as a feature...",
-  "Pretending this takes longer than it does...",
-  "Doing AI things you wouldn't understand...",
-  "Loading... because instant results are suspicious...",
+  "Loading... because the internet isn't instant.",
+  "Fetching your life data...",
+  "Hold on, we're getting the good stuff.",
+  "Spinning wheels...",
+  "Calculating the meaning of life...",
+  "Doing the math...",
+  "Waking up the hamsters...",
+  "Locating the bits and bytes...",
 ]
 
-export function SarcasticLoader({ className = '', size = 20 }: SarcasticLoaderProps) {
+const SARCASTIC_PROGRESS_MESSAGES = [
+    "Crunching the numbers (ouch)...",
+    "Judging your spending habits...",
+    "Finding money you didn't know you lost...",
+    "Asking the magic 8-ball...",
+    "Consulting financial spirits...",
+    "Dividing by zero...",
+    "Simulating stock market crashes...",
+]
+
+export function SarcasticLoader() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    const randomMessage = SARCASTIC_MESSAGES[Math.floor(Math.random() * SARCASTIC_MESSAGES.length)]
-    setMessage(randomMessage)
+    setMessage(SARCASTIC_MESSAGES[Math.floor(Math.random() * SARCASTIC_MESSAGES.length)])
   }, [])
 
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className="flex flex-col items-center justify-center gap-4 p-8">
       <motion.div
         animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
       >
-        <CircleNotch size={size} weight="bold" className="text-primary" />
+        <Spinner size={48} className="text-primary" />
       </motion.div>
-      <motion.span
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-sm text-muted-foreground italic"
-      >
-        {message}
-      </motion.span>
+      <p className="text-muted-foreground text-sm animate-pulse">{message}</p>
     </div>
   )
 }
 
-interface SarcasticProgressProps {
-  className?: string
-}
+export function SarcasticProgress() {
+    const [progress, setProgress] = useState(0)
+    const [message, setMessage] = useState(SARCASTIC_PROGRESS_MESSAGES[0])
 
-export function SarcasticProgress({ className = '' }: SarcasticProgressProps) {
-  const PROGRESS_MESSAGES = useMemo(
-    () => [
-      [0, "Polishing the chrome..."],
-      [10, "Reticulating splines..."],
-      [20, "Aligning the dilithium crystals... with a hammer."],
-      [30, "Charging the flux capacitor... to 87."],
-      [40, "It's not a bug, it's an undocumented feature."],
-      [50, "Dividing by zero..."],
-      [60, "Are we there yet?"],
-      [70, "I'm not slow, I'm just enjoying the scenery."],
-      [80, "Just one more thing..."],
-      [90, "Almost there... I think."],
-      [95, "Okay, maybe I am a little slow."],
-      [100, "Done! Finally."],
-    ],
-    []
-  );
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setProgress(p => {
+                if (p >= 100) {
+                    clearInterval(interval)
+                    return 100
+                }
+                // Slow down as we get closer to 100
+                const increment = Math.max(0.5, (100 - p) / 20 * Math.random())
+                return p + increment
+            })
+        }, 100)
 
-  const [progress, setProgress] = useState(0)
-  const [message, setMessage] = useState(PROGRESS_MESSAGES[0][1])
-  const [messageIndex, setMessageIndex] = useState(0)
+        const messageInterval = setInterval(() => {
+            setMessage(SARCASTIC_PROGRESS_MESSAGES[Math.floor(Math.random() * SARCASTIC_PROGRESS_MESSAGES.length)])
+        }, 3000)
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 98) {
-          clearInterval(interval)
-          return 98
+        return () => {
+            clearInterval(interval)
+            clearInterval(messageInterval)
         }
-        const increment = Math.random() * 15 + 5
-        return Math.min(prev + increment, 98)
-      })
-    }, 300)
+    }, [])
 
-    return () => clearInterval(interval)
-  }, [])
-
-  useEffect(() => {
-    const currentMessage = PROGRESS_MESSAGES.find((m, idx) => {
-      const nextMessage = PROGRESS_MESSAGES[idx + 1]
-      return progress >= (m[0] as number) && (!nextMessage || progress < (nextMessage[0] as number))
-    })
-
-    if (currentMessage && currentMessage[1] !== message) {
-      setMessage(currentMessage[1])
-      setMessageIndex(prev => prev + 1)
-    }
-  }, [progress, message, PROGRESS_MESSAGES])
-
-  return (
-    <div className={`space-y-3 ${className}`}>
-      <div className="relative w-full h-2 bg-muted rounded-full overflow-hidden">
-        <motion.div
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent-vibrant rounded-full"
-          initial={{ width: '0%' }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-        />
-      </div>
-      <motion.div
-        key={messageIndex}
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="flex items-center justify-between text-xs"
-      >
-        <span className="text-muted-foreground italic">{message}</span>
-        <span className="text-muted-foreground font-mono">{Math.round(progress)}%</span>
-      </motion.div>
-    </div>
-  )
+    return (
+        <div className="w-full max-w-md mx-auto space-y-4">
+             <Progress value={progress} className="h-2" />
+             <p className="text-center text-sm text-muted-foreground animate-pulse">{message}</p>
+        </div>
+    )
 }
