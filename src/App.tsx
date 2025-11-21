@@ -1,23 +1,28 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import { NavigationDrawer } from '@/components/NavigationDrawer'
 import { NavigationButton } from '@/components/NavigationButton'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { Module } from '@/lib/types'
-import { Dashboard } from '@/components/modules/Dashboard'
-import { Habits } from '@/components/modules/Habits'
-import { Finance } from '@/components/modules/Finance'
-import { Tasks } from '@/components/modules/Tasks'
-import { Workouts } from '@/components/modules/Workouts'
-import { Knox } from '@/components/modules/Knox'
-import { Shopping } from '@/components/modules/Shopping'
-import { Calendar } from '@/components/modules/Calendar'
-import { Settings } from '@/components/modules/Settings'
-import { GolfSwing } from '@/components/modules/GolfSwing'
-import { Connections } from '@/components/modules/Connections'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { clearAllAppData } from '@/lib/clear-data'
 import { LoadingScreen } from './components/LoadingScreen'
+// @ts-ignore
+import { registerSW } from 'virtual:pwa-register'
+import { SarcasticLoader } from './components/SarcasticLoader'
+
+// Lazy load modules
+const Dashboard = lazy(() => import('@/components/modules/Dashboard').then(module => ({ default: module.Dashboard })))
+const Habits = lazy(() => import('@/components/modules/Habits').then(module => ({ default: module.Habits })))
+const Finance = lazy(() => import('@/components/modules/Finance').then(module => ({ default: module.Finance })))
+const Tasks = lazy(() => import('@/components/modules/Tasks').then(module => ({ default: module.Tasks })))
+const Workouts = lazy(() => import('@/components/modules/Workouts').then(module => ({ default: module.Workouts })))
+const Knox = lazy(() => import('@/components/modules/Knox').then(module => ({ default: module.Knox })))
+const Shopping = lazy(() => import('@/components/modules/Shopping').then(module => ({ default: module.Shopping })))
+const Calendar = lazy(() => import('@/components/modules/Calendar').then(module => ({ default: module.Calendar })))
+const Settings = lazy(() => import('@/components/modules/Settings').then(module => ({ default: module.Settings })))
+const GolfSwing = lazy(() => import('@/components/modules/GolfSwing').then(module => ({ default: module.GolfSwing })))
+const Connections = lazy(() => import('@/components/modules/Connections').then(module => ({ default: module.Connections })))
 
 function App() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
@@ -25,6 +30,22 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // PWA Update handling
+    const updateSW = registerSW({
+      onNeedRefresh() {
+        toast.message('New version available', {
+          description: 'Reload to get the latest updates.',
+          action: {
+            label: 'Reload',
+            onClick: () => updateSW(true)
+          }
+        })
+      },
+      onOfflineReady() {
+        toast.success('App ready to work offline')
+      },
+    })
+
     const clearData = async () => {
       const hasCleared = localStorage.getItem('data-cleared-v1')
       if (!hasCleared) {
@@ -48,80 +69,46 @@ function App() {
   }
 
   const renderModule = () => {
-    switch (activeModule) {
-      case 'dashboard':
-        return (
-          <ErrorBoundary>
-            <Dashboard onNavigate={handleModuleChange} />
-          </ErrorBoundary>
-        )
-      case 'habits':
-        return (
-          <ErrorBoundary>
-            <Habits />
-          </ErrorBoundary>
-        )
-      case 'finance':
-        return (
-          <ErrorBoundary>
-            <Finance />
-          </ErrorBoundary>
-        )
-      case 'tasks':
-        return (
-          <ErrorBoundary>
-            <Tasks />
-          </ErrorBoundary>
-        )
-      case 'workouts':
-        return (
-          <ErrorBoundary>
-            <Workouts />
-          </ErrorBoundary>
-        )
-      case 'knox':
-        return (
-          <ErrorBoundary>
-            <Knox />
-          </ErrorBoundary>
-        )
-      case 'shopping':
-        return (
-          <ErrorBoundary>
-            <Shopping />
-          </ErrorBoundary>
-        )
-      case 'calendar':
-        return (
-          <ErrorBoundary>
-            <Calendar />
-          </ErrorBoundary>
-        )
-      case 'vault':
-        return (
-          <ErrorBoundary>
-            <GolfSwing />
-          </ErrorBoundary>
-        )
-      case 'connections':
-        return (
-          <ErrorBoundary>
-            <Connections />
-          </ErrorBoundary>
-        )
-      case 'settings':
-        return (
-          <ErrorBoundary>
-            <Settings />
-          </ErrorBoundary>
-        )
-      default:
-        return (
-          <ErrorBoundary>
-            <Dashboard onNavigate={handleModuleChange} />
-          </ErrorBoundary>
-        )
-    }
+    const ModuleLoader = () => (
+        <div className="flex items-center justify-center min-h-[50vh]">
+            <SarcasticLoader />
+        </div>
+    )
+
+    return (
+      <Suspense fallback={<ModuleLoader />}>
+        <ErrorBoundary>
+          {(() => {
+            switch (activeModule) {
+              case 'dashboard':
+                return <Dashboard onNavigate={handleModuleChange} />
+              case 'habits':
+                return <Habits />
+              case 'finance':
+                return <Finance />
+              case 'tasks':
+                return <Tasks />
+              case 'workouts':
+                return <Workouts />
+              case 'knox':
+                return <Knox />
+              case 'shopping':
+                return <Shopping />
+              case 'calendar':
+                return <Calendar />
+              case 'vault':
+                return <GolfSwing />
+              case 'connections':
+                return <Connections />
+              case 'settings':
+                return <Settings />
+              default:
+                return <Dashboard onNavigate={handleModuleChange} />
+            }
+          })()}
+        </ErrorBoundary>
+      </Suspense>
+    )
   }
 
   if (isLoading) {

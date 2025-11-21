@@ -16,6 +16,7 @@ import { useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Sparkline, TrendIndicator } from '@/components/Sparkline'
+import { QuickActionsFab } from '@/components/QuickActionsFab'
 
 interface DashboardProps {
   onNavigate: (module: Module) => void
@@ -155,7 +156,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   }, [knoxMessages])
 
   return (
-    <div className="pt-2 md:pt-4">
+    <div className="pt-2 md:pt-4 pb-24 md:pb-16 relative">
+      <QuickActionsFab />
+
       <div className="space-y-3 mb-12 md:mb-16">
         <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gradient-primary">Dashboard</h1>
         <p className="text-sm md:text-base text-muted-foreground/60 font-normal">Your life in numbers</p>

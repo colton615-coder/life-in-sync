@@ -734,24 +734,24 @@ export function Habits() {
                                   whileTap={{ scale: 0.9 }}
                                   onClick={() => decrementNumerical(habit.id)}
                                   disabled={currentValue === 0}
+                                  aria-label={`Decrease ${habit.name}`}
                                   className={cn(
-                                    "w-7 h-7 md:w-9 md:h-9 rounded-lg flex items-center justify-center transition-all",
+                                    "min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg flex items-center justify-center transition-all",
                                     currentValue === 0 
                                       ? "glass-morphic border border-border/30 text-muted-foreground/30 cursor-not-allowed"
                                       : "glass-card border border-primary/30 text-primary hover:bg-primary/20"
                                   )}
                                 >
-                                  <Minus size={14} weight="bold" className="md:hidden" />
-                                  <Minus size={18} weight="bold" className="hidden md:block" />
+                                  <Minus size={18} weight="bold" />
                                 </motion.button>
                                 <motion.button
                                   whileHover={{ scale: 1.1 }}
                                   whileTap={{ scale: 0.9 }}
                                   onClick={() => incrementNumerical(habit.id)}
-                                  className="w-7 h-7 md:w-9 md:h-9 rounded-lg glass-card border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 transition-all shadow-lg shadow-primary/20"
+                                  aria-label={`Increase ${habit.name}`}
+                                  className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg glass-card border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 transition-all shadow-lg shadow-primary/20"
                                 >
-                                  <Plus size={14} weight="bold" className="md:hidden" />
-                                  <Plus size={18} weight="bold" className="hidden md:block" />
+                                  <Plus size={18} weight="bold" />
                                 </motion.button>
                               </div>
                             </div>
@@ -784,10 +784,10 @@ export function Habits() {
                           variant="ghost"
                           size="icon"
                           onClick={() => deleteHabit(habit.id)}
-                          className="flex-shrink-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors w-7 h-7 md:w-9 md:h-9"
+                          aria-label={`Delete ${habit.name}`}
+                          className="flex-shrink-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors min-w-[44px] min-h-[44px] w-11 h-11"
                         >
-                          <Trash size={14} className="md:hidden" />
-                          <Trash size={18} className="hidden md:block" />
+                          <Trash size={20} />
                         </Button>
                       </div>
                     </Card>

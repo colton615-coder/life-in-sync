@@ -320,7 +320,8 @@ export function Shopping() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => handleStartEdit(item)}
-                                  className="h-10 w-10 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 rounded-xl"
+                                  aria-label={`Edit ${item.name}`}
+                                  className="h-11 w-11 min-w-[44px] min-h-[44px] hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 rounded-xl"
                                 >
                                   <PencilSimple className="w-5 h-5" weight="duotone" />
                                 </Button>
@@ -331,7 +332,8 @@ export function Shopping() {
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => handleDeleteItem(item.id)}
-                                    className="h-10 w-10 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 rounded-xl transition-colors"
+                                    aria-label={`Delete ${item.name}`}
+                                    className="h-11 w-11 min-w-[44px] min-h-[44px] hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 rounded-xl transition-colors"
                                   >
                                     <Trash className="w-5 h-5" weight="duotone" />
                                   </Button>
@@ -421,7 +423,8 @@ export function Shopping() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => handleDeleteItem(item.id)}
-                                  className="h-10 w-10 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 rounded-xl transition-colors"
+                                  aria-label={`Delete ${item.name}`}
+                                  className="h-11 w-11 min-w-[44px] min-h-[44px] hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 rounded-xl transition-colors"
                                 >
                                   <Trash className="w-5 h-5" weight="duotone" />
                                 </Button>
