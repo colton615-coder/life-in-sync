@@ -20,7 +20,8 @@ import {
   ArrowRight,
   Trash,
   ArrowsLeftRight,
-  Backpack
+  Backpack,
+  Warning
 } from '@phosphor-icons/react'
 import { SwingAnalysis, GolfClub } from '@/lib/types'
 import { useKV } from '@/hooks/use-kv'
@@ -32,78 +33,113 @@ import { cn } from '@/lib/utils'
 import { VideoPlayerWithTimeline } from '@/components/VideoPlayerWithTimeline'
 import { SwingComparisonDialog } from '@/components/SwingComparisonDialog'
 import { ClubSelectionDialog } from '@/components/ClubSelectionDialog'
+import { GolfSwingState } from '@/lib/golf/state'
 
 export function GolfSwing() {
+  // Data Persistence
   const [analyses, setAnalyses] = useKV<SwingAnalysis[]>('golf-swing-analyses', [])
-  const [activeAnalysis, setActiveAnalysis] = useState<SwingAnalysis | null>(null)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [processingProgress, setProcessingProgress] = useState(0)
-  const [processingStatus, setProcessingStatus] = useState('')
+
+  // UI State Machine
+  const [viewState, setViewState] = useState<GolfSwingState>({ status: 'IDLE' })
+
+  // Local UI Filters/Modals
   const [comparisonDialogOpen, setComparisonDialogOpen] = useState(false)
-  const [clubSelectionOpen, setClubSelectionOpen] = useState(false)
-  const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [selectedClubFilter, setSelectedClubFilter] = useState<string>('all')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const selectionMadeRef = useRef(false)
+  const isMounted = useRef(true)
 
+  // Cleanup video URLs on unmount or analyses change
   useEffect(() => {
     return () => {
-      if (analyses && analyses.length > 0) {
-        analyses.forEach(analysis => {
-          if (analysis.videoUrl) {
-            URL.revokeObjectURL(analysis.videoUrl)
-          }
+      isMounted.current = false
+      // Note: We rely on browsers to handle blob cleanup eventually,
+      // but explicit cleanup is better if we were tracking specific URLs created in this session.
+    }
+  }, [])
+
+  const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      // 1. Prevent default browser behavior just in case
+      event.preventDefault()
+      console.log('File input changed')
+
+      const file = event.target.files?.[0]
+
+      // Reset input value to allow selecting the same file again if needed
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+
+      if (!file) {
+        console.log('No file selected')
+        return
+      }
+
+      console.log('File selected:', file.name, file.type, file.size)
+
+      // 2. Validate
+      const validation = validateVideoFile(file)
+
+      if (!validation.isValid) {
+        const compressionTips = getVideoCompressionTips(validation.fileSizeMB)
+        toast.error(validation.error || 'Invalid video file', {
+          description: compressionTips.length > 0
+            ? `Tip: ${compressionTips[0]}`
+            : `File size: ${formatFileSize(validation.fileSize)}`
+        })
+        return
+      }
+
+      if (validation.warning) {
+        toast.info('Large video detected', {
+          description: validation.warning + ` Estimated processing time: ~${validation.estimatedProcessingTime}s`
         })
       }
-    }
-  }, [analyses])
 
-  const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) {
-      console.log('No file selected')
-      return
-    }
-
-    console.log('File selected:', file.name, file.type, file.size)
-
-    const validation = validateVideoFile(file)
-
-    if (!validation.isValid) {
-      const compressionTips = getVideoCompressionTips(validation.fileSizeMB)
-      toast.error(validation.error || 'Invalid video file', {
-        description: compressionTips.length > 0 
-          ? `Tip: ${compressionTips[0]}` 
-          : `File size: ${formatFileSize(validation.fileSize)}`
+      // 3. Strict State Transition
+      console.log('Transitioning to SELECTING_CLUB state')
+      selectionMadeRef.current = false
+      setViewState({
+        status: 'SELECTING_CLUB',
+        file: file
       })
-      return
-    }
 
-    if (validation.warning) {
-      toast.info('Large video detected', {
-        description: validation.warning + ` Estimated processing time: ~${validation.estimatedProcessingTime}s`
+    } catch (error) {
+      console.error('Error handling video upload:', error)
+      toast.error('Failed to load video file', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
       })
-    }
-
-    console.log('Opening club selection dialog')
-    setPendingFile(file)
-    setClubSelectionOpen(true)
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      setViewState({ status: 'IDLE' })
     }
   }
 
-  const startAnalysis = async (club: GolfClub | null) => {
-    if (!pendingFile) {
-      console.error('No pending file to analyze')
-      toast.error('No video file selected')
+  const handleClubSelectionComplete = (club: GolfClub | null) => {
+    if (viewState.status !== 'SELECTING_CLUB') {
+      console.error('Invalid state transition: received club selection but not in SELECTING_CLUB state')
       return
     }
 
-    console.log('Starting analysis for:', pendingFile.name, 'with club:', club)
+    // Mark selection as made to prevent handleDialogClose from cancelling the flow
+    selectionMadeRef.current = true
+
+    // Proceed to analysis with the file we already have in state
+    startAnalysis(viewState.file, club)
+  }
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open && viewState.status === 'SELECTING_CLUB' && !selectionMadeRef.current) {
+      // Only revert to IDLE if the dialog was closed WITHOUT a selection (e.g. click outside)
+      console.log('Dialog closed without selection, reverting to IDLE')
+      setViewState({ status: 'IDLE' })
+    }
+  }
+
+  const startAnalysis = async (file: File, club: GolfClub | null) => {
+    console.log('Starting analysis for:', file.name, 'with club:', club)
 
     const analysisId = `swing-${Date.now()}`
-    const videoUrl = URL.createObjectURL(pendingFile)
+    const videoUrl = URL.createObjectURL(file)
 
     const newAnalysis: SwingAnalysis = {
       id: analysisId,
@@ -115,21 +151,33 @@ export function GolfSwing() {
       processingProgress: 0
     }
 
+    // Optimistically add to list
     setAnalyses(current => [newAnalysis, ...(current || [])])
-    setActiveAnalysis(newAnalysis)
-    setIsProcessing(true)
-    setProcessingProgress(0)
 
-    toast.info('Starting swing analysis...', {
-      description: 'This will take a few seconds'
+    // Transition to ANALYZING state
+    setViewState({
+      status: 'ANALYZING',
+      file,
+      club,
+      progress: 0,
+      step: 'Initializing...'
     })
 
     try {
       console.log('Processing video...')
-      const poseData = await simulateVideoProcessing(pendingFile, (progress, status) => {
+      const poseData = await simulateVideoProcessing(file, (progress, status) => {
+        if (!isMounted.current) return
+
         console.log(`Progress: ${progress}% - ${status}`)
-        setProcessingProgress(progress)
-        setProcessingStatus(status)
+
+        // Update local view state
+        setViewState(prev =>
+          prev.status === 'ANALYZING'
+            ? { ...prev, progress, step: status }
+            : prev
+        )
+
+        // Update persistent record
         setAnalyses(current => 
           (current || []).map(a => 
             a.id === analysisId 
@@ -139,11 +187,19 @@ export function GolfSwing() {
         )
       })
 
+      if (!isMounted.current) return
+
       console.log('Analyzing pose data...')
+      setViewState(prev => prev.status === 'ANALYZING' ? { ...prev, step: 'Calculating metrics...' } : prev)
       const metrics = analyzePoseData(poseData)
       
+      if (!isMounted.current) return
+
       console.log('Generating AI feedback...')
+      setViewState(prev => prev.status === 'ANALYZING' ? { ...prev, step: 'Generating AI feedback...' } : prev)
       const feedback = await generateFeedback(metrics, club)
+
+      if (!isMounted.current) return
 
       const completedAnalysis: SwingAnalysis = {
         ...newAnalysis,
@@ -158,34 +214,42 @@ export function GolfSwing() {
       setAnalyses(current => 
         (current || []).map(a => a.id === analysisId ? completedAnalysis : a)
       )
-      setActiveAnalysis(completedAnalysis)
+
+      // Transition to VIEWING_RESULT
+      setViewState({
+        status: 'VIEWING_RESULT',
+        analysis: completedAnalysis
+      })
       
       console.log('Analysis completed successfully!')
       toast.success('Swing analysis completed!', {
         description: `Overall score: ${feedback.overallScore}/100`
       })
+
     } catch (error) {
+      if (!isMounted.current) return
       console.error('Analysis failed with error:', error)
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
       setAnalyses(current => 
         (current || []).map(a => 
           a.id === analysisId 
-            ? { ...a, status: 'failed', error: error instanceof Error ? error.message : 'Unknown error' }
+            ? { ...a, status: 'failed', error: errorMessage }
             : a
         )
       )
-      toast.error('Analysis failed', {
-        description: error instanceof Error ? error.message : 'Please try again with a different video'
-      })
-    } finally {
-      setIsProcessing(false)
-      setProcessingProgress(0)
-      setProcessingStatus('')
-      setPendingFile(null)
-    }
-  }
 
-  const handleClubSelect = (club: GolfClub) => {
-    startAnalysis(club)
+      setViewState({
+        status: 'ERROR',
+        message: 'Analysis failed',
+        error
+      })
+
+      toast.error('Analysis failed', {
+        description: errorMessage
+      })
+    }
   }
 
   const handleDeleteAnalysis = (analysisId: string, e: React.MouseEvent) => {
@@ -196,20 +260,13 @@ export function GolfSwing() {
 
     setAnalyses(current => {
       const updated = (current || []).filter(a => a.id !== analysisId)
-      
-      if (activeAnalysis?.id === analysisId) {
-        const remainingAnalyses = updated.filter(a => a.status === 'completed')
-        if (remainingAnalyses.length > 0) {
-          setActiveAnalysis(remainingAnalyses[0])
-        } else if (updated.length > 0) {
-          setActiveAnalysis(updated[0])
-        } else {
-          setActiveAnalysis(null)
-        }
-      }
-      
       return updated
     })
+
+    // If we are currently viewing this analysis, go back to IDLE
+    if (viewState.status === 'VIEWING_RESULT' && viewState.analysis.id === analysisId) {
+      setViewState({ status: 'IDLE' })
+    }
 
     if (analysisToDelete.videoUrl) {
       URL.revokeObjectURL(analysisToDelete.videoUrl)
@@ -218,6 +275,66 @@ export function GolfSwing() {
     toast.success('Analysis deleted', {
       description: 'Swing analysis has been removed'
     })
+  }
+
+  const handleViewAnalysis = (analysis: SwingAnalysis) => {
+    setViewState({ status: 'VIEWING_RESULT', analysis })
+  }
+
+  const renderProcessingState = () => {
+    if (viewState.status !== 'ANALYZING') return null
+
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex flex-col items-center justify-center min-h-[60vh] px-6"
+      >
+        <div aria-live="polite" aria-atomic="true" className="sr-only">
+          Analyzing your swing. {viewState.progress}% complete. {viewState.step}
+        </div>
+        <Card className="w-full max-w-2xl glass-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <Sparkle size={24} weight="duotone" className="text-primary" aria-hidden="true" />
+              </motion.div>
+              Analyzing Your Swing
+            </CardTitle>
+            <CardDescription>{viewState.step}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Progress value={viewState.progress} className="h-3" aria-label={`Analysis progress: ${viewState.progress}%`} />
+            <p className="text-center text-2xl font-bold text-primary" aria-hidden="true">
+              {viewState.progress}%
+            </p>
+            <div className="text-sm text-muted-foreground text-center space-y-2">
+              <p>• Extracting video frames</p>
+              <p>• Running pose estimation model</p>
+              <p>• Computing swing mechanics</p>
+              <p>• Generating AI feedback</p>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    )
+  }
+
+  const renderErrorState = () => {
+    if (viewState.status !== 'ERROR') return null
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+        <Warning size={48} className="text-destructive" />
+        <h3 className="text-xl font-bold">Something went wrong</h3>
+        <p className="text-muted-foreground">{viewState.message}</p>
+        <Button onClick={() => setViewState({ status: 'IDLE' })}>
+          Return to Dashboard
+        </Button>
+      </div>
+    )
   }
 
   const renderEmptyState = () => (
@@ -248,7 +365,7 @@ export function GolfSwing() {
         <Button
           size="lg"
           onClick={() => {
-            console.log('Upload button clicked')
+            console.log('Upload button clicked (Empty State)')
             fileInputRef.current?.click()
           }}
           className="gap-2 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 rounded-xl shadow-lg hover:shadow-xl transition-all"
@@ -283,48 +400,10 @@ export function GolfSwing() {
     </motion.div>
   )
 
-  const renderProcessingState = () => (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="flex flex-col items-center justify-center min-h-[60vh] px-6"
-    >
-      <div aria-live="polite" aria-atomic="true" className="sr-only">
-        Analyzing your swing. {processingProgress}% complete. {processingStatus}
-      </div>
-      <Card className="w-full max-w-2xl glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            >
-              <Sparkle size={24} weight="duotone" className="text-primary" aria-hidden="true" />
-            </motion.div>
-            Analyzing Your Swing
-          </CardTitle>
-          <CardDescription>{processingStatus}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Progress value={processingProgress} className="h-3" aria-label={`Analysis progress: ${processingProgress}%`} />
-          <p className="text-center text-2xl font-bold text-primary" aria-hidden="true">
-            {processingProgress}%
-          </p>
-          <div className="text-sm text-muted-foreground text-center space-y-2">
-            <p>• Extracting video frames</p>
-            <p>• Running pose estimation model</p>
-            <p>• Computing swing mechanics</p>
-            <p>• Generating AI feedback</p>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  )
+  const renderMetrics = (analysis: SwingAnalysis) => {
+    if (!analysis.metrics) return null
 
-  const renderMetrics = () => {
-    if (!activeAnalysis?.metrics) return null
-
-    const { metrics } = activeAnalysis
+    const { metrics } = analysis
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -447,10 +526,10 @@ export function GolfSwing() {
     )
   }
 
-  const renderFeedback = () => {
-    if (!activeAnalysis?.feedback) return null
+  const renderFeedback = (analysis: SwingAnalysis) => {
+    if (!analysis.feedback) return null
 
-    const { feedback } = activeAnalysis
+    const { feedback } = analysis
 
     return (
       <div className="space-y-6">
@@ -547,86 +626,87 @@ export function GolfSwing() {
     )
   }
 
-  const renderAnalysisList = () => (
-    <ScrollArea className="h-[600px]">
-      <div className="space-y-3" role="list" aria-label="Swing analysis history">
-        {(analyses || []).map((analysis) => (
-          <Card
-            key={analysis.id}
-            className={cn(
-              "cursor-pointer transition-all hover:border-primary/50 glass-card",
-              activeAnalysis?.id === analysis.id && "border-primary"
-            )}
-            onClick={() => setActiveAnalysis(analysis)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                setActiveAnalysis(analysis)
-              }
-            }}
-            tabIndex={0}
-            role="listitem"
-            aria-label={`Swing analysis from ${new Date(analysis.uploadedAt).toLocaleDateString()} at ${new Date(analysis.uploadedAt).toLocaleTimeString()}, status: ${analysis.status}${analysis.feedback ? `, score: ${analysis.feedback.overallScore} out of 100` : ''}`}
-            aria-current={activeAnalysis?.id === analysis.id ? 'true' : undefined}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <CardTitle className="text-base">
-                      Swing Analysis
-                    </CardTitle>
-                    {analysis.club && (
-                      <Badge variant="outline" className="text-xs gap-1">
-                        <Backpack size={12} weight="fill" />
-                        {analysis.club}
-                      </Badge>
-                    )}
+  const renderAnalysisList = () => {
+    const activeAnalysisId = viewState.status === 'VIEWING_RESULT' ? viewState.analysis.id : null;
+
+    return (
+      <ScrollArea className="h-[600px]">
+        <div className="space-y-3" role="list" aria-label="Swing analysis history">
+          {(analyses || []).map((analysis) => (
+            <Card
+              key={analysis.id}
+              className={cn(
+                "cursor-pointer transition-all hover:border-primary/50 glass-card",
+                activeAnalysisId === analysis.id && "border-primary"
+              )}
+              onClick={() => handleViewAnalysis(analysis)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleViewAnalysis(analysis)
+                }
+              }}
+              tabIndex={0}
+              role="listitem"
+              aria-label={`Swing analysis from ${new Date(analysis.uploadedAt).toLocaleDateString()} at ${new Date(analysis.uploadedAt).toLocaleTimeString()}`}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <CardTitle className="text-base">
+                        Swing Analysis
+                      </CardTitle>
+                      {analysis.club && (
+                        <Badge variant="outline" className="text-xs gap-1">
+                          <Backpack size={12} weight="fill" />
+                          {analysis.club}
+                        </Badge>
+                      )}
+                    </div>
+                    <CardDescription className="text-xs">
+                      {new Date(analysis.uploadedAt).toLocaleDateString()} at{' '}
+                      {new Date(analysis.uploadedAt).toLocaleTimeString()}
+                    </CardDescription>
                   </div>
-                  <CardDescription className="text-xs">
-                    {new Date(analysis.uploadedAt).toLocaleDateString()} at{' '}
-                    {new Date(analysis.uploadedAt).toLocaleTimeString()}
-                  </CardDescription>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Badge
+                      variant={
+                        analysis.status === 'completed' ? 'default' :
+                        analysis.status === 'failed' ? 'destructive' :
+                        'secondary'
+                      }
+                      className="text-xs"
+                    >
+                      {analysis.status}
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={(e) => handleDeleteAnalysis(analysis.id, e)}
+                    >
+                      <Trash size={16} weight="bold" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Badge
-                    variant={
-                      analysis.status === 'completed' ? 'default' :
-                      analysis.status === 'failed' ? 'destructive' :
-                      'secondary'
-                    }
-                    className="text-xs"
-                    aria-label={`Status: ${analysis.status}`}
-                  >
-                    {analysis.status}
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={(e) => handleDeleteAnalysis(analysis.id, e)}
-                    aria-label={`Delete swing analysis from ${new Date(analysis.uploadedAt).toLocaleDateString()}`}
-                  >
-                    <Trash size={16} weight="bold" aria-hidden="true" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            {analysis.feedback && (
-              <CardContent className="pt-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Score:</span>
-                  <Badge variant="outline" className="text-xs">
-                    {analysis.feedback.overallScore}/100
-                  </Badge>
-                </div>
-              </CardContent>
-            )}
-          </Card>
-        ))}
-      </div>
-    </ScrollArea>
-  )
+              </CardHeader>
+              {analysis.feedback && (
+                <CardContent className="pt-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Score:</span>
+                    <Badge variant="outline" className="text-xs">
+                      {analysis.feedback.overallScore}/100
+                    </Badge>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          ))}
+        </div>
+      </ScrollArea>
+    )
+  }
 
   const renderProgressTab = () => {
     const completedAnalyses = (analyses || []).filter(a => a.status === 'completed' && a.feedback)
@@ -787,11 +867,18 @@ export function GolfSwing() {
     )
   }
 
-  if (isProcessing) {
+  // Main Render Switch
+
+  if (viewState.status === 'ANALYZING') {
     return renderProcessingState()
   }
 
-  if (!analyses || analyses.length === 0) {
+  if (viewState.status === 'ERROR') {
+    return renderErrorState()
+  }
+
+  // If Idle and no analyses, show empty state
+  if (viewState.status === 'IDLE' && (!analyses || analyses.length === 0)) {
     return (
       <>
         {renderEmptyState()}
@@ -806,6 +893,7 @@ export function GolfSwing() {
     )
   }
 
+  // Otherwise show the dashboard (List + Details)
   return (
     <div className="pt-2 md:pt-4 space-y-4 md:space-y-6 px-4 md:px-0">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -863,38 +951,46 @@ export function GolfSwing() {
                 </div>
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="metrics" className="space-y-6 mt-6">
-              {activeAnalysis ? (
-                <>
-                  {activeAnalysis.videoUrl && (
+
+            {/* Content for VIEWING_RESULT state */}
+            {viewState.status === 'VIEWING_RESULT' ? (
+              <>
+                <TabsContent value="metrics" className="space-y-6 mt-6">
+                  {viewState.analysis.videoUrl && (
                     <VideoPlayerWithTimeline 
-                      videoUrl={activeAnalysis.videoUrl}
-                      poseData={activeAnalysis.poseData}
+                      videoUrl={viewState.analysis.videoUrl}
+                      poseData={viewState.analysis.poseData}
                     />
                   )}
-                  {renderMetrics()}
-                </>
-              ) : (
-                <Alert>
-                  <Play size={18} aria-hidden="true" />
-                  <AlertDescription>
-                    Select an analysis from the list to view details
-                  </AlertDescription>
-                </Alert>
-              )}
-            </TabsContent>
-            <TabsContent value="feedback" className="space-y-6 mt-6">
-              {activeAnalysis ? (
-                renderFeedback()
-              ) : (
-                <Alert>
-                  <Play size={18} aria-hidden="true" />
-                  <AlertDescription>
-                    Select an analysis from the list to view details
-                  </AlertDescription>
-                </Alert>
-              )}
-            </TabsContent>
+                  {renderMetrics(viewState.analysis)}
+                </TabsContent>
+                <TabsContent value="feedback" className="space-y-6 mt-6">
+                  {renderFeedback(viewState.analysis)}
+                </TabsContent>
+              </>
+            ) : (
+              // Content for IDLE/SELECTING state (when no result selected)
+              <>
+                <TabsContent value="metrics" className="mt-6">
+                  <Alert>
+                    <Play size={18} aria-hidden="true" />
+                    <AlertDescription>
+                      Select an analysis from the list to view details
+                    </AlertDescription>
+                  </Alert>
+                </TabsContent>
+                <TabsContent value="feedback" className="mt-6">
+                  <Alert>
+                    <Play size={18} aria-hidden="true" />
+                    <AlertDescription>
+                      Select an analysis from the list to view details
+                    </AlertDescription>
+                  </Alert>
+                </TabsContent>
+              </>
+            )}
+
+            {/* Progress tab is always available */}
             <TabsContent value="progress">
               {renderProgressTab()}
             </TabsContent>
@@ -917,9 +1013,9 @@ export function GolfSwing() {
       />
 
       <ClubSelectionDialog
-        open={clubSelectionOpen}
-        onOpenChange={setClubSelectionOpen}
-        onSelectClub={handleClubSelect}
+        open={viewState.status === 'SELECTING_CLUB'}
+        onOpenChange={(open) => handleDialogClose(open)}
+        onSelectClub={handleClubSelectionComplete}
       />
     </div>
   )
