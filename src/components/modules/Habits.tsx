@@ -1,7 +1,7 @@
 import { Card } from '../Card'
 import { Button } from '@/components/ui/button'
 import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Sparkle, X, ArrowRight, ArrowLeft, Minus } from '@phosphor-icons/react'
-import * as Icons from '@phosphor-icons/react'
+import { HabitIcons } from '@/lib/habit-icons'
 import { useKV } from '@/hooks/use-kv'
 import { Habit, TrackingType, HabitEntry, HabitIcon } from '@/lib/types'
 import { useState } from 'react'
@@ -272,29 +272,29 @@ export function Habits() {
   }
 
   const getIconComponent = (iconName: HabitIcon, habitName?: string) => {
-    const IconComponent = (Icons as Record<string, React.ElementType>)[iconName]
+    const IconComponent = HabitIcons[iconName]
     if (IconComponent) return IconComponent
     
-    if (!habitName) return Icons.Target
+    if (!habitName) return HabitIcons.Target
     
     const name = habitName.toLowerCase()
     
-    if (name.includes('water') || name.includes('drink') || name.includes('hydrat')) return Icons.Drop
-    if (name.includes('exercise') || name.includes('workout') || name.includes('gym')) return Icons.Barbell
-    if (name.includes('run')) return Icons.PersonSimpleRun
-    if (name.includes('read') || name.includes('book')) return Icons.Book
-    if (name.includes('sleep') || name.includes('rest')) return Icons.Moon
-    if (name.includes('meditat') || name.includes('mindful')) return Icons.FlowerLotus
-    if (name.includes('walk')) return Icons.PersonSimpleRun
-    if (name.includes('stretch') || name.includes('yoga')) return Icons.FlowerLotus
-    if (name.includes('food') || name.includes('eat') || name.includes('meal')) return Icons.ForkKnife
-    if (name.includes('vitamin') || name.includes('supplement') || name.includes('medicine')) return Icons.FirstAid
-    if (name.includes('journal') || name.includes('write')) return Icons.BookOpen
-    if (name.includes('learn') || name.includes('study')) return Icons.GraduationCap
-    if (name.includes('clean')) return Icons.House
-    if (name.includes('call') || name.includes('contact') || name.includes('friend')) return Icons.Chats
+    if (name.includes('water') || name.includes('drink') || name.includes('hydrat')) return HabitIcons.Drop
+    if (name.includes('exercise') || name.includes('workout') || name.includes('gym')) return HabitIcons.Barbell
+    if (name.includes('run')) return HabitIcons.PersonSimpleRun
+    if (name.includes('read') || name.includes('book')) return HabitIcons.Book
+    if (name.includes('sleep') || name.includes('rest')) return HabitIcons.Moon
+    if (name.includes('meditat') || name.includes('mindful')) return HabitIcons.FlowerLotus
+    if (name.includes('walk')) return HabitIcons.PersonSimpleRun
+    if (name.includes('stretch') || name.includes('yoga')) return HabitIcons.FlowerLotus
+    if (name.includes('food') || name.includes('eat') || name.includes('meal')) return HabitIcons.ForkKnife
+    if (name.includes('vitamin') || name.includes('supplement') || name.includes('medicine')) return HabitIcons.FirstAid
+    if (name.includes('journal') || name.includes('write')) return HabitIcons.BookOpen
+    if (name.includes('learn') || name.includes('study')) return HabitIcons.GraduationCap
+    if (name.includes('clean')) return HabitIcons.House
+    if (name.includes('call') || name.includes('contact') || name.includes('friend')) return HabitIcons.Chats
     
-    return Icons.Target
+    return HabitIcons.Target
   }
 
   const { activeHabits, completedHabits } = (() => {

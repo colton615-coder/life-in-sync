@@ -5,34 +5,7 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { MagnifyingGlass, X } from '@phosphor-icons/react'
-import * as Icons from '@phosphor-icons/react'
-
-const iconCategories = {
-  health: [
-    'Heart', 'Drop', 'Activity', 'Heartbeat', 'FirstAid'
-  ],
-  fitness: [
-    'Barbell', 'PersonSimpleRun', 'Bicycle', 'Fire', 'Lightning', 'Target', 'Medal', 'Trophy'
-  ],
-  food: [
-    'Apple', 'Coffee', 'ForkKnife', 'Cookie', 'Carrot'
-  ],
-  learning: [
-    'Book', 'BookOpen', 'GraduationCap', 'Brain', 'Lightbulb', 'Certificate'
-  ],
-  mindfulness: [
-    'FlowerLotus', 'Leaf', 'Moon', 'MoonStars', 'Sun', 'Sparkle'
-  ],
-  productivity: [
-    'CheckCircle', 'ListChecks', 'Briefcase', 'Calendar', 'Clock', 'Timer', 'Bell'
-  ],
-  creative: [
-    'PaintBrush', 'Palette', 'Camera', 'MusicNote', 'Microphone', 'Guitar'
-  ],
-  social: [
-    'Users', 'Handshake', 'Chats', 'Gift', 'ThumbsUp', 'House'
-  ]
-}
+import { iconCategories, HabitIcons } from '@/lib/habit-icons'
 
 const allIcons = Object.values(iconCategories).flat()
 
@@ -75,8 +48,8 @@ export function IconPicker({ value, onChange, className }: IconPickerProps) {
   ]
 
   const getIconComponent = (iconName: string) => {
-    const IconComponent = (Icons as Record<string, React.ElementType>)[iconName]
-    return IconComponent || Icons.Target
+    const IconComponent = HabitIcons[iconName]
+    return IconComponent || HabitIcons.Target
   }
 
   return (
@@ -131,7 +104,7 @@ export function IconPicker({ value, onChange, className }: IconPickerProps) {
           >
             {filteredIcons.length === 0 ? (
               <div className="col-span-5 text-center py-12 text-muted-foreground">
-                <Icons.MagnifyingGlass size={48} className="mx-auto mb-3 opacity-30" />
+                <MagnifyingGlass size={48} className="mx-auto mb-3 opacity-30" />
                 <p>No icons found</p>
               </div>
             ) : (
