@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TabGroup } from '@/components/TabGroup'
 import { Plus, CheckCircle, Trash, Calendar as CalendarIcon, MagnifyingGlass, X, CalendarBlank, Sparkle, Fire, Lightning, SortAscending } from '@phosphor-icons/react'
-import { useKV } from '@github/spark/hooks'
+import { useKV } from '@/hooks/use-kv'
 import { Task } from '@/lib/types'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'

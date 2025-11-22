@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import { AddHabitDialog } from './AddHabitDialog'
 import { AddShoppingItemDialog } from '@/components/shopping/AddShoppingItemDialog'
 import { AddExpenseDialog } from './AddExpenseDialog'
-import { useKV } from '@github/spark/hooks'
+import { useKV } from '@/hooks/use-kv'
 import { Habit, ShoppingItem } from '@/lib/types'
 import { toast } from 'sonner'
 
