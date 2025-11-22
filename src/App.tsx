@@ -96,7 +96,7 @@ function App() {
                 return <Shopping />
               case 'calendar':
                 return <Calendar />
-              case 'vault':
+              case 'golf':
                 return <GolfSwing />
               case 'connections':
                 return <Connections />

@@ -9,7 +9,7 @@ export type Module =
   | 'workouts'
   | 'shopping'
   | 'calendar'
-  | 'vault'
+  | 'golf'
   | 'connections'
   | 'settings'
   | 'history'
