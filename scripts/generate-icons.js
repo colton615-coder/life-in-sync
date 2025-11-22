@@ -1,5 +1,6 @@
 
 import fs from 'fs';
+import { Buffer } from 'buffer';
 
 // 1x1 pixel transparent PNG base64
 const base64Png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg==";

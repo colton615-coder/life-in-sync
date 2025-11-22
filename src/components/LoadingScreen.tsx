@@ -58,7 +58,7 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
              }, 800)
              return;
         }
-      } catch (e) {
+      } catch {
           // ignore error
       }
 

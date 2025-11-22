@@ -1,7 +1,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, CheckSquare, ShoppingCart, Receipt, X } from '@phosphor-icons/react'
+import { Plus, CheckSquare, ShoppingCart, Receipt } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { AddHabitDialog } from './AddHabitDialog'
@@ -19,8 +19,8 @@ export function QuickActionsFab() {
 
   // We use KV hooks here just to pass the setters to the dialogs if they need them,
   // or we can implement the logic here.
-  const [habits, setHabits] = useKV<Habit[]>('habits', [])
-  const [shoppingItems, setShoppingItems] = useKV<ShoppingItem[]>('shopping-items', [])
+  const [, setHabits] = useKV<Habit[]>('habits', [])
+  const [, setShoppingItems] = useKV<ShoppingItem[]>('shopping-items', [])
 
   const handleAddHabit = (habitData: Omit<Habit, 'id' | 'currentProgress' | 'streak'>) => {
     const newHabit: Habit = {
