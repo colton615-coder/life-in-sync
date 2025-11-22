@@ -120,14 +120,14 @@ export function Workouts() {
   }
 
   return (
-    <div className="pt-4 md:pt-6 space-y-5 md:space-y-6 px-1 md:px-0">
+    <div className="pt-3 md:pt-5 space-y-3 md:space-y-4 px-1 md:px-0">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2.5">
-            <Barbell weight="duotone" className="text-primary" size={28} />
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Barbell weight="duotone" className="text-primary" size={24} />
             Workouts
           </h1>
-          <p className="text-muted-foreground mt-1.5 md:mt-1 text-sm md:text-base">Build strength, one rep at a time</p>
+          <p className="text-muted-foreground mt-1 text-xs md:text-sm">Build strength, one rep at a time</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -243,25 +243,25 @@ export function Workouts() {
                     transition={{ delay: index * 0.05 }}
                   >
                     <Card className="neumorphic-card hover:glow-border group">
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <h3 className="font-semibold text-base md:text-lg">{workout.name}</h3>
-                              <Badge className={cn("text-xs capitalize", difficultyColors[workout.difficulty])}>
+                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                              <h3 className="font-semibold text-sm md:text-base">{workout.name}</h3>
+                              <Badge className={cn("text-[10px] px-1.5 py-0 capitalize", difficultyColors[workout.difficulty])}>
                                 {workout.difficulty}
                               </Badge>
                             </div>
-                            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                               <span className="flex items-center gap-1">
-                                <Barbell size={14} weight="duotone" />
+                                <Barbell size={12} weight="duotone" />
                                 {workout.focus}
                               </span>
                               <span>•</span>
                               <span>{workout.exercises.length} exercises</span>
                               <span>•</span>
                               <span className="flex items-center gap-1">
-                                <Timer size={14} weight="duotone" />
+                                <Timer size={12} weight="duotone" />
                                 ~{workout.estimatedDuration} min
                               </span>
                             </div>
@@ -272,6 +272,7 @@ export function Workouts() {
                                 onClick={() => startWorkout(workout)}
                                 size="sm"
                                 className="button-glow gap-1.5"
+                                aria-label="Start workout"
                               >
                                 <Play weight="fill" size={16} />
                                 <span className="hidden sm:inline">Start</span>
@@ -282,6 +283,7 @@ export function Workouts() {
                               size="icon"
                               onClick={() => deleteWorkout(workout.id)}
                               className="hover:bg-destructive/10 hover:text-destructive h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                              aria-label="Delete workout"
                             >
                               <Barbell size={16} weight="bold" className="rotate-45" />
                             </Button>
@@ -310,7 +312,7 @@ export function Workouts() {
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: 0.3 + idx * 0.03 }}
                                   className={cn(
-                                    "flex items-center justify-between py-2 px-3 rounded-lg transition-all",
+                                    "flex items-center justify-between py-1.5 px-2.5 rounded-md transition-all",
                                     "neumorphic-inset hover:bg-muted/50",
                                     isWarmup && "border-l-2 border-orange-500/50",
                                     isCooldown && "border-l-2 border-brand-secondary/50",
@@ -319,15 +321,15 @@ export function Workouts() {
                                   )}
                                 >
                                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                                    <span className="text-xs text-muted-foreground font-mono w-5">
+                                    <span className="text-[10px] text-muted-foreground font-mono w-4">
                                       {(idx + 1).toString().padStart(2, '0')}
                                     </span>
-                                    <span className="text-sm font-medium truncate">{exercise.name}</span>
-                                    <Badge variant="outline" className="text-xs capitalize ml-auto flex-shrink-0">
+                                    <span className="text-xs font-medium truncate">{exercise.name}</span>
+                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize ml-auto flex-shrink-0">
                                       {exercise.category}
                                     </Badge>
                                   </div>
-                                  <span className="text-sm font-semibold text-primary ml-3 flex-shrink-0">
+                                  <span className="text-xs font-semibold text-primary ml-2 flex-shrink-0">
                                     {exercise.type === 'reps' 
                                       ? `${exercise.sets}×${exercise.reps}`
                                       : `${exercise.duration}s`
