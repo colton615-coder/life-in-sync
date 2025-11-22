@@ -105,9 +105,9 @@ export function Calendar() {
   const getCategoryColor = (category: string): { bg: string; text: string; glow: string } => {
     switch (category) {
       case 'event':
-        return { bg: 'bg-gradient-to-br from-blue-500 to-cyan-500', text: 'text-blue-500', glow: 'shadow-blue-500/50' }
+        return { bg: 'bg-brand-gradient', text: 'text-brand-primary', glow: 'shadow-glow-primary' }
       case 'plan':
-        return { bg: 'bg-gradient-to-br from-purple-500 to-pink-500', text: 'text-purple-500', glow: 'shadow-purple-500/50' }
+        return { bg: 'bg-gradient-to-br from-brand-primary to-brand-secondary', text: 'text-brand-secondary', glow: 'shadow-brand-secondary/50' }
       case 'reminder':
         return { bg: 'bg-gradient-to-br from-orange-500 to-amber-500', text: 'text-orange-500', glow: 'shadow-orange-500/50' }
       case 'meeting':
@@ -123,9 +123,9 @@ export function Calendar() {
   return (
     <div className="pt-2 md:pt-4 space-y-6 max-w-6xl mx-auto relative">
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/20 via-cyan-500/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '0s' }} />
-        <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
-        <div className="absolute top-1/3 left-1/2 w-72 h-72 bg-gradient-to-br from-orange-500/20 via-amber-500/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-gradient-to-br from-brand-primary/20 via-brand-secondary/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '0s' }} />
+        <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-gradient-to-br from-brand-tertiary/20 via-brand-primary/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
+        <div className="absolute top-1/3 left-1/2 w-72 h-72 bg-gradient-to-br from-brand-secondary/20 via-brand-tertiary/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
       </div>
 
       <motion.div
@@ -139,19 +139,19 @@ export function Calendar() {
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
-          <div className="rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-4 shadow-2xl shadow-purple-500/30 relative overflow-hidden">
+          <div className="rounded-3xl bg-brand-gradient p-4 shadow-2xl shadow-glow-primary relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
             <CalendarBlank className="w-10 h-10 text-white relative z-10" weight="duotone" />
           </div>
         </motion.div>
         <div>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-brand-gradient">
             📅 Calendar 2.0
           </h1>
           <p className="text-lg text-muted-foreground mt-2 flex items-center justify-center gap-2">
-            <Star className="w-4 h-4 text-blue-500" weight="fill" />
+            <Star className="w-4 h-4 text-brand-primary" weight="fill" />
             Time marches on whether you plan or not
-            <Sparkle className="w-4 h-4 text-pink-500" weight="fill" />
+            <Sparkle className="w-4 h-4 text-brand-secondary" weight="fill" />
           </p>
         </div>
 
@@ -161,12 +161,12 @@ export function Calendar() {
               { 
                 value: totalEvents, 
                 label: 'Total Events',
-                gradient: 'from-purple-500 to-pink-500'
+                gradient: 'from-brand-primary to-brand-secondary'
               },
               { 
                 value: upcomingEvents, 
                 label: 'Upcoming',
-                gradient: 'from-blue-500 to-cyan-500'
+                gradient: 'from-brand-secondary to-brand-tertiary'
               }
             ]}
           />
@@ -179,13 +179,13 @@ export function Calendar() {
         transition={{ duration: 0.6, delay: 0.1 }}
         className="relative overflow-hidden rounded-3xl glass-card backdrop-blur-xl border border-white/20 shadow-2xl"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 via-brand-tertiary/5 to-brand-secondary/5" />
         
         <div className="relative p-6 md:p-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-8">
             <div className="flex items-center gap-3 md:gap-4 flex-wrap">
               <motion.h2 
-                className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+                className="text-2xl md:text-4xl font-bold text-brand-gradient"
                 layoutId="month-year"
               >
                 {MONTHS[month]} {year}
@@ -194,7 +194,7 @@ export function Calendar() {
                 variant="outline" 
                 size="sm"
                 onClick={goToToday}
-                className="border-2 border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:border-purple-300 rounded-xl min-h-[44px] px-4 touch-manipulation"
+                className="border-2 border-brand-secondary/30 hover:bg-brand-secondary/10 hover:border-brand-secondary/50 rounded-xl min-h-[44px] px-4 touch-manipulation"
               >
                 <Lightning className="w-4 h-4 md:mr-1" weight="fill" />
                 <span className="hidden md:inline ml-1">Today</span>
@@ -207,7 +207,7 @@ export function Calendar() {
                   variant="outline"
                   size="icon"
                   onClick={goToPreviousMonth}
-                  className="h-14 w-full md:w-14 min-w-[44px] rounded-xl border-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 touch-manipulation"
+                  className="h-14 w-full md:w-14 min-w-[44px] rounded-xl border-2 hover:bg-brand-primary/10 hover:border-brand-primary/50 touch-manipulation"
                 >
                   <CaretLeft className="w-6 h-6" weight="bold" />
                 </Button>
@@ -217,7 +217,7 @@ export function Calendar() {
                   variant="outline"
                   size="icon"
                   onClick={goToNextMonth}
-                  className="h-14 w-full md:w-14 min-w-[44px] rounded-xl border-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 touch-manipulation"
+                  className="h-14 w-full md:w-14 min-w-[44px] rounded-xl border-2 hover:bg-brand-primary/10 hover:border-brand-primary/50 touch-manipulation"
                 >
                   <CaretRight className="w-6 h-6" weight="bold" />
                 </Button>
@@ -225,7 +225,7 @@ export function Calendar() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 md:flex-initial">
                 <Button 
                   onClick={handleAddEvent} 
-                  className="h-14 w-full md:w-auto px-6 gap-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 rounded-xl font-semibold touch-manipulation"
+                  className="h-14 w-full md:w-auto px-6 gap-2 bg-brand-gradient text-white hover:shadow-2xl hover:shadow-glow-primary transition-all duration-300 rounded-xl font-semibold touch-manipulation"
                 >
                   <Plus className="w-5 h-5" weight="bold" />
                   <span className="hidden sm:inline">Add Event</span>
@@ -281,8 +281,8 @@ export function Calendar() {
                       today 
                         ? 'bg-gradient-to-br from-orange-500 to-red-500 text-white font-bold shadow-xl shadow-orange-500/50' 
                         : hasEvents
-                        ? 'bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-800/40 dark:hover:to-pink-800/40 border-2 border-purple-200/50 dark:border-purple-700/50'
-                        : 'glass-morphic hover:bg-gradient-to-br hover:from-blue-500/20 hover:to-cyan-500/20 border-2 border-transparent hover:border-blue-500/30',
+                        ? 'bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 dark:from-brand-primary/20 dark:to-brand-secondary/20 hover:from-brand-primary/20 hover:to-brand-secondary/20 border-2 border-brand-primary/30'
+                        : 'glass-morphic hover:bg-gradient-to-br hover:from-brand-primary/20 hover:to-brand-secondary/20 border-2 border-transparent hover:border-brand-primary/30',
                       'backdrop-blur-sm'
                     )}
                   >
@@ -322,7 +322,7 @@ export function Calendar() {
                         {dayEvents.length > 3 && (
                           <Badge 
                             variant="secondary" 
-                            className="text-[8px] px-1 py-0 h-3 md:h-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0"
+                            className="text-[8px] px-1 py-0 h-3 md:h-4 bg-brand-gradient text-white border-0"
                           >
                             +{dayEvents.length - 3}
                           </Badge>
@@ -362,12 +362,12 @@ export function Calendar() {
               transition={{ delay: 0.3 }}
               className="mt-8 flex flex-wrap gap-4 justify-center"
             >
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 border border-blue-200 dark:border-blue-700">
-                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500" />
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-brand-primary/10 to-brand-secondary/10 dark:from-brand-primary/30 dark:to-brand-secondary/30 border border-brand-primary/30">
+                <div className="w-3 h-3 rounded-full bg-brand-gradient" />
                 <span className="text-sm font-medium">Event</span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border border-purple-200 dark:border-purple-700">
-                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-brand-secondary/10 to-brand-tertiary/10 dark:from-brand-secondary/30 dark:to-brand-tertiary/30 border border-brand-secondary/30">
+                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-brand-secondary to-brand-tertiary" />
                 <span className="text-sm font-medium">Plan</span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 border border-orange-200 dark:border-orange-700">

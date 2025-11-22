@@ -507,7 +507,7 @@ export function Tasks() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setDialogOpen(true)}
-              className="inline-flex items-center gap-2 px-6 md:px-8 h-14 md:h-16 rounded-2xl font-semibold text-base md:text-lg text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
+              className="inline-flex items-center gap-2 px-6 md:px-8 h-14 md:h-16 rounded-2xl font-semibold text-base md:text-lg text-white bg-brand-gradient hover:shadow-2xl hover:shadow-glow-primary transition-all duration-300"
             >
               <Plus size={22} weight="bold" className="md:w-6 md:h-6" />
               Create Your First Task

@@ -313,9 +313,9 @@ export function Workouts() {
                                     "flex items-center justify-between py-2 px-3 rounded-lg transition-all",
                                     "neumorphic-inset hover:bg-muted/50",
                                     isWarmup && "border-l-2 border-orange-500/50",
-                                    isCooldown && "border-l-2 border-blue-500/50",
-                                    isRest && "border-l-2 border-purple-500/50",
-                                    !isWarmup && !isCooldown && !isRest && "border-l-2 border-primary/50"
+                                    isCooldown && "border-l-2 border-brand-secondary/50",
+                                    isRest && "border-l-2 border-brand-primary/50",
+                                    !isWarmup && !isCooldown && !isRest && "border-l-2 border-brand-primary/50"
                                   )}
                                 >
                                   <div className="flex items-center gap-2 flex-1 min-w-0">

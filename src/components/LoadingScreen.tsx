@@ -175,7 +175,7 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-accent-vibrant/20 blur-3xl"
+              className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-brand-primary/20 blur-3xl"
             />
             <motion.div
               animate={{
@@ -189,7 +189,7 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
                 ease: "easeInOut",
                 delay: 1
               }}
-              className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-accent-vibrant/20 blur-3xl"
+              className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-brand-secondary/20 blur-3xl"
             />
           </div>
 
@@ -216,10 +216,10 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}
-                  className="absolute inset-0 rounded-full bg-accent-vibrant/30 blur-2xl"
+                  className="absolute inset-0 rounded-full bg-brand-primary/30 blur-2xl"
                 />
-                <div className="relative w-24 h-24 rounded-3xl glass-card flex items-center justify-center border-2 border-accent-vibrant/50">
-                  <Sparkle size={48} weight="duotone" className="text-accent-vibrant" />
+                <div className="relative w-24 h-24 rounded-3xl glass-card flex items-center justify-center border-2 border-brand-primary/50">
+                  <Sparkle size={48} weight="duotone" className="text-brand-primary" />
                 </div>
               </div>
             </motion.div>
@@ -275,7 +275,7 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
                       delay: index * 0.2,
                       ease: "easeInOut"
                     }}
-                    className="w-2 h-2 rounded-full bg-accent-vibrant"
+                    className="w-2 h-2 rounded-full bg-brand-primary"
                   />
                 ))}
               </div>

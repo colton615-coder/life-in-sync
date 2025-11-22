@@ -95,17 +95,17 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
       icon: Flame 
     }
     if (lowerCategory.includes('cool') || lowerCategory.includes('stretch')) return { 
-      gradient: 'from-blue-500 to-cyan-500', 
-      bg: 'bg-blue-500/20', 
-      text: 'text-blue-500', 
+      gradient: 'from-brand-secondary to-brand-tertiary',
+      bg: 'bg-brand-secondary/20',
+      text: 'text-brand-secondary',
       color: 'rgb(59, 130, 246)', 
       icon: Wind 
     }
     if (lowerCategory.includes('rest')) return { 
-      gradient: 'from-purple-500 to-purple-600', 
-      bg: 'bg-purple-500/20', 
-      text: 'text-purple-500', 
-      color: 'rgb(168, 85, 247)', 
+      gradient: 'from-brand-primary to-brand-tertiary',
+      bg: 'bg-brand-primary/20',
+      text: 'text-brand-primary',
+      color: 'var(--brand-primary)',
       icon: Clock 
     }
     return { 

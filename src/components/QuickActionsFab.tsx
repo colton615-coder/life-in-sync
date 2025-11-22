@@ -65,7 +65,7 @@ export function QuickActionsFab() {
       label: 'Add Expense',
       icon: Receipt,
       onClick: () => setExpenseOpen(true),
-      color: 'bg-purple-500 hover:bg-purple-600 text-white'
+      color: 'bg-brand-secondary hover:bg-brand-secondary/90 text-white'
     },
   ]
 

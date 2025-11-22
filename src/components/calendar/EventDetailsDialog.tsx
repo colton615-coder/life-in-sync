@@ -78,15 +78,15 @@ export function EventDetailsDialog({
     switch (category) {
       case 'event':
         return { 
-          bg: 'bg-gradient-to-br from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20', 
-          border: 'border-l-4 border-l-blue-500',
-          text: 'text-blue-600 dark:text-blue-400'
+          bg: 'bg-brand-primary/10 dark:bg-brand-primary/20',
+          border: 'border-l-4 border-l-brand-primary',
+          text: 'text-brand-primary'
         }
       case 'plan':
         return { 
-          bg: 'bg-gradient-to-br from-purple-500/10 to-pink-500/10 dark:from-purple-500/20 dark:to-pink-500/20', 
-          border: 'border-l-4 border-l-purple-500',
-          text: 'text-purple-600 dark:text-purple-400'
+          bg: 'bg-brand-secondary/10 dark:bg-brand-secondary/20',
+          border: 'border-l-4 border-l-brand-secondary',
+          text: 'text-brand-secondary'
         }
       case 'reminder':
         return { 
@@ -112,9 +112,9 @@ export function EventDetailsDialog({
   const getCategoryBadge = (category: string): string => {
     switch (category) {
       case 'event':
-        return 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0'
+        return 'bg-brand-gradient text-white border-0'
       case 'plan':
-        return 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0'
+        return 'bg-gradient-to-r from-brand-secondary to-brand-tertiary text-white border-0'
       case 'reminder':
         return 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0'
       case 'meeting':
@@ -145,10 +145,10 @@ export function EventDetailsDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[650px] bg-gradient-to-br from-white/95 to-white/90 dark:from-gray-900/95 dark:to-gray-900/90 backdrop-blur-xl border-2 border-blue-200/50 dark:border-blue-800/50">
+        <DialogContent className="sm:max-w-[650px] bg-card border-2 border-brand-primary/30">
           <DialogHeader>
-            <DialogTitle className="text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
-              <CalendarBlank className="w-6 h-6 text-blue-500" weight="duotone" />
+            <DialogTitle className="text-2xl text-brand-gradient flex items-center gap-2">
+              <CalendarBlank className="w-6 h-6 text-brand-primary" weight="duotone" />
               {formatDate(date)}
             </DialogTitle>
             <DialogDescription className="text-base flex items-center gap-2">
@@ -156,7 +156,7 @@ export function EventDetailsDialog({
                 'No events scheduled for this day'
               ) : (
                 <>
-                  <Sparkle className="w-4 h-4 text-purple-500" weight="fill" />
+                  <Sparkle className="w-4 h-4 text-brand-secondary" weight="fill" />
                   {events.length} event{events.length > 1 ? 's' : ''} scheduled
                 </>
               )}
@@ -180,15 +180,15 @@ export function EventDetailsDialog({
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}
-                  className="rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 w-20 h-20 flex items-center justify-center mx-auto mb-6"
+                  className="rounded-full bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 dark:from-brand-primary/30 dark:to-brand-secondary/30 w-20 h-20 flex items-center justify-center mx-auto mb-6"
                 >
-                  <CalendarBlank className="w-10 h-10 text-blue-500" weight="duotone" />
+                  <CalendarBlank className="w-10 h-10 text-brand-primary" weight="duotone" />
                 </motion.div>
                 <p className="text-lg font-medium text-foreground mb-2">No events yet</p>
                 <p className="text-muted-foreground mb-6">Start planning your day</p>
                 <Button 
                   onClick={onAddNew} 
-                  className="gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-xl transition-all duration-300"
+                  className="gap-2 bg-brand-gradient text-white hover:shadow-xl hover:shadow-glow-primary transition-all duration-300"
                 >
                   <Plus weight="bold" />
                   Add Event
@@ -208,7 +208,7 @@ export function EventDetailsDialog({
                           exit={{ opacity: 0, x: 20 }}
                           transition={{ delay: index * 0.05 }}
                           className={cn(
-                            "group p-5 rounded-2xl border-2 border-transparent hover:border-purple-200/50 dark:hover:border-purple-700/50 transition-all duration-300 hover:shadow-lg",
+                            "group p-5 rounded-2xl border-2 border-transparent hover:border-brand-primary/50 transition-all duration-300 hover:shadow-lg",
                             colors.bg,
                             colors.border
                           )}
@@ -273,7 +273,7 @@ export function EventDetailsDialog({
               <Button 
                 onClick={onAddNew} 
                 variant="outline" 
-                className="w-full gap-2 h-12 border-2 border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:border-purple-300 rounded-xl font-semibold"
+                className="w-full gap-2 h-12 border-2 border-brand-primary/30 hover:bg-brand-primary/10 hover:border-brand-primary/50 rounded-xl font-semibold"
               >
                 <Plus weight="bold" />
                 Add Another Event

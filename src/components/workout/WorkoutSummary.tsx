@@ -35,7 +35,7 @@ export function WorkoutSummary({ workout, completedCount, onDone }: WorkoutSumma
               Workout Complete!
             </h1>
             <p className="text-muted-foreground max-w-sm text-base sm:text-lg">
-                Great job finishing <span className="font-semibold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">{workout.name}</span>
+                Great job finishing <span className="font-semibold bg-brand-gradient bg-clip-text text-transparent">{workout.name}</span>
             </p>
         </motion.div>
 
@@ -45,16 +45,16 @@ export function WorkoutSummary({ workout, completedCount, onDone }: WorkoutSumma
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="elevated-card hover:scale-105 transition-all duration-300 bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+          <Card className="elevated-card hover:scale-105 transition-all duration-300 bg-brand-primary/10 border-brand-primary/20">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2 justify-center">
-                <Clock className="h-4 w-4 text-purple-500" />
+                <Clock className="h-4 w-4 text-brand-primary" />
                 Duration
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <div className="flex flex-col items-center gap-1">
-                <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
+                <p className="text-3xl sm:text-4xl font-bold bg-brand-gradient bg-clip-text text-transparent">
                   {Math.ceil(totalTime / 60)}
                 </p>
                 <span className="text-sm text-muted-foreground">minutes</span>
@@ -68,16 +68,16 @@ export function WorkoutSummary({ workout, completedCount, onDone }: WorkoutSumma
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="elevated-card hover:scale-105 transition-all duration-300 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+          <Card className="elevated-card hover:scale-105 transition-all duration-300 bg-brand-secondary/10 border-brand-secondary/20">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2 justify-center">
-                <Trophy className="h-4 w-4 text-blue-500" />
+                <Trophy className="h-4 w-4 text-brand-secondary" />
                 Completed
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <div className="flex flex-col items-center gap-1">
-                <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
+                <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-brand-secondary to-brand-tertiary bg-clip-text text-transparent">
                   {completedCount}<span className="text-xl sm:text-2xl">/{totalExercises}</span>
                 </p>
                 <span className="text-sm text-muted-foreground">exercises</span>

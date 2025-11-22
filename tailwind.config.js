@@ -92,6 +92,12 @@ const defaultTheme = {
         overlay: "var(--color-bg-overlay)",
       },
       "focus-ring": "var(--color-focus-ring)",
+
+      // Semantic Theme Colors - Manually added to ensure build stability
+      "brand-primary": "var(--brand-primary)",
+      "brand-secondary": "var(--brand-secondary)",
+      "brand-tertiary": "var(--brand-tertiary)",
+      "accent-vibrant": "var(--accent-vibrant)",
     },
     borderRadius: {
       sm: "var(--radius-sm)",

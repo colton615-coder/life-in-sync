@@ -321,9 +321,9 @@ Respond as Knox with 2-4 sentences. Be provocative, challenging, and push them t
               disabled={loading}
               variant="outline"
               size="sm"
-              className="gap-2 text-xs md:text-sm bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-pink-300/30 hover:border-pink-400/50 transition-all min-h-[44px] px-4 touch-manipulation w-full sm:w-auto"
+              className="gap-2 text-xs md:text-sm bg-brand-primary/10 border-brand-primary/30 hover:border-brand-primary/50 transition-all min-h-[44px] px-4 touch-manipulation w-full sm:w-auto"
             >
-              <Heart size={16} weight="duotone" className="text-pink-500 flex-shrink-0" />
+              <Heart size={16} weight="duotone" className="text-brand-primary flex-shrink-0" />
               <span className="truncate">Ask About Relationship Patterns</span>
             </Button>
             <Button
