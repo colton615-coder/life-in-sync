@@ -16,30 +16,30 @@ export function WorkoutSummary({ workout, completedCount, onDone }: WorkoutSumma
   const estimatedCalories = Math.round((totalTime / 60) * 8)
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-8 text-center p-4">
+    <div className="flex flex-col items-center justify-center min-h-[80vh] gap-5 text-center p-4">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="flex flex-col items-center gap-4"
+          className="flex flex-col items-center gap-3"
         >
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-gradient-to-br from-green-500/30 to-emerald-600/20 flex items-center justify-center mb-4 neumorphic border-2 border-green-500/30"
+              className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-green-500/30 to-emerald-600/20 flex items-center justify-center mb-3 neumorphic border-2 border-green-500/30"
             >
-              <Confetti size={48} weight="duotone" className="text-green-500" />
+              <Confetti size={32} weight="duotone" className="text-green-500" />
             </motion.div>
-            <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
               Workout Complete!
             </h1>
-            <p className="text-muted-foreground max-w-sm text-base sm:text-lg">
+            <p className="text-muted-foreground max-w-sm text-sm sm:text-base">
                 Great job finishing <span className="font-semibold bg-brand-gradient bg-clip-text text-transparent">{workout.name}</span>
             </p>
         </motion.div>
 
-      <div className="w-full max-w-2xl grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="w-full max-w-2xl grid grid-cols-1 md:grid-cols-3 gap-3">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -53,11 +53,11 @@ export function WorkoutSummary({ workout, completedCount, onDone }: WorkoutSumma
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="flex flex-col items-center gap-1">
-                <p className="text-3xl sm:text-4xl font-bold bg-brand-gradient bg-clip-text text-transparent">
+              <div className="flex flex-col items-center gap-0.5">
+                <p className="text-2xl sm:text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">
                   {Math.ceil(totalTime / 60)}
                 </p>
-                <span className="text-sm text-muted-foreground">minutes</span>
+                <span className="text-xs text-muted-foreground">minutes</span>
               </div>
             </CardContent>
           </Card>
@@ -76,11 +76,11 @@ export function WorkoutSummary({ workout, completedCount, onDone }: WorkoutSumma
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="flex flex-col items-center gap-1">
-                <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-brand-secondary to-brand-tertiary bg-clip-text text-transparent">
-                  {completedCount}<span className="text-xl sm:text-2xl">/{totalExercises}</span>
+              <div className="flex flex-col items-center gap-0.5">
+                <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-brand-secondary to-brand-tertiary bg-clip-text text-transparent">
+                  {completedCount}<span className="text-lg sm:text-xl">/{totalExercises}</span>
                 </p>
-                <span className="text-sm text-muted-foreground">exercises</span>
+                <span className="text-xs text-muted-foreground">exercises</span>
               </div>
             </CardContent>
           </Card>
@@ -99,11 +99,11 @@ export function WorkoutSummary({ workout, completedCount, onDone }: WorkoutSumma
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="flex flex-col items-center gap-1">
-                <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-500 to-green-600 bg-clip-text text-transparent">
+              <div className="flex flex-col items-center gap-0.5">
+                <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-500 to-green-600 bg-clip-text text-transparent">
                   {estimatedCalories}
                 </p>
-                <span className="text-sm text-muted-foreground">calories</span>
+                <span className="text-xs text-muted-foreground">calories</span>
               </div>
             </CardContent>
           </Card>
@@ -118,7 +118,7 @@ export function WorkoutSummary({ workout, completedCount, onDone }: WorkoutSumma
        >
          <Button 
            onClick={onDone} 
-           className="w-full bg-success text-success-foreground hover:bg-success/90 shadow-xl shadow-success/30 text-base sm:text-lg h-12 sm:h-14 font-semibold"
+           className="w-full bg-success text-success-foreground hover:bg-success/90 shadow-xl shadow-success/30 text-sm sm:text-base h-10 sm:h-12 font-semibold"
          >
               Done
          </Button>

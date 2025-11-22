@@ -124,8 +124,8 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
     <>
       <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-background via-background/95 to-primary/5" />
 
-      <div className="relative z-10 flex flex-col items-center justify-between h-full min-h-screen py-8 text-center px-4">
-        <header className="flex flex-col items-center w-full space-y-4">
+      <div className="relative z-10 flex flex-col items-center justify-between h-full min-h-screen py-4 text-center px-4">
+        <header className="flex flex-col items-center w-full space-y-2">
           <motion.div 
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -174,7 +174,7 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className={cn(
-                "text-3xl sm:text-4xl md:text-5xl font-bold text-center flex-shrink-0 mx-4 bg-gradient-to-r bg-clip-text text-transparent", 
+                "text-2xl sm:text-3xl md:text-4xl font-bold text-center flex-shrink-0 mx-3 bg-gradient-to-r bg-clip-text text-transparent",
                 categoryStyle.gradient
               )}
             >
@@ -184,21 +184,20 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
           </div>
         </header>
 
-        <div className="flex flex-col items-center gap-6 w-full max-w-2xl my-6">
-          {currentExercise.asset && (
-            <motion.div
-              key={`image-${currentExerciseIndex}`}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="w-full max-w-md rounded-2xl overflow-hidden shadow-lg"
-            >
-              <img 
-                src={currentExercise.asset} 
-                alt={currentExercise.name}
-                className="w-full h-64 object-cover"
-              />
-            </motion.div>
-          )}
+        <div className="flex flex-col items-center gap-4 w-full max-w-2xl my-4">
+          <motion.div
+            key={`visual-${currentExerciseIndex}`}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={cn(
+              "w-full max-w-sm aspect-video rounded-2xl overflow-hidden shadow-lg flex items-center justify-center relative",
+              "bg-gradient-to-br",
+              categoryStyle.gradient
+            )}
+          >
+            <div className="absolute inset-0 bg-black/10 backdrop-blur-[2px]" />
+            <CategoryIcon size={64} weight="duotone" className="text-white drop-shadow-lg relative z-10" />
+          </motion.div>
           
           <motion.div
             key={`instructions-${currentExerciseIndex}`}
@@ -225,19 +224,22 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
               key={currentExerciseIndex}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="relative flex flex-col items-center justify-center my-8"
+              className="relative flex flex-col items-center justify-center my-4"
             >
                 <div className={cn(
-                  "font-mono text-8xl sm:text-9xl font-bold bg-gradient-to-r bg-clip-text text-transparent", 
+                  "font-mono text-6xl sm:text-7xl font-bold bg-gradient-to-r bg-clip-text text-transparent",
                   categoryStyle.gradient
                 )}>
                     {currentExercise.reps}
                 </div>
-                 <span className="text-4xl sm:text-5xl text-muted-foreground font-bold">Reps</span>
+                 <span className="text-2xl sm:text-3xl text-muted-foreground font-bold">Reps</span>
             </motion.div>
         ) : (
-            <div className="relative flex items-center justify-center my-8">
-                <svg className="w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 transform -rotate-90">
+            <div className="relative flex items-center justify-center my-4">
+                <svg
+                  viewBox="0 0 300 300"
+                  className="w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 transform -rotate-90"
+                >
                     <defs>
                       <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor={categoryStyle.color} />
@@ -270,7 +272,7 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
                   initial={{ scale: 1.1 }}
                   animate={{ scale: 1 }}
                   className={cn(
-                    "absolute font-mono text-8xl sm:text-9xl font-bold bg-gradient-to-r bg-clip-text text-transparent", 
+                    "absolute font-mono text-6xl sm:text-7xl font-bold bg-gradient-to-r bg-clip-text text-transparent",
                     categoryStyle.gradient
                   )}
                 >
@@ -287,9 +289,9 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
             transition={{ delay: 0.2 }}
           >
             <Card className="bg-card/60 backdrop-blur-sm elevated-card">
-              <CardHeader className="flex-row items-center justify-between p-3 sm:p-4">
+              <CardHeader className="flex-row items-center justify-between p-2 sm:p-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-md overflow-hidden bg-muted flex-shrink-0 shadow-lg flex items-center justify-center">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-md overflow-hidden bg-muted flex-shrink-0 shadow-lg flex items-center justify-center">
                     {nextExercise ? (
                       <span className="text-2xl">💪</span>
                     ) : (
@@ -335,7 +337,7 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
                   onClick={handleCompleteSet}
                   size="lg"
                   className={cn(
-                    "w-full h-14 sm:h-16 text-base sm:text-lg text-white transition-all bg-gradient-to-r neumorphic-button", 
+                    "w-full h-12 sm:h-14 text-base text-white transition-all bg-gradient-to-r neumorphic-button",
                     categoryStyle.gradient
                   )}
                 >
@@ -349,7 +351,7 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
                   <Button
                     onClick={handlePause}
                     size="lg"
-                    className="neumorphic-button w-28 sm:w-32"
+                    className="neumorphic-button h-12 w-28 sm:w-32"
                   >
                     <PauseCircle className="mr-2" />
                     <span>Pause</span>
@@ -360,7 +362,7 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
                     onClick={handleSkip}
                     size="lg"
                     variant="outline"
-                    className="neumorphic-flat w-28 sm:w-32"
+                    className="neumorphic-flat h-12 w-28 sm:w-32"
                   >
                     <SkipForward className="mr-2" />
                     <span>Skip</span>
