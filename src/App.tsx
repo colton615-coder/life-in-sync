@@ -7,7 +7,7 @@ import { Module } from '@/lib/types'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { clearAllAppData } from '@/lib/clear-data'
 import { LoadingScreen } from './components/LoadingScreen'
-// @ts-ignore
+// @ts-expect-error virtual:pwa-register is dynamically generated
 import { registerSW } from 'virtual:pwa-register'
 import { SarcasticLoader } from './components/SarcasticLoader'
 

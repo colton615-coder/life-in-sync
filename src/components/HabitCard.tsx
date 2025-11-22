@@ -20,19 +20,6 @@ interface HabitCardProps {
   style?: React.CSSProperties
 }
 
-const iconColors = [
-  'text-icon-vibrant',
-  'text-icon-accent',
-  'text-icon-primary',
-  'text-icon-secondary',
-  'text-icon-vibrant',
-  'text-icon-accent',
-  'text-icon-primary',
-  'text-icon-secondary',
-]
-
-const getIconColor = (index: number) => iconColors[index % iconColors.length]
-
 export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog, className, style }: HabitCardProps) {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
 
@@ -94,7 +81,6 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
     const icons: React.ReactElement[] = []
     for (let i = 0; i < (habit.targetCount || 1); i++) {
       const isFilled = i < (habit.currentProgress || 0)
-      const colorClass = getIconColor(i)
       
       icons.push(
         <motion.button

@@ -29,7 +29,7 @@ const DEFAULT_CATEGORIES = [
 ]
 
 export function AddExpenseDialog({ open, onOpenChange }: AddExpenseDialogProps) {
-  const [expenses, setExpenses] = useKV<Expense[]>('expenses', [])
+  const [, setExpenses] = useKV<Expense[]>('expenses', [])
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState(DEFAULT_CATEGORIES[2]) // Default to Food
   const [description, setDescription] = useState('')

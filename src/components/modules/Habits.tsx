@@ -658,8 +658,6 @@ export function Habits() {
                   ? (habit.trackingType === 'numerical' ? (todayEntry.value || 0) : (todayEntry.minutes || 0))
                   : 0
                 
-                const iconColor = 'text-success'
-                
                 return (
                   <motion.div key={habit.id} variants={item}>
                     <Card className="relative glass-card hover:border-primary/30 transition-all duration-300">
