@@ -44,17 +44,32 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
     const randomMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]
     setLoadingMessage(randomMessage)
 
+    let isMounted = true;
+
     const loadAffirmation = async () => {
+      // Safety check for spark runtime
+      if (typeof window.spark === 'undefined') {
+        const fallback = staticAffirmations[Math.floor(Math.random() * staticAffirmations.length)]
+        if (isMounted) setAffirmation(fallback)
+        return
+      }
+
       // Try to load existing affirmation from KV first for instant display
       try {
         const todayKey = getTodayKey()
-        const existing = await window.spark.kv.get('daily-affirmation') as DailyAffirmation | null
+        let existing: DailyAffirmation | null = null
+        if (window.spark.kv) {
+            existing = await window.spark.kv.get('daily-affirmation') as DailyAffirmation | null
+        }
+
         if (existing && existing.date === todayKey) {
-             setAffirmation({ text: existing.text, author: existing.author })
+             if (isMounted) setAffirmation({ text: existing.text, author: existing.author })
              // If we have an existing affirmation, we can load faster
              setTimeout(() => {
-                 setIsLoading(false)
-                 onLoadComplete()
+                 if (isMounted) {
+                     setIsLoading(false)
+                     onLoadComplete()
+                 }
              }, 800)
              return;
         }
@@ -64,6 +79,10 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
 
       // If no existing affirmation or different day, fetch new one in background
       try {
+        if (!window.spark.llmPrompt || !window.spark.llm) {
+            throw new Error('Spark LLM not available');
+        }
+
         const promptText = window.spark.llmPrompt`Generate a single inspirational quote or Bible verse for daily motivation. Return the result as valid JSON in the following format:
 {
   "text": "the quote or verse text",
@@ -92,13 +111,15 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
             author: data.author,
             date: todayKey
           }
-          setAffirmation({ text: data.text, author: data.author })
-          await window.spark.kv.set('daily-affirmation', affirmationData)
+          if (isMounted) setAffirmation({ text: data.text, author: data.author })
+          if (window.spark.kv) {
+              await window.spark.kv.set('daily-affirmation', affirmationData)
+          }
         }
       } catch (error) {
         console.error('Failed to load affirmation:', error)
         const fallback = staticAffirmations[Math.floor(Math.random() * staticAffirmations.length)]
-        setAffirmation(fallback)
+        if (isMounted) setAffirmation(fallback)
       }
     }
 
@@ -108,14 +129,29 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
     // Reduced artificial delay from 3800ms to 1000ms for first load feel,
     // or faster if affirmation loads earlier.
     const timer = setTimeout(() => {
-      setIsLoading(false)
-      setTimeout(() => {
-        onLoadComplete()
-      }, 500)
+      if (isMounted) {
+          setIsLoading(false)
+          setTimeout(() => {
+            if (isMounted) onLoadComplete()
+          }, 500)
+      }
     }, 1500)
 
-    return () => clearTimeout(timer)
-  }, [onLoadComplete])
+    // Safety valve: Force completion after 5 seconds no matter what
+    const safetyTimer = setTimeout(() => {
+        if (isMounted && isLoading) {
+            console.warn('LoadingScreen safety valve triggered');
+            setIsLoading(false);
+            onLoadComplete();
+        }
+    }, 5000);
+
+    return () => {
+        isMounted = false;
+        clearTimeout(timer);
+        clearTimeout(safetyTimer);
+    }
+  }, [onLoadComplete]) // Removed isLoading from dependency to avoid re-triggering
 
   return (
     <AnimatePresence>
