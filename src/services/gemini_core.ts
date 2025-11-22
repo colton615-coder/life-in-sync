@@ -25,10 +25,28 @@ export class GeminiCore {
    * Supports VITE_GEMINI_API_KEY (frontend) and GEMINI_API_KEY (script/backend).
    */
   private getApiKey(): string {
+    // 1. Priority: LocalStorage (User overrides)
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('gemini-api-key');
+      if (stored) {
+        try {
+          // useKV stores strings as JSON strings (e.g., "\"abc\"")
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === 'string' && parsed.length > 0) {
+            return parsed;
+          }
+        } catch {
+          // Fallback if not JSON stringified
+          if (stored.length > 0) return stored;
+        }
+      }
+    }
+
+    // 2. Priority: Vite Environment Variable
     const viteKey = import.meta.env?.VITE_GEMINI_API_KEY;
     if (viteKey) return viteKey;
 
-    // Fallback for non-Vite environments (e.g. running scripts via tsx)
+    // 3. Fallback for non-Vite environments (e.g. running scripts via tsx)
     if (typeof process !== 'undefined' && process.env.GEMINI_API_KEY) {
       return process.env.GEMINI_API_KEY;
     }

@@ -3,10 +3,11 @@ import { useKV } from '@/hooks/use-kv'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { Sparkle, Vibrate, SpeakerHigh, ShieldCheck, Trash, Warning } from '@phosphor-icons/react'
+import { Sparkle, Vibrate, SpeakerHigh, ShieldCheck, Trash, Warning, Key, LinkSimple } from '@phosphor-icons/react'
 import { getUsageStats, resetUsageStats } from '@/lib/completion-tracker'
 import type { AIUsageStats } from '@/lib/types'
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
@@ -27,6 +28,7 @@ export function Settings() {
   const [hapticEnabled, setHapticEnabled] = useKV<boolean>('settings-haptic-enabled', true)
   const [soundEnabled, setSoundEnabled] = useKV<boolean>('settings-sound-enabled', false)
   const [safeModeEnabled, setSafeModeEnabled] = useKV<boolean>('settings-safe-mode-enabled', true)
+  const [apiKey, setApiKey] = useKV<string>('gemini-api-key', '')
   const [isOwner, setIsOwner] = useState(false)
   const [usageStats, setUsageStats] = useState<AIUsageStats | null>(null)
   
@@ -52,6 +54,15 @@ export function Settings() {
     await resetUsageStats()
     await loadUsageStats()
     toast.success("Usage statistics reset")
+  }
+
+  const handleSaveApiKey = () => {
+    // Force a reload to ensure the new key is picked up by the GeminiCore singleton
+    triggerHaptic('success')
+    toast.success('API Key saved', {
+      description: 'Reloading app to apply changes...',
+    })
+    setTimeout(() => window.location.reload(), 1500)
   }
 
   const handleClearAllData = async () => {
@@ -198,6 +209,38 @@ export function Settings() {
                 toast.success(`Safe Mode ${checked ? 'enabled' : 'disabled'}`)
               }}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>AI Configuration</CardTitle>
+          <CardDescription>
+            Manage your connection to Google's Gemini AI.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="api-key" className="font-medium flex items-center gap-2">
+              <Key size={20} className="text-primary" />
+              Gemini API Key
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                id="api-key"
+                type="password"
+                placeholder="Paste your API key here..."
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="font-mono"
+              />
+              <Button onClick={handleSaveApiKey}>Save</Button>
+            </div>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <LinkSimple size={14} />
+              Need a key? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Get one from Google AI Studio</a>
+            </p>
           </div>
         </CardContent>
       </Card>
