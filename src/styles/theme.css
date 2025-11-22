@@ -218,20 +218,20 @@
     --color-accent-12: var(--blue-12);
     --color-accent-contrast: var(--blue-contrast);
 
-    /* Secondary accent colors */
-    --color-accent-secondary-1: var(--violet-1);
-    --color-accent-secondary-2: var(--violet-2);
-    --color-accent-secondary-3: var(--violet-3);
-    --color-accent-secondary-4: var(--violet-4);
-    --color-accent-secondary-5: var(--violet-5);
-    --color-accent-secondary-6: var(--violet-6);
-    --color-accent-secondary-7: var(--violet-7);
-    --color-accent-secondary-8: var(--violet-8);
-    --color-accent-secondary-9: var(--violet-9);
-    --color-accent-secondary-10: var(--violet-10);
-    --color-accent-secondary-11: var(--violet-11);
-    --color-accent-secondary-12: var(--violet-12);
-    --color-accent-secondary-contrast: var(--violet-contrast);
+    /* Secondary accent colors - UPDATED for Midnight Navy Theme (was Violet) */
+    --color-accent-secondary-1: var(--cyan-1);
+    --color-accent-secondary-2: var(--cyan-2);
+    --color-accent-secondary-3: var(--cyan-3);
+    --color-accent-secondary-4: var(--cyan-4);
+    --color-accent-secondary-5: var(--cyan-5);
+    --color-accent-secondary-6: var(--cyan-6);
+    --color-accent-secondary-7: var(--cyan-7);
+    --color-accent-secondary-8: var(--cyan-8);
+    --color-accent-secondary-9: var(--cyan-9);
+    --color-accent-secondary-10: var(--cyan-10);
+    --color-accent-secondary-11: var(--cyan-11);
+    --color-accent-secondary-12: var(--cyan-12);
+    --color-accent-secondary-contrast: var(--cyan-contrast);
 
     /* Foreground colors */
     --color-fg: var(--color-neutral-12);

@@ -114,9 +114,9 @@ export function Shopping() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 md:space-y-8 relative px-2 md:px-0 pt-4 md:pt-0">
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '0s' }} />
-        <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-cyan-500/20 via-blue-500/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-gradient-to-br from-orange-500/20 via-yellow-500/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }} />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-brand-primary/20 via-brand-secondary/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '0s' }} />
+        <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-brand-tertiary/20 via-brand-primary/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-gradient-to-br from-brand-secondary/20 via-brand-tertiary/20 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }} />
       </div>
 
       {confetti && (
@@ -159,19 +159,19 @@ export function Shopping() {
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
-          <div className="rounded-3xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 p-5 md:p-6 shadow-2xl shadow-purple-500/30 relative overflow-hidden">
+          <div className="rounded-3xl bg-brand-gradient p-5 md:p-6 shadow-2xl shadow-glow-primary relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
             <ShoppingCart className="w-10 h-10 md:w-12 md:h-12 text-white relative z-10" weight="duotone" />
           </div>
         </motion.div>
         <div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-brand-gradient">
             Shopping List 2.0
           </h1>
           <p className="text-base md:text-lg text-muted-foreground mt-2.5 md:mt-3 flex items-center justify-center gap-2">
             <Lightning className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" weight="fill" />
             Capitalism made pretty
-            <Sparkle className="w-4 h-4 md:w-5 md:h-5 text-pink-500" weight="fill" />
+            <Sparkle className="w-4 h-4 md:w-5 md:h-5 text-brand-secondary" weight="fill" />
           </p>
         </div>
 
@@ -193,7 +193,7 @@ export function Shopping() {
         transition={{ duration: 0.6, delay: 0.1 }}
         className="relative overflow-hidden rounded-3xl glass-card backdrop-blur-xl border border-white/20 shadow-2xl"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 via-purple-500/5 to-blue-500/5" />
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 via-brand-tertiary/5 to-brand-secondary/5" />
         
         <div className="relative p-6 md:p-10 space-y-6">
           <form onSubmit={handleAddItem} className="flex gap-3">
@@ -212,7 +212,7 @@ export function Shopping() {
                   animate={{ scale: 1 }}
                   className="absolute right-4 top-1/2 -translate-y-1/2"
                 >
-                  <Sparkle className="w-5 h-5 text-purple-500 animate-pulse" weight="fill" />
+                  <Sparkle className="w-5 h-5 text-brand-primary animate-pulse" weight="fill" />
                 </motion.div>
               )}
             </div>
@@ -237,7 +237,7 @@ export function Shopping() {
                   className="text-center py-20 px-4"
                 >
                   <motion.div 
-                    className="rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 w-20 h-20 flex items-center justify-center mx-auto mb-6"
+                    className="rounded-full bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 dark:from-brand-primary/30 dark:to-brand-secondary/30 w-20 h-20 flex items-center justify-center mx-auto mb-6"
                     animate={{ 
                       scale: [1, 1.1, 1],
                       rotate: [0, 5, -5, 0]
@@ -248,7 +248,7 @@ export function Shopping() {
                       ease: "easeInOut"
                     }}
                   >
-                    <ShoppingCart className="w-10 h-10 text-purple-500" weight="duotone" />
+                    <ShoppingCart className="w-10 h-10 text-brand-primary" weight="duotone" />
                   </motion.div>
                   <p className="text-xl font-medium text-foreground mb-2">
                     Your list is empty!
@@ -273,8 +273,8 @@ export function Shopping() {
                         className={cn(
                           'flex items-center gap-4 p-4 rounded-2xl transition-all duration-300',
                           'glass-morphic',
-                          'hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20',
-                          'hover:shadow-lg hover:scale-[1.02] border border-transparent hover:border-purple-200/50'
+                          'hover:from-brand-primary/10 hover:to-brand-secondary/10 dark:hover:from-brand-primary/20 dark:hover:to-brand-secondary/20',
+                          'hover:shadow-lg hover:scale-[1.02] border border-transparent hover:border-brand-primary/30'
                         )}
                       >
                         <motion.div
@@ -297,7 +297,7 @@ export function Shopping() {
                               onChange={(e) => setEditingName(e.target.value)}
                               onBlur={handleSaveEdit}
                               onKeyDown={handleEditKeyDown}
-                              className="h-12 text-base bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700 rounded-xl"
+                              className="h-12 text-base bg-white dark:bg-gray-800 border-2 border-brand-primary/50 rounded-xl"
                             />
                           </div>
                         ) : (

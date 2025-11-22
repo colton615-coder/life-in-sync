@@ -74,8 +74,8 @@ export function AddEventDialog({ open, onOpenChange, onAdd, initialDate }: AddEv
 
   const getCategoryColor = (cat: string) => {
     switch (cat) {
-      case 'event': return 'from-blue-500 to-cyan-500'
-      case 'plan': return 'from-purple-500 to-pink-500'
+      case 'event': return 'from-brand-primary to-brand-secondary'
+      case 'plan': return 'from-brand-secondary to-brand-tertiary'
       case 'reminder': return 'from-orange-500 to-amber-500'
       case 'meeting': return 'from-green-500 to-emerald-500'
       default: return 'from-gray-500 to-slate-500'
@@ -84,10 +84,10 @@ export function AddEventDialog({ open, onOpenChange, onAdd, initialDate }: AddEv
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] bg-gradient-to-br from-white/95 to-white/90 dark:from-gray-900/95 dark:to-gray-900/90 backdrop-blur-xl border-2 border-purple-200/50 dark:border-purple-800/50">
+      <DialogContent className="sm:max-w-[550px] bg-card border-2 border-brand-primary/30">
         <DialogHeader>
-          <DialogTitle className="text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
-            <CalendarBlank className="w-6 h-6 text-purple-500" weight="duotone" />
+          <DialogTitle className="text-2xl text-brand-gradient flex items-center gap-2">
+            <CalendarBlank className="w-6 h-6 text-brand-primary" weight="duotone" />
             Create New Event
           </DialogTitle>
           <DialogDescription className="text-base">
@@ -106,7 +106,7 @@ export function AddEventDialog({ open, onOpenChange, onAdd, initialDate }: AddEv
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="What's the event?"
-              className="h-12 text-base border-2 focus-visible:border-purple-400 rounded-xl"
+              className="h-12 text-base bg-input border-2 focus-visible:border-brand-primary rounded-xl"
               autoFocus
             />
           </div>
@@ -119,7 +119,7 @@ export function AddEventDialog({ open, onOpenChange, onAdd, initialDate }: AddEv
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add more details..."
               rows={3}
-              className="text-base border-2 focus-visible:border-purple-400 rounded-xl resize-none"
+              className="text-base bg-input border-2 focus-visible:border-brand-primary rounded-xl resize-none"
             />
           </div>
 
@@ -134,7 +134,7 @@ export function AddEventDialog({ open, onOpenChange, onAdd, initialDate }: AddEv
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="h-12 border-2 focus-visible:border-purple-400 rounded-xl"
+                className="h-12 border-2 focus-visible:border-brand-primary rounded-xl"
               />
             </div>
 
@@ -144,19 +144,19 @@ export function AddEventDialog({ open, onOpenChange, onAdd, initialDate }: AddEv
                 Category
               </Label>
               <Select value={category} onValueChange={(value) => setCategory(value as CalendarEvent['category'])}>
-                <SelectTrigger id="category" className="h-12 border-2 focus-visible:border-purple-400 rounded-xl">
+                <SelectTrigger id="category" className="h-12 border-2 focus-visible:border-brand-primary rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="event">
                     <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500`} />
+                      <div className={`w-3 h-3 rounded-full bg-brand-gradient`} />
                       Event
                     </div>
                   </SelectItem>
                   <SelectItem value="plan">
                     <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full bg-gradient-to-br from-purple-500 to-pink-500`} />
+                      <div className={`w-3 h-3 rounded-full bg-gradient-to-br from-brand-secondary to-brand-tertiary`} />
                       Plan
                     </div>
                   </SelectItem>
@@ -188,7 +188,7 @@ export function AddEventDialog({ open, onOpenChange, onAdd, initialDate }: AddEv
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="h-12 border-2 focus-visible:border-purple-400 rounded-xl"
+                className="h-12 border-2 focus-visible:border-brand-primary rounded-xl"
               />
             </div>
 
@@ -199,7 +199,7 @@ export function AddEventDialog({ open, onOpenChange, onAdd, initialDate }: AddEv
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="h-12 border-2 focus-visible:border-purple-400 rounded-xl"
+                className="h-12 border-2 focus-visible:border-brand-primary rounded-xl"
               />
             </div>
           </div>
