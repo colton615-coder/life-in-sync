@@ -15,7 +15,13 @@ export async function clearAllAppData() {
     'connections'
   ]
 
-  for (const key of keysToClear) {
-    await window.spark.kv.delete(key)
+  if (typeof window.spark !== 'undefined' && window.spark.kv) {
+    for (const key of keysToClear) {
+      try {
+        await window.spark.kv.delete(key)
+      } catch (error) {
+        console.warn(`Failed to delete key ${key}:`, error)
+      }
+    }
   }
 }
