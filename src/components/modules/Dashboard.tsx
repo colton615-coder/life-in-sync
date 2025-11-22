@@ -11,7 +11,7 @@ import {
   Sparkle
 } from '@phosphor-icons/react'
 import { Module, Habit, Expense, Task, CompletedWorkout, ChatMessage } from '@/lib/types'
-import { useKV } from '@github/spark/hooks'
+import { useKV } from '@/hooks/use-kv'
 import { useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'

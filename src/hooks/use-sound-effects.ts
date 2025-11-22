@@ -1,5 +1,5 @@
 import { useCallback, useRef, useEffect } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useKV } from '@/hooks/use-kv'
 
 type SoundType = 'success' | 'complete' | 'delete' | 'tap' | 'error' | 'notification'
 

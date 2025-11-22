@@ -23,7 +23,7 @@ import {
   Backpack
 } from '@phosphor-icons/react'
 import { SwingAnalysis, GolfClub } from '@/lib/types'
-import { useKV } from '@github/spark/hooks'
+import { useKV } from '@/hooks/use-kv'
 import { toast } from 'sonner'
 import { simulateVideoProcessing, analyzePoseData, generateFeedback } from '@/lib/golf/swing-analyzer'
 import { validateVideoFile, formatFileSize, getVideoCompressionTips } from '@/lib/golf/video-utils'

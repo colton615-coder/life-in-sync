@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise } from '@phosphor-icons/react'
-import { useKV } from '@github/spark/hooks'
+import { useKV } from '@/hooks/use-kv'
 import { WorkoutPlan, CompletedWorkout } from '@/lib/types'
 import { toast } from 'sonner'
 import { ActiveWorkout } from '../workout/ActiveWorkout'
