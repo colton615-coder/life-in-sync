@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Trash, PencilSimple, Fire, Drop, Target } from '@phosphor-icons/react'
-import * as Icons from '@phosphor-icons/react'
+import { HabitIcons } from '@/lib/habit-icons'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
@@ -25,24 +25,24 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
 
   const getIconComponent = () => {
     if (!habit.icon) return Drop
-    const IconComponent = (Icons as Record<string, React.ElementType>)[habit.icon]
+    const IconComponent = HabitIcons[habit.icon]
     if (IconComponent) return IconComponent
     
     const name = habit.name.toLowerCase()
     
     if (name.includes('water') || name.includes('drink') || name.includes('hydrat')) return Drop
-    if (name.includes('exercise') || name.includes('workout') || name.includes('gym') || name.includes('run')) return Icons.Barbell
-    if (name.includes('read') || name.includes('book')) return Icons.Book
-    if (name.includes('sleep') || name.includes('rest')) return Icons.Moon
-    if (name.includes('meditat') || name.includes('mindful')) return Icons.FlowerLotus
-    if (name.includes('walk')) return Icons.PersonSimpleRun
-    if (name.includes('stretch') || name.includes('yoga')) return Icons.FlowerLotus
-    if (name.includes('food') || name.includes('eat') || name.includes('meal')) return Icons.ForkKnife
-    if (name.includes('vitamin') || name.includes('supplement') || name.includes('medicine')) return Icons.FirstAid
-    if (name.includes('journal') || name.includes('write')) return Icons.BookOpen
-    if (name.includes('learn') || name.includes('study')) return Icons.GraduationCap
-    if (name.includes('clean')) return Icons.House
-    if (name.includes('call') || name.includes('contact') || name.includes('friend')) return Icons.Chats
+    if (name.includes('exercise') || name.includes('workout') || name.includes('gym') || name.includes('run')) return HabitIcons.Barbell
+    if (name.includes('read') || name.includes('book')) return HabitIcons.Book
+    if (name.includes('sleep') || name.includes('rest')) return HabitIcons.Moon
+    if (name.includes('meditat') || name.includes('mindful')) return HabitIcons.FlowerLotus
+    if (name.includes('walk')) return HabitIcons.PersonSimpleRun
+    if (name.includes('stretch') || name.includes('yoga')) return HabitIcons.FlowerLotus
+    if (name.includes('food') || name.includes('eat') || name.includes('meal')) return HabitIcons.ForkKnife
+    if (name.includes('vitamin') || name.includes('supplement') || name.includes('medicine')) return HabitIcons.FirstAid
+    if (name.includes('journal') || name.includes('write')) return HabitIcons.BookOpen
+    if (name.includes('learn') || name.includes('study')) return HabitIcons.GraduationCap
+    if (name.includes('clean')) return HabitIcons.House
+    if (name.includes('call') || name.includes('contact') || name.includes('friend')) return HabitIcons.Chats
     
     return Target
   }
