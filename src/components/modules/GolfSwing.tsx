@@ -39,14 +39,14 @@ import { GolfSwingState } from '@/lib/golf/state'
 
 /**
  * MetricCard: High-density visualization for a single data point.
- * Updated to use JetBrains Mono for values.
+ * Refactored for Midnight Neon aesthetic.
  */
 function MetricCard({
   label,
   value,
   subValue,
-  score, // 0-100 or 'good'/'poor' logic
-  type = 'value', // 'value' | 'rating'
+  score,
+  type = 'value',
   delay = 0
 }: {
   label: string
@@ -56,13 +56,11 @@ function MetricCard({
   type?: 'value' | 'rating'
   delay?: number
 }) {
-  // Determine color based on score
   const isGood = typeof score === 'number'
     ? score >= 70
     : ['excellent', 'good'].includes(score)
 
   const accentColor = isGood ? 'text-emerald-400' : 'text-orange-500'
-  const bgColor = isGood ? 'bg-emerald-400/5' : 'bg-orange-500/5'
   const progressColor = isGood ? 'bg-emerald-400' : 'bg-orange-500'
 
   return (
@@ -71,10 +69,10 @@ function MetricCard({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, delay, ease: "easeOut" }}
     >
-      <Card className={cn("border-0 glass-card relative overflow-hidden group hover:bg-white/5 transition-colors", bgColor)}>
+      <Card className="glass-card relative overflow-hidden group hover:bg-white/5 transition-colors">
         <CardContent className="p-4 flex flex-col justify-between h-full">
           <div className="flex justify-between items-start mb-2">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</span>
+            <span className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">{label}</span>
             {typeof score === 'string' && (
                <Badge variant="outline" className={cn("text-[10px] px-1 py-0 h-5 border-0 bg-black/20 backdrop-blur", accentColor)}>
                  {score.toUpperCase()}
@@ -83,12 +81,12 @@ function MetricCard({
           </div>
 
           <div className="space-y-2">
-            <div className={cn("text-2xl font-black tabular-nums tracking-tighter font-mono", accentColor)}>
+            <div className={cn("text-2xl font-bold tabular-nums tracking-tight font-mono text-white")}>
               {value}
             </div>
 
             {type === 'value' && typeof score === 'number' && (
-               <div className="h-1 w-full bg-background/30 rounded-full overflow-hidden">
+               <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
                  <motion.div
                    initial={{ width: 0 }}
                    animate={{ width: `${Math.min(100, score)}%` }}
@@ -111,9 +109,8 @@ function MetricCard({
 }
 
 function MetricsGrid({ metrics }: { metrics: SwingMetrics }) {
-  // Helpers to calculate scores for visuals
-  const hipScore = Math.min(100, (metrics.hipRotation.total / 90) * 100) // Target ~90 deg
-  const shoulderScore = Math.min(100, (metrics.shoulderRotation.total / 100) * 100) // Target ~100+
+  const hipScore = Math.min(100, (metrics.hipRotation.total / 90) * 100)
+  const shoulderScore = Math.min(100, (metrics.shoulderRotation.total / 100) * 100)
   const tempoScore = Math.abs(metrics.tempo.ratio - 2.0) < 0.3 ? 100 : 40
 
   return (
@@ -179,7 +176,7 @@ function ProgressChart({ analyses, selectedClubFilter, setSelectedClubFilter }: 
 
     if (completedAnalyses.length === 0) {
       return (
-        <Alert className="mt-6 bg-transparent border-dashed">
+        <Alert className="mt-6 bg-transparent border border-dashed border-white/10 text-slate-400">
           <ChartBar size={18} />
           <AlertDescription>
             Complete at least one swing analysis to see your progress over time
@@ -204,12 +201,12 @@ function ProgressChart({ analyses, selectedClubFilter, setSelectedClubFilter }: 
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
-          <h3 className="text-sm font-semibold text-muted-foreground">Score History</h3>
+          <h3 className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Score History</h3>
           <Select value={selectedClubFilter} onValueChange={setSelectedClubFilter}>
-            <SelectTrigger className="w-[140px] h-8 text-xs bg-transparent border-white/10">
+            <SelectTrigger className="w-[140px] h-8 text-xs bg-slate-900/50 border-white/10 text-white rounded-lg">
               <SelectValue placeholder="Filter Club" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-slate-900 border-white/10 text-white">
               <SelectItem value="all">All Clubs</SelectItem>
               {availableClubs.map(club => (
                 <SelectItem key={club} value={club}>{club}</SelectItem>
@@ -219,17 +216,17 @@ function ProgressChart({ analyses, selectedClubFilter, setSelectedClubFilter }: 
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Card className="glass-card p-3 border-0 bg-white/5">
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Average</div>
-            <div className="text-2xl font-black text-primary font-mono">{avgScore}</div>
+          <Card className="glass-card p-4 border-0">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-semibold">Average</div>
+            <div className="text-2xl font-bold text-cyan-400 font-mono tracking-tight">{avgScore}</div>
           </Card>
-           <Card className="glass-card p-3 border-0 bg-white/5">
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Total Swings</div>
-            <div className="text-2xl font-black text-primary font-mono">{filteredAnalyses.length}</div>
+           <Card className="glass-card p-4 border-0">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-semibold">Total Swings</div>
+            <div className="text-2xl font-bold text-cyan-400 font-mono tracking-tight">{filteredAnalyses.length}</div>
           </Card>
         </div>
 
-        <Card className="glass-card p-4 border-0 bg-black/20">
+        <Card className="glass-card p-4 border-0">
           {chartData.length > 0 ? (
               <div className="h-[150px] flex items-end justify-between gap-2 pt-4">
                 {chartData.map((data, idx) => {
@@ -238,10 +235,10 @@ function ProgressChart({ analyses, selectedClubFilter, setSelectedClubFilter }: 
                     <div key={idx} className="flex-1 flex flex-col items-center gap-1 group">
                       <div className="relative w-full flex flex-col items-center">
                         <div
-                          className="w-full max-w-[20px] bg-primary/80 rounded-t-sm transition-all group-hover:bg-cyan-400 hover:shadow-[0_0_10px_rgba(34,211,238,0.5)]"
+                          className="w-full max-w-[20px] bg-cyan-500/80 rounded-t-sm transition-all group-hover:bg-cyan-400 hover:shadow-[0_0_15px_rgba(34,211,238,0.5)]"
                           style={{ height: `${height}%`, minHeight: '4px' }}
                         />
-                         <div className="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 bg-black/90 backdrop-blur border border-white/10 px-2 py-1 rounded text-[10px] whitespace-nowrap z-10 transition-opacity font-mono">
+                         <div className="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 bg-slate-900/90 backdrop-blur border border-white/10 px-2 py-1 rounded text-[10px] whitespace-nowrap z-10 transition-opacity font-mono text-white">
                             {data.score} | {data.date}
                          </div>
                       </div>
@@ -250,8 +247,8 @@ function ProgressChart({ analyses, selectedClubFilter, setSelectedClubFilter }: 
                 })}
               </div>
             ) : (
-              <div className="h-[150px] flex items-center justify-center text-muted-foreground text-xs">
-                No data
+              <div className="h-[150px] flex items-center justify-center text-slate-500 text-xs font-mono">
+                No data available
               </div>
             )}
         </Card>
@@ -260,16 +257,11 @@ function ProgressChart({ analyses, selectedClubFilter, setSelectedClubFilter }: 
 }
 
 export function GolfSwing() {
-  // Data Persistence
   const [analyses, setAnalyses] = useKV<SwingAnalysis[]>('golf-swing-analyses', [])
-
-  // UI State Machine
   const [viewState, setViewState] = useState<GolfSwingState>({ status: 'IDLE' })
-
-  // Local UI Filters/Modals
   const [comparisonDialogOpen, setComparisonDialogOpen] = useState(false)
   const [selectedClubFilter, setSelectedClubFilter] = useState<string>('all')
-  const [historyOpen, setHistoryOpen] = useState(false) // For mobile drawer
+  const [historyOpen, setHistoryOpen] = useState(false)
   const [showOverlay, setShowOverlay] = useState(true)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -393,20 +385,20 @@ export function GolfSwing() {
 
   const handleViewAnalysis = (analysis: SwingAnalysis) => {
     setViewState({ status: 'VIEWING_RESULT', analysis })
-    setHistoryOpen(false) // Close mobile drawer on selection
+    setHistoryOpen(false)
   }
 
   const renderProcessingState = () => {
     if (viewState.status !== 'ANALYZING') return null
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center min-h-[60vh] px-6">
-        <Card className="w-full max-w-2xl glass-card border-0 bg-black/40">
+        <Card className="w-full max-w-2xl glass-card border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 justify-center">
               <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
                 <Sparkle size={24} weight="duotone" className="text-cyan-400" />
               </motion.div>
-              <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent font-bold">
                   Processing Swing Telemetry
               </span>
             </CardTitle>
@@ -435,7 +427,7 @@ export function GolfSwing() {
 
   const renderEmptyState = () => (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 md:px-6">
-      <div className="glass-card rounded-3xl p-8 md:p-12 max-w-2xl w-full border-0 bg-black/20 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      <div className="glass-card rounded-3xl p-8 md:p-12 max-w-2xl w-full shadow-[0_0_50px_rgba(0,0,0,0.5)]">
         <motion.div animate={{ rotateY: [0, 10, -10, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="mb-6">
           <Video size={80} weight="duotone" className="text-cyan-500/50 mx-auto" />
         </motion.div>
@@ -444,10 +436,9 @@ export function GolfSwing() {
             Upload your swing to initialize the biometric engine.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" onClick={() => fileInputRef.current?.click()} className="gap-2 text-base md:text-lg px-8 py-6 rounded-full bg-cyan-500 hover:bg-cyan-400 text-black font-bold shadow-glow-primary transition-all hover:scale-105">
+            <Button size="lg" onClick={() => fileInputRef.current?.click()} className="gap-2 text-base md:text-lg px-8 py-6 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black font-bold shadow-glow-primary transition-all hover:scale-105 border-0">
                 <Upload size={24} weight="bold" /> INITIATE UPLOAD
             </Button>
-             {/* Mobile: Allow accessing history even from empty state via button if analyses exist */}
             {analyses && analyses.length > 0 && (
                 <Button variant="outline" size="lg" onClick={() => setHistoryOpen(true)} className="lg:hidden gap-2 px-6 py-6 rounded-full border-white/10 bg-white/5 hover:bg-white/10 text-white">
                    <List size={24} /> HISTORY
@@ -470,7 +461,7 @@ export function GolfSwing() {
                 "cursor-pointer p-3 rounded-xl border transition-all flex items-center justify-between group",
                 activeAnalysisId === analysis.id
                   ? "bg-cyan-500/10 border-cyan-500/30 shadow-[0_0_15px_rgba(34,211,238,0.1)]"
-                  : "bg-black/20 border-white/5 hover:border-white/10 hover:bg-white/5"
+                  : "bg-slate-900/40 border-white/5 hover:border-white/10 hover:bg-white/5"
               )}
               onClick={() => handleViewAnalysis(analysis)}
             >
@@ -504,8 +495,6 @@ export function GolfSwing() {
     )
   }
 
-  // --- Main Dashboard Render ---
-
   if (viewState.status === 'ANALYZING') return renderProcessingState()
   if (viewState.status === 'ERROR') return renderErrorState()
   if (viewState.status === 'IDLE' && (!analyses || analyses.length === 0)) {
@@ -523,11 +512,10 @@ export function GolfSwing() {
     <div className="h-[calc(100vh-4rem)] flex flex-col pt-2 gap-4">
       {/* Header */}
       <div className="flex items-center justify-between px-4 shrink-0">
-        <h1 className="text-xl font-black flex items-center gap-2 tracking-tight">
+        <h1 className="text-xl font-black flex items-center gap-2 tracking-tight text-white">
           <span className="text-cyan-500">///</span> SWING ANALYZER
         </h1>
         <div className="flex gap-2">
-            {/* Mobile History Toggle */}
            <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
              <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="lg:hidden">
@@ -536,7 +524,7 @@ export function GolfSwing() {
              </SheetTrigger>
              <SheetContent side="left" className="w-[300px] sm:w-[400px] bg-slate-900 border-r-white/10">
                 <SheetHeader>
-                    <SheetTitle className="text-left">Mission History</SheetTitle>
+                    <SheetTitle className="text-left text-white">Mission History</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4">
                     {renderAnalysisList()}
@@ -544,7 +532,7 @@ export function GolfSwing() {
              </SheetContent>
            </Sheet>
 
-           <Button variant="outline" size="sm" onClick={() => setComparisonDialogOpen(true)} className="hidden md:flex border-white/10 hover:bg-white/5">
+           <Button variant="outline" size="sm" onClick={() => setComparisonDialogOpen(true)} className="hidden md:flex border-white/10 hover:bg-white/5 bg-transparent text-slate-200">
              <ArrowsLeftRight size={16} className="mr-2" /> COMPARE
            </Button>
            <Button size="sm" onClick={() => fileInputRef.current?.click()} className="bg-white/10 hover:bg-white/20 text-white border-0">
@@ -571,7 +559,7 @@ export function GolfSwing() {
               onToggleOverlay={() => setShowOverlay(!showOverlay)}
             />
           ) : (
-            <div className="aspect-video w-full rounded-2xl bg-black/20 border border-dashed border-white/10 flex items-center justify-center">
+            <div className="aspect-video w-full rounded-2xl bg-slate-900/50 backdrop-blur border border-dashed border-white/10 flex items-center justify-center">
               <div className="text-center text-slate-500">
                 <Video size={48} className="mx-auto mb-2 opacity-50" />
                 <p>Select mission data</p>
@@ -579,17 +567,16 @@ export function GolfSwing() {
             </div>
           )}
 
-          {/* On Mobile, Tabs are below video. On Desktop, they are also below video but in the same col-span */}
           {analysis && analysis.metrics && analysis.feedback ? (
              <Tabs defaultValue="metrics" className="flex-1 flex flex-col min-h-0">
                <TabsList className="w-full justify-start border-b border-white/5 rounded-none h-12 bg-transparent p-0 gap-8">
-                 <TabsTrigger value="metrics" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 data-[state=active]:text-cyan-400 rounded-none px-0 pb-2 text-slate-400 hover:text-slate-200 transition-colors">
+                 <TabsTrigger value="metrics" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 data-[state=active]:text-cyan-400 rounded-none px-0 pb-2 text-slate-400 hover:text-slate-200 transition-colors font-semibold tracking-wider text-xs uppercase">
                    TELEMETRY
                  </TabsTrigger>
-                 <TabsTrigger value="analysis" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 data-[state=active]:text-cyan-400 rounded-none px-0 pb-2 text-slate-400 hover:text-slate-200 transition-colors">
+                 <TabsTrigger value="analysis" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 data-[state=active]:text-cyan-400 rounded-none px-0 pb-2 text-slate-400 hover:text-slate-200 transition-colors font-semibold tracking-wider text-xs uppercase">
                    AI DIAGNOSTICS
                  </TabsTrigger>
-                 <TabsTrigger value="trends" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 data-[state=active]:text-cyan-400 rounded-none px-0 pb-2 text-slate-400 hover:text-slate-200 transition-colors">
+                 <TabsTrigger value="trends" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 data-[state=active]:text-cyan-400 rounded-none px-0 pb-2 text-slate-400 hover:text-slate-200 transition-colors font-semibold tracking-wider text-xs uppercase">
                     HISTORY
                   </TabsTrigger>
                </TabsList>
@@ -601,7 +588,7 @@ export function GolfSwing() {
 
                  <TabsContent value="analysis" className="mt-0 space-y-4">
                    <Card className="glass-card border-l-4 border-l-cyan-500 bg-cyan-500/5 p-6">
-                       <h3 className="text-lg font-bold text-cyan-400 flex items-center gap-2 mb-4">
+                       <h3 className="text-lg font-bold text-cyan-400 flex items-center gap-2 mb-4 tracking-tight">
                          <Sparkle weight="fill" /> KNOX ANALYSIS
                        </h3>
                        <div className="prose prose-invert prose-sm max-w-none">
@@ -618,7 +605,7 @@ export function GolfSwing() {
                        </h4>
                        <ul className="space-y-2">
                          {analysis.feedback.strengths.map((s, i) => (
-                           <li key={i} className="text-xs bg-emerald-500/5 border border-emerald-500/10 p-3 rounded-lg text-emerald-100/80">
+                           <li key={i} className="text-xs bg-emerald-500/5 border border-emerald-500/10 p-3 rounded-lg text-emerald-100/80 font-mono">
                              {s}
                            </li>
                          ))}
@@ -630,7 +617,7 @@ export function GolfSwing() {
                        </h4>
                        <ul className="space-y-2">
                          {analysis.feedback.improvements.map((s, i) => (
-                           <li key={i} className="text-xs bg-orange-500/5 border border-orange-500/10 p-3 rounded-lg text-orange-100/80">
+                           <li key={i} className="text-xs bg-orange-500/5 border border-orange-500/10 p-3 rounded-lg text-orange-100/80 font-mono">
                              {s}
                            </li>
                          ))}
@@ -649,7 +636,7 @@ export function GolfSwing() {
                </div>
              </Tabs>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-slate-500 text-sm border border-dashed border-white/10 rounded-xl bg-white/5">
+            <div className="flex-1 flex items-center justify-center text-slate-500 text-sm border border-dashed border-white/10 rounded-xl bg-slate-900/20">
               Select an analysis to view metrics
             </div>
           )}
@@ -658,9 +645,9 @@ export function GolfSwing() {
         {/* Right Panel: History List - Spans 4 cols, scrollable */}
         <div className="hidden lg:block lg:col-span-4 h-full min-h-0 flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-sm text-slate-400 tracking-widest uppercase">Archive</h3>
+            <h3 className="font-bold text-xs text-slate-400 tracking-[0.2em] uppercase">Archive</h3>
           </div>
-          <Card className="flex-1 glass-card border-0 bg-black/20 overflow-hidden">
+          <Card className="flex-1 glass-card border-0 overflow-hidden bg-slate-900/40">
              {renderAnalysisList()}
           </Card>
         </div>

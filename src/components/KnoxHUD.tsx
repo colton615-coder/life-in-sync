@@ -67,8 +67,8 @@ export function KnoxHUD({ metrics, className }: KnoxHUDProps) {
           )}
         >
           <div className={cn(
-              "glass-panel rounded-xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] border-l-4 backdrop-blur-xl flex items-start gap-4",
-              activeAlert.type === 'critical' ? "border-l-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]" : "border-l-amber-500"
+              "glass-card p-4 border-l-4 flex items-start gap-4",
+              activeAlert.type === 'critical' ? "border-l-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]" : "border-l-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.2)]"
           )}>
              <div className={cn(
                  "p-2 rounded-full bg-white/5",
@@ -79,7 +79,7 @@ export function KnoxHUD({ metrics, className }: KnoxHUDProps) {
 
              <div className="flex-1 pt-1">
                  <h4 className={cn(
-                     "text-sm font-bold tracking-widest font-mono uppercase mb-1",
+                     "text-xs font-bold tracking-[0.2em] uppercase mb-1",
                       activeAlert.type === 'critical' ? "text-red-400" : "text-amber-400"
                  )}>
                      {activeAlert.title}

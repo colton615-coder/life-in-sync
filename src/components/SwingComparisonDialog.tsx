@@ -404,67 +404,63 @@ Focus on biomechanical relationships - explain HOW one change affects another (e
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <Card className="glass-card border-primary/30">
+        <Card className="glass-card border-cyan-500/30 shadow-[0_0_20px_rgba(34,211,238,0.1)]">
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <CardTitle className="flex items-center gap-2">
-                  <TrendUp size={24} className="text-primary" />
-                  Progress Score
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <TrendUp size={24} className="text-cyan-400" />
+                  PROGRESS SCORE
                 </CardTitle>
-                <CardDescription className="mt-1">
+                <CardDescription className="mt-1 text-slate-400">
                   {comparisonReport.summary}
                 </CardDescription>
               </div>
-              <Badge variant="default" className="text-2xl px-4 py-2">
+              <div className="text-4xl font-black text-cyan-400 font-mono tabular-nums">
                 {comparisonReport.progressScore}/100
-              </Badge>
+              </div>
             </div>
           </CardHeader>
         </Card>
 
-        <Card className="glass-card border-accent/30">
+        <Card className="glass-card border-white/10">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkle size={24} weight="duotone" className="text-accent" />
+            <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-[0.2em] text-slate-500">
+              <Sparkle size={16} weight="duotone" className="text-purple-400" />
               Key Takeaway
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg font-medium leading-relaxed">{comparisonReport.keyTakeaway}</p>
+            <p className="text-lg font-bold text-white leading-relaxed font-mono">{comparisonReport.keyTakeaway}</p>
           </CardContent>
         </Card>
 
         {comparisonReport.improvements.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <ArrowUp size={24} className="text-success" weight="bold" />
+            <h3 className="text-xs uppercase tracking-[0.2em] font-semibold flex items-center gap-2 text-emerald-400">
+              <ArrowUp size={16} weight="bold" />
               Improvements
             </h3>
             {comparisonReport.improvements.map((improvement, idx) => (
-              <Card key={idx} className="glass-card border-success/30">
-                <CardHeader className="pb-3">
+              <Card key={idx} className="glass-card border-emerald-500/20 bg-emerald-500/5">
+                <CardHeader className="pb-2">
                   <div className="flex items-start justify-between gap-3">
-                    <CardTitle className="text-base">{improvement.metric}</CardTitle>
+                    <CardTitle className="text-sm font-bold text-white">{improvement.metric}</CardTitle>
                     <div className="flex items-center gap-2">
                       <Badge 
-                        variant={
-                          improvement.impact === 'High' ? 'default' :
-                          improvement.impact === 'Medium' ? 'secondary' :
-                          'outline'
-                        }
-                        className="text-xs"
+                        variant="outline"
+                        className="text-[10px] border-emerald-500/30 text-emerald-400 bg-emerald-500/10"
                       >
-                        {improvement.impact} Impact
+                        {improvement.impact.toUpperCase()} IMPACT
                       </Badge>
-                      <Badge variant="outline" className="text-xs text-success">
+                      <Badge variant="outline" className="text-[10px] border-emerald-500/30 text-emerald-400 bg-emerald-500/10 font-mono">
                         {improvement.change}
                       </Badge>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm leading-relaxed">{improvement.reason}</p>
+                  <p className="text-xs leading-relaxed text-slate-300 font-mono opacity-80">{improvement.reason}</p>
                 </CardContent>
               </Card>
             ))}
@@ -473,34 +469,30 @@ Focus on biomechanical relationships - explain HOW one change affects another (e
 
         {comparisonReport.regressions.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <ArrowDown size={24} className="text-destructive" weight="bold" />
-              Areas That Regressed
+            <h3 className="text-xs uppercase tracking-[0.2em] font-semibold flex items-center gap-2 text-red-400">
+              <ArrowDown size={16} weight="bold" />
+              Regressions
             </h3>
             {comparisonReport.regressions.map((regression, idx) => (
-              <Card key={idx} className="glass-card border-destructive/30">
-                <CardHeader className="pb-3">
+              <Card key={idx} className="glass-card border-red-500/20 bg-red-500/5">
+                <CardHeader className="pb-2">
                   <div className="flex items-start justify-between gap-3">
-                    <CardTitle className="text-base">{regression.metric}</CardTitle>
+                    <CardTitle className="text-sm font-bold text-white">{regression.metric}</CardTitle>
                     <div className="flex items-center gap-2">
                       <Badge 
-                        variant={
-                          regression.impact === 'High' ? 'destructive' :
-                          regression.impact === 'Medium' ? 'secondary' :
-                          'outline'
-                        }
-                        className="text-xs"
+                        variant="outline"
+                        className="text-[10px] border-red-500/30 text-red-400 bg-red-500/10"
                       >
-                        {regression.impact} Impact
+                        {regression.impact.toUpperCase()} IMPACT
                       </Badge>
-                      <Badge variant="outline" className="text-xs text-destructive">
+                      <Badge variant="outline" className="text-[10px] border-red-500/30 text-red-400 bg-red-500/10 font-mono">
                         {regression.change}
                       </Badge>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm leading-relaxed">{regression.reason}</p>
+                  <p className="text-xs leading-relaxed text-slate-300 font-mono opacity-80">{regression.reason}</p>
                 </CardContent>
               </Card>
             ))}

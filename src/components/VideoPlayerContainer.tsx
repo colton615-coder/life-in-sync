@@ -119,7 +119,7 @@ export function VideoPlayerContainer({
   return (
     <div ref={containerRef} className={cn("flex flex-col gap-4", isFullscreen ? "bg-black p-4 h-screen justify-center" : "", className)}>
       {/* Main Video Area */}
-      <Card className="relative overflow-hidden rounded-2xl border-0 bg-black shadow-2xl aspect-video group">
+      <Card className="glass-card relative overflow-hidden rounded-2xl border-0 bg-black/40 shadow-2xl aspect-video group">
         <video
             ref={videoRef}
             src={videoUrl}
@@ -140,21 +140,21 @@ export function VideoPlayerContainer({
 
         {/* Floating Status Indicators */}
         <div className="absolute top-4 left-4 flex gap-2 pointer-events-none">
-             <Badge variant="outline" className="bg-black/50 backdrop-blur border-white/10 text-white font-mono text-xs">
+             <Badge variant="outline" className="bg-slate-900/80 backdrop-blur border-white/10 text-white font-mono text-xs">
                 {isPlaying ? 'PLAYING' : 'PAUSED'}
              </Badge>
-             <Badge variant="outline" className="bg-black/50 backdrop-blur border-white/10 text-white font-mono text-xs tabular-nums">
+             <Badge variant="outline" className="bg-slate-900/80 backdrop-blur border-white/10 text-white font-mono text-xs tabular-nums">
                 {currentTime.toFixed(2)}s
              </Badge>
              {showOverlay && (
-                 <Badge variant="outline" className="bg-cyan-500/20 backdrop-blur border-cyan-500/50 text-cyan-400 font-mono text-xs">
+                 <Badge variant="outline" className="bg-cyan-500/20 backdrop-blur border-cyan-500/50 text-cyan-400 font-mono text-xs shadow-[0_0_10px_rgba(34,211,238,0.3)]">
                     ANALYSIS ON
                  </Badge>
              )}
         </div>
 
         <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-             <button onClick={toggleFullscreen} className="p-2 bg-black/50 backdrop-blur rounded-full text-white hover:bg-white/20 transition-colors">
+             <button onClick={toggleFullscreen} className="p-2 bg-slate-900/80 backdrop-blur rounded-full text-white hover:bg-white/20 transition-colors border border-white/10">
                 {isFullscreen ? <CornersIn size={20} /> : <ArrowsOutSimple size={20} />}
              </button>
         </div>
@@ -168,7 +168,7 @@ export function VideoPlayerContainer({
                     exit={{ opacity: 0, scale: 0.8 }}
                     className="absolute inset-0 flex items-center justify-center pointer-events-none"
                 >
-                    <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-glow-primary">
+                    <div className="w-16 h-16 rounded-full bg-cyan-500/20 backdrop-blur-md border border-cyan-500/50 flex items-center justify-center text-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.4)]">
                         <Play weight="fill" size={32} className="ml-1" />
                     </div>
                 </motion.div>
@@ -183,7 +183,7 @@ export function VideoPlayerContainer({
           <div className="flex justify-end">
               <button
                 onClick={togglePlayPause}
-                className="h-16 w-16 rounded-full neumorphic-convex active:neumorphic-concave flex items-center justify-center text-primary transition-all"
+                className="h-16 w-16 rounded-full neumorphic-convex active:neumorphic-concave flex items-center justify-center text-cyan-400 transition-all hover:shadow-[0_0_15px_rgba(34,211,238,0.3)]"
               >
                   {isPlaying ? <Pause size={24} weight="fill" /> : <Play size={24} weight="fill" />}
               </button>
@@ -203,7 +203,7 @@ export function VideoPlayerContainer({
                 onClick={onToggleOverlay}
                 className={cn(
                     "h-16 w-16 rounded-full neumorphic-convex flex items-center justify-center transition-all",
-                    showOverlay ? "text-cyan-400 shadow-[inset_0_0_10px_rgba(34,211,238,0.3)]" : "text-slate-500"
+                    showOverlay ? "text-cyan-400 shadow-[inset_0_0_15px_rgba(34,211,238,0.2)] border-cyan-500/30" : "text-slate-500"
                 )}
               >
                   <span className="text-[10px] font-bold font-mono uppercase tracking-wider">
