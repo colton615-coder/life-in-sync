@@ -99,6 +99,10 @@ const defaultTheme = {
       "brand-tertiary": "var(--brand-tertiary)",
       "accent-vibrant": "var(--accent-vibrant)",
     },
+    fontFamily: {
+      mono: ['"JetBrains Mono"', 'monospace'],
+      sans: ['Raleway', 'sans-serif'],
+    },
     borderRadius: {
       sm: "var(--radius-sm)",
       md: "var(--radius-md)",

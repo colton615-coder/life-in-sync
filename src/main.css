@@ -226,4 +226,26 @@
   .shadow-glow-primary {
     box-shadow: 0 4px 24px -4px color-mix(in oklch, var(--brand-primary), transparent 50%);
   }
+
+  /* Dark Neumorphism Utilities */
+  .neumorphic-convex {
+    background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,0,0,0.1));
+    box-shadow:
+      -4px -4px 10px rgba(255,255,255,0.05),
+      4px 4px 10px rgba(0,0,0,0.5);
+  }
+
+  .neumorphic-concave {
+    background: linear-gradient(145deg, rgba(0,0,0,0.2), rgba(255,255,255,0.02));
+    box-shadow:
+      inset 4px 4px 10px rgba(0,0,0,0.5),
+      inset -4px -4px 10px rgba(255,255,255,0.05);
+  }
+
+  .glass-panel {
+    background: rgba(15, 23, 42, 0.6); /* Slate-900 with opacity */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
 }
