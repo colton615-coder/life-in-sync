@@ -1,5 +1,5 @@
-
-import { GoogleGenerativeAI, GenerativeModel, GenerationConfig } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel, GenerationConfig, Part } from '@google/generative-ai';
+import { z } from 'zod';
 
 /**
  * Core service for interacting with Google Gemini API.
@@ -10,6 +10,8 @@ export class GeminiCore {
   private model: GenerativeModel;
   private apiKey: string;
   private static readonly MODEL_NAME = 'gemini-2.5-pro';
+  private static readonly MAX_RETRIES = 3;
+  private static readonly INITIAL_RETRY_DELAY = 1000;
 
   constructor() {
     this.apiKey = this.getApiKey();
@@ -59,15 +61,15 @@ export class GeminiCore {
    * Generates content with retry logic for rate limits.
    */
   async generateContent(
-    prompt: string | Array<string | any>, // Part[] type loosely typed here to avoid deep imports in signatures
+    prompt: string | Array<string | Part>,
     config?: GenerationConfig
   ): Promise<string> {
     if (!this.apiKey) {
       throw new Error('Gemini API Key is missing. Please set VITE_GEMINI_API_KEY.');
     }
 
-    let retries = 3;
-    let delay = 1000;
+    let retries = GeminiCore.MAX_RETRIES;
+    let delay = GeminiCore.INITIAL_RETRY_DELAY;
 
     while (retries > 0) {
       try {
@@ -87,6 +89,47 @@ export class GeminiCore {
       }
     }
     throw new Error('Gemini API request failed after retries.');
+  }
+
+  /**
+   * Generates content and parses it as JSON, validating against a Zod schema if provided.
+   * Handles markdown code block stripping and basic JSON repair.
+   */
+  async generateJSON<T>(
+    prompt: string | Array<string | Part>,
+    schema?: z.ZodType<T>,
+    config?: GenerationConfig
+  ): Promise<T> {
+    const rawText = await this.generateContent(prompt, config);
+    const cleanedJson = this.cleanJsonString(rawText);
+
+    try {
+      const parsed = JSON.parse(cleanedJson);
+
+      if (schema) {
+        return schema.parse(parsed);
+      }
+      return parsed as T;
+    } catch (error) {
+      console.error('Failed to parse or validate JSON from Gemini response:', error);
+      console.debug('Raw response:', rawText);
+      console.debug('Cleaned JSON:', cleanedJson);
+      throw new Error(`Gemini response was not valid JSON${schema ? ' or did not match schema' : ''}: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Helper to clean markdown code blocks from JSON strings.
+   */
+  private cleanJsonString(text: string): string {
+    let cleaned = text.trim();
+    // Remove markdown code blocks
+    if (cleaned.startsWith('```json')) {
+      cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleaned.startsWith('```')) {
+      cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    return cleaned.trim();
   }
 
   /**
