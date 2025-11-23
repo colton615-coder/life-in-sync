@@ -101,7 +101,7 @@ const defaultTheme = {
     },
     fontFamily: {
       mono: ['"JetBrains Mono"', 'monospace'],
-      sans: ['Raleway', 'sans-serif'],
+      sans: ['Inter', 'sans-serif'],
     },
     borderRadius: {
       sm: "var(--radius-sm)",
