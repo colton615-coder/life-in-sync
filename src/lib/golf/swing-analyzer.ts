@@ -321,3 +321,47 @@ function generateMockPoseData(): SwingPoseData[] {
 
   return frames
 }
+
+export interface InstantMetrics {
+  spineAngle: number
+  hipRotation: number
+  shoulderRotation: number
+  headPosition: { x: number, y: number }
+}
+
+export function calculateInstantaneousMetrics(frame: SwingPoseData): InstantMetrics {
+  if (!frame || !frame.landmarks) {
+    return { spineAngle: 0, hipRotation: 0, shoulderRotation: 0, headPosition: { x: 0, y: 0 } }
+  }
+
+  const landmarks = frame.landmarks
+
+  // Helper to get landmark
+  const get = (idx: number) => landmarks[idx]
+
+  // Spine Angle
+  const nose = get(LANDMARK_INDICES.NOSE)
+  const leftHip = get(LANDMARK_INDICES.LEFT_HIP)
+  const rightHip = get(LANDMARK_INDICES.RIGHT_HIP)
+  const midHip = {
+    x: (leftHip.x + rightHip.x) / 2,
+    y: (leftHip.y + rightHip.y) / 2
+  }
+  const spineAngle = Math.atan2(nose.x - midHip.x, nose.y - midHip.y) * 180 / Math.PI
+
+  // Hip Rotation (Approximate from 2D projected Z diff or just X/Y diff logic)
+  // Note: Real 3D rotation is hard without depth, but we use the Z coord from MediaPipe
+  const hipRotation = Math.atan2(rightHip.z - leftHip.z, rightHip.x - leftHip.x) * 180 / Math.PI
+
+  // Shoulder Rotation
+  const leftShoulder = get(LANDMARK_INDICES.LEFT_SHOULDER)
+  const rightShoulder = get(LANDMARK_INDICES.RIGHT_SHOULDER)
+  const shoulderRotation = Math.atan2(rightShoulder.z - leftShoulder.z, rightShoulder.x - leftShoulder.x) * 180 / Math.PI
+
+  return {
+    spineAngle,
+    hipRotation,
+    shoulderRotation,
+    headPosition: { x: nose.x, y: nose.y }
+  }
+}

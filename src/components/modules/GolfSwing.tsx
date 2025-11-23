@@ -32,6 +32,7 @@ import { KnoxHUD } from '@/components/KnoxHUD'
 import { SwingComparisonDialog } from '@/components/SwingComparisonDialog'
 import { ClubSelectionDialog } from '@/components/ClubSelectionDialog'
 import { GolfSwingState } from '@/lib/golf/state'
+import { AnalysisCockpit } from '@/components/golf/AnalysisCockpit'
 
 /**
  * MetricCard: High-density visualization for a single data point.
@@ -503,6 +504,16 @@ export function GolfSwing() {
 
   const analysis = viewState.status === 'VIEWING_RESULT' ? viewState.analysis : null
 
+  // Refactor 2.0: If viewing result, show AnalysisCockpit
+  if (viewState.status === 'VIEWING_RESULT' && viewState.analysis) {
+    return (
+      <AnalysisCockpit
+        analysis={viewState.analysis}
+        onBack={() => setViewState({ status: 'IDLE' })}
+      />
+    )
+  }
+
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col pt-2 gap-4">
       {/* Header */}
@@ -536,105 +547,16 @@ export function GolfSwing() {
         </div>
       </div>
 
-      {/* Knox HUD Layer */}
-      {analysis && analysis.metrics && (
-          <KnoxHUD metrics={analysis.metrics} />
-      )}
-
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 px-4 overflow-hidden min-h-0 pb-4">
 
         {/* Left/Top Panel: Media + Timeline (Hero) - Spans 8 cols on desktop */}
         <div className="lg:col-span-8 flex flex-col gap-6 min-h-0 overflow-y-auto lg:overflow-visible no-scrollbar">
-          {analysis && analysis.videoUrl ? (
-            <VideoPlayerContainer
-              videoUrl={analysis.videoUrl}
-              poseData={analysis.poseData}
-              className="w-full shrink-0"
-              showOverlay={showOverlay}
-              onToggleOverlay={() => setShowOverlay(!showOverlay)}
-            />
-          ) : (
             <div className="aspect-video w-full rounded-2xl bg-white/5 backdrop-blur border border-dashed border-white/10 flex items-center justify-center">
               <div className="text-center text-slate-500">
                 <Video size={48} className="mx-auto mb-2 opacity-50" />
                 <p>Select mission data</p>
               </div>
             </div>
-          )}
-
-          {analysis && analysis.metrics && analysis.feedback ? (
-             <Tabs defaultValue="metrics" className="flex-1 flex flex-col min-h-0">
-               <TabsList className="w-full justify-start border-b border-white/5 rounded-none h-12 bg-transparent p-0 gap-8">
-                 <TabsTrigger value="metrics" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#2E8AF7] data-[state=active]:text-[#2E8AF7] rounded-none px-0 pb-2 text-slate-400 hover:text-slate-200 transition-colors font-semibold tracking-wider text-xs uppercase">
-                   TELEMETRY
-                 </TabsTrigger>
-                 <TabsTrigger value="analysis" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#2E8AF7] data-[state=active]:text-[#2E8AF7] rounded-none px-0 pb-2 text-slate-400 hover:text-slate-200 transition-colors font-semibold tracking-wider text-xs uppercase">
-                   AI DIAGNOSTICS
-                 </TabsTrigger>
-                 <TabsTrigger value="trends" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#2E8AF7] data-[state=active]:text-[#2E8AF7] rounded-none px-0 pb-2 text-slate-400 hover:text-slate-200 transition-colors font-semibold tracking-wider text-xs uppercase">
-                    HISTORY
-                  </TabsTrigger>
-               </TabsList>
-
-               <div className="mt-6 flex-1 overflow-y-auto pr-1 pb-20 lg:pb-0">
-                 <TabsContent value="metrics" className="mt-0">
-                   <MetricsGrid metrics={analysis.metrics} />
-                 </TabsContent>
-
-                 <TabsContent value="analysis" className="mt-0 space-y-4">
-                   <div className="glass-card border-l-4 border-l-[#2E8AF7] bg-[#2E8AF7]/5 p-6">
-                       <h3 className="text-lg font-bold text-[#2E8AF7] flex items-center gap-2 mb-4 tracking-tight">
-                         <Sparkle weight="fill" /> KNOX ANALYSIS
-                       </h3>
-                       <div className="prose prose-invert prose-sm max-w-none">
-                         <p className="leading-relaxed text-slate-300 font-mono">
-                           {analysis.feedback.aiInsights}
-                         </p>
-                       </div>
-                   </div>
-
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div className="space-y-3">
-                       <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-2">
-                         <CheckCircle weight="fill" /> Systems Nominal
-                       </h4>
-                       <ul className="space-y-2">
-                         {analysis.feedback.strengths.map((s, i) => (
-                           <li key={i} className="text-xs bg-emerald-500/5 border border-emerald-500/10 p-3 rounded-lg text-emerald-100/80 font-mono">
-                             {s}
-                           </li>
-                         ))}
-                       </ul>
-                     </div>
-                     <div className="space-y-3">
-                       <h4 className="text-xs font-bold text-orange-400 uppercase tracking-widest flex items-center gap-2">
-                         <Target weight="fill" /> System Faults
-                       </h4>
-                       <ul className="space-y-2">
-                         {analysis.feedback.improvements.map((s, i) => (
-                           <li key={i} className="text-xs bg-orange-500/5 border border-orange-500/10 p-3 rounded-lg text-orange-100/80 font-mono">
-                             {s}
-                           </li>
-                         ))}
-                       </ul>
-                     </div>
-                   </div>
-                 </TabsContent>
-
-                 <TabsContent value="trends" className="mt-0">
-                    <ProgressChart
-                      analyses={analyses || []}
-                      selectedClubFilter={selectedClubFilter}
-                      setSelectedClubFilter={setSelectedClubFilter}
-                    />
-                 </TabsContent>
-               </div>
-             </Tabs>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-slate-500 text-sm border border-dashed border-white/10 rounded-xl bg-white/5">
-              Select an analysis to view metrics
-            </div>
-          )}
         </div>
 
         {/* Right Panel: History List - Spans 4 cols, scrollable */}
