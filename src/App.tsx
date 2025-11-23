@@ -11,7 +11,7 @@ import { LoadingScreen } from './components/LoadingScreen'
 import { registerSW } from 'virtual:pwa-register'
 import { SarcasticLoader } from './components/SarcasticLoader'
 
-// Lazy load modules
+// Lazy load all modules to reduce initial bundle size
 const Dashboard = lazy(() => import('@/components/modules/Dashboard').then(module => ({ default: module.Dashboard })))
 const Habits = lazy(() => import('@/components/modules/Habits').then(module => ({ default: module.Habits })))
 const Finance = lazy(() => import('@/components/modules/Finance').then(module => ({ default: module.Finance })))
@@ -47,10 +47,14 @@ function App() {
     })
 
     const clearData = async () => {
-      const hasCleared = localStorage.getItem('data-cleared-v1')
-      if (!hasCleared) {
-        await clearAllAppData()
-        localStorage.setItem('data-cleared-v1', 'true')
+      try {
+        const hasCleared = localStorage.getItem('data-cleared-v1')
+        if (!hasCleared) {
+          await clearAllAppData()
+          localStorage.setItem('data-cleared-v1', 'true')
+        }
+      } catch (error) {
+        console.error('Failed to clear app data:', error)
       }
     }
     clearData()
@@ -120,9 +124,9 @@ function App() {
       <a href="#main-content" className="skip-to-content">
         Skip to main content
       </a>
-      <div id="main-content" className="md:px-8 md:py-8 pb-20 md:pb-32 text-5xl">
+      <main id="main-content" className="md:px-8 md:py-8 pb-20 md:pb-32 text-5xl">
         {renderModule()}
-      </div>
+      </main>
       <NavigationButton 
         onClick={() => setDrawerOpen(!drawerOpen)}
         isOpen={drawerOpen}

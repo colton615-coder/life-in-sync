@@ -22,72 +22,79 @@ interface DashboardProps {
   onNavigate: (module: Module) => void
 }
 
+// Optimization: Extract calculation logic to pure functions to reduce component complexity
+// and allow for easier testing if needed.
+const calculateHabitStats = (habits: Habit[] | null, today: string) => {
+  const allHabits = habits || []
+  const totalHabits = allHabits.length
+  let completedToday = 0
+  let totalStreak = 0
+  let longestStreak = 0
+
+  allHabits.forEach(habit => {
+    const todayEntry = habit.entries?.find(e => e.date === today)
+    if (todayEntry) {
+      if (habit.trackingType === 'boolean' && todayEntry.completed) {
+        completedToday++
+      } else if (habit.trackingType === 'numerical' && habit.target && todayEntry.value && todayEntry.value >= habit.target) {
+        completedToday++
+      } else if (habit.trackingType === 'time' && habit.target && todayEntry.minutes && todayEntry.minutes >= habit.target) {
+        completedToday++
+      }
+    }
+    totalStreak += habit.streak || 0
+    if ((habit.streak || 0) > longestStreak) {
+      longestStreak = habit.streak || 0
+    }
+  })
+
+  const percentComplete = totalHabits > 0 ? Math.floor((completedToday / totalHabits) * 100) : 0
+  const averageStreak = totalHabits > 0 ? Math.floor(totalStreak / totalHabits) : 0
+
+  const last7Days: number[] = []
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date()
+    date.setDate(date.getDate() - i)
+    const dateStr = date.toISOString().split('T')[0]
+    let completedOnDate = 0
+    allHabits.forEach(habit => {
+      const entry = habit.entries?.find(e => e.date === dateStr)
+      if (entry) {
+        if (habit.trackingType === 'boolean' && entry.completed) {
+          completedOnDate++
+        } else if (habit.trackingType === 'numerical' && habit.target && entry.value && entry.value >= habit.target) {
+          completedOnDate++
+        } else if (habit.trackingType === 'time' && habit.target && entry.minutes && entry.minutes >= habit.target) {
+          completedOnDate++
+        }
+      }
+    })
+    last7Days.push(totalHabits > 0 ? (completedOnDate / totalHabits) * 100 : 0)
+  }
+
+  return {
+    total: totalHabits,
+    completedToday,
+    percentComplete,
+    longestStreak,
+    averageStreak,
+    trend7Days: last7Days
+  }
+}
+
 export function Dashboard({ onNavigate }: DashboardProps) {
+  // Use defaults to prevent null checks everywhere
   const [habits] = useKV<Habit[]>('habits', [])
   const [expenses] = useKV<Expense[]>('expenses', [])
   const [tasks] = useKV<Task[]>('tasks', [])
   const [completedWorkouts] = useKV<CompletedWorkout[]>('completed-workouts', [])
   const [knoxMessages] = useKV<ChatMessage[]>('knox-messages', [])
 
-  const today = new Date().toISOString().split('T')[0]
+  // Memoize today's date to avoid recalculation on every render
+  // although Date creation is cheap, consistency matters
+  const today = useMemo(() => new Date().toISOString().split('T')[0], [])
 
-  const habitStats = useMemo(() => {
-    const allHabits = habits || []
-    const totalHabits = allHabits.length
-    let completedToday = 0
-    let totalStreak = 0
-    let longestStreak = 0
-
-    allHabits.forEach(habit => {
-      const todayEntry = habit.entries?.find(e => e.date === today)
-      if (todayEntry) {
-        if (habit.trackingType === 'boolean' && todayEntry.completed) {
-          completedToday++
-        } else if (habit.trackingType === 'numerical' && habit.target && todayEntry.value && todayEntry.value >= habit.target) {
-          completedToday++
-        } else if (habit.trackingType === 'time' && habit.target && todayEntry.minutes && todayEntry.minutes >= habit.target) {
-          completedToday++
-        }
-      }
-      totalStreak += habit.streak || 0
-      if ((habit.streak || 0) > longestStreak) {
-        longestStreak = habit.streak || 0
-      }
-    })
-
-    const percentComplete = totalHabits > 0 ? Math.floor((completedToday / totalHabits) * 100) : 0
-    const averageStreak = totalHabits > 0 ? Math.floor(totalStreak / totalHabits) : 0
-
-    const last7Days: number[] = []
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date()
-      date.setDate(date.getDate() - i)
-      const dateStr = date.toISOString().split('T')[0]
-      let completedOnDate = 0
-      allHabits.forEach(habit => {
-        const entry = habit.entries?.find(e => e.date === dateStr)
-        if (entry) {
-          if (habit.trackingType === 'boolean' && entry.completed) {
-            completedOnDate++
-          } else if (habit.trackingType === 'numerical' && habit.target && entry.value && entry.value >= habit.target) {
-            completedOnDate++
-          } else if (habit.trackingType === 'time' && habit.target && entry.minutes && entry.minutes >= habit.target) {
-            completedOnDate++
-          }
-        }
-      })
-      last7Days.push(totalHabits > 0 ? (completedOnDate / totalHabits) * 100 : 0)
-    }
-
-    return { 
-      total: totalHabits, 
-      completedToday, 
-      percentComplete,
-      longestStreak,
-      averageStreak,
-      trend7Days: last7Days
-    }
-  }, [habits, today])
+  const habitStats = useMemo(() => calculateHabitStats(habits, today), [habits, today])
 
   const financeStats = useMemo(() => {
     const allExpenses = expenses || []
@@ -165,6 +172,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        {/* Habits Widget */}
         <DashboardWidget
           title="Habits"
           icon={<Fire size={20} weight="duotone" />}
@@ -177,7 +185,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 {habitStats.completedToday}/{habitStats.total}
               </Badge>
             </div>
-            <Progress value={habitStats.percentComplete} className="h-1.5" />
+            <Progress value={habitStats.percentComplete} className="h-1.5" aria-label="Habit completion progress" />
             <div className="grid grid-cols-2 gap-2 pt-1">
               <div>
                 <div className="flex items-center gap-2">
@@ -208,6 +216,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           </div>
         </DashboardWidget>
 
+        {/* Finance Widget */}
         <DashboardWidget
           title="Finance"
           icon={<CurrencyDollar size={20} weight="duotone" />}
@@ -246,6 +255,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           </div>
         </DashboardWidget>
 
+        {/* Tasks Widget */}
         <DashboardWidget
           title="Tasks"
           icon={<CheckCircle size={20} weight="duotone" />}
@@ -258,7 +268,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 {taskStats.completionRate}%
               </Badge>
             </div>
-            <Progress value={taskStats.completionRate} className="h-1.5" />
+            <Progress value={taskStats.completionRate} className="h-1.5" aria-label="Task completion rate" />
             <div className="grid grid-cols-2 gap-2 pt-1">
               <div>
                 <div className="text-xl font-semibold text-primary">{taskStats.active}</div>
@@ -272,6 +282,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           </div>
         </DashboardWidget>
 
+        {/* Workouts Widget */}
         <DashboardWidget
           title="Workouts"
           icon={<Barbell size={20} weight="duotone" />}
@@ -299,6 +310,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           </div>
         </DashboardWidget>
 
+        {/* Knox Widget */}
         <DashboardWidget
           title="AI Knox"
           icon={<Brain size={20} weight="duotone" />}
@@ -326,6 +338,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           </div>
         </DashboardWidget>
 
+        {/* Quick Stats Widget */}
         <DashboardWidget
           title="Quick Stats"
           icon={<Target size={20} weight="duotone" />}

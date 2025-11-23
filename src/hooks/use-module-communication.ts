@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { moduleBridge, ModuleEvent, ModuleEventType } from '@/lib/module-bridge'
 import { Module } from '@/lib/types'
 
@@ -6,6 +6,7 @@ export function useModuleCommunication(moduleId: Module) {
   const [recentEvents, setRecentEvents] = useState<ModuleEvent[]>([])
   const [incomingEvents, setIncomingEvents] = useState<ModuleEvent[]>([])
 
+  // Memoize the emit function to prevent re-creation
   const emit = useCallback((
     type: ModuleEventType,
     data: Record<string, unknown>,
@@ -62,15 +63,24 @@ export function useModuleCommunication(moduleId: Module) {
   }, [emit])
 
   useEffect(() => {
+    // Subscribe returns an unsubscription function
     const unsubscribe = moduleBridge.subscribeAll((event) => {
+      // Filter events relevant to this module or broadcasts
       if (event.targetModule === moduleId || !event.targetModule) {
-        setIncomingEvents(prev => [event, ...prev].slice(0, 20))
+        setIncomingEvents(prev => {
+          // Prevent duplicate events if using StrictMode (though bridge handles some)
+          // Optimization: Limit buffer size
+          return [event, ...prev].slice(0, 20)
+        })
       }
       
+      // Keep a log of all recent events for debugging/monitoring
       setRecentEvents(prev => [event, ...prev].slice(0, 50))
     })
 
-    return unsubscribe
+    return () => {
+      unsubscribe()
+    }
   }, [moduleId])
 
   const getModuleInsights = useCallback(() => {
@@ -85,7 +95,12 @@ export function useModuleCommunication(moduleId: Module) {
     }
   }, [moduleId])
 
-  return {
+  const clearIncoming = useCallback(() => {
+    setIncomingEvents([])
+  }, [])
+
+  // Memoize the return object to prevent consumers from re-rendering unnecessarily
+  return useMemo(() => ({
     emit,
     broadcastCompletion,
     shareData,
@@ -94,6 +109,16 @@ export function useModuleCommunication(moduleId: Module) {
     recentEvents,
     incomingEvents,
     getModuleInsights,
-    clearIncoming: () => setIncomingEvents([])
-  }
+    clearIncoming
+  }), [
+    emit,
+    broadcastCompletion,
+    shareData,
+    triggerCrossModule,
+    celebrateMilestone,
+    recentEvents,
+    incomingEvents,
+    getModuleInsights,
+    clearIncoming
+  ])
 }
