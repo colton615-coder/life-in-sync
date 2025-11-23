@@ -1,8 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Play, Pause, ArrowsOutSimple, CornersIn } from '@phosphor-icons/react'
+import { Play, Pause, CornersIn, ArrowsOutSimple } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { SwingPoseData } from '@/lib/types'
 import { RotaryScrubber } from '@/components/RotaryScrubber'
@@ -41,8 +40,6 @@ export function VideoPlayerContainer({
 
     const handleTimeUpdate = () => {
       setCurrentTime(video.currentTime)
-      // Estimate frame index based on 30fps assumption if poseData exists
-      // Or strictly map time to poseData timestamps if available
       if (poseData && poseData.length > 0) {
           const frame = Math.min(
               Math.floor((video.currentTime / video.duration) * poseData.length),
@@ -80,14 +77,13 @@ export function VideoPlayerContainer({
 
   const handleScrubberChange = (delta: number) => {
     if (videoRef.current) {
-        // Pause if scrubbing starts
         if (isPlaying) videoRef.current.pause()
 
-        // Map rotation delta to time delta
-        // Sensitivity: 1 full rotation (360 deg ~ delta sums) = 1 second?
-        // Let's say delta is roughly degrees/pixels.
-        // delta of 10 = move 0.05s
-        const seekTime = videoRef.current.currentTime + (delta * 0.05)
+        // delta comes in degrees (or pixels mapped to degrees).
+        // Let's say 360 degrees = 5 seconds of video scrub for precision
+        // So 1 degree = 5/360 seconds.
+        const sensitivity = 5 / 360;
+        const seekTime = videoRef.current.currentTime + (delta * sensitivity)
         videoRef.current.currentTime = Math.max(0, Math.min(duration, seekTime))
     }
   }
@@ -106,7 +102,6 @@ export function VideoPlayerContainer({
     }
   }
 
-  // Sync fullscreen state listener
   useEffect(() => {
       const handleFSChange = () => {
           setIsFullscreen(!!document.fullscreenElement)
@@ -117,83 +112,99 @@ export function VideoPlayerContainer({
 
 
   return (
-    <div ref={containerRef} className={cn("flex flex-col gap-4", isFullscreen ? "bg-black p-4 h-screen justify-center" : "", className)}>
-      {/* Main Video Area */}
-      <Card className="glass-card relative overflow-hidden rounded-2xl border-0 bg-black/40 shadow-2xl aspect-video group">
+    <div ref={containerRef} className={cn("flex flex-col gap-6", isFullscreen ? "bg-black p-4 h-screen justify-center" : "", className)}>
+
+      {/*
+         VIEWFINDER CONTAINER
+         Master Directive: "Rounded-2xl container with a thick, glowing border."
+      */}
+      <div className="relative group rounded-2xl overflow-hidden border border-[#2E8AF7]/30 shadow-[0_0_30px_rgba(0,0,0,0.5)] bg-black aspect-video">
+
+        {/* Scanline Overlay */}
+        <div className="absolute inset-0 z-20 pointer-events-none scanlines opacity-50 mix-blend-overlay" />
+
+        {/* Corner Reticles */}
+        <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-white/40 z-20 pointer-events-none" />
+        <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-white/40 z-20 pointer-events-none" />
+        <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-white/40 z-20 pointer-events-none" />
+        <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-white/40 z-20 pointer-events-none" />
+
+        {/* Video Element */}
         <video
             ref={videoRef}
             src={videoUrl}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain relative z-10"
             playsInline
-            controls={false} // Hide native controls
+            controls={false}
             onClick={togglePlayPause}
         />
 
-        {/* Overlay Layer */}
+        {/* AI Overlay Canvas */}
         {poseData && (
             <OverlayCanvas
                 poseData={poseData}
                 currentFrame={currentFrameIndex}
                 showOverlay={showOverlay}
+                className="z-10"
             />
         )}
 
-        {/* Floating Status Indicators */}
-        <div className="absolute top-4 left-4 flex gap-2 pointer-events-none">
-             <Badge variant="outline" className="bg-slate-900/80 backdrop-blur border-white/10 text-white font-mono text-xs">
-                {isPlaying ? 'PLAYING' : 'PAUSED'}
+        {/* Status HUD (Top Left) */}
+        <div className="absolute top-6 left-6 flex gap-3 pointer-events-none z-30">
+             <Badge variant="outline" className="bg-black/40 backdrop-blur border-white/10 text-white font-mono text-[10px] tracking-wider">
+                {isPlaying ? 'REC ●' : 'PAUSED'}
              </Badge>
-             <Badge variant="outline" className="bg-slate-900/80 backdrop-blur border-white/10 text-white font-mono text-xs tabular-nums">
-                {currentTime.toFixed(2)}s
+             <Badge variant="outline" className="bg-black/40 backdrop-blur border-white/10 text-[#2E8AF7] font-mono text-[10px] tabular-nums tracking-wider shadow-[0_0_10px_rgba(46,138,247,0.2)]">
+                T: {currentTime.toFixed(2)}s
              </Badge>
-             {showOverlay && (
-                 <Badge variant="outline" className="bg-cyan-500/20 backdrop-blur border-cyan-500/50 text-cyan-400 font-mono text-xs shadow-[0_0_10px_rgba(34,211,238,0.3)]">
-                    ANALYSIS ON
-                 </Badge>
-             )}
         </div>
 
-        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-             <button onClick={toggleFullscreen} className="p-2 bg-slate-900/80 backdrop-blur rounded-full text-white hover:bg-white/20 transition-colors border border-white/10">
-                {isFullscreen ? <CornersIn size={20} /> : <ArrowsOutSimple size={20} />}
+        {/* Fullscreen Trigger (Top Right) */}
+        <div className="absolute top-4 right-14 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
+             <button onClick={toggleFullscreen} className="p-2 bg-black/40 backdrop-blur rounded-full text-white hover:bg-white/10 transition-colors border border-white/10">
+                {isFullscreen ? <CornersIn size={16} /> : <ArrowsOutSimple size={16} />}
              </button>
         </div>
 
-        {/* Central Play Button Overlay (only when paused) */}
+        {/* Central Play Button Overlay */}
         <AnimatePresence>
             {!isPlaying && (
                 <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
                 >
-                    <div className="w-16 h-16 rounded-full bg-cyan-500/20 backdrop-blur-md border border-cyan-500/50 flex items-center justify-center text-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.4)]">
+                    <div className="w-20 h-20 rounded-full bg-[#2E8AF7]/10 backdrop-blur-sm border border-[#2E8AF7]/50 flex items-center justify-center text-[#2E8AF7] shadow-[0_0_30px_rgba(46,138,247,0.3)]">
                         <Play weight="fill" size={32} className="ml-1" />
                     </div>
                 </motion.div>
             )}
         </AnimatePresence>
-      </Card>
+      </div>
 
-      {/* Cockpit Controls */}
-      <div className={cn("grid grid-cols-[1fr_auto_1fr] items-center gap-4", isFullscreen ? "fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl px-4" : "")}>
+      {/*
+          THE CONTROL DECK
+          Master Directive: Neumorphic controls, physical scrubber.
+      */}
+      <div className={cn("grid grid-cols-[1fr_auto_1fr] items-center gap-8 px-4", isFullscreen ? "fixed bottom-12 left-1/2 -translate-x-1/2 w-full max-w-3xl z-50 glass-panel rounded-3xl p-6" : "")}>
 
-          {/* Left: Playback Toggle (Primary Action) */}
+          {/* Left: Transport Controls */}
           <div className="flex justify-end">
               <button
                 onClick={togglePlayPause}
-                className="h-16 w-16 rounded-full neumorphic-convex active:neumorphic-concave flex items-center justify-center text-cyan-400 transition-all hover:shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                className="h-14 w-14 rounded-full neumorphic-convex active:neumorphic-concave flex items-center justify-center text-[#2E8AF7] transition-all hover:shadow-[0_0_15px_rgba(46,138,247,0.2)] hover:text-white"
               >
-                  {isPlaying ? <Pause size={24} weight="fill" /> : <Play size={24} weight="fill" />}
+                  {isPlaying ? <Pause size={20} weight="fill" /> : <Play size={20} weight="fill" />}
               </button>
           </div>
 
-          {/* Center: The Jog Dial */}
-          <div className="relative z-10">
+          {/* Center: The Jog Dial (Physical Scrubber) */}
+          <div className="relative z-10 flex flex-col items-center gap-2">
+             <div className="text-[10px] text-slate-500 font-mono tracking-[0.2em] uppercase">Jog Shuttle</div>
              <RotaryScrubber
                 onChange={handleScrubberChange}
-                onEnd={() => { /* Optional snap logic */ }}
+                sensitivity={1} // 1 degree visual = 1 unit delta
              />
           </div>
 
@@ -202,8 +213,8 @@ export function VideoPlayerContainer({
               <button
                 onClick={onToggleOverlay}
                 className={cn(
-                    "h-16 w-16 rounded-full neumorphic-convex flex items-center justify-center transition-all",
-                    showOverlay ? "text-cyan-400 shadow-[inset_0_0_15px_rgba(34,211,238,0.2)] border-cyan-500/30" : "text-slate-500"
+                    "h-14 w-14 rounded-full neumorphic-convex flex items-center justify-center transition-all active:neumorphic-concave",
+                    showOverlay ? "text-[#2E8AF7] shadow-[inset_0_0_15px_rgba(46,138,247,0.15)] border-[#2E8AF7]/30" : "text-slate-500"
                 )}
               >
                   <span className="text-[10px] font-bold font-mono uppercase tracking-wider">

@@ -13,77 +13,35 @@ export function RotaryScrubber({
   className,
   onChange,
   onEnd,
-  sensitivity = 0.05
+  sensitivity = 1
 }: RotaryScrubberProps) {
   const controls = useDragControls()
   const [rotation, setRotation] = useState(0)
-  const centerRef = useRef<{ x: number; y: number } | null>(null)
-  const knobRef = useRef<HTMLDivElement>(null)
 
-  // Calculate center point on mount/resize
-  useEffect(() => {
-    const updateCenter = () => {
-      if (knobRef.current) {
-        const rect = knobRef.current.getBoundingClientRect()
-        centerRef.current = {
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2
-        }
-      }
-    }
+  // We use this to track cumulative drag for the session to prevent jumps
+  const dragStartRotation = useRef(0)
 
-    updateCenter()
-    window.addEventListener('resize', updateCenter)
-    return () => window.removeEventListener('resize', updateCenter)
-  }, [])
+  const handleDragStart = () => {
+    dragStartRotation.current = rotation
+  }
 
   const handleDrag = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (!centerRef.current) return
+    // Master Directive: "Map user Drag X (pixels) directly to Rotation (degrees)"
+    // 1 pixel moved on X axis = 1 degree of rotation (adjusted by sensitivity)
 
-    // Vector from center to current pointer position
-    // We use the pointer position relative to the viewport
-    // info.point.x/y are absolute coordinates
-    const currentAngle = Math.atan2(
-      info.point.y - centerRef.current.y,
-      info.point.x - centerRef.current.x
-    )
+    const dragDeltaX = info.offset.x
+    const newRotation = dragStartRotation.current + (dragDeltaX * sensitivity)
 
-    // We track the change in angle more simply by using the delta movements
-    // But purely using delta x/y can be unintuitive for circular motion.
-    // A better approach for a "jog dial" that feels like infinite scrolling:
-    // We interpret horizontal drag or rotational drag as value changes.
+    setRotation(newRotation)
 
-    // However, for a true rotary feel, we want to track the angle change.
-    // Since we don't have the 'previous' angle easily in this frame without state,
-    // let's use a simpler approximation that works well for "scrubbing":
-    // Rotating clockwise = positive, counter-clockwise = negative.
+    // Calculate the delta for this specific frame event (approximate) or just pass total rotation change?
+    // The parent expects a delta to scrub video.
+    // If we pass the total rotation change from start, the parent might scrub too much if it accumulates.
+    // Better to pass the *incremental* change.
+    // However, `info.delta.x` gives us the per-frame delta.
 
-    // Let's use the cross product of the radius vector and the movement vector
-    // to determine rotation direction and magnitude.
-    // r = (px - cx, py - cy)
-    // v = (dx, dy)
-    // cross = rx * vy - ry * vx
-    // This gives us the torque/rotation direction.
-
-    const rx = info.point.x - centerRef.current.x
-    const ry = info.point.y - centerRef.current.y
-    const vx = info.delta.x
-    const vy = info.delta.y
-
-    // Normalize radius to keep sensitivity consistent regardless of distance from center
-    const radius = Math.sqrt(rx * rx + ry * ry)
-    if (radius === 0) return // avoid divide by zero at exact center
-
-    // The "angular" movement contribution
-    const angularDelta = (rx * vy - ry * vx) / radius
-
-    // Update visual rotation state
-    const rotationDelta = angularDelta * 2 // Multiplier for visual feel
-    setRotation(r => r + rotationDelta)
-
-    // Trigger callback with scaled delta
-    // We might want to use the raw angular delta or a sensitivity multiplier
-    onChange(rotationDelta * sensitivity)
+    const incrementalDelta = info.delta.x * sensitivity
+    onChange(incrementalDelta)
   }
 
   const handleDragEnd = () => {
@@ -92,37 +50,45 @@ export function RotaryScrubber({
 
   return (
     <div className={cn("relative flex items-center justify-center", className)}>
-      {/* Outer Ring / Housing */}
+      {/*
+        Outer Ring / Housing
+        "Dark gradient from-gray-800 to-black with a subtle bevel"
+      */}
       <div
-        className="w-32 h-32 rounded-full bg-slate-900 neumorphic-concave flex items-center justify-center"
+        className="w-24 h-24 rounded-full bg-gradient-to-b from-[#1c2230] to-[#0f1219] shadow-[inset_0_1px_0_rgba(255,255,255,0.1),_0_10px_20px_rgba(0,0,0,0.5)] flex items-center justify-center ring-1 ring-black"
         aria-label="Video scrubber control"
       >
-        {/* The Knob itself */}
+        {/*
+           The Knob (Rotatable Element)
+           "Convex knob. Physical cylinder viewed from top."
+        */}
         <motion.div
-          ref={knobRef}
-          className="w-24 h-24 rounded-full neumorphic-convex cursor-grab active:cursor-grabbing flex items-center justify-center relative"
+          className="w-16 h-16 rounded-full bg-gradient-to-br from-[#2b3240] to-[#151925] shadow-[inset_0_1px_0_rgba(255,255,255,0.1),_0_5px_10px_rgba(0,0,0,0.5)] cursor-grab active:cursor-grabbing flex items-center justify-center relative border border-white/5"
           style={{ rotate: rotation }}
-          drag
+          drag="x"
           dragControls={controls}
-          dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+          dragConstraints={{ left: 0, right: 0 }} // Unconstrained dragging visually, but we don't want the element to move x/y, just rotate.
           dragElastic={0}
           dragMomentum={false}
+          onDragStart={handleDragStart}
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
           whileTap={{ scale: 0.98 }}
         >
-          {/* Indicator Dimple/Line */}
-          <div className="absolute top-2 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+          {/*
+             The Dimple (Finger Placement)
+             "Small circular div, inset shadow, positioned at the top"
+          */}
+          <div className="absolute top-2 w-3 h-3 rounded-full bg-[#0f1219] shadow-[inset_0_1px_2px_rgba(0,0,0,0.8),_0_1px_0_rgba(255,255,255,0.1)] border border-white/5" />
 
-          {/* Grip Texture (optional, simple radial lines) */}
-          <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none" viewBox="0 0 100 100">
-             <circle cx="50" cy="50" r="35" fill="none" stroke="white" strokeWidth="1" strokeDasharray="1 4" />
+          {/* Optional: Radial Texture/Grip lines for "Physical" feel */}
+          <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 100 100">
+             <circle cx="50" cy="50" r="28" fill="none" stroke="white" strokeWidth="0.5" strokeDasharray="1 3" />
           </svg>
 
-          {/* Inner Label */}
-          <div className="font-mono text-[10px] text-slate-500 select-none pointer-events-none" style={{ transform: `rotate(${-rotation}deg)` }}>
-            SCRUB
-          </div>
+          {/* Center Cap decoration */}
+          <div className="w-6 h-6 rounded-full bg-gradient-to-b from-[#2E8AF7]/10 to-transparent border border-[#2E8AF7]/20" />
+
         </motion.div>
       </div>
     </div>

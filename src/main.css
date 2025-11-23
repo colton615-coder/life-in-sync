@@ -3,6 +3,7 @@
 @import './styles/theme.css';
 @import './index.css';
 @import "tw-animate-css";
+
 /*
   ---break---
 */
@@ -14,9 +15,6 @@
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
   looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
 */
 @layer base {
   *,
@@ -29,101 +27,146 @@
 }
 
 /*
-  ---break---
+  MASTER DIRECTIVE: MIDNIGHT GLASS THEME (HOTFIXED)
+  Moved variables to :root for safety and explicit compatibility.
 */
-:root {
-  --radius: 0.625rem;
-  /* Updated Midnight Neon Palette */
-  --background: #020408; /* The Void */
-  --foreground: #ffffff;
-  --card: #0f172a; /* Slate-900 */
-  --card-foreground: #ffffff;
-  --popover: #0f172a;
-  --popover-foreground: #ffffff;
-  --primary: #22d3ee; /* Cyan-400 */
-  --primary-foreground: #020408;
-  --secondary: #1e293b; /* Slate-800 */
-  --secondary-foreground: #ffffff;
-  --muted: #1e293b;
-  --muted-foreground: #64748b; /* Slate-500 */
-  --accent: #22d3ee;
-  --accent-foreground: #020408;
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.1);
-  --ring: rgba(34, 211, 238, 0.5); /* Cyan Glow */
-  --chart-1: #22d3ee;
-  --chart-2: #3b82f6;
-  --chart-3: #6366f1;
-  --chart-4: #8b5cf6;
-  --chart-5: #d946ef;
-  --sidebar: #0f172a;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #22d3ee;
-  --sidebar-primary-foreground: #020408;
-  --sidebar-accent: #1e293b;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #22d3ee;
+@layer base {
+  :root {
+    --radius: 0.625rem;
 
-  /* Semantic Brand Colors - Midnight Neon Theme */
-  --accent-vibrant: #22d3ee;
-  --brand-primary: #22d3ee;
-  --brand-secondary: #3b82f6; /* Blue-500 */
-  --brand-tertiary: #6366f1; /* Indigo-500 */
+    /* Theme Colors */
+    --background: #0B0E14; /* Deepest Void */
+    --foreground: #ffffff;
+
+    --card: #151925; /* Soft Navy */
+    --card-foreground: #ffffff;
+
+    --popover: #151925;
+    --popover-foreground: #ffffff;
+
+    --primary: #2E8AF7; /* Electric Blue */
+    --primary-foreground: #ffffff;
+
+    --secondary: #1e293b;
+    --secondary-foreground: #ffffff;
+
+    --muted: #1e293b;
+    --muted-foreground: #64748b;
+
+    --accent: #2E8AF7;
+    --accent-foreground: #ffffff;
+
+    --destructive: #EF4444; /* Crimson */
+    --destructive-foreground: #ffffff;
+
+    --border: rgba(255, 255, 255, 0.1); /* Increased visibility */
+    --input: rgba(255, 255, 255, 0.1);
+    --ring: rgba(46, 138, 247, 0.5); /* Blue Glow */
+
+    --chart-1: #2E8AF7;
+    --chart-2: #3b82f6;
+    --chart-3: #6366f1;
+    --chart-4: #8b5cf6;
+    --chart-5: #d946ef;
+
+    --sidebar: #151925;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #2E8AF7;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #1e293b;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: rgba(255, 255, 255, 0.1);
+    --sidebar-ring: #2E8AF7;
+
+    /* Custom Theme Variables */
+    --bg-app: #0B0E14;
+    --bg-panel: #151925;
+    --glass-surface: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.1);
+
+    --font-mono: "JetBrains Mono", monospace;
+  }
+
+  .dark {
+    /* Enforce Midnight Glass Palette */
+    --background: #0B0E14;
+    --foreground: #ffffff;
+    --card: #151925;
+    --card-foreground: #ffffff;
+    --popover: #151925;
+    --popover-foreground: #ffffff;
+    --primary: #2E8AF7;
+    --primary-foreground: #ffffff;
+    --secondary: #1e293b;
+    --secondary-foreground: #ffffff;
+    --muted: #1e293b;
+    --muted-foreground: #64748b;
+    --accent: #2E8AF7;
+    --accent-foreground: #ffffff;
+    --destructive: #EF4444;
+    --destructive-foreground: #ffffff;
+    --border: rgba(255, 255, 255, 0.1);
+    --input: rgba(255, 255, 255, 0.1);
+    --ring: rgba(46, 138, 247, 0.5);
+
+    --chart-1: #2E8AF7;
+    --chart-2: #3b82f6;
+    --chart-3: #6366f1;
+    --chart-4: #8b5cf6;
+    --chart-5: #d946ef;
+
+    --sidebar: #151925;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #2E8AF7;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #1e293b;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: rgba(255, 255, 255, 0.1);
+    --sidebar-ring: #2E8AF7;
+  }
 }
 
 /*
-  ---break---
+  Standard CSS Keyframes (Downgraded from @theme inline)
 */
-.dark {
-  /* Enforce Midnight Neon Palette in Dark Mode too */
-  --background: #020408;
-  --foreground: #ffffff;
-  --card: #0f172a;
-  --card-foreground: #ffffff;
-  --popover: #0f172a;
-  --popover-foreground: #ffffff;
-  --primary: #22d3ee;
-  --primary-foreground: #020408;
-  --secondary: #1e293b;
-  --secondary-foreground: #ffffff;
-  --muted: #1e293b;
-  --muted-foreground: #64748b;
-  --accent: #22d3ee;
-  --accent-foreground: #020408;
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.1);
-  --ring: rgba(34, 211, 238, 0.5);
-  --chart-1: #22d3ee;
-  --chart-2: #3b82f6;
-  --chart-3: #6366f1;
-  --chart-4: #8b5cf6;
-  --chart-5: #d946ef;
-  --sidebar: #0f172a;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #22d3ee;
-  --sidebar-primary-foreground: #020408;
-  --sidebar-accent: #1e293b;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #22d3ee;
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
 
-  --accent-vibrant: #22d3ee;
-  --brand-primary: #22d3ee;
-  --brand-secondary: #3b82f6;
-  --brand-tertiary: #6366f1;
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
 }
 
 /*
-  ---break---
+  Theme Configuration
+  Mapping CSS variables to Tailwind theme keys explicitly where needed,
+  though Tailwind v4 often picks up --color-* automatically.
 */
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -156,45 +199,12 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Semantic Theme Aliases */
-  --color-accent-vibrant: var(--accent-vibrant);
-  --color-brand-primary: var(--brand-primary);
-  --color-brand-secondary: var(--brand-secondary);
-  --color-brand-tertiary: var(--brand-tertiary);
-
+  /* Animation mappings */
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
-
-  /*
-  ---break---
-*/
-  @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-
-    to {
-      height: var(--radix-accordion-content-height);
-    }
-  }
-
-  /*
-  ---break---
-*/
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-
-    to {
-      height: 0;
-    }
-  }
+  --animate-pulse-slow: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/*
-  ---break---
-*/
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -202,60 +212,73 @@
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+      letter-spacing: -0.02em;
   }
 }
 
-/* Semantic Utilities - Using pure CSS to avoid Tailwind build order issues */
+/* Semantic Utilities - Midnight Glass Theme (Hotfixed) */
 @layer utilities {
-  .bg-brand-gradient {
-    background-image: linear-gradient(to bottom right, var(--brand-primary), var(--brand-tertiary), var(--brand-secondary));
+  .bg-void-gradient {
+    background: radial-gradient(circle at center, #151925 0%, #0B0E14 100%);
   }
 
-  .text-brand-gradient {
-    background-image: linear-gradient(to bottom right, var(--brand-primary), var(--brand-tertiary), var(--brand-secondary));
-    background-clip: text;
-    color: transparent;
+  /* Text Glows */
+  .text-glow {
+    text-shadow: 0 0 10px rgba(46, 138, 247, 0.5);
   }
 
-  .border-brand-glow {
-    border-color: color-mix(in oklch, var(--brand-primary), transparent 50%);
-    box-shadow: 0 0 15px rgba(34, 211, 238, 0.3), 0 0 15px color-mix(in oklch, var(--brand-primary), transparent 80%);
+  .text-glow-sm {
+    text-shadow: 0 0 5px rgba(46, 138, 247, 0.4);
   }
 
-  /* Override specific glows to be cyan based */
-  .shadow-glow-primary {
-    box-shadow: 0 0 15px rgba(34,211,238,0.4);
-  }
-
-  /* Dark Neumorphism Utilities */
-  .neumorphic-convex {
-    background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,0,0,0.2));
-    box-shadow:
-      -4px -4px 10px rgba(255,255,255,0.05),
-      4px 4px 10px rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .neumorphic-concave {
-    background: linear-gradient(145deg, rgba(0,0,0,0.4), rgba(255,255,255,0.02));
-    box-shadow:
-      inset 4px 4px 10px rgba(0,0,0,0.5),
-      inset -4px -4px 10px rgba(255,255,255,0.05);
-     border: 1px solid rgba(255,255,255,0.02);
+  /*
+    Glass Panels - HOTFIXED
+    - Gradient background for visibility on dark displays
+    - Increased border opacity
+  */
+  .glass-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(46, 138, 247, 0.05));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
   }
 
   .glass-panel {
-    background: rgba(15, 23, 42, 0.6); /* Slate-900 with opacity */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+     background: rgba(21, 25, 37, 0.7);
+     backdrop-filter: blur(12px);
+     -webkit-backdrop-filter: blur(12px);
+     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  /* New Global Utility for the Deep Glass Aesthetic */
-  .glass-card {
-      @apply bg-slate-900/50 backdrop-blur-md border-t border-l border-white/10 rounded-2xl ring-1 ring-white/5 shadow-xl;
+  /* Scanlines */
+  .scanlines {
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.2) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* Neumorphic Utilities */
+  .neumorphic-convex {
+      background: linear-gradient(145deg, #1c2230, #0f1219);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        0 10px 20px rgba(0,0,0,0.5);
+  }
+
+  .neumorphic-concave {
+      background: linear-gradient(145deg, #0f1219, #1c2230);
+      box-shadow:
+         inset 2px 2px 5px rgba(0,0,0,0.5),
+         inset -1px -1px 2px rgba(255,255,255,0.05);
   }
 }
