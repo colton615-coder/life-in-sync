@@ -219,14 +219,15 @@ export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | n
 
   try {
     if (window.spark && window.spark.llm && window.spark.llmPrompt) {
-      const prompt = window.spark.llmPrompt`You are a professional golf instructor analyzing a student's swing. Based on these metrics:
-- Hip Rotation: ${metrics.hipRotation.total.toFixed(1)}°
-- Shoulder Rotation: ${metrics.shoulderRotation.total.toFixed(1)}°
+      const prompt = window.spark.llmPrompt`You are an elite-level golf biomechanics coach analyzing a student's swing data. Be direct, analytical, and concise. Avoid generic encouragement.
+Based on these technical metrics:
+- Hip Rotation: ${metrics.hipRotation.total.toFixed(1)}° (Target: >90°)
+- Shoulder Rotation: ${metrics.shoulderRotation.total.toFixed(1)}° (Target: >100°)
 - Head Stability: ${metrics.headMovement.stability}
 - Weight Transfer: ${metrics.weightTransfer.rating}
-- Tempo Ratio: ${metrics.tempo.ratio.toFixed(2)}:1${clubContext}
+- Tempo Ratio: ${metrics.tempo.ratio.toFixed(2)}:1 (Target: 2.0:1)${clubContext}
 
-Provide a 2-3 sentence personalized insight focusing on the most important aspect to work on for improvement${club ? ` with this ${club}` : ''}.`
+Provide a 2-3 sentence technical diagnosis of the primary mechanical flaw and its immediate consequence on ball flight${club ? ` with the ${club}` : ''}.`
 
       const response = await callAIWithRetry(prompt, 'gpt-4o', false)
       if (response) {
