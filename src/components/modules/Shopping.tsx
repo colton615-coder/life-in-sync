@@ -326,19 +326,18 @@ export function Shopping() {
                                   <PencilSimple className="w-5 h-5" weight="duotone" />
                                 </Button>
                               </motion.div>
-                              {!isMobile && (
-                                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleDeleteItem(item.id)}
-                                    aria-label={`Delete ${item.name}`}
-                                    className="h-11 w-11 min-w-[44px] min-h-[44px] hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 rounded-xl transition-colors"
-                                  >
-                                    <Trash className="w-5 h-5" weight="duotone" />
-                                  </Button>
-                                </motion.div>
-                              )}
+
+                              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeleteItem(item.id)}
+                                  aria-label={`Delete ${item.name}`}
+                                  className="h-11 w-11 min-w-[44px] min-h-[44px] hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 rounded-xl transition-colors"
+                                >
+                                  <Trash className="w-5 h-5" weight="duotone" />
+                                </Button>
+                              </motion.div>
                             </>
                           )}
                         </div>

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise } from '@phosphor-icons/react'
+import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise, PencilSimple, Trash } from '@phosphor-icons/react'
 import { useKV } from '@/hooks/use-kv'
 import { WorkoutPlan, CompletedWorkout } from '@/lib/types'
 import { toast } from 'sonner'
@@ -17,6 +17,7 @@ import { StatCard } from '@/components/StatCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { generateWorkoutPlan } from '@/lib/workout-generator'
+import { EditWorkoutDialog } from '@/components/EditWorkoutDialog'
 
 type WorkoutStage = 'planning' | 'active' | 'summary'
 
@@ -31,6 +32,9 @@ export function Workouts() {
   const [workoutStage, setWorkoutStage] = useState<WorkoutStage>('planning')
   const [activeWorkoutPlan, setActiveWorkoutPlan] = useState<WorkoutPlan | null>(null)
   const [completedCount, setCompletedCount] = useState(0)
+
+  const [editWorkout, setEditWorkout] = useState<WorkoutPlan | null>(null)
+  const [isEditOpen, setIsEditOpen] = useState(false)
 
   const generateWorkout = async () => {
     setGenerating(true)
@@ -97,6 +101,15 @@ export function Workouts() {
   const deleteWorkout = (workoutId: string) => {
     setWorkoutPlans((current) => (current || []).filter(w => w.id !== workoutId))
     toast.success('Workout deleted')
+  }
+
+  const updateWorkoutPlan = (workoutId: string, updates: Partial<WorkoutPlan>) => {
+    setWorkoutPlans((current) =>
+      (current || []).map(w =>
+        w.id === workoutId ? { ...w, ...updates } : w
+      )
+    )
+    toast.success('Workout updated')
   }
 
   if (workoutStage === 'active' && activeWorkoutPlan) {
@@ -266,7 +279,7 @@ export function Workouts() {
                               </span>
                             </div>
                           </div>
-                          <div className="flex gap-2 flex-shrink-0">
+                          <div className="flex gap-2 flex-shrink-0 items-center">
                             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                               <Button
                                 onClick={() => startWorkout(workout)}
@@ -278,15 +291,30 @@ export function Workouts() {
                                 <span className="hidden sm:inline">Start</span>
                               </Button>
                             </motion.div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => deleteWorkout(workout.id)}
-                              className="hover:bg-destructive/10 hover:text-destructive h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                              aria-label="Delete workout"
-                            >
-                              <Barbell size={16} weight="bold" className="rotate-45" />
-                            </Button>
+
+                            <div className="flex items-center">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                      setEditWorkout(workout)
+                                      setIsEditOpen(true)
+                                  }}
+                                  className="h-8 w-8 text-muted-foreground hover:text-white"
+                                  aria-label="Edit workout"
+                                >
+                                  <PencilSimple size={16} />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => deleteWorkout(workout.id)}
+                                  className="hover:bg-destructive/10 hover:text-destructive h-8 w-8 text-muted-foreground"
+                                  aria-label="Delete workout"
+                                >
+                                  <Trash size={16} />
+                                </Button>
+                            </div>
                           </div>
                         </div>
                         
@@ -423,6 +451,13 @@ export function Workouts() {
           )}
         </TabsContent>
       </Tabs>
+
+      <EditWorkoutDialog
+        open={isEditOpen}
+        onOpenChange={setIsEditOpen}
+        workout={editWorkout}
+        onSave={updateWorkoutPlan}
+      />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { GlassCard } from '@/components/shell/GlassCard'
 import { Button } from '@/components/ui/button'
-import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Sparkle, X, ArrowRight, ArrowLeft, Minus } from '@phosphor-icons/react'
+import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Sparkle, X, ArrowRight, ArrowLeft, Minus, PencilSimple } from '@phosphor-icons/react'
 import { HabitIcons } from '@/lib/habit-icons'
 import { useKV } from '@/hooks/use-kv'
 import { Habit, TrackingType, HabitEntry, HabitIcon } from '@/lib/types'
@@ -25,6 +25,8 @@ export function Habits() {
   const [filterTab, setFilterTab] = useState('all')
   const [showConfetti, setShowConfetti] = useState(false)
   const [animatingStreak, setAnimatingStreak] = useState<string | null>(null)
+  const [editHabit, setEditHabit] = useState<Habit | null>(null)
+  const [isEditOpen, setIsEditOpen] = useState(false)
   
   const [newHabit, setNewHabit] = useState({
     name: '',
@@ -250,6 +252,15 @@ export function Habits() {
   const deleteHabit = (habitId: string) => {
     setHabits((current) => current ? current.filter(h => h.id !== habitId) : [])
     toast.success('Habit removed')
+  }
+
+  const updateHabit = (habitId: string, updates: Partial<Habit>) => {
+    setHabits((current) =>
+      (current || []).map(h =>
+        h.id === habitId ? { ...h, ...updates } : h
+      )
+    )
+    toast.success('Habit updated')
   }
 
   const getTodayEntry = (habit: Habit): HabitEntry | undefined => {
@@ -626,7 +637,29 @@ export function Habits() {
                         </div>
 
                         {/* Right Section: Controls or Status */}
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-2 md:gap-3">
+                            <div className="flex items-center gap-1 opacity-100 transition-opacity duration-200">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                      setEditHabit(habit)
+                                      setIsEditOpen(true)
+                                    }}
+                                    className="h-8 w-8 text-slate-400 hover:text-white hover:bg-white/10 rounded-full"
+                                >
+                                    <PencilSimple size={16} />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => deleteHabit(habit.id)}
+                                    className="h-8 w-8 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-full"
+                                >
+                                    <Trash size={16} />
+                                </Button>
+                            </div>
+
                             {completed ? (
                                 <div className="h-8 w-1 bg-emerald-500 shadow-[0_0_10px_#10b981] rounded-full" />
                             ) : (
@@ -657,6 +690,13 @@ export function Habits() {
           )}
         </>
       )}
+
+      <EditHabitDialog
+        open={isEditOpen}
+        onOpenChange={setIsEditOpen}
+        habit={editHabit}
+        onSave={updateHabit}
+      />
     </div>
   )
 }

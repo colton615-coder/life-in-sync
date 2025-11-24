@@ -623,22 +623,20 @@ export function Tasks() {
                         </div>
                       </motion.div>
 
-                      {!isMobile && (
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              deleteTask(task.id)
-                            }}
-                            className="w-10 h-10 rounded-xl flex items-center justify-center neumorphic-button text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                            aria-label={`Delete task "${task.title}"`}
-                          >
-                            <Trash size={20} weight="bold" />
-                          </motion.button>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            deleteTask(task.id)
+                          }}
+                          className="w-10 h-10 rounded-xl flex items-center justify-center neumorphic-button text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                          aria-label={`Delete task "${task.title}"`}
+                        >
+                          <Trash size={20} weight="bold" />
+                        </motion.button>
+                      </div>
                     </div>
                   </NeumorphicCard>
                 )
