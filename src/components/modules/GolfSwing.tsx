@@ -23,7 +23,7 @@ import {
 import { SwingAnalysis, GolfClub, SwingMetrics } from '@/lib/types'
 import { useKV } from '@/hooks/use-kv'
 import { toast } from 'sonner'
-import { simulateVideoProcessing, analyzePoseData, generateFeedback } from '@/lib/golf/swing-analyzer'
+import { processVideo, analyzePoseData, generateFeedback } from '@/lib/golf/swing-analyzer'
 import { validateVideoFile } from '@/lib/golf/video-utils'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -326,7 +326,7 @@ export function GolfSwing() {
     })
 
     try {
-      const poseData = await simulateVideoProcessing(file, (progress, status) => {
+      const poseData = await processVideo(file, (progress, status) => {
         if (!isMounted.current) return
         setViewState(prev => prev.status === 'ANALYZING' ? { ...prev, progress, step: status } : prev)
         setAnalyses(current => (current || []).map(a => a.id === analysisId ? { ...a, processingProgress: progress, status: progress < 100 ? 'processing' : 'analyzing' } : a))
