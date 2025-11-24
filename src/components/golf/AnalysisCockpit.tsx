@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Play, Pause, ChevronLeft } from 'lucide-react'
+import { Play, Pause, ChevronLeft, BarChart3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SwingAnalysis, SwingPoseData } from '@/lib/types'
 import { VideoPlayerContainer, VideoPlayerController } from '@/components/VideoPlayerContainer'
 import { calculateInstantaneousMetrics, InstantMetrics } from '@/lib/golf/swing-analyzer'
+import { PhaseList } from '@/components/golf/PhaseList'
 
 /**
  * AnalysisCockpit
@@ -12,8 +13,8 @@ import { calculateInstantaneousMetrics, InstantMetrics } from '@/lib/golf/swing-
  *
  * Layout:
  * - Zone A (40%): Video Viewport
- * - Zone B (15%): Command Strip
- * - Zone C (45%): Telemetry Grid
+ * - Zone B (15%): Command Strip (Scrubber)
+ * - Zone C (45%): Phase Card List (Sequential Flow)
  */
 
 interface AnalysisCockpitProps {
@@ -26,20 +27,16 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
-  const [metrics, setMetrics] = useState<InstantMetrics | null>(null)
+
+  // We still calculate instant metrics for internal logic if needed,
+  // but the primary display is now the PhaseList
+  const [instantMetrics, setInstantMetrics] = useState<InstantMetrics | null>(null)
 
   const videoControllerRef = useRef<VideoPlayerController>(null)
   const scrubberRef = useRef<HTMLDivElement>(null)
 
   // -- DERIVED --
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0
-
-  // Mock faults if not present in analysis (using static zones for demo "2.0 feel")
-  // In a real app, these would come from analysis.feedback.faults with timestamps
-  const faults = useMemo(() => [
-    { start: 0.4, end: 0.5, type: 'critical' as const, label: 'Early Ext.' },
-    { start: 0.6, end: 0.7, type: 'warning' as const, label: 'Head Dip' }
-  ], [])
 
   // -- HANDLERS --
   const handleTimeUpdate = (time: number, dur: number) => {
@@ -53,7 +50,7 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
       )
       const frame = analysis.poseData[frameIndex]
       if (frame) {
-        setMetrics(calculateInstantaneousMetrics(frame))
+        setInstantMetrics(calculateInstantaneousMetrics(frame))
       }
     }
   }
@@ -91,11 +88,16 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
     window.removeEventListener('pointerup', handleScrubEnd)
   }
 
-  // Determine if we are in a fault zone
-  const activeFault = faults.find(f => {
-    const t = currentTime / duration
-    return t >= f.start && t <= f.end
-  })
+  const handlePhaseSelect = (timestamp: number) => {
+    if (videoControllerRef.current && duration) {
+        // The timestamp from PhaseMetric is relative (0.0 - 1.0) or absolute?
+        // In swing-analyzer, timestamp is i/30 (seconds).
+        // The video player expects seconds.
+        // Let's check `swing-analyzer.ts`.
+        // Yes, mock data uses `i / 30`. So it's absolute seconds.
+        videoControllerRef.current.seek(timestamp)
+    }
+  }
 
   // -- RENDER --
   return (
@@ -132,7 +134,7 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
             onClick={() => setIsPlaying(!isPlaying)}
             className="p-3 rounded-full bg-[#2E8AF7]/10 backdrop-blur-md border border-[#2E8AF7]/30 text-[#2E8AF7] active:scale-95 transition-all hover:bg-[#2E8AF7]/20 shadow-[0_0_15px_rgba(46,138,247,0.2)]"
             >
-            {isPlaying ? <Pause size={24} weight="fill" /> : <Play size={24} weight="fill" />}
+            {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
             </button>
         </div>
       </section>
@@ -140,7 +142,7 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
       {/* ZONE B: CONTROL RIBBON (15%) */}
       <section className="h-[15%] shrink-0 bg-[#0B0E14] border-b border-slate-800 flex flex-col justify-center px-4 relative shadow-[0_-10px_20px_rgba(0,0,0,0.5)] z-30">
 
-        {/* The "Fault Line" Scrubber Track */}
+        {/* Scrubber Track */}
         <div
             className="relative w-full h-10 flex items-center mb-1 touch-none"
             ref={scrubberRef}
@@ -148,17 +150,6 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
         >
           {/* Track Background */}
           <div className="absolute inset-x-0 h-1 bg-slate-800 rounded-full overflow-hidden">
-            {/* Dynamic Fault Injection */}
-            {faults.map((fault, idx) => (
-              <div
-                key={idx}
-                className={cn("absolute h-full opacity-80", fault.type === 'critical' ? 'bg-red-500' : 'bg-orange-400')}
-                style={{
-                  left: `${fault.start * 100}%`,
-                  width: `${(fault.end - fault.start) * 100}%`
-                }}
-              />
-            ))}
             {/* Progress Fill */}
             <motion.div
               className="h-full bg-[#2E8AF7] shadow-[0_0_10px_#2E8AF7]"
@@ -189,87 +180,40 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
         </div>
       </section>
 
-      {/* ZONE C: TELEMETRY GRID (45%) */}
-      <section className="flex-1 min-h-0 bg-[#0B0E14] overflow-y-auto no-scrollbar">
-        {/* The "Bento Box" Grid - Zero Gaps */}
-        <div className="grid grid-cols-2 divide-x divide-y divide-slate-800 border-b border-slate-800">
+      {/* ZONE C: PHASE LIST (45%) */}
+      <section className="flex-1 min-h-0 bg-[#0B0E14] flex flex-col">
+        {/* Summary Header */}
+        <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-white/5">
+            <div className="flex items-center gap-2">
+                <BarChart3 size={16} className="text-[#2E8AF7]" />
+                <span className="text-xs font-bold uppercase tracking-widest text-slate-300">Sequence Analysis</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <span className="text-[10px] text-slate-500 uppercase">Overall Score</span>
+                <span className={cn(
+                    "text-sm font-mono font-bold px-2 py-0.5 rounded border bg-black/40",
+                    (analysis.feedback?.overallScore || 0) >= 80 ? "text-emerald-400 border-emerald-500/30" : "text-[#2E8AF7] border-[#2E8AF7]/30"
+                )}>
+                    {analysis.feedback?.overallScore || 0}
+                </span>
+            </div>
+        </div>
 
-          <DataCell
-            label="Hip Rotation"
-            value={metrics ? `${metrics.hipRotation.toFixed(0)}°` : '--'}
-            status="neutral"
-          />
-
-          <DataCell
-            label="Shoulder Turn"
-            value={metrics ? `${metrics.shoulderRotation.toFixed(0)}°` : '--'}
-            status={metrics && metrics.shoulderRotation > 90 ? 'good' : 'neutral'}
-          />
-
-          {/* Contextual Fault Display */}
-          <div className={cn(
-              "p-4 flex flex-col justify-center h-24 transition-colors duration-300",
-              activeFault?.type === 'critical' ? "bg-red-500/10" : ""
-          )}>
-             <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">System Status</span>
-             {activeFault ? (
-                 <span className={cn("text-lg font-mono font-bold animate-pulse", activeFault.type === 'critical' ? "text-red-500" : "text-orange-400")}>
-                     ⚠ {activeFault.label}
-                 </span>
-             ) : (
-                 <span className="text-lg font-mono text-emerald-500">NOMINAL</span>
-             )}
-          </div>
-
-          <DataCell
-            label="Tempo"
-            value={analysis.metrics ? `${analysis.metrics.tempo.ratio.toFixed(1)}:1` : '--'}
-            status="neutral"
-          />
-
-          <DataCell
-             label="Spine Angle"
-             value={metrics ? `${metrics.spineAngle.toFixed(0)}°` : '--'}
-             status="neutral"
-          />
-
-          <DataCell
-             label="Est. Power"
-             value={metrics ? `${(Math.abs(metrics.hipRotation * 1.5)).toFixed(0)}` : '--'}
-             status="neutral"
-          />
-
-          {/* Full Width AI Insight */}
-          <div className="col-span-2 p-5 flex items-start gap-4 bg-slate-900/30 border-t border-slate-800">
-             <div className="w-1 self-stretch bg-[#2E8AF7] rounded-full" />
-             <div>
-               <h4 className="text-[10px] font-bold text-[#2E8AF7] mb-2 uppercase tracking-widest flex items-center gap-2">
-                   AI Diagnostic Log
-               </h4>
-               <p className="text-xs text-slate-400 leading-relaxed font-mono">
-                 {analysis.feedback?.aiInsights || "Awaiting Swing Data..."}
-               </p>
-             </div>
-          </div>
+        {/* Phase List Component */}
+        <div className="flex-1 min-h-0">
+            {analysis.metrics ? (
+                <PhaseList
+                    metrics={analysis.metrics}
+                    currentTimestamp={currentTime}
+                    onSelectPhase={handlePhaseSelect}
+                />
+            ) : (
+                <div className="flex items-center justify-center h-full text-slate-500 text-xs">
+                    No metrics available
+                </div>
+            )}
         </div>
       </section>
     </div>
   )
-}
-
-function DataCell({ label, value, status }: { label: string, value: string | number, status: 'neutral' | 'good' | 'critical' }) {
-  const statusColor = {
-    neutral: 'text-slate-200',
-    good: 'text-emerald-400',
-    critical: 'text-red-500'
-  };
-
-  return (
-    <div className="p-4 flex flex-col justify-center h-24 hover:bg-white/5 transition-colors">
-      <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">{label}</span>
-      <span className={cn("text-3xl font-mono tracking-tighter", statusColor[status])}>
-        {value}
-      </span>
-    </div>
-  );
 }
