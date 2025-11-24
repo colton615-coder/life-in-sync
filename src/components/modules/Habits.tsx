@@ -1,4 +1,4 @@
-import { Card } from '../Card'
+import { GlassCard } from '@/components/shell/GlassCard'
 import { Button } from '@/components/ui/button'
 import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Sparkle, X, ArrowRight, ArrowLeft, Minus } from '@phosphor-icons/react'
 import { HabitIcons } from '@/lib/habit-icons'
@@ -12,7 +12,6 @@ import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Confetti } from '@/components/Confetti'
 import { IconPicker } from '@/components/IconPicker'
-import { StatCard } from '@/components/StatCard'
 
 const trackingTypeOptions = [
   { value: 'boolean' as TrackingType, icon: Check, label: 'Simple Checkbox', description: 'Just mark it done' },
@@ -274,26 +273,6 @@ export function Habits() {
   const getIconComponent = (iconName: HabitIcon, habitName?: string) => {
     const IconComponent = HabitIcons[iconName]
     if (IconComponent) return IconComponent
-    
-    if (!habitName) return HabitIcons.Target
-    
-    const name = habitName.toLowerCase()
-    
-    if (name.includes('water') || name.includes('drink') || name.includes('hydrat')) return HabitIcons.Drop
-    if (name.includes('exercise') || name.includes('workout') || name.includes('gym')) return HabitIcons.Barbell
-    if (name.includes('run')) return HabitIcons.PersonSimpleRun
-    if (name.includes('read') || name.includes('book')) return HabitIcons.Book
-    if (name.includes('sleep') || name.includes('rest')) return HabitIcons.Moon
-    if (name.includes('meditat') || name.includes('mindful')) return HabitIcons.FlowerLotus
-    if (name.includes('walk')) return HabitIcons.PersonSimpleRun
-    if (name.includes('stretch') || name.includes('yoga')) return HabitIcons.FlowerLotus
-    if (name.includes('food') || name.includes('eat') || name.includes('meal')) return HabitIcons.ForkKnife
-    if (name.includes('vitamin') || name.includes('supplement') || name.includes('medicine')) return HabitIcons.FirstAid
-    if (name.includes('journal') || name.includes('write')) return HabitIcons.BookOpen
-    if (name.includes('learn') || name.includes('study')) return HabitIcons.GraduationCap
-    if (name.includes('clean')) return HabitIcons.House
-    if (name.includes('call') || name.includes('contact') || name.includes('friend')) return HabitIcons.Chats
-    
     return HabitIcons.Target
   }
 
@@ -372,19 +351,20 @@ export function Habits() {
     <div className="pt-4 md:pt-6 space-y-4 md:space-y-5 animate-in fade-in duration-500 px-1 md:px-0">
       {showConfetti && <Confetti />}
       
+      {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">🔥 Habits</h1>
-          <p className="text-muted-foreground mt-1.5 md:mt-1 text-sm md:text-base font-normal">Same circus, different day</p>
+          <h1 className="text-2xl md:text-3xl font-light text-white tracking-wide">Habits</h1>
+          <p className="text-slate-400 mt-1 text-sm">Consistency is key, Architect.</p>
         </div>
         {creationStep === 0 && (
           <Button
             size="default"
             onClick={() => setCreationStep(1)}
-            className="gap-2 h-11 md:h-9 px-5 md:px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+            className="gap-2 h-10 px-5 bg-white/10 hover:bg-white/20 text-white border border-white/20 shadow-lg backdrop-blur-md rounded-full"
           >
-            <Plus size={18} weight="bold" className="md:w-4 md:h-4" />
-            <span>New</span>
+            <Plus size={18} weight="bold" />
+            <span>New Protocol</span>
           </Button>
         )}
       </div>
@@ -397,28 +377,28 @@ export function Habits() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="glass-card border-primary/30 shadow-xl p-4 md:p-6">
+            <GlassCard className="p-6">
               <div className="flex items-start justify-between mb-4 md:mb-5">
                 <div className="flex items-center gap-2.5 md:gap-3">
-                  <div className="w-9 h-9 md:w-10 md:h-10 rounded-full glass-card border-primary/30 flex items-center justify-center">
-                    <Sparkle weight="fill" className="text-primary" size={18} />
+                  <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30">
+                    <Sparkle weight="fill" size={18} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-base md:text-lg">Create New Habit</h3>
-                    <p className="text-xs md:text-sm text-muted-foreground">Step {creationStep} of {newHabit.trackingType === 'boolean' ? 3 : 4}</p>
+                    <h3 className="font-medium text-white text-lg">New Protocol</h3>
+                    <p className="text-sm text-slate-400">Step {creationStep} of {newHabit.trackingType === 'boolean' ? 3 : 4}</p>
                   </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={resetCreation}
-                  className="text-muted-foreground hover:text-foreground h-9 w-9 md:h-10 md:w-10"
+                  className="text-slate-400 hover:text-white"
                 >
-                  <X size={20} className="md:w-5 md:h-5" />
+                  <X size={20} />
                 </Button>
               </div>
 
-              <div className="space-y-3 md:space-y-5">
+              <div className="space-y-4">
                 <motion.div
                   key={creationStep}
                   initial={{ opacity: 0, x: 20 }}
@@ -426,15 +406,15 @@ export function Habits() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <h2 className="text-base md:text-xl font-semibold mb-3 md:mb-5 text-primary">{getStepPrompt()}</h2>
+                  <h2 className="text-xl font-light text-white mb-4">{getStepPrompt()}</h2>
 
                   {creationStep === 1 && (
-                    <div className="space-y-2 md:space-y-3">
+                    <div className="space-y-3">
                       <Input
-                        placeholder="e.g., Drink water, Read, Exercise, Meditate"
+                        placeholder="e.g., Drink water, Read, Exercise"
                         value={newHabit.name}
                         onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
-                        className="h-11 md:h-12 text-base glass-morphic border-border/50 focus:border-primary"
+                        className="h-12 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-cyan-400/50"
                         autoFocus
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && canProceedToNextStep()) {
@@ -443,10 +423,10 @@ export function Habits() {
                         }}
                       />
                       <Input
-                        placeholder="Why does this matter to you? (optional)"
+                        placeholder="Purpose (optional)"
                         value={newHabit.description}
                         onChange={(e) => setNewHabit({ ...newHabit, description: e.target.value })}
-                        className="h-10 md:h-11 glass-morphic border-border/50 focus:border-primary"
+                        className="h-11 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-cyan-400/50"
                       />
                     </div>
                   )}
@@ -471,24 +451,24 @@ export function Habits() {
                               setTimeout(() => setCreationStep(4), 100)
                             }
                           }}
-                          whileHover={{ scale: 1.02, x: 4 }}
+                          whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           className={cn(
-                            'flex items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl md:rounded-2xl border-2 transition-all text-left',
+                            'flex items-center gap-4 p-4 rounded-xl border transition-all text-left',
                             newHabit.trackingType === value
-                              ? 'glass-card border-primary bg-primary/20'
-                              : 'glass-morphic border-border/50 hover:border-primary/30'
+                              ? 'bg-cyan-500/20 border-cyan-500/50'
+                              : 'bg-white/5 border-white/10 hover:bg-white/10'
                           )}
                         >
                           <div className={cn(
-                            'w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl flex items-center justify-center',
-                            newHabit.trackingType === value ? 'bg-primary/30' : 'bg-muted/50'
+                            'w-10 h-10 rounded-lg flex items-center justify-center',
+                            newHabit.trackingType === value ? 'text-cyan-400' : 'text-slate-400'
                           )}>
-                            <Icon size={20} weight="bold" className={cn(newHabit.trackingType === value ? 'text-primary' : 'text-muted-foreground', 'md:w-6 md:h-6')} />
+                            <Icon size={24} weight="regular" />
                           </div>
                           <div>
-                            <div className="font-semibold text-base md:text-lg">{label}</div>
-                            <div className="text-xs md:text-sm text-muted-foreground">{description}</div>
+                            <div className="font-medium text-white">{label}</div>
+                            <div className="text-sm text-slate-400">{description}</div>
                           </div>
                         </motion.button>
                       ))}
@@ -496,40 +476,40 @@ export function Habits() {
                   )}
 
                   {creationStep === 4 && (
-                    <div className="space-y-3 md:space-y-4">
+                    <div className="space-y-4">
                       {newHabit.trackingType === 'numerical' && (
-                        <div className="grid grid-cols-2 gap-3 md:gap-4">
+                        <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="text-xs md:text-sm font-medium text-muted-foreground mb-1.5 md:mb-2 block">Target number</label>
+                            <label className="text-sm font-medium text-slate-400 mb-2 block">Target</label>
                             <Input
                               type="number"
                               placeholder="e.g., 8"
                               value={newHabit.target}
                               onChange={(e) => setNewHabit({ ...newHabit, target: e.target.value })}
-                              className="h-11 md:h-12 text-base glass-morphic border-border/50 focus:border-primary"
+                              className="bg-white/5 border-white/10 text-white"
                               autoFocus
                             />
                           </div>
                           <div>
-                            <label className="text-xs md:text-sm font-medium text-muted-foreground mb-1.5 md:mb-2 block">What are you counting?</label>
+                            <label className="text-sm font-medium text-slate-400 mb-2 block">Unit</label>
                             <Input
-                              placeholder="e.g., glasses, pages, reps"
+                              placeholder="e.g., pages"
                               value={newHabit.unit}
                               onChange={(e) => setNewHabit({ ...newHabit, unit: e.target.value })}
-                              className="h-11 md:h-12 text-base glass-morphic border-border/50 focus:border-primary"
+                              className="bg-white/5 border-white/10 text-white"
                             />
                           </div>
                         </div>
                       )}
                       {newHabit.trackingType === 'time' && (
                         <div>
-                          <label className="text-xs md:text-sm font-medium text-muted-foreground mb-1.5 md:mb-2 block">Minutes per day</label>
+                          <label className="text-sm font-medium text-slate-400 mb-2 block">Minutes per day</label>
                           <Input
                             type="number"
                             placeholder="e.g., 30"
                             value={newHabit.target}
                             onChange={(e) => setNewHabit({ ...newHabit, target: e.target.value })}
-                            className="h-11 md:h-12 text-base glass-morphic border-border/50 focus:border-primary"
+                            className="bg-white/5 border-white/10 text-white"
                             autoFocus
                           />
                         </div>
@@ -538,7 +518,7 @@ export function Habits() {
                   )}
                 </motion.div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-border/30">
+                <div className="flex items-center justify-between pt-4 border-t border-white/10">
                   <Button
                     variant="ghost"
                     onClick={() => {
@@ -548,7 +528,7 @@ export function Habits() {
                         resetCreation()
                       }
                     }}
-                    className="gap-2"
+                    className="gap-2 text-slate-400 hover:text-white"
                   >
                     <ArrowLeft size={18} />
                     Back
@@ -564,91 +544,41 @@ export function Habits() {
                       }
                     }}
                     disabled={!canProceedToNextStep()}
-                    className="gap-2 shadow-lg shadow-primary/20"
+                    className="gap-2 bg-cyan-500 hover:bg-cyan-600 text-white border-0"
                   >
-                    {creationStep === 4 || (creationStep === 3 && newHabit.trackingType === 'boolean') ? 'Create Habit' : 'Continue'}
+                    {creationStep === 4 || (creationStep === 3 && newHabit.trackingType === 'boolean') ? 'Initialize' : 'Continue'}
                     <ArrowRight size={18} />
                   </Button>
                 </div>
               </div>
-            </Card>
+            </GlassCard>
           </motion.div>
         )}
       </AnimatePresence>
 
       {creationStep === 0 && (
         <>
-          {habits && habits.length > 0 && (
-            <StatCard 
-              stats={[
-                { value: habits.length, label: 'Total' },
-                { value: activeHabits.length, label: 'Active' },
-                { value: completedHabits.length, label: 'Done' }
-              ]}
-            />
-          )}
-
-          <div className="flex gap-1 p-1 bg-muted/50 rounded-xl w-fit mx-auto">
-            <button
-              onClick={() => setFilterTab('all')}
-              className={cn(
-                'px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
-                filterTab === 'all'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
-              )}
-            >
-              All Habits
-            </button>
-            <button
-              onClick={() => setFilterTab('active')}
-              className={cn(
-                'px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
-                filterTab === 'active'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
-              )}
-            >
-              Active
-            </button>
-            <button
-              onClick={() => setFilterTab('completed')}
-              className={cn(
-                'px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
-                filterTab === 'completed'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
-              )}
-            >
-              Completed
-            </button>
-          </div>
-
           {!habits || habits.length === 0 ? (
-            <Card className="text-center py-12 md:py-16">
-              <Fire size={48} weight="duotone" className="text-primary mx-auto mb-3 md:mb-4 md:w-14 md:h-14" />
-              <h3 className="font-semibold text-lg md:text-xl mb-1 md:mb-2">No habits yet</h3>
-              <p className="text-muted-foreground text-sm md:text-[15px] mb-4 md:mb-6">Start your first habit and build a streak!</p>
+            <GlassCard className="text-center py-16">
+              <div className="w-16 h-16 rounded-full bg-cyan-500/10 flex items-center justify-center mx-auto mb-4 text-cyan-400">
+                  <Fire size={32} weight="duotone" />
+              </div>
+              <h3 className="font-light text-xl text-white mb-2">No active protocols</h3>
+              <p className="text-slate-400 text-sm mb-6">Initiate your first habit sequence.</p>
               <Button
                 onClick={() => setCreationStep(1)}
-                className="gap-2 h-10 px-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+                className="gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/20"
               >
                 <Plus size={18} weight="bold" />
-                Create Your First Habit
+                Initialize Protocol
               </Button>
-            </Card>
-          ) : filteredHabits.length === 0 ? (
-            <Card className="text-center py-12 md:py-16">
-              <CheckCircle size={48} weight="duotone" className="text-primary mx-auto mb-3 md:mb-4 md:w-14 md:h-14" />
-              <h3 className="font-semibold text-lg md:text-xl mb-1 md:mb-2">No habits in this filter</h3>
-              <p className="text-muted-foreground text-sm md:text-[15px]">Try a different filter to see your habits</p>
-            </Card>
+            </GlassCard>
           ) : (
             <motion.div 
               variants={container}
               initial="hidden"
               animate="show"
-              className="grid gap-2 md:gap-3"
+              className="space-y-3"
             >
               {filteredHabits.map((habit) => {
                 const completed = isCompletedToday(habit)
@@ -660,135 +590,66 @@ export function Habits() {
                 
                 return (
                   <motion.div key={habit.id} variants={item}>
-                    <Card className="relative glass-card hover:border-primary/30 transition-all duration-300">
-                      <div className="flex items-start gap-2.5 md:gap-4">
-                        {habit.trackingType === 'boolean' ? (
-                          <button
-                            onClick={() => toggleBooleanHabit(habit.id)}
-                            className="flex-shrink-0"
-                          >
-                            <motion.div
-                              whileTap={{ scale: 0.85 }}
-                              whileHover={{ scale: 1.05 }}
-                              className={cn(
-                                'w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl flex items-center justify-center border-2 transition-all',
-                                completed 
-                                  ? 'glass-card border-success bg-success/20 shadow-lg shadow-success/30' 
-                                  : 'glass-morphic border-border/50'
-                              )}
-                            >
-                              <IconComponent
-                                size={28}
-                                weight={completed ? 'fill' : 'regular'}
-                                className={cn('transition-all md:hidden', completed ? 'text-success' : 'text-muted-foreground')}
-                              />
-                              <IconComponent
-                                size={36}
-                                weight={completed ? 'fill' : 'regular'}
-                                className={cn('transition-all hidden md:block', completed ? 'text-success' : 'text-muted-foreground')}
-                              />
-                            </motion.div>
-                          </button>
-                        ) : (
-                          <div className="flex-shrink-0">
-                            <motion.div
-                              className={cn(
-                                'w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl flex items-center justify-center border-2 transition-all',
-                                completed 
-                                  ? 'glass-card border-success bg-success/20 shadow-lg shadow-success/30' 
-                                  : 'glass-morphic border-border/50'
-                              )}
-                            >
-                              <IconComponent
-                                size={28}
-                                weight={completed ? 'fill' : 'regular'}
-                                className={cn('transition-all md:hidden', completed ? 'text-success' : 'text-muted-foreground')}
-                              />
-                              <IconComponent
-                                size={36}
-                                weight={completed ? 'fill' : 'regular'}
-                                className={cn('transition-all hidden md:block', completed ? 'text-success' : 'text-muted-foreground')}
-                              />
-                            </motion.div>
-                          </div>
-                        )}
+                    <GlassCard className={cn(
+                        "p-4 transition-all duration-300 group",
+                         completed ? "border-emerald-500/30" : "hover:border-cyan-400/30"
+                    )}>
+                      <div className="flex items-center justify-between">
                         
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2 mb-1">
-                            <h3 className="font-semibold text-sm md:text-lg">{habit.name}</h3>
-                          </div>
-                          {habit.description && (
-                            <p className="text-xs md:text-sm text-muted-foreground mb-1.5 md:mb-2">{habit.description}</p>
-                          )}
-                          
-                          {habit.trackingType !== 'boolean' && (
-                            <div className="flex items-center gap-1.5 md:gap-2 mb-1.5 md:mb-2">
-                              <div className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-lg glass-card border border-primary/30 text-primary text-xs md:text-sm font-bold">
-                                {currentValue} / {habit.target} {habit.unit || 'min'}
-                              </div>
-                              <div className="flex items-center gap-1 md:gap-1.5">
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  onClick={() => decrementNumerical(habit.id)}
-                                  disabled={currentValue === 0}
-                                  aria-label={`Decrease ${habit.name}`}
-                                  className={cn(
-                                    "min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg flex items-center justify-center transition-all",
-                                    currentValue === 0 
-                                      ? "glass-morphic border border-border/30 text-muted-foreground/30 cursor-not-allowed"
-                                      : "glass-card border border-primary/30 text-primary hover:bg-primary/20"
-                                  )}
-                                >
-                                  <Minus size={18} weight="bold" />
-                                </motion.button>
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  onClick={() => incrementNumerical(habit.id)}
-                                  aria-label={`Increase ${habit.name}`}
-                                  className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg glass-card border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 transition-all shadow-lg shadow-primary/20"
-                                >
-                                  <Plus size={18} weight="bold" />
-                                </motion.button>
-                              </div>
+                        {/* Left Section: Icon & Info */}
+                        <div className="flex items-center space-x-4">
+                            <button
+                                onClick={() => habit.trackingType === 'boolean' && toggleBooleanHabit(habit.id)}
+                                disabled={habit.trackingType !== 'boolean'}
+                                className={cn(
+                                    "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500",
+                                    completed
+                                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                                        : "bg-white/5 text-slate-400 border border-white/10 group-hover:border-cyan-400/50"
+                                )}
+                            >
+                                <IconComponent size={20} weight={completed ? "fill" : "regular"} />
+                            </button>
+
+                            <div>
+                                <h3 className={cn(
+                                    "font-medium transition-colors",
+                                    completed ? "text-emerald-100" : "text-slate-200"
+                                )}>
+                                    {habit.name}
+                                </h3>
+                                <div className="flex items-center space-x-2 mt-1">
+                                    <Fire size={12} weight="fill" className={completed ? "text-emerald-400" : "text-amber-500"} />
+                                    <span className="text-xs text-slate-400">{habit.streak} day streak</span>
+                                </div>
                             </div>
-                          )}
-                          
-                          <div className="flex items-center gap-2 md:gap-3">
-                            <div className="flex items-center gap-1 md:gap-1.5">
-                              <Fire weight="fill" className="text-[color:var(--color-accent-gold)]" size={14} />
-                              <motion.span 
-                                key={`${habit.id}-${habit.streak}`}
-                                animate={animatingStreak === habit.id ? {
-                                  scale: [1, 1.4, 1],
-                                  rotate: [0, 5, -5, 0]
-                                } : {}}
-                                transition={{ duration: 0.6, ease: "easeInOut" }}
-                                className="font-semibold text-xs md:text-sm"
-                              >
-                                {habit.streak}
-                              </motion.span>
-                              <span className="font-normal text-xs md:text-sm">day streak</span>
-                            </div>
-                            {completed && (
-                              <Badge variant="outline" className="text-[10px] md:text-xs border-success/30 text-success glass-morphic px-1.5 py-0">
-                                ✓ Done today
-                              </Badge>
-                            )}
-                          </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => deleteHabit(habit.id)}
-                          aria-label={`Delete ${habit.name}`}
-                          className="flex-shrink-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors min-w-[44px] min-h-[44px] w-11 h-11"
-                        >
-                          <Trash size={20} />
-                        </Button>
+
+                        {/* Right Section: Controls or Status */}
+                        <div className="flex items-center">
+                            {completed ? (
+                                <div className="h-8 w-1 bg-emerald-500 shadow-[0_0_10px_#10b981] rounded-full" />
+                            ) : (
+                                <>
+                                    {habit.trackingType !== 'boolean' && (
+                                         <div className="flex items-center gap-2 mr-2">
+                                            <span className="text-xs font-mono text-slate-300">
+                                                {currentValue} / {habit.target} {habit.unit}
+                                            </span>
+                                            <button
+                                                onClick={() => incrementNumerical(habit.id)}
+                                                className="w-8 h-8 rounded-full bg-white/5 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-400 flex items-center justify-center transition-colors"
+                                            >
+                                                <Plus size={14} />
+                                            </button>
+                                         </div>
+                                    )}
+                                    <div className="h-8 w-1 bg-white/10 rounded-full" />
+                                </>
+                            )}
+                        </div>
                       </div>
-                    </Card>
+                    </GlassCard>
                   </motion.div>
                 )
               })}
