@@ -1,140 +1,204 @@
-import { useState, useEffect } from 'react'
-import { Habit, HabitIcon } from '@/lib/types'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Drop, BookOpen, Barbell, AppleLogo, MoonStars, HeartStraight } from '@phosphor-icons/react'
+import { Habit, HabitIcon, TrackingType } from '@/lib/types'
+import { useState, useEffect } from 'react'
+import { IconPicker } from '@/components/IconPicker'
+import { Check, Hash, Clock, ArrowRight, X } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 
 interface EditHabitDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   habit: Habit | null
-  onEditHabit: (habitId: string, updates: Partial<Habit>) => void
+  onSave: (habitId: string, updates: Partial<Habit>) => void
 }
 
-const iconOptions: { value: HabitIcon; Icon: React.ElementType; label: string }[] = [
-  { value: 'droplet', Icon: Drop, label: 'Water' },
-  { value: 'book', Icon: BookOpen, label: 'Reading' },
-  { value: 'dumbbell', Icon: Barbell, label: 'Exercise' },
-  { value: 'apple', Icon: AppleLogo, label: 'Nutrition' },
-  { value: 'moon', Icon: MoonStars, label: 'Sleep' },
-  { value: 'heart', Icon: HeartStraight, label: 'Meditation' },
+const trackingTypeOptions = [
+  { value: 'boolean' as TrackingType, icon: Check, label: 'Simple Checkbox', description: 'Just mark it done' },
+  { value: 'numerical' as TrackingType, icon: Hash, label: 'Track Numbers', description: 'Track reps, pages, glasses' },
+  { value: 'time' as TrackingType, icon: Clock, label: 'Track Time', description: 'Measure minutes or hours' },
 ]
 
-export function EditHabitDialog({ open, onOpenChange, habit, onEditHabit }: EditHabitDialogProps) {
-  const [name, setName] = useState('')
-  const [selectedIcon, setSelectedIcon] = useState<HabitIcon>('droplet')
-  const [targetCount, setTargetCount] = useState(8)
+export function EditHabitDialog({ open, onOpenChange, habit, onSave }: EditHabitDialogProps) {
+  const [editedHabit, setEditedHabit] = useState<{
+    name: string
+    description: string
+    trackingType: TrackingType
+    target: string
+    unit: string
+    icon: HabitIcon
+  }>({
+    name: '',
+    description: '',
+    trackingType: 'boolean',
+    target: '',
+    unit: '',
+    icon: 'Drop'
+  })
 
   useEffect(() => {
     if (habit) {
-      setName(habit.name)
-      setSelectedIcon(habit.icon || 'droplet')
-      setTargetCount(habit.targetCount || 8)
+      setEditedHabit({
+        name: habit.name,
+        description: habit.description || '',
+        trackingType: habit.trackingType || 'boolean',
+        target: habit.target ? habit.target.toString() : '',
+        unit: habit.unit || '',
+        icon: habit.icon || 'Drop'
+      })
     }
   }, [habit])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (habit && name.trim()) {
-      onEditHabit(habit.id, {
-        name: name.trim(),
-        icon: selectedIcon,
-        targetCount,
-      })
-      onOpenChange(false)
+  const handleSave = () => {
+    if (!editedHabit.name.trim()) {
+      toast.error('Please give your habit a name')
+      return
     }
-  }
 
-  if (!habit) return null
+    if (editedHabit.trackingType !== 'boolean') {
+      if (!editedHabit.target || parseFloat(editedHabit.target) <= 0) {
+        toast.error('Please set a daily goal')
+        return
+      }
+      if (editedHabit.trackingType === 'numerical' && !editedHabit.unit.trim()) {
+        toast.error('What are you counting? (e.g., reps, pages, cups)')
+        return
+      }
+    }
+
+    if (!habit) return
+
+    onSave(habit.id, {
+      name: editedHabit.name,
+      description: editedHabit.description,
+      trackingType: editedHabit.trackingType,
+      target: editedHabit.trackingType !== 'boolean' ? parseFloat(editedHabit.target) : undefined,
+      unit: editedHabit.trackingType === 'numerical' ? editedHabit.unit : editedHabit.trackingType === 'time' ? 'minutes' : undefined,
+      icon: editedHabit.icon
+    })
+
+    onOpenChange(false)
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] glass-card border-accent/30">
+      <DialogContent className="sm:max-w-[500px] glass-card border-white/10 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-3xl bg-gradient-to-r from-accent to-secondary bg-clip-text text-transparent">
-            Modify Protocol
-          </DialogTitle>
+          <DialogTitle className="text-xl font-light text-white">Edit Protocol</DialogTitle>
+          <DialogDescription className="text-slate-400">
+            Modify your habit tracking parameters
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+
+        <div className="space-y-4 pt-2">
           <div className="space-y-3">
-            <Label htmlFor="habit-name" className="text-foreground font-semibold">Protocol Name</Label>
-            <Input
-              id="habit-name"
-              placeholder="e.g., Hydration, Knowledge, Training"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="glass-morphic border-border/50 focus:border-accent h-12 text-lg"
+            <div>
+              <label className="text-sm font-medium text-slate-400 mb-1.5 block">Name</label>
+              <Input
+                placeholder="e.g., Drink water, Read, Exercise"
+                value={editedHabit.name}
+                onChange={(e) => setEditedHabit({ ...editedHabit, name: e.target.value })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-cyan-400/50"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-slate-400 mb-1.5 block">Purpose (Optional)</label>
+              <Input
+                placeholder="Why are you doing this?"
+                value={editedHabit.description}
+                onChange={(e) => setEditedHabit({ ...editedHabit, description: e.target.value })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-cyan-400/50"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-slate-400 mb-2 block">Icon</label>
+            <IconPicker
+              value={editedHabit.icon}
+              onChange={(iconName) => setEditedHabit({ ...editedHabit, icon: iconName })}
             />
           </div>
 
-          <div className="space-y-3">
-            <Label className="text-foreground font-semibold">Interface Icon</Label>
-            <div className="grid grid-cols-3 gap-3" role="group" aria-label="Icon selection">
-              {iconOptions.map(({ value, Icon, label }, index) => (
-                <motion.button
+          <div>
+            <label className="text-sm font-medium text-slate-400 mb-2 block">Tracking Method</label>
+            <div className="grid gap-2">
+              {trackingTypeOptions.map(({ value, icon: Icon, label, description }) => (
+                <button
                   key={value}
-                  type="button"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedIcon(value)}
+                  onClick={() => setEditedHabit({ ...editedHabit, trackingType: value })}
                   className={cn(
-                    'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
-                    selectedIcon === value
-                      ? 'glass-card border-accent bg-accent/20 text-accent neon-glow'
-                      : 'glass-morphic border-border/50 hover:border-accent/50 text-muted-foreground hover:text-foreground'
+                    'flex items-center gap-3 p-3 rounded-xl border transition-all text-left',
+                    editedHabit.trackingType === value
+                      ? 'bg-cyan-500/20 border-cyan-500/50'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10'
                   )}
-                  aria-label={`Select ${label} icon`}
-                  aria-pressed={selectedIcon === value}
                 >
-                  <Icon weight={selectedIcon === value ? 'fill' : 'regular'} className="w-8 h-8" aria-hidden="true" />
-                  <span className="text-sm font-medium">{label}</span>
-                </motion.button>
+                  <div className={cn(
+                    'w-8 h-8 rounded-lg flex items-center justify-center',
+                    editedHabit.trackingType === value ? 'text-cyan-400' : 'text-slate-400'
+                  )}>
+                    <Icon size={20} weight="regular" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-white text-sm">{label}</div>
+                  </div>
+                </button>
               ))}
             </div>
           </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="target-count" className="text-foreground font-semibold">Daily Target (1-20)</Label>
-            <Input
-              id="target-count"
-              type="number"
-              min="1"
-              max="20"
-              value={targetCount}
-              onChange={(e) => setTargetCount(Number(e.target.value))}
-              required
-              className="glass-morphic border-border/50 focus:border-accent h-12 text-lg"
-            />
-            <p className="text-sm text-muted-foreground">
-              Adjust the number of daily executions required
-            </p>
-          </div>
+          {(editedHabit.trackingType === 'numerical' || editedHabit.trackingType === 'time') && (
+             <motion.div
+               initial={{ opacity: 0, height: 0 }}
+               animate={{ opacity: 1, height: 'auto' }}
+               className="grid grid-cols-2 gap-4"
+             >
+               <div>
+                 <label className="text-sm font-medium text-slate-400 mb-1.5 block">
+                   {editedHabit.trackingType === 'time' ? 'Minutes per day' : 'Daily Target'}
+                 </label>
+                 <Input
+                   type="number"
+                   value={editedHabit.target}
+                   onChange={(e) => setEditedHabit({ ...editedHabit, target: e.target.value })}
+                   className="bg-white/5 border-white/10 text-white"
+                 />
+               </div>
+               {editedHabit.trackingType === 'numerical' && (
+                 <div>
+                   <label className="text-sm font-medium text-slate-400 mb-1.5 block">Unit</label>
+                   <Input
+                     placeholder="e.g., pages"
+                     value={editedHabit.unit}
+                     onChange={(e) => setEditedHabit({ ...editedHabit, unit: e.target.value })}
+                     className="bg-white/5 border-white/10 text-white"
+                   />
+                 </div>
+               )}
+             </motion.div>
+          )}
 
-          <DialogFooter className="gap-2">
+          <div className="flex gap-3 pt-2">
             <Button 
-              type="button" 
-              variant="outline" 
+              onClick={handleSave}
+              className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white border-0"
+            >
+              Save Changes
+            </Button>
+            <Button 
+              variant="outline"
               onClick={() => onOpenChange(false)}
-              className="glass-morphic border-border/50 hover:border-destructive/50 hover:text-destructive"
+              className="border-white/10 text-slate-300 hover:bg-white/5 hover:text-white"
             >
               Cancel
             </Button>
-            <Button 
-              type="submit"
-              className="glass-card bg-gradient-to-r from-accent/30 to-secondary/30 hover:from-accent/50 hover:to-secondary/50 border-accent/50"
-            >
-              Update Protocol
-            </Button>
-          </DialogFooter>
-        </form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )
