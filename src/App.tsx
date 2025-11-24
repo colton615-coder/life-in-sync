@@ -1,5 +1,4 @@
 import { useState, useEffect, Suspense, lazy } from 'react'
-import { NavigationDrawer } from '@/components/NavigationDrawer'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { Module } from '@/lib/types'
@@ -31,7 +30,6 @@ const Connections = lazy(() => import('@/components/modules/Connections').then(m
 
 function App() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
-  const [drawerOpen, setDrawerOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -67,7 +65,6 @@ function App() {
 
   const handleModuleChange = (moduleId: string) => {
     setActiveModule(moduleId as Module)
-    setDrawerOpen(false)
     
     if (['history'].includes(moduleId)) {
       toast.info('Coming soon', {
@@ -148,15 +145,6 @@ function App() {
         <FloatingDock
             activeModule={activeModule}
             onNavigate={handleModuleChange}
-            onOpenDrawer={() => setDrawerOpen(true)}
-        />
-
-        {/* Side Drawer (for extended navigation) */}
-        <NavigationDrawer
-          isOpen={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          activeModule={activeModule}
-          onModuleChange={handleModuleChange}
         />
 
         <Toaster position="top-right" richColors />
