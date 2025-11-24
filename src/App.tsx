@@ -1,15 +1,20 @@
 import { useState, useEffect, Suspense, lazy } from 'react'
 import { NavigationDrawer } from '@/components/NavigationDrawer'
-import { NavigationButton } from '@/components/NavigationButton'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { Module } from '@/lib/types'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { clearAllAppData } from '@/lib/clear-data'
 import { LoadingScreen } from './components/LoadingScreen'
+import { SarcasticLoader } from './components/SarcasticLoader'
+
+// Shell Components
+import { AppBackground } from '@/components/shell/AppBackground'
+import { LifeCore } from '@/components/shell/LifeCore'
+import { FloatingDock } from '@/components/shell/FloatingDock'
+
 // @ts-expect-error virtual:pwa-register is dynamically generated
 import { registerSW } from 'virtual:pwa-register'
-import { SarcasticLoader } from './components/SarcasticLoader'
 
 // Lazy load all modules to reduce initial bundle size
 const Dashboard = lazy(() => import('@/components/modules/Dashboard').then(module => ({ default: module.Dashboard })))
@@ -119,26 +124,44 @@ function App() {
     return <LoadingScreen onLoadComplete={() => setIsLoading(false)} />
   }
 
+  // If we are in the Golf module, we might want to suppress the global LifeCore header
+  // to maximize screen real estate, as per the "Single Screen" requirement.
+  const isGolfModule = activeModule === 'golf';
+
   return (
-    <div className="min-h-screen bg-background">
-      <a href="#main-content" className="skip-to-content">
-        Skip to main content
-      </a>
-      <main id="main-content" className="md:px-8 md:py-8 pb-20 md:pb-32 text-5xl">
-        {renderModule()}
-      </main>
-      <NavigationButton 
-        onClick={() => setDrawerOpen(!drawerOpen)}
-        isOpen={drawerOpen}
-      />
-      <NavigationDrawer
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        activeModule={activeModule}
-        onModuleChange={handleModuleChange}
-      />
-      <Toaster position="top-right" richColors />
-    </div>
+    <AppBackground>
+      <div className="min-h-screen">
+        <a href="#main-content" className="skip-to-content text-white">
+          Skip to main content
+        </a>
+
+        {/* Global Header (LifeCore) - Conditional */}
+        {!isGolfModule && <LifeCore />}
+
+        {/* Main Content Area */}
+        {/* Adjusted padding to account for the Floating Dock at bottom */}
+        <main id="main-content" className="md:px-8 pb-32">
+          {renderModule()}
+        </main>
+
+        {/* Floating Dock Navigation */}
+        <FloatingDock
+            activeModule={activeModule}
+            onNavigate={handleModuleChange}
+            onOpenDrawer={() => setDrawerOpen(true)}
+        />
+
+        {/* Side Drawer (for extended navigation) */}
+        <NavigationDrawer
+          isOpen={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          activeModule={activeModule}
+          onModuleChange={handleModuleChange}
+        />
+
+        <Toaster position="top-right" richColors />
+      </div>
+    </AppBackground>
   );
 }
 
