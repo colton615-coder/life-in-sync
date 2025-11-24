@@ -58,7 +58,7 @@ export function EditWorkoutDialog({ open, onOpenChange, workout, onSave }: EditW
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] glass-card border-white/10 max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="text-xl font-light text-white">Edit Workout Plan</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-white">Edit Workout Plan</DialogTitle>
           <DialogDescription className="text-slate-400">
             Customize your training regimen
           </DialogDescription>
@@ -163,7 +163,7 @@ export function EditWorkoutDialog({ open, onOpenChange, workout, onSave }: EditW
           <div className="flex gap-3 pt-2 mt-auto">
             <Button
               onClick={handleSave}
-              className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white border-0"
+              className="flex-1 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/50"
             >
               Save Changes
             </Button>
