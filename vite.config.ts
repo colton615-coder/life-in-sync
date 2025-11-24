@@ -19,8 +19,8 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MiB
       },
       manifest: {
-        name: 'Command Center - Personal Dashboard',
-        short_name: 'Command',
+        name: 'LiFE-iN-SYNC',
+        short_name: 'LiFE-iN-SYNC',
         description: 'A comprehensive personal dashboard for habits, finance, and life management.',
         theme_color: '#1a1b1e',
         background_color: '#1a1b1e',
