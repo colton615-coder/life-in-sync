@@ -46,6 +46,7 @@ export function VideoPlayerContainer({
   const [currentFrameIndex, setCurrentFrameIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [canvasStyle, setCanvasStyle] = useState<React.CSSProperties>({})
 
   const isPlaying = externalIsPlaying !== undefined ? externalIsPlaying : internalIsPlaying
 
@@ -77,6 +78,60 @@ export function VideoPlayerContainer({
     }
   }, [externalIsPlaying])
 
+  // Canvas Alignment Logic
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const updateCanvas = () => {
+        if (!video.videoWidth || !video.videoHeight) return
+
+        const containerW = video.offsetWidth
+        const containerH = video.offsetHeight
+        const videoRatio = video.videoWidth / video.videoHeight
+        const containerRatio = containerW / containerH
+
+        let renderW, renderH, top, left
+
+        if (containerRatio > videoRatio) {
+            // Pillarbox (black bars left/right) - Video is height-limited
+            renderH = containerH
+            renderW = renderH * videoRatio
+            top = 0
+            left = (containerW - renderW) / 2
+        } else {
+            // Letterbox (black bars top/bottom) - Video is width-limited
+            renderW = containerW
+            renderH = renderW / videoRatio
+            left = 0
+            top = (containerH - renderH) / 2
+        }
+
+        setCanvasStyle({
+            width: `${renderW}px`,
+            height: `${renderH}px`,
+            top: `${top}px`,
+            left: `${left}px`,
+            position: 'absolute'
+        })
+    }
+
+    // Observers
+    const resizeObserver = new ResizeObserver(updateCanvas)
+    resizeObserver.observe(video)
+    video.addEventListener('resize', updateCanvas)
+    window.addEventListener('resize', updateCanvas)
+
+    // Initial call
+    updateCanvas()
+
+    return () => {
+        resizeObserver.disconnect()
+        video.removeEventListener('resize', updateCanvas)
+        window.removeEventListener('resize', updateCanvas)
+    }
+  }, [videoUrl]) // Re-run if source changes
+
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
@@ -84,6 +139,8 @@ export function VideoPlayerContainer({
     const handleLoadedMetadata = () => {
       setDuration(video.duration)
       onTimeUpdate?.(video.currentTime, video.duration)
+      // Set playback rate to 0.5x
+      video.playbackRate = 0.5
     }
 
     const handleTimeUpdate = () => {
@@ -112,9 +169,15 @@ export function VideoPlayerContainer({
       onPlaybackStatusChange?.(false)
     }
 
+    // Force playback rate on play (sometimes it resets)
+    const enforceSpeed = () => {
+         video.playbackRate = 0.5
+    }
+
     video.addEventListener('loadedmetadata', handleLoadedMetadata)
     video.addEventListener('timeupdate', handleTimeUpdate)
     video.addEventListener('play', handlePlay)
+    video.addEventListener('play', enforceSpeed)
     video.addEventListener('pause', handlePause)
     video.addEventListener('ended', handleEnded)
 
@@ -122,6 +185,7 @@ export function VideoPlayerContainer({
       video.removeEventListener('loadedmetadata', handleLoadedMetadata)
       video.removeEventListener('timeupdate', handleTimeUpdate)
       video.removeEventListener('play', handlePlay)
+      video.removeEventListener('play', enforceSpeed)
       video.removeEventListener('pause', handlePause)
       video.removeEventListener('ended', handleEnded)
     }
@@ -175,23 +239,19 @@ export function VideoPlayerContainer({
 
       {/*
          VIEWFINDER CONTAINER
-         Master Directive: "Rounded-2xl container with a thick, glowing border."
-         Refactor: If controls are hidden, we might want zero border radius for the "Monolith" look,
-         but keeping it consistent for now unless overridden by className.
+         Refactor: Removed 'aspect-video' forced ratio. Now uses 'flex-1' or 'h-full' from parent.
+         Added 'flex flex-col' to ensure it takes available space.
       */}
       <div className={cn(
-          "relative group overflow-hidden bg-black aspect-video",
-          controls ? "rounded-2xl border border-[#2E8AF7]/30 shadow-[0_0_30px_rgba(0,0,0,0.5)]" : "w-full h-full"
+          "relative group overflow-hidden bg-black flex items-center justify-center",
+          // Use a class to force fill if not in a flex container, but ideally parent controls this.
+          // We remove 'aspect-video' so it can grow vertically.
+          "w-full h-full min-h-0",
+          controls ? "rounded-2xl border border-[#2E8AF7]/30 shadow-[0_0_30px_rgba(0,0,0,0.5)]" : ""
       )}>
 
         {/* Scanline Overlay */}
         <div className="absolute inset-0 z-20 pointer-events-none scanlines opacity-50 mix-blend-overlay" />
-
-        {/* Corner Reticles - Only if controls enabled or explicitly requested? Keeping for now as part of "Viewfinder" aesthetic */}
-        <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-white/40 z-20 pointer-events-none" />
-        <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-white/40 z-20 pointer-events-none" />
-        <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-white/40 z-20 pointer-events-none" />
-        <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-white/40 z-20 pointer-events-none" />
 
         {/* Video Element */}
         <video
@@ -199,21 +259,26 @@ export function VideoPlayerContainer({
             src={videoUrl}
             className="w-full h-full object-contain relative z-10"
             playsInline
+            autoPlay
+            loop
+            muted // Required for autoplay usually
             controls={false}
             onClick={togglePlayPause}
         />
 
-        {/* AI Overlay Canvas */}
+        {/* AI Overlay Canvas - Positioned via calculated styles */}
         {poseData && (
-            <OverlayCanvas
-                poseData={poseData}
-                currentFrame={currentFrameIndex}
-                showOverlay={showOverlay}
-                className="z-10"
-            />
+            <div style={canvasStyle} className="z-10 pointer-events-none">
+                <OverlayCanvas
+                    poseData={poseData}
+                    currentFrame={currentFrameIndex}
+                    showOverlay={showOverlay}
+                    className="w-full h-full"
+                />
+            </div>
         )}
 
-        {/* Status HUD (Top Left) - Only if controls are enabled (Legacy Mode) */}
+        {/* Status HUD (Top Left) - Minimal status */}
         {controls && (
           <div className="absolute top-6 left-6 flex gap-3 pointer-events-none z-30">
               <Badge variant="outline" className="bg-black/40 backdrop-blur border-white/10 text-white font-mono text-[10px] tracking-wider">
@@ -226,27 +291,13 @@ export function VideoPlayerContainer({
         )}
 
         {/* Fullscreen Trigger (Top Right) */}
-        <div className="absolute top-4 right-14 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-4 right-4 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
              <button onClick={toggleFullscreen} className="p-2 bg-black/40 backdrop-blur rounded-full text-white hover:bg-white/10 transition-colors border border-white/10">
                 {isFullscreen ? <CornersIn size={16} /> : <ArrowsOutSimple size={16} />}
              </button>
         </div>
 
-        {/* Central Play Button Overlay */}
-        <AnimatePresence>
-            {!isPlaying && (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
-                >
-                    <div className="w-20 h-20 rounded-full bg-[#2E8AF7]/10 backdrop-blur-sm border border-[#2E8AF7]/50 flex items-center justify-center text-[#2E8AF7] shadow-[0_0_30px_rgba(46,138,247,0.3)]">
-                        <Play weight="fill" size={32} className="ml-1" />
-                    </div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+        {/* REMOVED: Central Play Button Overlay (per user request) */}
       </div>
 
       {/*
