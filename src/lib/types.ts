@@ -229,6 +229,9 @@ export interface PhaseMetric {
     value: string
   }
   valid: boolean
+  aiAnalysis?: string
+  tips?: string[]
+  drills?: string[]
 }
 
 export interface SwingMetrics {

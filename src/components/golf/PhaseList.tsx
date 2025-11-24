@@ -1,5 +1,5 @@
-import { useRef, useEffect } from 'react'
-import { SwingMetrics, PhaseMetric } from '@/lib/types'
+import { useState } from 'react'
+import { SwingMetrics } from '@/lib/types'
 import { PhaseCard } from './PhaseCard'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
@@ -10,6 +10,8 @@ interface PhaseListProps {
 }
 
 export function PhaseList({ metrics, currentTimestamp, onSelectPhase }: PhaseListProps) {
+  const [expandedPhase, setExpandedPhase] = useState<string | null>(null)
+
   // Define the explicit order of phases
   const phaseOrder: (keyof SwingMetrics['phases'])[] = [
     'address',
@@ -22,10 +24,15 @@ export function PhaseList({ metrics, currentTimestamp, onSelectPhase }: PhaseLis
     'finish'
   ]
 
-  // Determine active phase based on timestamp
-  // We find the phase with the closest timestamp that is <= currentTimestamp,
-  // OR just map the clicked state if we want manual selection.
-  // For now, let's highlight the phase that matches the video time approx.
+  const handlePhaseClick = (phaseKey: string, timestamp: number) => {
+    // Accordion Logic: Toggle if same, otherwise set new
+    if (expandedPhase === phaseKey) {
+      setExpandedPhase(null)
+    } else {
+      setExpandedPhase(phaseKey)
+      onSelectPhase(timestamp)
+    }
+  }
 
   return (
     <ScrollArea className="h-full w-full px-4 py-4">
@@ -35,9 +42,8 @@ export function PhaseList({ metrics, currentTimestamp, onSelectPhase }: PhaseLis
           if (!phaseData.valid) return null
 
           // Simple active check: Is the video roughly at this phase?
-          // Since we don't know the exact duration of each phase, we can just check if
-          // currentTimestamp is close to the snapshot timestamp.
-          const isActive = Math.abs(currentTimestamp - phaseData.timestamp) < 0.1 // 100ms window
+          const isActive = Math.abs(currentTimestamp - phaseData.timestamp) < 0.1
+          const isExpanded = expandedPhase === phaseKey
 
           return (
             <PhaseCard
@@ -45,7 +51,8 @@ export function PhaseList({ metrics, currentTimestamp, onSelectPhase }: PhaseLis
               index={index}
               phase={phaseData}
               isActive={isActive}
-              onClick={() => onSelectPhase(phaseData.timestamp)}
+              isExpanded={isExpanded}
+              onClick={() => handlePhaseClick(phaseKey, phaseData.timestamp)}
             />
           )
         })}

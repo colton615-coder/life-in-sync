@@ -273,7 +273,20 @@ export function analyzePoseData(poseData: SwingPoseData[]): SwingMetrics {
   }
 }
 
-export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | null = null): Promise<SwingFeedback> {
+export interface PhaseDetails {
+  aiAnalysis: string
+  tips: string[]
+  drills: string[]
+}
+
+export type PhaseFeedbackMap = Record<string, PhaseDetails>
+
+export interface ExtendedFeedback {
+  globalFeedback: SwingFeedback
+  phaseDetails: PhaseFeedbackMap
+}
+
+export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | null = null): Promise<ExtendedFeedback> {
   const strengths: string[] = []
   const improvements: string[] = []
   const drills: SwingFeedback['drills'] = []
@@ -285,30 +298,94 @@ export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | n
   if (metrics.phases.impact.score < 70) improvements.push('Loss of spine angle at impact')
 
   let aiInsights = 'AI analysis initialized.'
+  let phaseDetails: PhaseFeedbackMap = {}
 
   try {
     if (window.spark && window.spark.llm && window.spark.llmPrompt) {
-      const prompt = window.spark.llmPrompt`You are an elite golf coach.
-Analyze these metrics:
-Score: ${overallScore}
-Head Stability: ${metrics.headMovement.stability}
-Impact Score: ${metrics.phases.impact.score}
+      // Prompt engineering for JSON structure
+      const prompt = window.spark.llmPrompt`You are an elite golf coach analyzing a student's swing.
 
-Provide a concise, professional diagnosis.`
+      METRICS:
+      - Club: ${club || 'Unknown'}
+      - Overall Score: ${overallScore}/100
+      - Head Stability: ${metrics.headMovement.stability}
+      - Impact Score: ${metrics.phases.impact.score}
 
-      const response = await callAIWithRetry(prompt, 'gemini-2.5-pro', false)
-      if (response) aiInsights = response
+      PHASE DATA:
+      1. Address: ${metrics.phases.address.keyMetric.label} = ${metrics.phases.address.keyMetric.value} (Score: ${metrics.phases.address.score})
+      2. Takeaway: ${metrics.phases.takeaway.keyMetric.label} = ${metrics.phases.takeaway.keyMetric.value} (Score: ${metrics.phases.takeaway.score})
+      3. Backswing: ${metrics.phases.backswing.keyMetric.label} = ${metrics.phases.backswing.keyMetric.value} (Score: ${metrics.phases.backswing.score})
+      4. Top: ${metrics.phases.top.keyMetric.label} = ${metrics.phases.top.keyMetric.value} (Score: ${metrics.phases.top.score})
+      5. Downswing: ${metrics.phases.downswing.keyMetric.label} = ${metrics.phases.downswing.keyMetric.value} (Score: ${metrics.phases.downswing.score})
+      6. Impact: ${metrics.phases.impact.keyMetric.label} = ${metrics.phases.impact.keyMetric.value} (Score: ${metrics.phases.impact.score})
+      7. Follow Through: ${metrics.phases.followThrough.keyMetric.label} = ${metrics.phases.followThrough.keyMetric.value} (Score: ${metrics.phases.followThrough.score})
+      8. Finish: ${metrics.phases.finish.keyMetric.label} = ${metrics.phases.finish.keyMetric.value} (Score: ${metrics.phases.finish.score})
+
+      TASK:
+      Provide a JSON response with the following structure. NO markdown formatting, just raw JSON.
+      {
+        "aiInsights": "A concise, 2-sentence summary of the swing.",
+        "strengths": ["string", "string"],
+        "improvements": ["string", "string"],
+        "phases": {
+           "address": { "analysis": "string", "tips": ["string", "string"], "drills": ["string"] },
+           "takeaway": { "analysis": "string", "tips": ["string", "string"], "drills": ["string"] },
+           "backswing": { "analysis": "string", "tips": ["string", "string"], "drills": ["string"] },
+           "top": { "analysis": "string", "tips": ["string", "string"], "drills": ["string"] },
+           "downswing": { "analysis": "string", "tips": ["string", "string"], "drills": ["string"] },
+           "impact": { "analysis": "string", "tips": ["string", "string"], "drills": ["string"] },
+           "followThrough": { "analysis": "string", "tips": ["string", "string"], "drills": ["string"] },
+           "finish": { "analysis": "string", "tips": ["string", "string"], "drills": ["string"] }
+        }
+      }
+      `
+
+      // Ensure we request JSON mode or rely on prompt instruction.
+      // Since generateJSON isn't available in standard window.spark.llm shim (it's in the service),
+      // we'll use standard generate and try to parse.
+      // Ideally we would use the z.object() schema from the service, but we are in lib/ here.
+      // We will trust the prompt.
+
+      const rawResponse = await callAIWithRetry(prompt, 'gemini-2.5-pro', false)
+
+      if (rawResponse) {
+        // Attempt to clean markdown code blocks if present
+        const jsonString = rawResponse.replace(/```json\n?|\n?```/g, '')
+        try {
+          const data = JSON.parse(jsonString)
+          aiInsights = data.aiInsights || aiInsights
+          if (Array.isArray(data.strengths)) strengths.push(...data.strengths)
+          if (Array.isArray(data.improvements)) improvements.push(...data.improvements)
+          if (data.phases) {
+             // Map AI response keys to internal interface
+             phaseDetails = Object.entries(data.phases).reduce((acc, [key, val]: [string, any]) => {
+                 acc[key] = {
+                     aiAnalysis: val.analysis || val.aiAnalysis || '',
+                     tips: val.tips || [],
+                     drills: val.drills || []
+                 }
+                 return acc
+             }, {} as PhaseFeedbackMap)
+          }
+        } catch (e) {
+          console.warn('Failed to parse AI JSON response', e)
+          aiInsights = rawResponse // Fallback to raw text
+        }
+      }
     }
   } catch (error) {
-    console.warn('AI Feedback unavailable')
+    console.warn('AI Feedback unavailable', error)
   }
 
   return {
-    overallScore,
-    strengths,
-    improvements,
-    drills,
-    aiInsights
+    globalFeedback: {
+        overallScore,
+        strengths: Array.from(new Set(strengths)), // Dedup
+        improvements: Array.from(new Set(improvements)),
+        drills,
+        aiInsights
+    },
+    phaseDetails
   }
 }
 
