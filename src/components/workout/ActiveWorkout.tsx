@@ -14,6 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
+import { PowerSlider } from '@/components/ui/PowerSlider'
 
 interface ActiveWorkoutProps {
   workout: WorkoutPlan
@@ -330,20 +331,15 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
           
           {isRepBased ? (
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
               >
-                <Button
-                  onClick={handleCompleteSet}
-                  size="lg"
-                  className={cn(
-                    "w-full h-12 sm:h-14 text-base text-white transition-all bg-gradient-to-r neumorphic-button",
-                    categoryStyle.gradient
-                  )}
-                >
-                  <Check className="mr-2" />
-                  <span>Complete Set</span>
-                </Button>
+                  <PowerSlider
+                      onComplete={handleCompleteSet}
+                      label="Slide to Complete Set"
+                      className="mt-2"
+                  />
               </motion.div>
           ) : (
             <div className="flex justify-center gap-3 sm:gap-4">
