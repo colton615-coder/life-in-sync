@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { motion } from 'framer-motion'
-import { Play, Pause, ChevronLeft, BarChart3, SkipForward, SkipBack } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Play, Pause, ChevronLeft, BarChart3, SkipForward, SkipBack, Scan } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SwingAnalysis, SwingPoseData } from '@/lib/types'
 import { VideoPlayerContainer, VideoPlayerController } from '@/components/VideoPlayerContainer'
 import { calculateInstantaneousMetrics, InstantMetrics } from '@/lib/golf/swing-analyzer'
 import { PhaseList } from '@/components/golf/PhaseList'
+import { VirtualJogDial } from '@/components/golf/VirtualJogDial'
 
 /**
  * AnalysisCockpit
@@ -31,6 +32,7 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
+  const [isJogMode, setIsJogMode] = useState(false)
 
   // We still calculate instant metrics for internal logic if needed,
   // but the primary display is now the PhaseList
@@ -106,9 +108,17 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
       }
   }
 
+  const handleJogSeek = (delta: number) => {
+     if (videoControllerRef.current) {
+         const t = videoControllerRef.current.getCurrentTime() + delta
+         // Clamp handled by player, but good to be safe
+         videoControllerRef.current.seek(Math.max(0, Math.min(t, duration)))
+     }
+  }
+
   // -- RENDER --
   return (
-    <div className="h-[100dvh] w-full flex flex-col bg-[#0B0E14] text-slate-200 font-sans overflow-hidden">
+    <div className="h-[100dvh] w-full flex flex-col bg-[#0B0E14] text-slate-200 font-sans overflow-hidden relative">
 
       {/* HEADER / NAV (Absolute Top Left) */}
       <button
@@ -137,6 +147,21 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
 
         {/* Floating Minimal Controls (Bottom of Video) */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent z-40">
+
+             {/* Jog Dial Overlay */}
+             <AnimatePresence>
+                {isJogMode && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                        className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-auto"
+                    >
+                        <VirtualJogDial onSeek={handleJogSeek} sensitivity={0.5} />
+                    </motion.div>
+                )}
+             </AnimatePresence>
+
              {/* Scrubber */}
             <div
                 className="relative w-full h-8 flex items-center mb-2 touch-none cursor-pointer group"
@@ -160,7 +185,7 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
             </div>
 
             {/* Transport Row */}
-            <div className="flex items-center justify-between text-xs font-mono text-slate-400">
+            <div className="flex items-center justify-between text-xs font-mono text-slate-400 relative z-50">
                 <span>{currentTime.toFixed(2)}s</span>
 
                 <div className="flex items-center gap-6">
@@ -174,7 +199,19 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
                     <button onClick={() => skip(1)} className="p-2 hover:text-white transition-colors"><SkipForward size={16} /></button>
                 </div>
 
-                <span>{duration.toFixed(2)}s</span>
+                 <div className="flex items-center gap-2">
+                    <span>{duration.toFixed(2)}s</span>
+                    <button
+                        onClick={() => setIsJogMode(!isJogMode)}
+                        className={cn(
+                            "p-1.5 rounded-full border border-white/10 transition-colors ml-2",
+                            isJogMode ? "bg-[#2E8AF7] text-white shadow-[0_0_10px_#2E8AF7]" : "bg-white/5 text-slate-400 hover:text-white"
+                        )}
+                        aria-label="Toggle Precision Jog Dial"
+                    >
+                        <Scan size={14} />
+                    </button>
+                </div>
             </div>
         </div>
       </section>

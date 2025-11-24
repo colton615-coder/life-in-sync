@@ -24,6 +24,7 @@ import { VirtualList } from '@/components/VirtualList'
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
 import { useSoundEffects } from '@/hooks/use-sound-effects'
 import { sanitizeForLLM, parseAIResponse } from '@/lib/security'
+import { QuickExpenseDrawer } from '@/components/finance/QuickExpenseDrawer'
 
 const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Other']
 const COLORS = ['#5fd4f4', '#9d7fff', '#6ee7b7', '#fbbf24', '#fb923c', '#f87171', '#94a3b8']
@@ -82,6 +83,20 @@ export function Finance() {
     playSound('success')
     toast.success('Expense logged!')
   }, [newExpense, setExpenses, triggerHaptic, playSound])
+
+  const handleQuickAdd = useCallback((amount: number, category: string, description: string) => {
+      const expense: Expense = {
+        id: Date.now().toString(),
+        amount,
+        category,
+        description,
+        date: new Date().toISOString().split('T')[0]
+      }
+      setExpenses((current) => [...(current || []), expense])
+      triggerHaptic('success')
+      playSound('success')
+      toast.success('Expense logged via Quick Add!')
+  }, [setExpenses, triggerHaptic, playSound])
 
   const editExpense = useCallback((expenseId: string, updates: Partial<Expense>) => {
     setExpenses((current) => 
@@ -313,76 +328,74 @@ CRITICAL RULES:
         </motion.div>
 
         {activeTab === 'expenses' && (
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-              >
+          <div className="flex gap-2">
+            <QuickExpenseDrawer onAddExpense={handleQuickAdd} />
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
                 <Button
                   size="default"
-                  className="gap-2 h-11 md:h-9 px-5 md:px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all flex-shrink-0"
+                  variant="outline"
+                  className="gap-2 h-11 md:h-9 px-3 bg-white/5 hover:bg-white/10 border-white/10 text-slate-300"
                 >
-                  <Plus size={18} weight="bold" className="md:w-4 md:h-4" />
-                  <span className="font-semibold">Add</span>
+                  <span className="font-medium hidden sm:inline">Detailed</span>
+                  <Plus size={14} weight="bold" className="sm:hidden" />
                 </Button>
-              </motion.div>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] glass-card border-primary/30 max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-xl md:text-2xl">Log New Expense</DialogTitle>
-                <DialogDescription className="text-xs md:text-sm">
-                  Track your spending and stay on budget
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 md:space-y-5 pt-3 md:pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="expense-amount" className="text-xs md:text-sm font-semibold">Amount</Label>
-                  <Input
-                    id="expense-amount"
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={newExpense.amount}
-                    onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
-                    className="h-10 md:h-11 glass-morphic border-border/50 focus:border-primary text-base"
-                  />
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px] glass-card border-primary/30 max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-xl md:text-2xl">Log New Expense</DialogTitle>
+                  <DialogDescription className="text-xs md:text-sm">
+                    Track your spending and stay on budget
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 md:space-y-5 pt-3 md:pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="expense-amount" className="text-xs md:text-sm font-semibold">Amount</Label>
+                    <Input
+                      id="expense-amount"
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={newExpense.amount}
+                      onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
+                      className="h-10 md:h-11 glass-morphic border-border/50 focus:border-primary text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="expense-category" className="text-xs md:text-sm font-semibold">Category</Label>
+                    <Select
+                      value={newExpense.category}
+                      onValueChange={(value) => setNewExpense({ ...newExpense, category: value })}
+                    >
+                      <SelectTrigger id="expense-category" className="h-10 md:h-11 glass-morphic border-border/50 text-base">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CATEGORIES.map(cat => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="expense-description" className="text-xs md:text-sm font-semibold">Description (Optional)</Label>
+                    <AutocompleteInput
+                      id="expense-description"
+                      placeholder="What was this for?"
+                      value={newExpense.description}
+                      onValueChange={(value) => setNewExpense({ ...newExpense, description: value })}
+                      historicalData={historicalDescriptions}
+                      maxSuggestions={5}
+                    />
+                  </div>
+                  <div className="flex gap-2 md:gap-3 pt-2">
+                    <Button onClick={addExpense} className="flex-1 h-10 md:h-11 shadow-md text-sm md:text-base">Log Expense</Button>
+                    <Button variant="outline" onClick={() => setDialogOpen(false)} className="h-10 md:h-11 text-sm md:text-base">Cancel</Button>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="expense-category" className="text-xs md:text-sm font-semibold">Category</Label>
-                  <Select
-                    value={newExpense.category}
-                    onValueChange={(value) => setNewExpense({ ...newExpense, category: value })}
-                  >
-                    <SelectTrigger id="expense-category" className="h-10 md:h-11 glass-morphic border-border/50 text-base">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIES.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="expense-description" className="text-xs md:text-sm font-semibold">Description (Optional)</Label>
-                  <AutocompleteInput
-                    id="expense-description"
-                    placeholder="What was this for?"
-                    value={newExpense.description}
-                    onValueChange={(value) => setNewExpense({ ...newExpense, description: value })}
-                    historicalData={historicalDescriptions}
-                    maxSuggestions={5}
-                  />
-                </div>
-                <div className="flex gap-2 md:gap-3 pt-2">
-                  <Button onClick={addExpense} className="flex-1 h-10 md:h-11 shadow-md text-sm md:text-base">Log Expense</Button>
-                  <Button variant="outline" onClick={() => setDialogOpen(false)} className="h-10 md:h-11 text-sm md:text-base">Cancel</Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         )}
       </div>
 
