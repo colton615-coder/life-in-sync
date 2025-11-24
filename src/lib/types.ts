@@ -219,7 +219,29 @@ export interface SwingPoseData {
   worldLandmarks?: SwingLandmark[]
 }
 
+export interface PhaseMetric {
+  name: string
+  timestamp: number
+  score: number
+  status: 'excellent' | 'good' | 'fair' | 'poor'
+  keyMetric: {
+    label: string
+    value: string
+  }
+  valid: boolean
+}
+
 export interface SwingMetrics {
+  phases: {
+    address: PhaseMetric
+    takeaway: PhaseMetric
+    backswing: PhaseMetric
+    top: PhaseMetric
+    downswing: PhaseMetric
+    impact: PhaseMetric
+    followThrough: PhaseMetric
+    finish: PhaseMetric
+  }
   spineAngle: {
     address: number
     backswing: number

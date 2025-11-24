@@ -1,5 +1,5 @@
 import { callAIWithRetry } from '@/lib/ai-utils'
-import { SwingPoseData, SwingMetrics, SwingFeedback, GolfClub } from '@/lib/types'
+import { SwingPoseData, SwingMetrics, SwingFeedback, GolfClub, PhaseMetric } from '@/lib/types'
 
 interface MediaPipeLandmark {
   x: number
@@ -26,12 +26,19 @@ const LANDMARK_INDICES = {
   RIGHT_ELBOW: 14,
 }
 
-function detectSwingPhase(frame: number, totalFrames: number): 'address' | 'backswing' | 'impact' | 'followThrough' {
+// Updated to 8 phases
+function detectSwingPhase(frame: number, totalFrames: number): string {
   const progress = frame / totalFrames
-  if (progress < 0.1) return 'address'
-  if (progress < 0.4) return 'backswing'
-  if (progress < 0.6) return 'impact'
-  return 'followThrough'
+
+  // Heuristic phase detection based on generic swing timing
+  if (progress < 0.10) return 'address'
+  if (progress < 0.20) return 'takeaway'
+  if (progress < 0.40) return 'backswing'
+  if (progress < 0.45) return 'top'
+  if (progress < 0.55) return 'downswing'
+  if (progress < 0.60) return 'impact'
+  if (progress < 0.75) return 'followThrough'
+  return 'finish'
 }
 
 export function analyzePoseData(poseData: SwingPoseData[]): SwingMetrics {
@@ -39,28 +46,42 @@ export function analyzePoseData(poseData: SwingPoseData[]): SwingMetrics {
     throw new Error('No pose data available for analysis')
   }
 
-  const phaseData: Record<string, SwingPoseData[]> = {
+  const phaseFrames: Record<string, SwingPoseData[]> = {
     address: [],
+    takeaway: [],
     backswing: [],
+    top: [],
+    downswing: [],
     impact: [],
-    followThrough: []
+    followThrough: [],
+    finish: []
   }
 
   poseData.forEach((frame, index) => {
     const phase = detectSwingPhase(index, poseData.length)
-    phaseData[phase].push(frame)
+    if (phaseFrames[phase]) {
+      phaseFrames[phase].push(frame)
+    }
   })
 
-  const getAverageFrame = (frames: SwingPoseData[]) => {
+  const getRepresentativeFrame = (frames: SwingPoseData[]) => {
     if (frames.length === 0) return null
+    // Use the middle frame of the phase as representative
     return frames[Math.floor(frames.length / 2)]
   }
 
-  const addressFrame = getAverageFrame(phaseData.address)
-  const backswingFrame = getAverageFrame(phaseData.backswing)
-  const impactFrame = getAverageFrame(phaseData.impact)
-  const followThroughFrame = getAverageFrame(phaseData.followThrough)
+  const frames = {
+    address: getRepresentativeFrame(phaseFrames.address),
+    takeaway: getRepresentativeFrame(phaseFrames.takeaway),
+    backswing: getRepresentativeFrame(phaseFrames.backswing),
+    top: getRepresentativeFrame(phaseFrames.top),
+    downswing: getRepresentativeFrame(phaseFrames.downswing),
+    impact: getRepresentativeFrame(phaseFrames.impact),
+    followThrough: getRepresentativeFrame(phaseFrames.followThrough),
+    finish: getRepresentativeFrame(phaseFrames.finish)
+  }
 
+  // Helper Calculation Functions
   const calculateSpineAngle = (frame: SwingPoseData | null): number => {
     if (!frame) return 0
     const nose = frame.landmarks[LANDMARK_INDICES.NOSE]
@@ -72,22 +93,107 @@ export function analyzePoseData(poseData: SwingPoseData[]): SwingMetrics {
       z: (leftHip.z + rightHip.z) / 2,
       visibility: 1
     }
-    return Math.atan2(nose.x - midHip.x, nose.y - midHip.y) * 180 / Math.PI
+    // Invert to standard vertical spine angle (0 = vertical)
+    return Math.abs(Math.atan2(nose.x - midHip.x, nose.y - midHip.y) * 180 / Math.PI)
   }
 
-  const calculateHipRotation = (frame: SwingPoseData | null): number => {
+  const calculateRotation = (frame: SwingPoseData | null, index1: number, index2: number): number => {
     if (!frame) return 0
-    const leftHip = frame.landmarks[LANDMARK_INDICES.LEFT_HIP]
-    const rightHip = frame.landmarks[LANDMARK_INDICES.RIGHT_HIP]
-    return Math.atan2(rightHip.z - leftHip.z, rightHip.x - leftHip.x) * 180 / Math.PI
+    const p1 = frame.landmarks[index1]
+    const p2 = frame.landmarks[index2]
+    // Simple 2D projection rotation
+    return Math.abs(Math.atan2(p2.z - p1.z, p2.x - p1.x) * 180 / Math.PI)
   }
 
-  const calculateShoulderRotation = (frame: SwingPoseData | null): number => {
-    if (!frame) return 0
-    const leftShoulder = frame.landmarks[LANDMARK_INDICES.LEFT_SHOULDER]
-    const rightShoulder = frame.landmarks[LANDMARK_INDICES.RIGHT_SHOULDER]
-    return Math.atan2(rightShoulder.z - leftShoulder.z, rightShoulder.x - leftShoulder.x) * 180 / Math.PI
+  const calculateHipRotation = (frame: SwingPoseData | null) =>
+    calculateRotation(frame, LANDMARK_INDICES.LEFT_HIP, LANDMARK_INDICES.RIGHT_HIP)
+
+  const calculateShoulderRotation = (frame: SwingPoseData | null) =>
+    calculateRotation(frame, LANDMARK_INDICES.LEFT_SHOULDER, LANDMARK_INDICES.RIGHT_SHOULDER)
+
+  // --- Phase Metric Generators ---
+
+  const createPhaseMetric = (
+    name: string,
+    frame: SwingPoseData | null,
+    metricFn: () => { label: string, value: string, score: number }
+  ): PhaseMetric => {
+    if (!frame) {
+      return {
+        name,
+        timestamp: 0,
+        score: 0,
+        status: 'poor',
+        keyMetric: { label: 'No Data', value: '--' },
+        valid: false
+      }
+    }
+
+    const metric = metricFn()
+    let status: 'excellent' | 'good' | 'fair' | 'poor' = 'poor'
+    if (metric.score >= 90) status = 'excellent'
+    else if (metric.score >= 75) status = 'good'
+    else if (metric.score >= 60) status = 'fair'
+
+    return {
+      name,
+      timestamp: frame.timestamp,
+      score: metric.score,
+      status,
+      keyMetric: {
+        label: metric.label,
+        value: metric.value
+      },
+      valid: true
+    }
   }
+
+  const phases = {
+    address: createPhaseMetric('Address', frames.address, () => {
+      const angle = calculateSpineAngle(frames.address)
+      const score = angle > 10 && angle < 30 ? 95 : 60
+      return { label: 'Spine Angle', value: `${angle.toFixed(1)}°`, score }
+    }),
+    takeaway: createPhaseMetric('Takeaway', frames.takeaway, () => {
+      const rotation = calculateShoulderRotation(frames.takeaway)
+      const score = rotation > 20 ? 90 : 50
+      return { label: 'Shldr Rotation', value: `${rotation.toFixed(1)}°`, score }
+    }),
+    backswing: createPhaseMetric('Backswing', frames.backswing, () => {
+      const rotation = calculateHipRotation(frames.backswing)
+      const score = rotation > 35 ? 92 : 65
+      return { label: 'Hip Turn', value: `${rotation.toFixed(1)}°`, score }
+    }),
+    top: createPhaseMetric('Top', frames.top, () => {
+      const rotation = calculateShoulderRotation(frames.top)
+      const score = rotation > 85 ? 95 : 70
+      return { label: 'Max Rotation', value: `${rotation.toFixed(1)}°`, score }
+    }),
+    downswing: createPhaseMetric('Downswing', frames.downswing, () => {
+      const score = 85 // Mock score for acceleration
+      return { label: 'Sequence', value: 'Good', score }
+    }),
+    impact: createPhaseMetric('Impact', frames.impact, () => {
+      const angle = calculateSpineAngle(frames.impact)
+      const score = Math.abs(angle - (frames.address ? calculateSpineAngle(frames.address) : 0)) < 5 ? 95 : 60
+      return { label: 'Spine Retention', value: `${angle.toFixed(1)}°`, score }
+    }),
+    followThrough: createPhaseMetric('Follow Through', frames.followThrough, () => {
+      const rotation = calculateShoulderRotation(frames.followThrough)
+      const score = rotation > 80 ? 90 : 60
+      return { label: 'Extension', value: `${rotation.toFixed(1)}°`, score }
+    }),
+    finish: createPhaseMetric('Finish', frames.finish, () => {
+       const balance = 95 // Mock balance score
+       return { label: 'Balance', value: 'Stable', score: balance }
+    })
+  }
+
+  // Legacy Metrics (Recalculated or Mapped)
+  const backswingHipRotation = calculateHipRotation(frames.backswing)
+  const impactHipRotation = calculateHipRotation(frames.impact)
+  const backswingShoulderRotation = calculateShoulderRotation(frames.backswing)
+  const impactShoulderRotation = calculateShoulderRotation(frames.impact)
 
   const calculateHeadMovement = (): { lateral: number; vertical: number; stability: 'excellent' | 'good' | 'fair' | 'poor' } => {
     const nosePositions = poseData.map(frame => frame.landmarks[LANDMARK_INDICES.NOSE])
@@ -104,17 +210,12 @@ export function analyzePoseData(poseData: SwingPoseData[]): SwingMetrics {
     return { lateral: lateralMovement, vertical: verticalMovement, stability }
   }
 
-  const backswingHipRotation = calculateHipRotation(backswingFrame)
-  const impactHipRotation = calculateHipRotation(impactFrame)
-  const backswingShoulderRotation = calculateShoulderRotation(backswingFrame)
-  const impactShoulderRotation = calculateShoulderRotation(impactFrame)
-
   const headMovement = calculateHeadMovement()
 
   const calculateWeightTransfer = (): SwingMetrics['weightTransfer'] => {
     const addressBalance = 50
-    const backswingShift = backswingFrame ? 60 : 50
-    const impactShift = impactFrame ? 40 : 50
+    const backswingShift = frames.backswing ? 60 : 50
+    const impactShift = frames.impact ? 40 : 50
     
     const transferQuality = Math.abs(backswingShift - 50) + Math.abs(impactShift - 50)
     let rating: 'excellent' | 'good' | 'fair' | 'poor'
@@ -127,11 +228,12 @@ export function analyzePoseData(poseData: SwingPoseData[]): SwingMetrics {
   }
 
   return {
+    phases, // New Logic
     spineAngle: {
-      address: calculateSpineAngle(addressFrame),
-      backswing: calculateSpineAngle(backswingFrame),
-      impact: calculateSpineAngle(impactFrame),
-      followThrough: calculateSpineAngle(followThroughFrame)
+      address: calculateSpineAngle(frames.address),
+      backswing: calculateSpineAngle(frames.backswing),
+      impact: calculateSpineAngle(frames.impact),
+      followThrough: calculateSpineAngle(frames.followThrough)
     },
     hipRotation: {
       backswing: backswingHipRotation,
@@ -163,78 +265,49 @@ export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | n
   const improvements: string[] = []
   const drills: SwingFeedback['drills'] = []
 
+  // Use new Phase Metrics for simplified feedback logic
+  const phaseValues = Object.values(metrics.phases)
+  const lowScorePhases = phaseValues.filter(p => p.score < 70)
+
   if (metrics.headMovement.stability === 'excellent' || metrics.headMovement.stability === 'good') {
     strengths.push('Excellent head stability throughout the swing')
   } else {
     improvements.push('Excessive head movement detected')
-    drills.push({
-      title: 'Head Stability Drill',
-      description: 'Place a club across your shoulders and practice your swing while keeping your head still. Have someone watch or record to ensure minimal head movement.',
-      focusArea: 'Head Position',
-      difficulty: 'beginner'
-    })
   }
 
-  if (metrics.hipRotation.total > 80) {
-    strengths.push('Strong hip rotation generating power')
-  } else {
-    improvements.push('Limited hip rotation reducing power potential')
-    drills.push({
-      title: 'Hip Rotation Drill',
-      description: 'Practice the "step drill" - step forward with your lead foot as you swing to encourage proper hip rotation and weight transfer.',
-      focusArea: 'Hip Rotation',
-      difficulty: 'intermediate'
-    })
+  if (metrics.phases.top.score > 90) {
+    strengths.push('Excellent shoulder rotation at the top of the backswing')
   }
 
-  if (metrics.weightTransfer.rating === 'excellent' || metrics.weightTransfer.rating === 'good') {
-    strengths.push('Effective weight transfer from backswing to impact')
-  } else {
-    improvements.push('Improve weight transfer for more consistent contact')
+  if (metrics.phases.impact.score < 70) {
+    improvements.push('Spine angle loss at impact detected')
     drills.push({
-      title: 'Weight Transfer Drill',
-      description: 'Hit shots with your feet together, then gradually widen your stance. This helps feel proper weight shift.',
-      focusArea: 'Weight Transfer',
-      difficulty: 'beginner'
-    })
-  }
-
-  if (Math.abs(metrics.tempo.ratio - 2.0) < 0.3) {
-    strengths.push('Good tempo with ideal 2:1 backswing to downswing ratio')
-  } else {
-    improvements.push('Tempo could be improved for more consistent strikes')
-    drills.push({
-      title: 'Tempo Drill',
-      description: 'Count "one-two" on backswing and "three" on downswing. Maintain this 2:1 rhythm for all practice swings.',
-      focusArea: 'Tempo',
+      title: 'Impact Bag Drill',
+      description: 'Hit an impact bag to feel the proper body position at impact without worrying about ball flight.',
+      focusArea: 'Impact',
       difficulty: 'beginner'
     })
   }
 
   const overallScore = calculateOverallScore(metrics)
-
   const clubContext = club ? `\nClub Used: ${club}` : ''
-
   let aiInsights = 'AI insights unavailable at this time.'
 
   try {
     if (window.spark && window.spark.llm && window.spark.llmPrompt) {
-      const prompt = window.spark.llmPrompt`You are an elite-level golf biomechanics coach analyzing a student's swing data. Be direct, analytical, and concise. Avoid generic encouragement.
+      const prompt = window.spark.llmPrompt`You are an elite-level golf biomechanics coach analyzing a student's swing data. Be direct, analytical, and concise.
 Based on these technical metrics:
-- Hip Rotation: ${metrics.hipRotation.total.toFixed(1)}° (Target: >90°)
-- Shoulder Rotation: ${metrics.shoulderRotation.total.toFixed(1)}° (Target: >100°)
+- Top Rotation Score: ${metrics.phases.top.score}/100
+- Impact Position Score: ${metrics.phases.impact.score}/100
 - Head Stability: ${metrics.headMovement.stability}
-- Weight Transfer: ${metrics.weightTransfer.rating}
-- Tempo Ratio: ${metrics.tempo.ratio.toFixed(2)}:1 (Target: 2.0:1)${clubContext}
+- Tempo Ratio: ${metrics.tempo.ratio.toFixed(2)}:1
 
-Provide a 2-3 sentence technical diagnosis of the primary mechanical flaw and its immediate consequence on ball flight${club ? ` with the ${club}` : ''}.`
+Provide a 2-3 sentence technical diagnosis of the primary mechanical flaw.${clubContext}`
 
       const response = await callAIWithRetry(prompt, 'gpt-4o', false)
       if (response) {
         aiInsights = response
       }
-    } else {
-      console.warn('Spark AI is unavailable for generating golf feedback insights')
     }
   } catch (error) {
     console.error('Failed to generate AI insights:', error)
@@ -250,25 +323,15 @@ Provide a 2-3 sentence technical diagnosis of the primary mechanical flaw and it
 }
 
 function calculateOverallScore(metrics: SwingMetrics): number {
-  let score = 70
+  // Average of all phase scores
+  const phaseScores = Object.values(metrics.phases).map(p => p.score)
+  const avgPhaseScore = phaseScores.reduce((a, b) => a + b, 0) / phaseScores.length
 
-  if (metrics.headMovement.stability === 'excellent') score += 10
-  else if (metrics.headMovement.stability === 'good') score += 7
-  else if (metrics.headMovement.stability === 'fair') score += 4
+  // Weighted slightly by stability
+  let stabilityBonus = 0
+  if (metrics.headMovement.stability === 'excellent') stabilityBonus = 5
 
-  if (metrics.hipRotation.total > 90) score += 10
-  else if (metrics.hipRotation.total > 70) score += 7
-  else if (metrics.hipRotation.total > 50) score += 4
-
-  if (metrics.weightTransfer.rating === 'excellent') score += 10
-  else if (metrics.weightTransfer.rating === 'good') score += 7
-  else if (metrics.weightTransfer.rating === 'fair') score += 4
-
-  if (Math.abs(metrics.tempo.ratio - 2.0) < 0.2) score += 10
-  else if (Math.abs(metrics.tempo.ratio - 2.0) < 0.4) score += 7
-  else if (Math.abs(metrics.tempo.ratio - 2.0) < 0.6) score += 4
-
-  return Math.min(100, score)
+  return Math.min(100, Math.round(avgPhaseScore + stabilityBonus))
 }
 
 export async function simulateVideoProcessing(
@@ -276,19 +339,19 @@ export async function simulateVideoProcessing(
   onProgress: (progress: number, status: string) => void
 ): Promise<SwingPoseData[]> {
   onProgress(10, 'Uploading video...')
-  await new Promise(resolve => setTimeout(resolve, 1000))
+  await new Promise(resolve => setTimeout(resolve, 800))
 
   onProgress(30, 'Extracting frames...')
-  await new Promise(resolve => setTimeout(resolve, 1500))
+  await new Promise(resolve => setTimeout(resolve, 800))
 
-  onProgress(50, 'Running pose estimation...')
-  await new Promise(resolve => setTimeout(resolve, 2000))
+  onProgress(50, 'Identifying swing phases...')
+  await new Promise(resolve => setTimeout(resolve, 800))
 
-  onProgress(70, 'Analyzing swing mechanics...')
-  await new Promise(resolve => setTimeout(resolve, 1500))
+  onProgress(70, 'Analyzing kinematics...')
+  await new Promise(resolve => setTimeout(resolve, 800))
 
-  onProgress(90, 'Generating insights...')
-  await new Promise(resolve => setTimeout(resolve, 1000))
+  onProgress(90, 'Generating report cards...')
+  await new Promise(resolve => setTimeout(resolve, 800))
 
   const mockPoseData: SwingPoseData[] = generateMockPoseData()
   
@@ -298,7 +361,7 @@ export async function simulateVideoProcessing(
 
 function generateMockPoseData(): SwingPoseData[] {
   const frames: SwingPoseData[] = []
-  const totalFrames = 90
+  const totalFrames = 120 // Increased frame count for better phase resolution
 
   for (let i = 0; i < totalFrames; i++) {
     const progress = i / totalFrames
@@ -314,7 +377,7 @@ function generateMockPoseData(): SwingPoseData[] {
     }
 
     frames.push({
-      timestamp: i / 30,
+      timestamp: i / 30, // 30fps assumption
       landmarks
     })
   }
@@ -335,11 +398,8 @@ export function calculateInstantaneousMetrics(frame: SwingPoseData): InstantMetr
   }
 
   const landmarks = frame.landmarks
-
-  // Helper to get landmark
   const get = (idx: number) => landmarks[idx]
 
-  // Spine Angle
   const nose = get(LANDMARK_INDICES.NOSE)
   const leftHip = get(LANDMARK_INDICES.LEFT_HIP)
   const rightHip = get(LANDMARK_INDICES.RIGHT_HIP)
@@ -347,16 +407,12 @@ export function calculateInstantaneousMetrics(frame: SwingPoseData): InstantMetr
     x: (leftHip.x + rightHip.x) / 2,
     y: (leftHip.y + rightHip.y) / 2
   }
-  const spineAngle = Math.atan2(nose.x - midHip.x, nose.y - midHip.y) * 180 / Math.PI
+  const spineAngle = Math.abs(Math.atan2(nose.x - midHip.x, nose.y - midHip.y) * 180 / Math.PI)
+  const hipRotation = Math.abs(Math.atan2(rightHip.z - leftHip.z, rightHip.x - leftHip.x) * 180 / Math.PI)
 
-  // Hip Rotation (Approximate from 2D projected Z diff or just X/Y diff logic)
-  // Note: Real 3D rotation is hard without depth, but we use the Z coord from MediaPipe
-  const hipRotation = Math.atan2(rightHip.z - leftHip.z, rightHip.x - leftHip.x) * 180 / Math.PI
-
-  // Shoulder Rotation
   const leftShoulder = get(LANDMARK_INDICES.LEFT_SHOULDER)
   const rightShoulder = get(LANDMARK_INDICES.RIGHT_SHOULDER)
-  const shoulderRotation = Math.atan2(rightShoulder.z - leftShoulder.z, rightShoulder.x - leftShoulder.x) * 180 / Math.PI
+  const shoulderRotation = Math.abs(Math.atan2(rightShoulder.z - leftShoulder.z, rightShoulder.x - leftShoulder.x) * 180 / Math.PI)
 
   return {
     spineAngle,
