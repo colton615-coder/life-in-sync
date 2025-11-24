@@ -15,6 +15,7 @@
         "@google/generative-ai": "^0.24.1",
         "@heroicons/react": "^2.2.0",
         "@hookform/resolvers": "^5.2.2",
+        "@mediapipe/pose": "^0.5.1675469404",
         "@octokit/core": "^7.0.6",
         "@phosphor-icons/react": "^2.1.7",
         "@radix-ui/colors": "^3.0.0",
