@@ -192,6 +192,11 @@ export interface ShoppingItem {
   name: string
   completed: boolean
   createdAt: string
+  category?: string
+  priority?: 'low' | 'medium' | 'high'
+  notes?: string
+  quantity?: number
+  unit?: string
 }
 
 export interface CalendarEvent {

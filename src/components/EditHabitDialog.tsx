@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Habit, HabitIcon, TrackingType } from '@/lib/types'
 import { useState, useEffect } from 'react'
 import { IconPicker } from '@/components/IconPicker'
-import { Check, Hash, Clock, ArrowRight, X } from '@phosphor-icons/react'
+import { Check, Hash, Clock } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -87,7 +87,7 @@ export function EditHabitDialog({ open, onOpenChange, habit, onSave }: EditHabit
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] glass-card border-white/10 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-light text-white">Edit Protocol</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-white">Edit Protocol</DialogTitle>
           <DialogDescription className="text-slate-400">
             Modify your habit tracking parameters
           </DialogDescription>
@@ -186,7 +186,7 @@ export function EditHabitDialog({ open, onOpenChange, habit, onSave }: EditHabit
           <div className="flex gap-3 pt-2">
             <Button 
               onClick={handleSave}
-              className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white border-0"
+              className="flex-1 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/50"
             >
               Save Changes
             </Button>

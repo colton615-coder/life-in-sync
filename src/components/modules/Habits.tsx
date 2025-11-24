@@ -1,17 +1,17 @@
 import { GlassCard } from '@/components/shell/GlassCard'
 import { Button } from '@/components/ui/button'
-import { Plus, Fire, CheckCircle, Trash, Clock, Hash, Check, Sparkle, X, ArrowRight, ArrowLeft, Minus, PencilSimple } from '@phosphor-icons/react'
+import { Plus, Fire, Trash, Clock, Hash, Check, Sparkle, X, ArrowRight, ArrowLeft, PencilSimple } from '@phosphor-icons/react'
 import { HabitIcons } from '@/lib/habit-icons'
 import { useKV } from '@/hooks/use-kv'
 import { Habit, TrackingType, HabitEntry, HabitIcon } from '@/lib/types'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Confetti } from '@/components/Confetti'
 import { IconPicker } from '@/components/IconPicker'
+import { EditHabitDialog } from '@/components/EditHabitDialog'
 
 const trackingTypeOptions = [
   { value: 'boolean' as TrackingType, icon: Check, label: 'Simple Checkbox', description: 'Just mark it done' },
@@ -287,7 +287,7 @@ export function Habits() {
     return HabitIcons.Target
   }
 
-  const { activeHabits, completedHabits } = (() => {
+  const { activeHabits, completedHabits } = useMemo(() => {
     const active: Habit[] = []
     const completed: Habit[] = []
     
@@ -300,14 +300,14 @@ export function Habits() {
     })
     
     return { activeHabits: active, completedHabits: completed }
-  })()
+  }, [habits, today])
 
-  const filteredHabits = (() => {
+  const filteredHabits = useMemo(() => {
     if (filterTab === 'all') return [...activeHabits, ...completedHabits]
     if (filterTab === 'active') return activeHabits
     if (filterTab === 'completed') return completedHabits
     return habits || []
-  })()
+  }, [filterTab, activeHabits, completedHabits, habits])
 
   const container = {
     hidden: { opacity: 0 },
@@ -365,8 +365,8 @@ export function Habits() {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-light text-white tracking-wide">Habits</h1>
-          <p className="text-slate-400 mt-1 text-sm">Consistency is key, Architect.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Habits</h1>
+          <p className="text-slate-400 mt-1 text-sm font-medium">Consistency is key, Architect.</p>
         </div>
         {creationStep === 0 && (
           <Button
@@ -395,7 +395,7 @@ export function Habits() {
                     <Sparkle weight="fill" size={18} />
                   </div>
                   <div>
-                    <h3 className="font-medium text-white text-lg">New Protocol</h3>
+                    <h3 className="font-bold text-white text-lg">New Protocol</h3>
                     <p className="text-sm text-slate-400">Step {creationStep} of {newHabit.trackingType === 'boolean' ? 3 : 4}</p>
                   </div>
                 </div>
@@ -417,7 +417,7 @@ export function Habits() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <h2 className="text-xl font-light text-white mb-4">{getStepPrompt()}</h2>
+                  <h2 className="text-xl font-bold text-white mb-4">{getStepPrompt()}</h2>
 
                   {creationStep === 1 && (
                     <div className="space-y-3">
@@ -555,7 +555,7 @@ export function Habits() {
                       }
                     }}
                     disabled={!canProceedToNextStep()}
-                    className="gap-2 bg-cyan-500 hover:bg-cyan-600 text-white border-0"
+                    className="gap-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/50"
                   >
                     {creationStep === 4 || (creationStep === 3 && newHabit.trackingType === 'boolean') ? 'Initialize' : 'Continue'}
                     <ArrowRight size={18} />
@@ -574,11 +574,11 @@ export function Habits() {
               <div className="w-16 h-16 rounded-full bg-cyan-500/10 flex items-center justify-center mx-auto mb-4 text-cyan-400">
                   <Fire size={32} weight="duotone" />
               </div>
-              <h3 className="font-light text-xl text-white mb-2">No active protocols</h3>
+              <h3 className="font-bold text-xl text-white mb-2">No active protocols</h3>
               <p className="text-slate-400 text-sm mb-6">Initiate your first habit sequence.</p>
               <Button
                 onClick={() => setCreationStep(1)}
-                className="gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                className="gap-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/50"
               >
                 <Plus size={18} weight="bold" />
                 Initialize Protocol

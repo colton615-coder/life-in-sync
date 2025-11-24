@@ -40,7 +40,7 @@ const DashboardTile = ({
             onClick={onClick}
         >
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium text-white tracking-wider uppercase">{title}</h3>
+                <h3 className="text-sm font-bold text-white tracking-wider uppercase">{title}</h3>
                 <div className="text-cyan-400">
                     {icon}
                 </div>
@@ -192,8 +192,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
       {/* Greeting / Context (Optional - LifeCore handles the main header now, but we can have subheaders) */}
       <div className="space-y-1 mb-8 px-2">
-         <h2 className="text-sm font-light text-slate-400 uppercase tracking-widest">Command Center</h2>
-         <p className="text-xl text-white font-light">Welcome back, Architect.</p>
+         <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Command Center</h2>
+         <p className="text-xl text-white font-bold tracking-tight">Welcome back, Architect.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
