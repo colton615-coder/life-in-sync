@@ -338,7 +338,20 @@ export function GolfSwing() {
       
       if (!isMounted.current) return
       setViewState(prev => prev.status === 'ANALYZING' ? { ...prev, step: 'Generating AI feedback...' } : prev)
-      const feedback = await generateFeedback(metrics, club)
+      const { globalFeedback, phaseDetails } = await generateFeedback(metrics, club)
+
+      // Merge phase details into metrics
+      if (metrics && metrics.phases) {
+         Object.keys(phaseDetails).forEach(key => {
+            const phaseKey = key as keyof typeof metrics.phases;
+            if (metrics.phases[phaseKey]) {
+                metrics.phases[phaseKey] = {
+                    ...metrics.phases[phaseKey],
+                    ...phaseDetails[key]
+                }
+            }
+         })
+      }
 
       if (!isMounted.current) return
       const completedAnalysis: SwingAnalysis = {
@@ -347,7 +360,7 @@ export function GolfSwing() {
         processedAt: new Date().toISOString(),
         poseData,
         metrics,
-        feedback,
+        feedback: globalFeedback,
         processingProgress: 100
       }
 
