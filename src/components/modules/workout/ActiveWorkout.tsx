@@ -11,8 +11,6 @@ import { PowerSlider } from '@/components/ui/PowerSlider'
 import { useKV } from '@/hooks/use-kv'
 import { updatePersonalRecords, getPersonalRecord } from '@/lib/workout/pr-manager'
 import { toast } from 'sonner'
-import { MuscleHighlight } from './MuscleHighlight'
-import { useGymSound } from '@/hooks/use-gym-sound'
 
 interface ActiveWorkoutProps {
   workout: WorkoutPlan
@@ -26,12 +24,13 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
   const [completedExercises, setCompletedExercises] = useState<CompletedExercise[]>([])
 
   // Initialize granular sets for the current exercise
+  // We map the abstract "3 sets" to concrete objects
   const [currentSets, setCurrentSets] = useState<WorkoutSet[]>([])
 
   const [startTime] = useState(Date.now())
   const [duration, setDuration] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
-  
+
   const [keypadOpen, setKeypadOpen] = useState(false)
   const [keypadValue, setKeypadValue] = useState('')
   const [keypadFocus, setKeypadFocus] = useState<{setIndex: number, field: SetFocus} | null>(null)
@@ -43,7 +42,6 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
   const [currentPR, setCurrentPR] = useState<PersonalRecord | undefined>(undefined)
 
   const activeExercise = workout.exercises[activeExerciseIndex]
-  const { playBuzzer } = useGymSound()
 
   // Timer
   useEffect(() => {
@@ -62,7 +60,6 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
         setRestTimer(prev => {
           if (prev <= 1) {
             setRestActive(false)
-            playBuzzer() // Buzz when done
             return 0
           }
           return prev - 1
@@ -70,13 +67,13 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
       }, 1000)
     }
     return () => clearInterval(interval)
-  }, [restActive, restTimer, playBuzzer])
+  }, [restActive, restTimer])
 
   // Initialize sets when exercise changes
   useEffect(() => {
     if (!activeExercise) return
 
-    // Check if we already have data for this exercise
+    // Check if we already have data for this exercise (e.g. if we went back)
     const existingData = completedExercises.find(e => e.exerciseId === activeExercise.id)
 
     if (existingData) {
@@ -132,7 +129,7 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
     setRestTimer(90)
     setRestActive(true)
 
-    // Check for PRs
+    // Check for PRs immediately
     const updatedRecs = updatePersonalRecords(
         personalRecords || [],
         activeExercise.id,
@@ -202,29 +199,24 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* Exercise Header */}
-        <div className="grid grid-cols-[1fr_auto] gap-4 items-start">
-           <div className="space-y-2">
-               <h2 className="text-2xl font-bold leading-tight">{activeExercise.name}</h2>
-               {currentPR && (
-                  <div className="flex items-center gap-2">
+        <div className="space-y-2">
+           <div className="flex items-start justify-between">
+              <h2 className="text-2xl font-bold leading-tight">{activeExercise.name}</h2>
+              {currentPR && (
+                  <div className="flex flex-col items-end">
                       <span className="text-[10px] text-amber-500 font-mono font-bold uppercase tracking-wider">PR</span>
                       <span className="text-sm font-mono font-bold text-white">{currentPR.oneRepMax} lbs</span>
                   </div>
-               )}
-               <div className="flex gap-2 flex-wrap">
-                 {activeExercise.muscleGroups.map(m => (
-                   <span key={m} className="px-2 py-0.5 rounded-full border border-white/10 text-[10px] text-white/60 uppercase tracking-wide">
-                     {m}
-                   </span>
-                 ))}
-               </div>
+              )}
            </div>
 
-           {/* Muscle Viz */}
-           <MuscleHighlight
-              muscles={activeExercise.muscleGroups}
-              className="w-16 h-32 -mt-2 -mr-2"
-           />
+           <div className="flex gap-2">
+             {activeExercise.muscleGroups.map(m => (
+               <span key={m} className="px-2 py-0.5 rounded-full border border-white/10 text-[10px] text-white/60 uppercase tracking-wide">
+                 {m}
+               </span>
+             ))}
+           </div>
         </div>
 
         {/* Sets Grid */}

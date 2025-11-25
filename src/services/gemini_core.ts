@@ -13,12 +13,15 @@ export class GeminiCore {
   private static readonly MAX_RETRIES = 3;
   private static readonly INITIAL_RETRY_DELAY = 1000;
 
-  constructor() {
-    this.apiKey = this.getApiKey();
+  constructor(apiKey?: string) {
+    this.apiKey = apiKey ?? this.getApiKey();
+    if (!this.apiKey) {
+      console.error("Gemini API Key is not available. Connection will fail.");
+      // throw new Error("API Key is missing."); // Or handle gracefully
+    }
     this.genAI = new GoogleGenerativeAI(this.apiKey);
     this.model = this.genAI.getGenerativeModel({
       model: GeminiCore.MODEL_NAME,
-      // Optional: Set safety settings here if needed globally
     });
   }
 
@@ -137,5 +140,9 @@ export class GeminiCore {
    */
   getModel(): GenerativeModel {
     return this.model;
+  }
+
+  public static getModelName(): string {
+    return GeminiCore.MODEL_NAME;
   }
 }

@@ -45,9 +45,7 @@ export async function generateWorkoutPlan(workoutPrompt: string): Promise<Workou
     }
 
     try {
-      const gemini = new GeminiCore();
-      
-      console.log('[Workout Generation] Step 1: Creating Gemini prompt')
+      console.log('[Workout Generation] Step 1: Creating LLM prompt')
       const promptText = `You are a fitness expert. Generate a complete workout plan based on this request: "${workoutPrompt}".
 
 CRITICAL: If the user specifies a time duration (e.g., "15 minute", "30 min", etc.), you MUST create exercises that add up to approximately that duration.
@@ -94,7 +92,9 @@ Muscle groups can include: chest, back, legs, arms, core, shoulders, cardio
 Categories: "Warm-up", "Work", "Cool-down"
 Difficulty levels: "beginner", "intermediate", "advanced"`;
 
-      console.log('[Workout Generation] Step 2: Calling Gemini API')
+      console.log('[Workout Generation] Step 2: Calling AI with retry mechanism')
+      
+      const response = await callAIWithRetry(promptText, true)
       
       // Use generateJSON with Zod schema validation
       const data = await gemini.generateJSON(promptText, ResponseSchema);

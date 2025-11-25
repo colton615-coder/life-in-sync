@@ -137,6 +137,15 @@ export interface ChatMessage {
   model?: string;
 }
 
+export interface WorkoutSet {
+  id: string
+  reps?: number
+  weight?: number
+  duration?: number
+  completed: boolean
+  completedAt?: string
+}
+
 export interface Exercise {
   id: string
   name: string
@@ -146,6 +155,7 @@ export interface Exercise {
   reps?: number
   duration?: number
   weight?: number
+  targetSets?: WorkoutSet[] // Granular target sets
   muscleGroups: string[]
   difficulty: 'beginner' | 'intermediate' | 'advanced'
   instructions: {
@@ -165,6 +175,12 @@ export interface WorkoutPlan {
   createdAt: string
 }
 
+export interface CompletedExercise {
+  exerciseId: string
+  name: string
+  sets: WorkoutSet[]
+}
+
 export interface CompletedWorkout {
   id: string
   workoutPlanId: string
@@ -172,6 +188,7 @@ export interface CompletedWorkout {
   workoutFocus: string
   completedExercises: number
   totalExercises: number
+  exercises?: CompletedExercise[] // Detailed set data
   totalDuration: number
   calories: number
   date: string
@@ -179,12 +196,16 @@ export interface CompletedWorkout {
 }
 
 export interface PersonalRecord {
-  exerciseId: string
+  id: string
   exerciseName: string
-  maxWeight?: number
-  maxReps?: number
-  maxDuration?: number
-  achievedAt: string
+  oneRepMax: number
+  maxVolume: number
+  lastUpdated: string
+  history: {
+    date: string
+    oneRepMax: number
+    volume: number
+  }[]
 }
 
 export interface ShoppingItem {

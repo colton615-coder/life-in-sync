@@ -11,8 +11,9 @@ import {
 } from '@phosphor-icons/react'
 import { Module, Habit, Expense, Task, CompletedWorkout, ChatMessage } from '@/lib/types'
 import { useKV } from '@/hooks/use-kv'
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { GlassCard } from '@/components/shell/GlassCard'
+import { QUOTES } from '@/lib/quotes'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Sparkline, TrendIndicator } from '@/components/Sparkline'
@@ -115,6 +116,11 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [tasks] = useKV<Task[]>('tasks', [])
   const [completedWorkouts] = useKV<CompletedWorkout[]>('completed-workouts', [])
   const [knoxMessages] = useKV<ChatMessage[]>('knox-messages', [])
+  const [greeting, setGreeting] = useState({ text: '', author: '' });
+
+  useEffect(() => {
+    setGreeting(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+  }, []);
 
   const today = useMemo(() => new Date().toISOString().split('T')[0], [])
 
@@ -190,10 +196,11 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     <div className="pt-2 md:pt-4 pb-24 md:pb-16 relative">
       <QuickActionsFab />
 
-      {/* Greeting / Context (Optional - LifeCore handles the main header now, but we can have subheaders) */}
+      {/* Greeting / Context */}
       <div className="space-y-1 mb-8 px-2">
          <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Command Center</h2>
-         <p className="text-xl text-white font-bold tracking-tight">Welcome back, Architect.</p>
+         <p className="text-xl text-white font-bold tracking-tight">"{greeting.text}"</p>
+         <p className="text-xs text-slate-500 font-mono">- {greeting.author}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

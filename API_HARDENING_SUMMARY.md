@@ -79,24 +79,21 @@ Improved `parseAIJsonResponse()` function:
 **Architecture**:
 - Frontend: React + TypeScript + Vite
 - AI Services: 
-  - Spark LLM (GPT-4o) via `window.spark.llm`
   - Google Gemini via `@google/generative-ai` SDK
 - No Express/Node backend
 - No custom API endpoints
 
-**Note**: All API interactions happen through:
-1. Spark SDK (built-in, managed by runtime)
-2. Google Gemini SDK (direct browser-to-Google communication)
+**Note**: All API interactions happen through the Google Gemini SDK.
 
 ## Part 3: Knox AI (Gemini) Configuration Fix ✅
 
 ### Problem Identified
-- **Issue**: 404 errors when calling `models/gemini-1.5-flash` or experimental models
+- **Issue**: Errors when calling various Gemini models.
 - **Root Causes**:
-  1. Experimental model `gemini-2.0-flash-exp` not available for all API keys/regions
-  2. Insufficient error handling for 404/403/permission errors
-  3. No model fallback strategy
-  4. Limited diagnostic information
+  1. Use of experimental or non-standard models.
+  2. Insufficient error handling for API errors.
+  3. No model fallback strategy.
+  4. Limited diagnostic information.
 
 ### Solution Implemented
 
@@ -120,29 +117,27 @@ if (error?.status === 404 || error?.message?.includes('404')) {
 ```
 
 **User-Friendly Messages**:
-- 404: "Model not found - try gemini-1.5-flash or gemini-1.5-pro"
+- 404: "Model not found - please use gemini-2.5-pro"
 - 403: "Permission denied - your API key may not have access"
 - 400: "Invalid API key"
 - 429: "API quota exceeded"
 
 #### 2. Improved Connection Test
-**File**: `src/lib/gemini/client.ts`
+**File**: `src/services/gemini_core.ts`
 
 Enhanced `testConnection()` method:
-- ✅ Uses stable model (`gemini-1.5-flash`) for testing
+- ✅ Uses stable model (`gemini-2.5-pro`) for testing
 - ✅ Detects 404 errors with helpful guidance
-- ✅ Provides model availability recommendations
 - ✅ Tests with minimal token usage
 
-**Before**: Used default model (could be experimental)
-**After**: Uses `gemini-1.5-flash` for reliable testing
+**Before**: Used various models.
+**After**: Uses `gemini-2.5-pro` for reliable testing.
 
 #### 3. Model Stability Improvements
-**File**: `src/components/modules/Knox.tsx`
+**File**: `src/services/gemini_core.ts`
 
-Changed Knox module to use stable model:
-- ❌ **Before**: `gemini-2.0-flash-exp` (experimental, may not be available)
-- ✅ **After**: `gemini-1.5-flash` (stable, widely available)
+Standardized all modules to use the stable model:
+- ✅ **After**: `gemini-2.5-pro` (stable, widely available)
 
 **Impact**:
 - Reduced 404 errors
@@ -192,7 +187,7 @@ Error: [object Object]
 ```
 Model "gemini-2.0-flash-exp" not found or not accessible. 
 Please verify the model name and your API key permissions. 
-Available models: gemini-1.5-flash, gemini-1.5-pro, gemini-2.0-flash-exp
+Available models: gemini-2.5-pro
 ```
 
 ## Implementation Details
@@ -210,7 +205,7 @@ Available models: gemini-1.5-flash, gemini-1.5-pro, gemini-2.0-flash-exp
    - Added 404/403/429 specific handling
 
 3. **`src/components/modules/Knox.tsx`**
-   - Changed model from `gemini-2.0-flash-exp` to `gemini-1.5-flash`
+   - Standardized model to `gemini-2.5-pro`
    - Maintained all three call sites (startSession, sendQuickQuery, sendMessage)
 
 ### Logging Improvements

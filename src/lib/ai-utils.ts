@@ -4,47 +4,22 @@ import { GeminiCore } from '../services/gemini_core';
 const gemini = new GeminiCore();
 
 /**
- * @deprecated This function was a wrapper for window.spark.llm.
- * It is now redirected to use GeminiCore for production stability.
- */
-async function safeSparkLLMCall(
-  promptText: string,
-  model: string = 'gemini-2.5-pro',
-  jsonMode: boolean = false
-): Promise<string> {
-  console.log('[Safe LLM Call] Delegating to GeminiCore');
-  
-  try {
-    if (jsonMode) {
-      // If jsonMode is requested, we try to get JSON but return it as string to match signature
-      // or just get content and let the caller parse it (since this function returns string)
-      // Better: Just ask Gemini for the content, the caller handles parsing usually via parseAIJsonResponse
-      // But we can add a system instruction for JSON if not present.
-      const jsonPrompt = promptText + "\n\nIMPORTANT: Output strictly valid JSON.";
-      return await gemini.generateContent(jsonPrompt);
-    }
-    
-    return await gemini.generateContent(promptText);
-  } catch (error) {
-    console.error('[Safe LLM Call] Gemini Core failed:', error);
-    throw error;
-  }
-}
-
-/**
- * robust AI call with retries.
- * Now backed by GeminiCore which has its own retries, but we keep this wrapper
- * to maintain backward compatibility with existing calls.
+ * Robust AI call, backed by the GeminiCore service which includes built-in retries.
  */
 export async function callAIWithRetry(
   promptText: string,
-  model: string = 'gemini-2.5-pro', // defaulted to supported model
-  jsonMode: boolean = false,
-  maxRetries: number = 3
+  jsonMode: boolean = false
 ): Promise<string> {
-  // GeminiCore handles retries internally for 429/503.
-  // We'll rely on that, but if we want to catch other errors or be extra safe:
-  return safeSparkLLMCall(promptText, model, jsonMode);
+  try {
+    if (jsonMode) {
+      const jsonPrompt = `${promptText}\n\nIMPORTANT: Respond with only valid JSON.`;
+      return await gemini.generateContent(jsonPrompt);
+    }
+    return await gemini.generateContent(promptText);
+  } catch (error) {
+    console.error('[callAIWithRetry] Gemini Core failed:', error);
+    throw error; // Re-throw to be handled by the caller
+  }
 }
 
 /**

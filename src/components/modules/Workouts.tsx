@@ -248,8 +248,7 @@ export function Workouts() {
               </motion.div>
             </Card>
           ) : (
-            // Quick-Start Grid: 2 Columns on Mobile, 3 on Desktop
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <AnimatePresence mode="popLayout">
                 {[...(workoutPlans || [])].reverse().map((workout, index) => (
                   <motion.div
@@ -260,53 +259,66 @@ export function Workouts() {
                     transition={{ delay: index * 0.05 }}
                     className="h-full"
                   >
-                    <Card
-                        className="neumorphic-card hover:glow-border group h-full flex flex-col justify-between p-3 active:scale-[0.98] transition-all cursor-pointer relative overflow-hidden"
-                        onClick={() => startWorkout(workout)}
-                    >
-                      {/* Gradient Overlay for "Active" feel */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                      <div className="space-y-2 relative z-10">
-                         {/* Header: Name & Difficulty */}
-                        <div className="flex flex-col gap-1">
-                             <div className="flex items-start justify-between">
-                                <h3 className="font-bold text-sm leading-tight line-clamp-2 text-white/90 group-hover:text-white transition-colors">
-                                    {workout.name}
-                                </h3>
-                                <Badge className={cn("text-[10px] px-1 py-0 h-4 capitalize border-0", difficultyColors[workout.difficulty])}>
-                                    {workout.difficulty.substring(0, 3)}
-                                </Badge>
-                             </div>
+                    <Card className="neumorphic-card hover:glow-border group h-full flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                              <h3 className="font-semibold text-sm md:text-base truncate">{workout.name}</h3>
+                              <Badge className={cn("text-[10px] px-1.5 py-0 capitalize", difficultyColors[workout.difficulty])}>
+                                {workout.difficulty}
+                              </Badge>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Barbell size={12} weight="duotone" />
+                                {workout.focus}
+                              </span>
+                              <span>•</span>
+                              <span>{workout.exercises.length} exercises</span>
+                            </div>
+                          </div>
                         </div>
 
-                        {/* Metadata Row */}
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-muted-foreground font-mono">
-                           <span className="flex items-center gap-0.5">
-                                <Timer size={10} weight="fill" />
-                                {workout.estimatedDuration}m
-                           </span>
-                           <span className="flex items-center gap-0.5">
-                                <Lightning size={10} weight="fill" />
-                                {workout.exercises.length} Ex
-                           </span>
-                        </div>
+                        <div className="space-y-2">
+                           <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                              Overview
+                            </h4>
+                            <span className="text-[10px] font-mono text-primary">
+                              ~{workout.estimatedDuration} MIN
+                            </span>
+                          </div>
 
-                        {/* Focus Tags */}
-                        <div className="flex flex-wrap gap-1 mt-1">
-                             <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-white/10 text-slate-400">
-                                 {workout.focus.split(' ')[0]}
-                             </Badge>
+                          <div className="flex flex-wrap gap-1.5">
+                             {workout.exercises.slice(0, 3).map((ex, i) => (
+                               <Badge key={i} variant="outline" className="text-[10px] bg-black/20 border-white/5 truncate max-w-[100px]">
+                                 {ex.name}
+                               </Badge>
+                             ))}
+                             {workout.exercises.length > 3 && (
+                               <Badge variant="outline" className="text-[10px] bg-black/20 border-white/5">
+                                 +{workout.exercises.length - 3}
+                               </Badge>
+                             )}
+                          </div>
                         </div>
                       </div>
 
-                      {/* Footer Actions (Mini) */}
-                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5 relative z-10">
-                            <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1">
-                                START <Play weight="fill" size={10} />
-                            </span>
+                      <div className="mt-4 pt-3 border-t border-white/5 flex gap-2">
+                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
+                              <Button
+                                onClick={() => startWorkout(workout)}
+                                size="sm"
+                                className="w-full button-glow gap-1.5 h-9"
+                                aria-label="Start workout"
+                              >
+                                <Play weight="fill" size={16} />
+                                <span className="font-bold">START</span>
+                              </Button>
+                            </motion.div>
 
-                            <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex gap-1">
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -316,17 +328,17 @@ export function Workouts() {
                                       setEditWorkout(workout)
                                       setIsEditOpen(true)
                                   }}
+                                  className="h-9 w-9 text-muted-foreground hover:text-white"
+                                  aria-label="Edit workout"
                                 >
                                   <PencilSimple size={12} />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
-                                  onClick={(e) => {
-                                      e.stopPropagation()
-                                      deleteWorkout(workout.id)
-                                  }}
+                                  onClick={() => deleteWorkout(workout.id)}
+                                  className="hover:bg-destructive/10 hover:text-destructive h-9 w-9 text-muted-foreground"
+                                  aria-label="Delete workout"
                                 >
                                   <Trash size={12} />
                                 </Button>
@@ -364,7 +376,11 @@ export function Workouts() {
               <AnimatePresence mode="popLayout">
                 {[...(completedWorkouts || [])].reverse().map((workout, index) => {
                   const completionRate = (workout.completedExercises / workout.totalExercises) * 100
-                  
+                  // Calculate total volume
+                  const totalVolume = workout.exercises?.reduce((acc, ex) => {
+                    return acc + ex.sets.reduce((sAcc, s) => sAcc + ((s.weight || 0) * (s.reps || 0)), 0)
+                  }, 0) || 0
+
                   return (
                     <motion.div
                       key={workout.id}
@@ -384,17 +400,33 @@ export function Workouts() {
                               <span>{workout.date}</span>
                               <span>•</span>
                               <span>{Math.ceil(workout.totalDuration / 60)} min</span>
-                              <span>•</span>
-                              <span className="text-primary font-semibold">{workout.calories} cal</span>
+                              {totalVolume > 0 && (
+                                <>
+                                  <span>•</span>
+                                  <span className="font-mono text-xs">{totalVolume.toLocaleString()} lbs vol</span>
+                                </>
+                              )}
                             </div>
-                            <div className="mt-3 space-y-2">
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">
-                                  {workout.completedExercises}/{workout.totalExercises} exercises
-                                </span>
-                                <span className="font-semibold text-primary">{Math.round(completionRate)}%</span>
+
+                            {/* Detailed Exercise Summary */}
+                            {workout.exercises && workout.exercises.length > 0 && (
+                              <div className="mt-3 space-y-1">
+                                {workout.exercises.slice(0, 3).map((ex, i) => (
+                                  <div key={i} className="flex justify-between text-xs">
+                                     <span className="text-muted-foreground">{ex.name}</span>
+                                     <span className="font-mono">{ex.sets.filter(s => s.completed).length} sets</span>
+                                  </div>
+                                ))}
+                                {workout.exercises.length > 3 && (
+                                   <div className="text-[10px] text-muted-foreground/50 pt-1">
+                                     +{workout.exercises.length - 3} more exercises
+                                   </div>
+                                )}
                               </div>
-                              <div className="slider-track h-1.5 w-full">
+                            )}
+
+                            <div className="mt-3 space-y-2">
+                              <div className="slider-track h-1 w-full">
                                 <motion.div 
                                   initial={{ width: 0 }}
                                   animate={{ width: `${completionRate}%` }}
