@@ -74,7 +74,11 @@ export const FloatingDock = ({ activeModule, onNavigate }: FloatingDockProps) =>
 
     return (
         <div className="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
-            <div className="pointer-events-auto bg-white/10 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] h-20 w-[90%] max-w-md rounded-3xl flex items-center px-2 overflow-x-auto no-scrollbar">
+            <nav
+                className="pointer-events-auto bg-white/10 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] h-20 w-[90%] max-w-md rounded-3xl flex items-center px-2 overflow-x-auto no-scrollbar"
+                role="navigation"
+                aria-label="Main Navigation"
+            >
                 {modules.map((module) => (
                     <NavItem
                         key={module.id}
@@ -84,7 +88,7 @@ export const FloatingDock = ({ activeModule, onNavigate }: FloatingDockProps) =>
                         onClick={() => onNavigate(module.id as Module)}
                     />
                 ))}
-            </div>
+            </nav>
         </div>
     )
 }
