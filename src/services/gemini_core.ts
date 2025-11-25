@@ -1,5 +1,7 @@
 import { GoogleGenerativeAI, GenerativeModel, GenerationConfig, Part } from '@google/generative-ai';
 import { z } from 'zod';
+import { FinancialAudit, ACCOUNTANT_CATEGORIES } from '../types/accountant';
+import { FinancialReport } from '../types/financial_report';
 
 /**
  * Core service for interacting with Google Gemini API.
@@ -144,5 +146,102 @@ export class GeminiCore {
 
   public static getModelName(): string {
     return GeminiCore.MODEL_NAME;
+  }
+
+  /**
+   * Generates a comprehensive financial report using "The Accountant" persona.
+   * @param auditData The user's completed financial audit.
+   * @returns A structured FinancialReport object.
+   */
+  async generateFinancialReport(auditData: FinancialAudit): Promise<FinancialReport> {
+    // Dynamically create a Zod schema for the report for runtime validation.
+    const financialReportSchema = z.object({
+      executiveSummary: z.string().min(50),
+      spendingAnalysis: z.array(z.object({
+        category: z.nativeEnum(Object.keys(ACCOUNTANT_CATEGORIES)),
+        totalSpent: z.number(),
+        aiSummary: z.string().min(20),
+        healthScore: z.number().min(1).max(10),
+      })),
+      proposedBudget: z.object(
+        Object.keys(ACCOUNTANT_CATEGORIES).reduce((acc, cat) => {
+          acc[cat] = z.object({
+            allocatedAmount: z.number(),
+            subcategories: z.object(
+              Object.keys(ACCOUNTANT_CATEGORIES[cat].subcategories).reduce((subAcc, subCat) => {
+                subAcc[subCat] = z.number();
+                return subAcc;
+              }, {})
+            ),
+          });
+          return acc;
+        }, {})
+      ),
+      moneyManagementAdvice: z.array(z.object({
+        title: z.string(),
+        description: z.string(),
+        relatedCategory: z.nativeEnum(Object.keys(ACCOUNTANT_CATEGORIES)),
+      })),
+      reportGeneratedAt: z.string().datetime(),
+      version: z.literal('1.0'),
+    });
+
+    const prompt = this.constructFinancialReportPrompt(auditData);
+
+    // Use generateJSON with the schema to get a validated object
+    return this.generateJSON(prompt, financialReportSchema);
+  }
+
+  private constructFinancialReportPrompt(auditData: FinancialAudit): string {
+    const auditJson = JSON.stringify(auditData, null, 2);
+    const categoriesJson = JSON.stringify(ACCOUNTANT_CATEGORIES, null, 2);
+
+    return `
+      You are "The Accountant," an elite-level, direct, and analytical AI financial advisor.
+      Your task is to analyze the user's financial audit data and generate a comprehensive, structured financial report.
+      The tone must be professional, insightful, and highly analytical. Avoid generic encouragement.
+
+      **User's Financial Audit Data:**
+      ${auditJson}
+
+      **Budgeting Categories:**
+      Use the following category structure for your analysis and budget proposal.
+      ${categoriesJson}
+
+      **Instructions:**
+      1.  **Analyze Spending:** Scrutinize the user's income and expenses. Identify areas of high spending, potential savings, and financial strengths or weaknesses.
+      2.  **Create a Budget:** Propose a detailed monthly budget. The total allocated budget must not exceed the user's monthly income. Be realistic but firm in your recommendations.
+      3.  **Provide Advice:** Offer actionable, specific money management advice. Each piece of advice should be linked to a specific financial category.
+      4.  **Format Output:** You MUST respond with a valid JSON object that strictly adheres to the defined 'FinancialReport' schema. Do not include any text, markdown, or commentary outside of the JSON object itself.
+
+      **Output Schema (reminder):**
+      \`\`\`json
+      {
+        "executiveSummary": "string",
+        "spendingAnalysis": [
+          {
+            "category": "string (must be a key from ACCOUNTANT_CATEGORIES)",
+            "totalSpent": "number",
+            "aiSummary": "string",
+            "healthScore": "number (1-10)"
+          }
+        ],
+        "proposedBudget": {
+          // Dynamically structured based on ACCOUNTANT_CATEGORIES
+        },
+        "moneyManagementAdvice": [
+          {
+            "title": "string",
+            "description": "string",
+            "relatedCategory": "string (must be a key from ACCOUNTANT_CATEGORIES)"
+          }
+        ],
+        "reportGeneratedAt": "string (ISO 8601 format)",
+        "version": "1.0"
+      }
+      \`\`\`
+
+      Now, generate the financial report based on the user's data.
+    `;
   }
 }

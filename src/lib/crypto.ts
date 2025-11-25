@@ -41,6 +41,9 @@ function getDeviceKey(): string {
 
 export async function encrypt(plaintext: string): Promise<string> {
   try {
+    if (typeof plaintext !== 'string') {
+      throw new Error('Plaintext must be a string')
+    }
     const encoder = new TextEncoder()
     const data = encoder.encode(plaintext)
     
@@ -68,7 +71,6 @@ export async function encrypt(plaintext: string): Promise<string> {
     const base64 = btoa(String.fromCharCode(...combined))
     return base64
   } catch (error) {
-    console.error('Encryption failed:', error)
     throw new Error('Failed to encrypt data')
   }
 }
@@ -96,7 +98,6 @@ export async function decrypt(encryptedData: string): Promise<string> {
     const decoder = new TextDecoder()
     return decoder.decode(decryptedData)
   } catch (error) {
-    console.error('Decryption failed:', error)
     throw new Error('Failed to decrypt data')
   }
 }

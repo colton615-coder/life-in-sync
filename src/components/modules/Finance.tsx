@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { useKV } from '@/hooks/use-kv';
 import { FinancialAudit, ACCOUNTANT_CATEGORIES } from '@/types/accountant';
+import { FinancialReport } from '@/types/financial_report';
+import { GeminiCore } from '@/services/gemini_core';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/Card';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BrainCircuit } from 'lucide-react';
 import { SarcasticLoader } from '@/components/SarcasticLoader';
+import { FirstMeeting } from '../accountant/FirstMeeting';
+import { BudgetManager } from '../accountant/BudgetManager';
 
 // Define the initial state for a new audit
 const createNewAudit = (): FinancialAudit => {
@@ -32,19 +36,40 @@ const createNewAudit = (): FinancialAudit => {
 
 export function Finance() {
   const [audit, setAudit] = useKV<FinancialAudit>('financial-audit', createNewAudit());
+  const [report, setReport] = useKV<FinancialReport | null>('financial-report', null);
+  const [meetingCompleted, setMeetingCompleted] = useKV<boolean>('meeting-completed', false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const auditSteps = [
     'monthlyIncome',
     ...Object.keys(ACCOUNTANT_CATEGORIES),
   ] as const;
 
+  const generateReport = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const gemini = new GeminiCore();
+      const completedAudit = { ...audit, auditCompletedAt: new Date().toISOString() };
+      setAudit(completedAudit);
+      const generatedReport = await gemini.generateFinancialReport(completedAudit);
+      setReport(generatedReport);
+    } catch (err) {
+      console.error("Failed to generate financial report:", err);
+      setError("The Accountant is currently unavailable. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleNext = () => {
     if (currentStep < auditSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Final step: complete the audit
-      setAudit(prev => ({ ...prev, auditCompletedAt: new Date().toISOString() }));
+      // Final step: complete the audit and generate the report
+      generateReport();
     }
   };
 
@@ -57,12 +82,34 @@ export function Finance() {
   const renderCurrentStep = () => {
     const stepKey = auditSteps[currentStep];
 
-    if (audit?.auditCompletedAt) {
+    if (isLoading) {
+      return <SarcasticLoader text="Analyzing your questionable life choices..." />;
+    }
+
+    if (error) {
       return (
+        <Card className="glass-card text-center p-8 border-red-500/50">
+          <h2 className="text-2xl font-bold mb-4 text-red-400">Error</h2>
+          <p className="text-muted-foreground mb-6">{error}</p>
+          <Button onClick={generateReport}>Try Again</Button>
+        </Card>
+      );
+    }
+
+    if (meetingCompleted && report) {
+      return <BudgetManager />;
+    }
+
+    if (report) {
+       return <FirstMeeting onComplete={() => setMeetingCompleted(true)} />;
+    }
+
+    if (audit?.auditCompletedAt && !report) {
+       return (
         <Card className="glass-card text-center p-8">
-          <h2 className="text-2xl font-bold mb-4 text-gradient-cyan">Audit Complete!</h2>
-          <p className="text-muted-foreground mb-6">"The Accountant" is now reviewing your financial profile. Your first meeting will be ready shortly.</p>
-          <Button onClick={() => setAudit(createNewAudit())}>Start New Audit</Button>
+          <h2 className="text-2xl font-bold mb-4 text-gradient-cyan">Audit Submitted</h2>
+           <p className="text-muted-foreground mb-6">Your financial data has been sent to "The Accountant". Generate your report to continue.</p>
+          <Button onClick={generateReport}>Generate Report</Button>
         </Card>
       );
     }
@@ -150,18 +197,20 @@ export function Finance() {
         </motion.div>
       </AnimatePresence>
 
-      <div className="flex justify-between items-center mt-6">
-        <Button variant="outline" onClick={handleBack} disabled={currentStep === 0}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back
-        </Button>
-        <p className="text-sm text-muted-foreground">
-          Step {currentStep + 1} of {auditSteps.length}
-        </p>
-        <Button onClick={handleNext}>
-          {currentStep === auditSteps.length - 1 ? 'Finish Audit' : 'Next'}
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
+      {!audit.auditCompletedAt && !report && (
+        <div className="flex justify-between items-center mt-6">
+            <Button variant="outline" onClick={handleBack} disabled={currentStep === 0}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            </Button>
+            <p className="text-sm text-muted-foreground">
+            Step {currentStep + 1} of {auditSteps.length}
+            </p>
+            <Button onClick={handleNext} disabled={isLoading}>
+            {currentStep === auditSteps.length - 1 ? 'Finish & Analyze' : 'Next'}
+            <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+        </div>
+      )}
     </div>
   );
 }

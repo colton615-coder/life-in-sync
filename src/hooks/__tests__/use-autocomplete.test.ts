@@ -1,14 +1,14 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useAutocomplete, useInputWithAutocomplete } from '../use-autocomplete'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals'
 
 describe('useAutocomplete', () => {
   beforeEach(() => {
-    vi.useFakeTimers()
+    jest.useFakeTimers()
   })
 
   afterEach(() => {
-    vi.restoreAllMocks()
+    jest.restoreAllMocks()
   })
 
   const historicalData = [
@@ -38,7 +38,7 @@ describe('useAutocomplete', () => {
     rerender({ input: 'ap' })
     
     act(() => {
-      vi.advanceTimersByTime(150)
+      jest.advanceTimersByTime(150)
     })
 
     await waitFor(() => {
@@ -56,7 +56,7 @@ describe('useAutocomplete', () => {
     rerender({ input: 'ban' })
     
     act(() => {
-      vi.advanceTimersByTime(150)
+      jest.advanceTimersByTime(150)
     })
 
     await waitFor(() => {
@@ -76,7 +76,7 @@ describe('useAutocomplete', () => {
     rerender({ input: 'e' })
     
     act(() => {
-      vi.advanceTimersByTime(150)
+      jest.advanceTimersByTime(150)
     })
 
     await waitFor(() => {
@@ -92,7 +92,7 @@ describe('useAutocomplete', () => {
 
     rerender({ input: 'ap' })
     act(() => {
-      vi.advanceTimersByTime(150)
+      jest.advanceTimersByTime(150)
     })
     await waitFor(() => {
       expect(result.current).toEqual([])
@@ -100,7 +100,7 @@ describe('useAutocomplete', () => {
 
     rerender({ input: 'app' })
     act(() => {
-      vi.advanceTimersByTime(150)
+      jest.advanceTimersByTime(150)
     })
     await waitFor(() => {
       expect(result.current).toContain('Apple')
@@ -115,7 +115,7 @@ describe('useAutocomplete', () => {
 
     rerender({ input: 'APPLE' })
     act(() => {
-      vi.advanceTimersByTime(150)
+      jest.advanceTimersByTime(150)
     })
 
     await waitFor(() => {
@@ -132,7 +132,7 @@ describe('useAutocomplete', () => {
 
     rerender({ input: 'apple' })
     act(() => {
-      vi.advanceTimersByTime(150)
+      jest.advanceTimersByTime(150)
     })
 
     await waitFor(() => {
@@ -161,7 +161,7 @@ describe('useAutocomplete', () => {
 
     rerender({ input: 'Apple' })
     act(() => {
-      vi.advanceTimersByTime(150)
+      jest.advanceTimersByTime(150)
     })
 
     await waitFor(() => {
@@ -184,11 +184,11 @@ describe('useInputWithAutocomplete', () => {
   const historicalData = ['Apple', 'Apricot', 'Banana']
 
   beforeEach(() => {
-    vi.useFakeTimers()
+    jest.useFakeTimers()
   })
 
   afterEach(() => {
-    vi.restoreAllMocks()
+    jest.restoreAllMocks()
   })
 
   it('should initialize with empty value', () => {
@@ -219,7 +219,7 @@ describe('useInputWithAutocomplete', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(150)
+      jest.advanceTimersByTime(150)
     })
 
     await waitFor(() => {
@@ -240,7 +240,7 @@ describe('useInputWithAutocomplete', () => {
   })
 
   it('should hide suggestions on blur with delay', () => {
-    vi.useRealTimers()
+    jest.useRealTimers()
     const { result } = renderHook(() => useInputWithAutocomplete(historicalData))
 
     act(() => {
@@ -268,7 +268,7 @@ describe('useInputWithAutocomplete', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(150)
+      jest.advanceTimersByTime(150)
     })
 
     await waitFor(() => {
