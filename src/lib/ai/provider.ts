@@ -1,32 +1,39 @@
 import type { AIProvider, AIRequest, AIResponse } from './types';
+import { GeminiCore } from '@/services/gemini_core';
 
 export class AIRouter {
+  private gemini: GeminiCore;
+
+  constructor() {
+    this.gemini = new GeminiCore();
+  }
+
   async generate(request: AIRequest): Promise<AIResponse> {
     try {
-      return await this.callProvider('spark', request);
+      // Force Gemini provider
+      return await this.callGemini(request);
     } catch (error: unknown) {
-      console.error(`Spark provider failed:`, error);
+      console.error(`AI provider failed:`, error);
       const e = error as Error;
       throw new Error(`AI provider failed: ${e.message}`);
     }
   }
 
-  private async callProvider(
-    provider: AIProvider,
+  private async callGemini(
     request: AIRequest
   ): Promise<AIResponse> {
-    // Fallback to spark
-    const sparkModel = request.model || 'gpt-4o';
-    const prompt = window.spark.llmPrompt`${request.prompt}`;
-    const response = await window.spark.llm(prompt, sparkModel, request.jsonMode);
+    const response = await this.gemini.generateContent(request.prompt);
+
+    // Attempt to parse JSON if requested, though this simplified router returns text.
+    // The GeminiCore.generateJSON method should be used directly if typed JSON is needed.
+    // If request.jsonMode is true, we assume the caller handles parsing or the prompt ensures JSON.
 
     return {
       text: response,
-      provider: 'spark',
-      model: sparkModel,
+      provider: 'gemini',
+      model: 'gemini-2.5-pro',
     };
   }
 }
 
 export const ai = new AIRouter();
-

@@ -3,24 +3,18 @@ import { motion } from 'framer-motion'
 import { Quotes } from '@phosphor-icons/react'
 import type { DailyAffirmation as DailyAffirmationType } from './LoadingScreen'
 import { getTodayKey } from '@/lib/utils'
+import { useKV } from '@/hooks/use-kv'
 
 export function DailyAffirmation() {
   const [affirmation, setAffirmation] = useState<DailyAffirmationType | null>(null)
+  // Use existing KV hook to read localStorage directly
+  const [storedAffirmation] = useKV<DailyAffirmationType | null>('daily-affirmation', null)
 
   useEffect(() => {
-    const loadAffirmation = async () => {
-      try {
-        const storedAffirmation = await window.spark.kv.get<DailyAffirmationType>('daily-affirmation')
-        if (storedAffirmation && storedAffirmation.date === getTodayKey()) {
-          setAffirmation(storedAffirmation)
-        }
-      } catch (error) {
-        console.error('Failed to load daily affirmation:', error)
-      }
+    if (storedAffirmation && storedAffirmation.date === getTodayKey()) {
+      setAffirmation(storedAffirmation)
     }
-
-    loadAffirmation()
-  }, [])
+  }, [storedAffirmation])
 
   if (!affirmation) return null
 

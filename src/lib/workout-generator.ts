@@ -1,10 +1,40 @@
 import { toast } from 'sonner'
-import { callAIWithRetry, parseAIJsonResponse, validateAIResponse } from '@/lib/ai-utils'
+import { GeminiCore } from '@/services/gemini_core'
 import { WorkoutPlan } from '@/lib/types'
+import { z } from 'zod'
+
+// Define Zod schemas for validation
+const ExerciseSchema = z.object({
+  id: z.string().optional(),
+  name: z.string(),
+  type: z.enum(['reps', 'time']),
+  category: z.string(),
+  duration: z.number().optional(),
+  sets: z.number().optional(),
+  reps: z.number().optional(),
+  muscleGroups: z.array(z.string()).optional(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  instructions: z.object({
+    summary: z.string(),
+    keyPoints: z.array(z.string())
+  }),
+  asset: z.string().optional()
+})
+
+const WorkoutPlanSchema = z.object({
+  name: z.string(),
+  focus: z.string(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']),
+  exercises: z.array(ExerciseSchema)
+})
+
+const ResponseSchema = z.object({
+  workoutPlan: WorkoutPlanSchema
+})
 
 export async function generateWorkoutPlan(workoutPrompt: string): Promise<WorkoutPlan | null> {
     console.log('====================================')
-    console.log('[Workout Generation] Starting new workout generation')
+    console.log('[Workout Generation] Starting new workout generation (Gemini)')
     console.log('[Workout Generation] User prompt:', workoutPrompt)
     console.log('====================================')
     
@@ -15,20 +45,10 @@ export async function generateWorkoutPlan(workoutPrompt: string): Promise<Workou
     }
 
     try {
-      console.log('[Workout Generation] Step 0: Checking spark API availability')
+      const gemini = new GeminiCore();
       
-      if (!window.spark) {
-        throw new Error('Spark API not available - window.spark is undefined')
-      }
-      if (!window.spark.llm) {
-        throw new Error('Spark LLM API not available - window.spark.llm is undefined')
-      }
-      if (!window.spark.llmPrompt) {
-        throw new Error('Spark llmPrompt API not available - window.spark.llmPrompt is undefined')
-      }
-      
-      console.log('[Workout Generation] Step 1: Creating LLM prompt')
-      const promptText = window.spark.llmPrompt`You are a fitness expert. Generate a complete workout plan based on this request: "${workoutPrompt}".
+      console.log('[Workout Generation] Step 1: Creating Gemini prompt')
+      const promptText = `You are a fitness expert. Generate a complete workout plan based on this request: "${workoutPrompt}".
 
 CRITICAL: If the user specifies a time duration (e.g., "15 minute", "30 min", etc.), you MUST create exercises that add up to approximately that duration.
 - For time-based exercises (type: "time"), the "duration" field is in SECONDS
@@ -72,68 +92,55 @@ Examples:
 
 Muscle groups can include: chest, back, legs, arms, core, shoulders, cardio
 Categories: "Warm-up", "Work", "Cool-down"
-Difficulty levels: "beginner", "intermediate", "advanced"`
+Difficulty levels: "beginner", "intermediate", "advanced"`;
 
-      console.log('[Workout Generation] Step 2: Calling AI with retry mechanism')
-      console.log('[Workout Generation] Using model: gpt-4o, JSON mode: true')
+      console.log('[Workout Generation] Step 2: Calling Gemini API')
       
-      const response = await callAIWithRetry(promptText, 'gpt-4o', true)
+      // Use generateJSON with Zod schema validation
+      const data = await gemini.generateJSON(promptText, ResponseSchema);
       
-      console.log('[Workout Generation] Step 3: AI response received')
-      const data = parseAIJsonResponse<{ workoutPlan: Record<string, unknown> }>(response, 'workoutPlan structure')
-      
-      console.log('[Workout Generation] Step 6: Validating required fields')
-      validateAIResponse(data, ['workoutPlan', 'workoutPlan.name', 'workoutPlan.exercises'])
+      console.log('[Workout Generation] Step 3: AI response received and validated')
 
-      console.log('[Workout Generation] Step 7: Validating exercises array')
-      if (!Array.isArray(data.workoutPlan.exercises)) {
-        throw new Error('workoutPlan.exercises must be an array')
-      }
-
-      if (data.workoutPlan.exercises.length === 0) {
-        throw new Error('workoutPlan.exercises cannot be empty')
-      }
-
-      console.log('[Workout Generation] Step 9: Calculating total duration')
-      const totalDuration = data.workoutPlan.exercises.reduce((acc: number, ex: Record<string, unknown>) => {
+      console.log('[Workout Generation] Step 4: Calculating total duration')
+      const totalDuration = data.workoutPlan.exercises.reduce((acc, ex) => {
         if (ex.type === 'time') {
-          return acc + (ex.duration as number || 0)
+          return acc + (ex.duration || 0)
         }
         if (ex.type === 'reps') {
-          const sets = ex.sets as number || 3
-          const reps = ex.reps as number || 10
+          const sets = ex.sets || 3
+          const reps = ex.reps || 10
           return acc + (sets * reps * 3)
         }
         return acc
       }, 0)
 
-      console.log('[Workout Generation] Step 10: Building workout plan object')
+      console.log('[Workout Generation] Step 5: Building workout plan object')
       const workout: WorkoutPlan = {
         id: Date.now().toString(),
-        name: (data.workoutPlan.name as string) || 'Custom Workout',
-        focus: (data.workoutPlan.focus as string) || 'General Fitness',
-        exercises: data.workoutPlan.exercises.map((ex: Record<string, unknown>) => ({
-          id: (ex.id as string) || `ex-${Math.random().toString(36).substr(2, 9)}`,
-          name: (ex.name as string) || 'Exercise',
-          type: (ex.type as 'reps' | 'time') || 'reps',
-          category: (ex.category as string) || 'Work',
-          duration: ex.duration as number,
-          sets: (ex.sets as number) || 3,
-          reps: (ex.reps as number) || 10,
-          muscleGroups: (ex.muscleGroups as string[]) || [],
+        name: data.workoutPlan.name || 'Custom Workout',
+        focus: data.workoutPlan.focus || 'General Fitness',
+        exercises: data.workoutPlan.exercises.map((ex) => ({
+          id: ex.id || `ex-${Math.random().toString(36).substr(2, 9)}`,
+          name: ex.name || 'Exercise',
+          type: ex.type as 'reps' | 'time',
+          category: ex.category || 'Work',
+          duration: ex.duration,
+          sets: ex.sets || 3,
+          reps: ex.reps || 10,
+          muscleGroups: ex.muscleGroups || [],
           difficulty: (ex.difficulty as 'beginner' | 'intermediate' | 'advanced') || 'intermediate',
-          instructions: (ex.instructions as { summary: string; keyPoints: string[] }) || {
+          instructions: ex.instructions || {
             summary: 'Perform this exercise with proper form',
             keyPoints: ['Focus on form', 'Breathe steadily', 'Control the movement']
           },
-          asset: ex.asset as string
+          asset: ex.asset || ''
         })),
         estimatedDuration: Math.ceil(totalDuration / 60),
         difficulty: (data.workoutPlan.difficulty as 'beginner' | 'intermediate' | 'advanced') || 'intermediate',
         createdAt: new Date().toISOString()
       }
 
-      console.log('[Workout Generation] Step 13: Cleanup and success')
+      console.log('[Workout Generation] Step 6: Cleanup and success')
       toast.success('Workout generated successfully!')
       
       return workout
@@ -146,21 +153,15 @@ Difficulty levels: "beginner", "intermediate", "advanced"`
       let errorMessage = 'Failed to generate workout'
       let errorTitle = 'Generation Failed'
       
-      if (error instanceof SyntaxError) {
-        errorTitle = 'Server Error'
-        errorMessage = 'The AI service returned an invalid response. This may be due to high server load or a temporary issue. Please try again in a moment.'
-      } else if (error instanceof Error) {
-        if (error.message.includes('AI service returned invalid response')) {
-          errorTitle = 'Service Error'
-          errorMessage = error.message
-        } else if (error.message.includes('Network') || error.message.includes('fetch')) {
-          errorTitle = 'Network Error'
-          errorMessage = 'Unable to reach the AI service. Please check your connection and try again.'
-        } else if (error.message.includes('timeout')) {
-          errorTitle = 'Timeout Error'
-          errorMessage = 'The request took too long. Please try again with a simpler workout description.'
+      if (error instanceof Error) {
+        if (error.message.includes('429')) {
+            errorTitle = 'AI Busy'
+            errorMessage = 'The AI service is currently busy. Please try again in a moment.'
+        } else if (error.message.includes('JSON')) {
+             errorTitle = 'Data Error'
+             errorMessage = 'The AI response was invalid. Please try again.'
         } else {
-          errorMessage = error.message
+            errorMessage = error.message
         }
       }
       

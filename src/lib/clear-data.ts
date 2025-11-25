@@ -12,13 +12,16 @@ export async function clearAllAppData() {
     'shopping-items',
     'calendar-events',
     'golf-swings',
-    'connections'
+    'connections',
+    'daily-affirmation'
   ]
 
-  if (typeof window.spark !== 'undefined' && window.spark.kv) {
+  if (typeof window !== 'undefined' && window.localStorage) {
     for (const key of keysToClear) {
       try {
-        await window.spark.kv.delete(key)
+        window.localStorage.removeItem(key)
+        // Dispatch event for hooks
+        window.dispatchEvent(new CustomEvent('local-storage-change', { detail: { key, newValue: null } }));
       } catch (error) {
         console.warn(`Failed to delete key ${key}:`, error)
       }

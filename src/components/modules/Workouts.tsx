@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise, PencilSimple, Trash } from '@phosphor-icons/react'
+import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise, PencilSimple, Trash, Lightning } from '@phosphor-icons/react'
 import { useKV } from '@/hooks/use-kv'
 import { WorkoutPlan, CompletedWorkout } from '@/lib/types'
 import { toast } from 'sonner'
@@ -127,13 +127,14 @@ export function Workouts() {
   }
 
   const difficultyColors = {
-    beginner: 'bg-green-500/10 text-green-500 border-green-500/20',
-    intermediate: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-    advanced: 'bg-red-500/10 text-red-500 border-red-500/20'
+    beginner: 'text-green-500 border-green-500/20 bg-green-500/10',
+    intermediate: 'text-amber-500 border-amber-500/20 bg-amber-500/10',
+    advanced: 'text-red-500 border-red-500/20 bg-red-500/10'
   }
 
   return (
     <div className="pt-3 md:pt-5 space-y-3 md:space-y-4 px-1 md:px-0">
+      {/* Header Area */}
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
@@ -142,6 +143,7 @@ export function Workouts() {
           </h1>
           <p className="text-muted-foreground mt-1 text-xs md:text-sm">Build strength, one rep at a time</p>
         </div>
+
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -150,7 +152,7 @@ export function Workouts() {
                 className="gap-2 h-11 md:h-9 px-5 md:px-4 button-glow"
               >
                 <Sparkle weight="fill" size={18} className="md:w-4 md:h-4" />
-                <span>Generate</span>
+                <span className="hidden sm:inline">Generate</span>
               </Button>
             </motion.div>
           </DialogTrigger>
@@ -193,6 +195,7 @@ export function Workouts() {
         </Dialog>
       </div>
 
+      {/* Stats Area */}
       <Card>
         <StatCard 
           stats={[
@@ -245,7 +248,8 @@ export function Workouts() {
               </motion.div>
             </Card>
           ) : (
-            <div className="grid gap-3">
+            // Quick-Start Grid: 2 Columns on Mobile, 3 on Desktop
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               <AnimatePresence mode="popLayout">
                 {[...(workoutPlans || [])].reverse().map((workout, index) => (
                   <motion.div
@@ -254,120 +258,79 @@ export function Workouts() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: index * 0.05 }}
+                    className="h-full"
                   >
-                    <Card className="neumorphic-card hover:glow-border group">
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                              <h3 className="font-semibold text-sm md:text-base">{workout.name}</h3>
-                              <Badge className={cn("text-[10px] px-1.5 py-0 capitalize", difficultyColors[workout.difficulty])}>
-                                {workout.difficulty}
-                              </Badge>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Barbell size={12} weight="duotone" />
-                                {workout.focus}
-                              </span>
-                              <span>•</span>
-                              <span>{workout.exercises.length} exercises</span>
-                              <span>•</span>
-                              <span className="flex items-center gap-1">
-                                <Timer size={12} weight="duotone" />
-                                ~{workout.estimatedDuration} min
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex gap-2 flex-shrink-0 items-center">
-                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                              <Button
-                                onClick={() => startWorkout(workout)}
-                                size="sm"
-                                className="button-glow gap-1.5"
-                                aria-label="Start workout"
-                              >
-                                <Play weight="fill" size={16} />
-                                <span className="hidden sm:inline">Start</span>
-                              </Button>
-                            </motion.div>
+                    <Card
+                        className="neumorphic-card hover:glow-border group h-full flex flex-col justify-between p-3 active:scale-[0.98] transition-all cursor-pointer relative overflow-hidden"
+                        onClick={() => startWorkout(workout)}
+                    >
+                      {/* Gradient Overlay for "Active" feel */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                            <div className="flex items-center">
+                      <div className="space-y-2 relative z-10">
+                         {/* Header: Name & Difficulty */}
+                        <div className="flex flex-col gap-1">
+                             <div className="flex items-start justify-between">
+                                <h3 className="font-bold text-sm leading-tight line-clamp-2 text-white/90 group-hover:text-white transition-colors">
+                                    {workout.name}
+                                </h3>
+                                <Badge className={cn("text-[10px] px-1 py-0 h-4 capitalize border-0", difficultyColors[workout.difficulty])}>
+                                    {workout.difficulty.substring(0, 3)}
+                                </Badge>
+                             </div>
+                        </div>
+
+                        {/* Metadata Row */}
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-muted-foreground font-mono">
+                           <span className="flex items-center gap-0.5">
+                                <Timer size={10} weight="fill" />
+                                {workout.estimatedDuration}m
+                           </span>
+                           <span className="flex items-center gap-0.5">
+                                <Lightning size={10} weight="fill" />
+                                {workout.exercises.length} Ex
+                           </span>
+                        </div>
+
+                        {/* Focus Tags */}
+                        <div className="flex flex-wrap gap-1 mt-1">
+                             <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-white/10 text-slate-400">
+                                 {workout.focus.split(' ')[0]}
+                             </Badge>
+                        </div>
+                      </div>
+
+                      {/* Footer Actions (Mini) */}
+                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5 relative z-10">
+                            <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1">
+                                START <Play weight="fill" size={10} />
+                            </span>
+
+                            <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  onClick={() => {
+                                  className="h-6 w-6 text-muted-foreground hover:text-white rounded-full hover:bg-white/10"
+                                  onClick={(e) => {
+                                      e.stopPropagation()
                                       setEditWorkout(workout)
                                       setIsEditOpen(true)
                                   }}
-                                  className="h-8 w-8 text-muted-foreground hover:text-white"
-                                  aria-label="Edit workout"
                                 >
-                                  <PencilSimple size={16} />
+                                  <PencilSimple size={12} />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  onClick={() => deleteWorkout(workout.id)}
-                                  className="hover:bg-destructive/10 hover:text-destructive h-8 w-8 text-muted-foreground"
-                                  aria-label="Delete workout"
+                                  className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                                  onClick={(e) => {
+                                      e.stopPropagation()
+                                      deleteWorkout(workout.id)
+                                  }}
                                 >
-                                  <Trash size={16} />
+                                  <Trash size={12} />
                                 </Button>
                             </div>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                              Exercise Plan
-                            </h4>
-                            <Badge variant="outline" className="text-xs">
-                              {workout.exercises.filter(e => e.category.toLowerCase().includes('work')).length} work sets
-                            </Badge>
-                          </div>
-                          <div className="grid gap-1.5">
-                            {workout.exercises.map((exercise, idx) => {
-                              const isWarmup = exercise.category.toLowerCase().includes('warm')
-                              const isCooldown = exercise.category.toLowerCase().includes('cool')
-                              const isRest = exercise.category.toLowerCase().includes('rest')
-                              
-                              return (
-                                <motion.div 
-                                  key={idx}
-                                  initial={{ opacity: 0, x: -10 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: 0.3 + idx * 0.03 }}
-                                  className={cn(
-                                    "flex items-center justify-between py-1.5 px-2.5 rounded-md transition-all",
-                                    "neumorphic-inset hover:bg-muted/50",
-                                    isWarmup && "border-l-2 border-orange-500/50",
-                                    isCooldown && "border-l-2 border-brand-secondary/50",
-                                    isRest && "border-l-2 border-brand-primary/50",
-                                    !isWarmup && !isCooldown && !isRest && "border-l-2 border-brand-primary/50"
-                                  )}
-                                >
-                                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                                    <span className="text-[10px] text-muted-foreground font-mono w-4">
-                                      {(idx + 1).toString().padStart(2, '0')}
-                                    </span>
-                                    <span className="text-xs font-medium truncate">{exercise.name}</span>
-                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize ml-auto flex-shrink-0">
-                                      {exercise.category}
-                                    </Badge>
-                                  </div>
-                                  <span className="text-xs font-semibold text-primary ml-2 flex-shrink-0">
-                                    {exercise.type === 'reps' 
-                                      ? `${exercise.sets}×${exercise.reps}`
-                                      : `${exercise.duration}s`
-                                    }
-                                  </span>
-                                </motion.div>
-                              )
-                            })}
-                          </div>
-                        </div>
                       </div>
                     </Card>
                   </motion.div>

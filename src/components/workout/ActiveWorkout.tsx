@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { WorkoutPlan } from '@/lib/types'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { PauseCircle, PlayCircle, SkipForward, XCircle, Check, Flame, Target, Wind, Clock } from '@phosphor-icons/react'
-import { motion } from 'framer-motion'
+import { PauseCircle, PlayCircle, SkipForward, XCircle, Clock, Heart, Timer } from '@phosphor-icons/react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import {
   Dialog,
@@ -26,6 +26,10 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
   const [isPaused, setIsPaused] = useState(false)
   const [isPauseModalOpen, setIsPauseModalOpen] = useState(false)
   
+  // Persistent Rest Timer
+  const [restTimer, setRestTimer] = useState(0)
+  const [isResting, setIsResting] = useState(false)
+
   const currentExercise = workout.exercises[currentExerciseIndex]
   const [timeLeft, setTimeLeft] = useState(currentExercise.duration || 0)
   const nextExercise = workout.exercises[currentExerciseIndex + 1]
@@ -33,29 +37,50 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
   const goToNextExercise = useCallback(() => {
     if (currentExerciseIndex < workout.exercises.length - 1) {
       setCurrentExerciseIndex(prev => prev + 1)
+      setIsResting(false) // Cancel explicit rest mode if moving manually
     } else {
       onFinish(true)
     }
   }, [currentExerciseIndex, workout.exercises, onFinish])
 
+  // Workout Timer Logic
   useEffect(() => {
-    if (isPaused || isPauseModalOpen || currentExercise.type !== 'time') return
+    if (isPaused || isPauseModalOpen) return
 
-    if (timeLeft <= 0) {
-        goToNextExercise()
-        return
+    let timer: NodeJS.Timeout
+
+    if (currentExercise.type === 'time' && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev: number) => {
+          if (prev <= 1) {
+             goToNextExercise()
+             return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
     }
 
-    const timer = setInterval(() => {
-      setTimeLeft((prev: number) => prev - 1)
-    }, 1000)
-
     return () => clearInterval(timer)
-   
-  }, [timeLeft, isPaused, isPauseModalOpen, currentExercise.type, currentExerciseIndex, goToNextExercise])
+  }, [timeLeft, isPaused, isPauseModalOpen, currentExercise.type, goToNextExercise])
 
+  // Rest Timer Logic
+  useEffect(() => {
+      let timer: NodeJS.Timeout
+      if (isResting) {
+          timer = setInterval(() => {
+              setRestTimer(prev => prev + 1)
+          }, 1000)
+      } else {
+          setRestTimer(0)
+      }
+      return () => clearInterval(timer)
+  }, [isResting])
+
+  // Reset local state on exercise change
   useEffect(() => {
     setTimeLeft(workout.exercises[currentExerciseIndex].duration || 0)
+    // If previous was a set, maybe auto-start rest? For now manual.
   }, [currentExerciseIndex, workout.exercises])
 
   const handleSkip = () => {
@@ -78,318 +103,199 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
   }
   
   const handleCompleteSet = () => {
+      // Trigger rest timer visual or just move next
+      // Ideally, we'd show a "Rest" overlay, but for "Flow State" we just move to next
+      // If the NEXT exercise is explicitly "Rest", it will handle itself via 'time' logic above.
+      // If the NEXT exercise is another Set, user might want to rest.
+      // For now, Kinetic Engine means speed.
       goToNextExercise()
   }
 
   const timerProgress = currentExercise.duration ? (timeLeft / currentExercise.duration) * 100 : 0
-  const workoutProgress = ((currentExerciseIndex + 1) / workout.exercises.length) * 100
   
   const isRepBased = currentExercise.type === 'reps'
+  const isRestType = currentExercise.category.toLowerCase().includes('rest')
 
-  const getCategoryColor = (category: string) => {
-    const lowerCategory = category.toLowerCase()
-    if (lowerCategory.includes('warm')) return { 
-      gradient: 'from-orange-500 to-amber-500', 
-      bg: 'bg-orange-500/20', 
-      text: 'text-orange-500', 
-      color: 'rgb(249, 115, 22)', 
-      icon: Flame 
-    }
-    if (lowerCategory.includes('cool') || lowerCategory.includes('stretch')) return { 
-      gradient: 'from-brand-secondary to-brand-tertiary',
-      bg: 'bg-brand-secondary/20',
-      text: 'text-brand-secondary',
-      color: 'rgb(59, 130, 246)', 
-      icon: Wind 
-    }
-    if (lowerCategory.includes('rest')) return { 
-      gradient: 'from-brand-primary to-brand-tertiary',
-      bg: 'bg-brand-primary/20',
-      text: 'text-brand-primary',
-      color: 'var(--brand-primary)',
-      icon: Clock 
-    }
-    return { 
-      gradient: 'from-green-500 to-emerald-500', 
-      bg: 'bg-green-500/20', 
-      text: 'text-green-500', 
-      color: 'rgb(34, 197, 94)', 
-      icon: Target 
-    }
+  // Pure Black UI Helpers
+  const formatTime = (seconds: number) => {
+      const mins = Math.floor(seconds / 60)
+      const secs = seconds % 60
+      return `${mins}:${secs.toString().padStart(2, '0')}`
   }
-
-  const categoryStyle = getCategoryColor(currentExercise.category)
-  const CategoryIcon = categoryStyle.icon
 
   return (
     <>
-      <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-background via-background/95 to-primary/5" />
+      {/* Pure Black Background */}
+      <div className="fixed inset-0 w-full h-full bg-black text-white" />
 
-      <div className="relative z-10 flex flex-col items-center justify-between h-full min-h-screen py-4 text-center px-4">
-        <header className="flex flex-col items-center w-full space-y-2">
-          <motion.div 
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200 }}
-            className="relative inline-flex items-center justify-center"
-          >
-            <svg className="w-14 h-14 transform -rotate-90">
-              <circle 
-                cx="28" 
-                cy="28" 
-                r="24" 
-                stroke="hsl(var(--muted) / 0.2)" 
-                strokeWidth="4" 
-                fill="transparent" 
-              />
-              <circle 
-                cx="28" 
-                cy="28" 
-                r="24" 
-                stroke={categoryStyle.color}
-                strokeWidth="4" 
-                fill="transparent"
-                strokeDasharray={2 * Math.PI * 24}
-                strokeDashoffset={(2 * Math.PI * 24) * (1 - (workoutProgress / 100))}
-                className="transition-all duration-500"
-                style={{ strokeLinecap: 'round' }}
-              />
-            </svg>
-            <span className="absolute text-xs font-bold">{currentExerciseIndex + 1}/{workout.exercises.length}</span>
-          </motion.div>
+      <div className="relative z-10 flex flex-col h-full min-h-[100dvh] pt-6 pb-6 px-4 font-mono">
 
-          <div className="flex justify-between items-center w-full max-w-2xl">
-            <div className="flex-1 text-left">
-                 <Badge className={cn("shadow-lg", categoryStyle.bg, categoryStyle.text, "border border-current/30")}>
-                   <CategoryIcon className="h-3 w-3 mr-1" />
-                   {currentExercise.category}
-                 </Badge>
-                 {isRepBased && currentExercise.sets && (
-                   <p className="text-xs font-bold text-muted-foreground mt-1">
-                     Set {currentExercise.sets}
-                   </p>
-                 )}
+        {/* Top Bar: Progress & Status */}
+        <div className="flex justify-between items-start mb-8">
+            <div className="flex flex-col">
+                <span className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
+                    Exercise {currentExerciseIndex + 1} / {workout.exercises.length}
+                </span>
+                <h1 className="text-xl font-bold tracking-tight text-white line-clamp-2 max-w-[70vw]">
+                    {currentExercise.name.toUpperCase()}
+                </h1>
+                <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="outline" className="text-[10px] rounded-sm border-zinc-800 text-zinc-400 uppercase">
+                        {currentExercise.category}
+                    </Badge>
+                     {isResting && (
+                         <Badge variant="default" className="text-[10px] rounded-sm bg-emerald-900 text-emerald-400 border-none animate-pulse">
+                            RESTING: {formatTime(restTimer)}
+                         </Badge>
+                     )}
+                </div>
             </div>
-            <motion.h1 
-              key={currentExerciseIndex}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={cn(
-                "text-2xl sm:text-3xl md:text-4xl font-bold text-center flex-shrink-0 mx-3 bg-gradient-to-r bg-clip-text text-transparent",
-                categoryStyle.gradient
-              )}
-            >
-              {currentExercise.name}
-            </motion.h1>
-            <div className="flex-1" />
-          </div>
-        </header>
 
-        <div className="flex flex-col items-center gap-4 w-full max-w-2xl my-4">
-          <motion.div
-            key={`visual-${currentExerciseIndex}`}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className={cn(
-              "w-full max-w-sm aspect-video rounded-2xl overflow-hidden shadow-lg flex items-center justify-center relative",
-              "bg-gradient-to-br",
-              categoryStyle.gradient
-            )}
-          >
-            <div className="absolute inset-0 bg-black/10 backdrop-blur-[2px]" />
-            <CategoryIcon size={64} weight="duotone" className="text-white drop-shadow-lg relative z-10" />
-          </motion.div>
-          
-          <motion.div
-            key={`instructions-${currentExerciseIndex}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="w-full px-4 text-center space-y-3"
-          >
-            <p className="text-sm sm:text-base text-foreground/90">
-              {currentExercise.instructions.summary}
-            </p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {currentExercise.instructions.keyPoints.slice(0, 3).map((point, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {point}
-                </Badge>
-              ))}
+            <div className="flex flex-col items-end gap-2">
+                 <button onClick={handlePause} className="p-2 rounded-full hover:bg-zinc-900 active:scale-95 transition-all">
+                     <PauseCircle size={24} className="text-zinc-500" />
+                 </button>
             </div>
-          </motion.div>
         </div>
 
-        {isRepBased ? (
-            <motion.div 
-              key={currentExerciseIndex}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="relative flex flex-col items-center justify-center my-4"
-            >
-                <div className={cn(
-                  "font-mono text-6xl sm:text-7xl font-bold bg-gradient-to-r bg-clip-text text-transparent",
-                  categoryStyle.gradient
-                )}>
-                    {currentExercise.reps}
-                </div>
-                 <span className="text-2xl sm:text-3xl text-muted-foreground font-bold">Reps</span>
-            </motion.div>
-        ) : (
-            <div className="relative flex items-center justify-center my-4">
-                <svg
-                  viewBox="0 0 300 300"
-                  className="w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 transform -rotate-90"
+        {/* Center Stage: The Metric */}
+        <div className="flex-1 flex flex-col justify-center items-center relative">
+             <AnimatePresence mode="wait">
+                <motion.div
+                    key={currentExerciseIndex}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex flex-col items-center"
                 >
-                    <defs>
-                      <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor={categoryStyle.color} />
-                        <stop offset="100%" stopColor={categoryStyle.color} />
-                      </linearGradient>
-                    </defs>
-                    <circle 
-                      cx="50%" 
-                      cy="50%" 
-                      r="140" 
-                      stroke="hsl(var(--muted) / 0.2)" 
-                      strokeWidth="12" 
-                      fill="transparent" 
-                    />
-                    <circle 
-                      cx="50%" 
-                      cy="50%" 
-                      r="140" 
-                      stroke="url(#progressGradient)" 
-                      strokeWidth="12" 
-                      fill="transparent"
-                      strokeDasharray={2 * Math.PI * 140} 
-                      strokeDashoffset={(2 * Math.PI * 140) * (1 - (timerProgress / 100))}
-                      className="transition-all duration-1000 ease-linear"
-                      style={{ strokeLinecap: 'round' }} 
-                    />
-                </svg>
-                <motion.div 
-                  key={timeLeft}
-                  initial={{ scale: 1.1 }}
-                  animate={{ scale: 1 }}
-                  className={cn(
-                    "absolute font-mono text-6xl sm:text-7xl font-bold bg-gradient-to-r bg-clip-text text-transparent",
-                    categoryStyle.gradient
-                  )}
-                >
-                  {timeLeft}
-                </motion.div>
-            </div>
-        )}
-
-        <div className="w-full max-w-2xl space-y-4">
-          <motion.div
-            key={`next-${currentExerciseIndex}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card className="bg-card/60 backdrop-blur-sm elevated-card">
-              <CardHeader className="flex-row items-center justify-between p-2 sm:p-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-md overflow-hidden bg-muted flex-shrink-0 shadow-lg flex items-center justify-center">
-                    {nextExercise ? (
-                      <span className="text-2xl">💪</span>
+                    {isRepBased ? (
+                        <>
+                             <span className="text-[120px] leading-none font-bold tracking-tighter text-white tabular-nums">
+                                 {currentExercise.reps}
+                             </span>
+                             <span className="text-zinc-600 text-sm uppercase tracking-[0.2em] mt-2">Target Reps</span>
+                             {currentExercise.sets && (
+                                 <span className="text-emerald-500 text-xs uppercase tracking-widest mt-4 border border-emerald-900/50 bg-emerald-950/30 px-3 py-1 rounded-full">
+                                     Set {currentExercise.sets}
+                                 </span>
+                             )}
+                        </>
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-xs">
-                        END
-                      </div>
+                        <>
+                            <div className="relative flex items-center justify-center">
+                                {/* Timer Circle Background */}
+                                <svg className="w-64 h-64 transform -rotate-90">
+                                    <circle
+                                        cx="128"
+                                        cy="128"
+                                        r="120"
+                                        stroke="#18181b" // zinc-900
+                                        strokeWidth="4"
+                                        fill="transparent"
+                                    />
+                                    <circle
+                                        cx="128"
+                                        cy="128"
+                                        r="120"
+                                        stroke={isRestType ? "#10b981" : "#3b82f6"} // emerald-500 or blue-500
+                                        strokeWidth="4"
+                                        fill="transparent"
+                                        strokeDasharray={2 * Math.PI * 120}
+                                        strokeDashoffset={(2 * Math.PI * 120) * (1 - (timerProgress / 100))}
+                                        className="transition-all duration-1000 ease-linear"
+                                        style={{ strokeLinecap: 'round' }}
+                                    />
+                                </svg>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                     <span className="text-6xl font-bold tracking-tighter text-white tabular-nums">
+                                         {timeLeft}
+                                     </span>
+                                     <span className="text-zinc-500 text-xs uppercase tracking-widest mt-1">Seconds</span>
+                                </div>
+                            </div>
+                        </>
                     )}
-                  </div>
-                  <div className="text-left">
-                      <CardTitle className="text-xs text-muted-foreground">Next Up</CardTitle>
-                      <CardDescription className="text-sm sm:text-base font-semibold text-foreground">
-                          {nextExercise ? nextExercise.name : 'Final Exercise!'}
-                      </CardDescription>
-                      {nextExercise && (
-                        <Badge className={cn(
-                          "mt-1 text-xs", 
-                          getCategoryColor(nextExercise.category).bg, 
-                          getCategoryColor(nextExercise.category).text
-                        )}>
-                          {nextExercise.category}
-                        </Badge>
-                      )}
-                  </div>
-                </div>
-                 {nextExercise && (
-                   <span className={cn(
-                     "text-lg sm:text-xl font-bold", 
-                     getCategoryColor(nextExercise.category).text
-                   )}>
-                     {nextExercise.duration ? `${nextExercise.duration}s` : `${nextExercise.reps}`}
-                   </span>
-                 )}
-              </CardHeader>
-            </Card>
-          </motion.div>
-          
-          {isRepBased ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                  <PowerSlider
-                      onComplete={handleCompleteSet}
-                      label="Slide to Complete Set"
-                      className="mt-2"
-                  />
-              </motion.div>
-          ) : (
-            <div className="flex justify-center gap-3 sm:gap-4">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    onClick={handlePause}
-                    size="lg"
-                    className="neumorphic-button h-12 w-28 sm:w-32"
-                  >
-                    <PauseCircle className="mr-2" />
-                    <span>Pause</span>
-                  </Button>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    onClick={handleSkip}
-                    size="lg"
-                    variant="outline"
-                    className="neumorphic-flat h-12 w-28 sm:w-32"
-                  >
-                    <SkipForward className="mr-2" />
-                    <span>Skip</span>
-                  </Button>
-                </motion.div>
-            </div>
-          )}
+             </AnimatePresence>
+
+             {/* Instructions / Details */}
+             <div className="mt-12 w-full max-w-sm px-4 border-l-2 border-zinc-900 pl-4">
+                 <p className="text-zinc-400 text-xs leading-relaxed">
+                     {currentExercise.instructions.summary}
+                 </p>
+                 <div className="flex gap-2 mt-3">
+                     <div className="flex items-center gap-1.5 text-zinc-600">
+                         <Heart size={14} weight="fill" />
+                         <span className="text-[10px] uppercase">Cardio</span>
+                     </div>
+                     <div className="flex items-center gap-1.5 text-zinc-600">
+                         <Timer size={14} weight="fill" />
+                         <span className="text-[10px] uppercase">Tempo: 2-0-2</span>
+                     </div>
+                 </div>
+             </div>
+        </div>
+
+        {/* Bottom Actions: The Kinetic Interface */}
+        <div className="w-full max-w-md mx-auto space-y-4">
+             {/* Next Up Preview */}
+             {nextExercise && (
+                 <div className="flex items-center justify-between px-2 text-zinc-600 text-xs uppercase tracking-wider mb-2">
+                     <span>Up Next</span>
+                     <span>{nextExercise.name}</span>
+                 </div>
+             )}
+
+             {/* Primary Action */}
+             {isRepBased ? (
+                 <PowerSlider
+                     onComplete={handleCompleteSet}
+                     label="SWIPE TO COMPLETE"
+                     className="h-16" // Taller for easier thumb access
+                 />
+             ) : (
+                 <div className="grid grid-cols-2 gap-4">
+                     <Button
+                         variant="outline"
+                         onClick={handleSkip}
+                         className="h-14 border-zinc-800 bg-black text-zinc-400 hover:bg-zinc-900 hover:text-white uppercase tracking-widest text-xs"
+                     >
+                         Skip
+                     </Button>
+                     <Button
+                         variant="outline"
+                         onClick={handlePause}
+                         className="h-14 border-zinc-800 bg-black text-zinc-400 hover:bg-zinc-900 hover:text-white uppercase tracking-widest text-xs"
+                     >
+                         Pause
+                     </Button>
+                 </div>
+             )}
         </div>
       </div>
       
+       {/* Pause Modal - Keeping Neumorphic for contrast or switch to flat black? Staying consistent with system modals for now, but darkening. */}
        <Dialog open={isPauseModalOpen} onOpenChange={(open) => !open && handleResume()}>
-        <DialogContent className="neumorphic">
+        <DialogContent className="bg-zinc-950 border-zinc-800 text-white">
           <DialogHeader className="items-center text-center">
-            <DialogTitle className="text-2xl">Workout Paused</DialogTitle>
-            <DialogDescription>Take a breather. Ready to get back to it?</DialogDescription>
+            <DialogTitle className="text-2xl font-mono uppercase tracking-tight">System Paused</DialogTitle>
+            <DialogDescription className="text-zinc-500">Recovery protocols active.</DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex-col sm:flex-col gap-2">
-            <Button
+          <div className="flex flex-col gap-3 py-4">
+             <Button
               onClick={handleResume}
-              className="w-full neumorphic-button"
+              className="w-full h-12 bg-white text-black hover:bg-zinc-200 uppercase tracking-widest text-xs font-bold"
             >
-              <PlayCircle className="mr-2 h-4 w-4" />Resume Workout
+              <PlayCircle className="mr-2 h-4 w-4" />Resume
             </Button>
             <Button
               onClick={handleEndWorkout}
-              variant="destructive"
-              className="w-full neumorphic-button"
+              variant="outline"
+              className="w-full h-12 border-red-900/50 text-red-500 hover:bg-red-950/30 uppercase tracking-widest text-xs font-bold"
             >
-              <XCircle className="mr-2 h-4 w-4" />End Workout
+              <XCircle className="mr-2 h-4 w-4" />Abort Session
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </>

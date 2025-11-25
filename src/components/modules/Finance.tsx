@@ -23,8 +23,10 @@ import { AutocompleteInput } from '@/components/AutocompleteInput'
 import { VirtualList } from '@/components/VirtualList'
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
 import { useSoundEffects } from '@/hooks/use-sound-effects'
-import { sanitizeForLLM, parseAIResponse } from '@/lib/security'
+import { sanitizeForLLM } from '@/lib/security'
 import { QuickExpenseDrawer } from '@/components/finance/QuickExpenseDrawer'
+import { GeminiCore } from '@/services/gemini_core'
+import { z } from 'zod'
 
 const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Other']
 const COLORS = ['#5fd4f4', '#9d7fff', '#6ee7b7', '#fbbf24', '#fb923c', '#f87171', '#94a3b8']
@@ -38,6 +40,46 @@ const CATEGORY_ICONS: Record<string, string> = {
   'Health': '⚕️',
   'Other': '💵'
 }
+
+// Zod schema for budget response
+const BudgetResponseSchema = z.object({
+  budget: z.object({
+    allocations: z.object({
+      housing: z.number(),
+      utilities: z.number(),
+      food: z.number(),
+      transportation: z.number(),
+      insurance: z.number(),
+      healthcare: z.number(),
+      debtPayment: z.number(),
+      savings: z.number(),
+      retirement: z.number(),
+      entertainment: z.number(),
+      personal: z.number(),
+      miscellaneous: z.number()
+    }),
+    recommendations: z.array(z.object({
+      category: z.string(),
+      amount: z.number(),
+      percentage: z.number(),
+      reasoning: z.string(),
+      tips: z.array(z.string())
+    })),
+    savingsStrategy: z.object({
+      emergencyFund: z.number(),
+      shortTermSavings: z.number(),
+      longTermSavings: z.number(),
+      timeline: z.string()
+    }),
+    debtStrategy: z.object({
+      payoffPlan: z.string(),
+      monthlyPayment: z.number(),
+      estimatedPayoffDate: z.string(),
+      tips: z.array(z.string())
+    }).optional(),
+    actionItems: z.array(z.string())
+  })
+})
 
 export function Finance() {
   const [expenses, setExpenses] = useKV<Expense[]>('expenses', [])
@@ -135,7 +177,7 @@ export function Finance() {
       const safeMajorExpenses = sanitizeForLLM(profile.majorExpenses)
       const safeConcerns = sanitizeForLLM(profile.concerns)
       
-      const promptText = window.spark.llmPrompt`You are an expert financial advisor. Based on the following detailed financial profile, create a comprehensive, personalized budget plan.
+      const promptText = `You are an expert financial advisor. Based on the following detailed financial profile, create a comprehensive, personalized budget plan.
 
 FINANCIAL PROFILE:
 - Total Monthly Income: $${totalIncome}
@@ -225,20 +267,10 @@ CRITICAL RULES:
 5. Account for their ${profile.dependents} dependent(s) in food, healthcare, etc.
 6. Match recommendations to their stated financial goals
 7. Be practical and specific with all tips and action items
-8. Ensure the budget is balanced and achievable`
+8. Ensure the budget is balanced and achievable`;
 
-      const response = await window.spark.llm(promptText, 'gpt-4o', true)
-      
-      if (!response || typeof response !== 'string') {
-        throw new Error('Invalid response from AI service')
-      }
-
-      const parsed = parseAIResponse(response)
-      
-      if (!parsed.budget || !parsed.budget.allocations) {
-        console.error('Invalid budget structure:', parsed)
-        throw new Error('AI returned invalid budget structure')
-      }
+      const gemini = new GeminiCore();
+      const parsed = await gemini.generateJSON(promptText, BudgetResponseSchema);
 
       const budget: DetailedBudget = {
         id: Date.now().toString(),

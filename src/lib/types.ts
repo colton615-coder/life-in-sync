@@ -133,7 +133,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
-  provider?: 'spark';
+  provider?: 'spark' | 'gemini';
   model?: string;
 }
 

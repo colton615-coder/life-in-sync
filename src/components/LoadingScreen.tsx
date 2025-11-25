@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkle } from '@phosphor-icons/react'
 import { getTodayKey } from '@/lib/utils'
+import { GeminiCore } from '@/services/gemini_core'
+import { useKV } from '@/hooks/use-kv'
 
 interface LoadingScreenProps {
   onLoadComplete: () => void
@@ -40,6 +42,9 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [loadingMessage, setLoadingMessage] = useState('')
 
+  // Direct KV access
+  const [storedAffirmation, setStoredAffirmation] = useKV<DailyAffirmation | null>('daily-affirmation', null)
+
   useEffect(() => {
     const randomMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]
     setLoadingMessage(randomMessage)
@@ -47,23 +52,12 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
     let isMounted = true;
 
     const loadAffirmation = async () => {
-      // Safety check for spark runtime
-      if (typeof window.spark === 'undefined') {
-        const fallback = staticAffirmations[Math.floor(Math.random() * staticAffirmations.length)]
-        if (isMounted) setAffirmation(fallback)
-        return
-      }
-
-      // Try to load existing affirmation from KV first for instant display
+      // 1. Try to load existing affirmation from KV first for instant display
       try {
         const todayKey = getTodayKey()
-        let existing: DailyAffirmation | null = null
-        if (window.spark.kv) {
-            existing = await window.spark.kv.get('daily-affirmation') as DailyAffirmation | null
-        }
 
-        if (existing && existing.date === todayKey) {
-             if (isMounted) setAffirmation({ text: existing.text, author: existing.author })
+        if (storedAffirmation && storedAffirmation.date === todayKey) {
+             if (isMounted) setAffirmation({ text: storedAffirmation.text, author: storedAffirmation.author })
              // If we have an existing affirmation, we can load faster
              setTimeout(() => {
                  if (isMounted) {
@@ -73,51 +67,42 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
              }, 800)
              return;
         }
-      } catch {
-          // ignore error
+      } catch (e) {
+          console.warn('Error reading stored affirmation:', e)
       }
 
-      // If no existing affirmation or different day, fetch new one in background
+      // 2. If no existing affirmation or different day, fetch new one from Gemini
       try {
-        if (!window.spark.llmPrompt || !window.spark.llm) {
-            throw new Error('Spark LLM not available');
-        }
+        const gemini = new GeminiCore();
 
-        const promptText = window.spark.llmPrompt`Generate a single inspirational quote or Bible verse for daily motivation. Return the result as valid JSON in the following format:
+        const promptText = `Generate a single inspirational quote or Bible verse for daily motivation. Return the result as valid JSON in the following format:
 {
   "text": "the quote or verse text",
   "author": "author name or Bible reference"
 }
-Keep the text under 120 characters. Make it profound and uplifting. Generate a different quote each time.`
+Keep the text under 120 characters. Make it profound and uplifting. Generate a different quote each time.`;
         
-        const response = await window.spark.llm(promptText, "gpt-4o-mini", true)
+        // Use JSON generation
+        const data = await gemini.generateJSON<{ text: string, author: string }>(promptText);
         
-        if (!response || typeof response !== 'string') {
-          throw new Error('Invalid response from AI service')
-        }
-
-        let data
-        try {
-          data = JSON.parse(response)
-        } catch (parseError) {
-          console.error('JSON parse error:', parseError)
-          throw new Error('Failed to parse affirmation')
-        }
-        
-        if (data.text && data.author) {
+        if (data && data.text && data.author) {
           const todayKey = getTodayKey()
           const affirmationData: DailyAffirmation = {
             text: data.text,
             author: data.author,
             date: todayKey
           }
-          if (isMounted) setAffirmation({ text: data.text, author: data.author })
-          if (window.spark.kv) {
-              await window.spark.kv.set('daily-affirmation', affirmationData)
+
+          if (isMounted) {
+              setAffirmation({ text: data.text, author: data.author })
+              setStoredAffirmation(affirmationData)
           }
+        } else {
+             throw new Error('Invalid AI response structure');
         }
       } catch (error) {
-        console.error('Failed to load affirmation:', error)
+        console.error('Failed to load affirmation via Gemini:', error)
+        // Fallback to static if API fails or Key missing
         const fallback = staticAffirmations[Math.floor(Math.random() * staticAffirmations.length)]
         if (isMounted) setAffirmation(fallback)
       }
@@ -126,8 +111,7 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
     // Start loading affirmation
     loadAffirmation();
 
-    // Reduced artificial delay from 3800ms to 1000ms for first load feel,
-    // or faster if affirmation loads earlier.
+    // Default load time if API is slow
     const timer = setTimeout(() => {
       if (isMounted) {
           setIsLoading(false)
@@ -137,7 +121,7 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
       }
     }, 1500)
 
-    // Safety valve: Force completion after 5 seconds no matter what
+    // Safety valve
     const safetyTimer = setTimeout(() => {
         if (isMounted && isLoading) {
             console.warn('LoadingScreen safety valve triggered');
@@ -151,7 +135,7 @@ Keep the text under 120 characters. Make it profound and uplifting. Generate a d
         clearTimeout(timer);
         clearTimeout(safetyTimer);
     }
-  }, [onLoadComplete]) // Removed isLoading from dependency to avoid re-triggering
+  }, [onLoadComplete, storedAffirmation, setStoredAffirmation]) // Added dependencies
 
   return (
     <AnimatePresence>

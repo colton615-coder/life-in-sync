@@ -1,6 +1,8 @@
 import { callAIWithRetry } from '@/lib/ai-utils'
 import { SwingPoseData, SwingMetrics, SwingFeedback, GolfClub, PhaseMetric, SwingLandmark } from '@/lib/types'
 import { SwingVideoProcessor } from './video-processor'
+import { GeminiCore } from '@/services/gemini_core'
+import { z } from 'zod'
 
 const LANDMARK_INDICES = {
   NOSE: 0,
@@ -19,6 +21,30 @@ const LANDMARK_INDICES = {
   LEFT_ELBOW: 13,
   RIGHT_ELBOW: 14,
 }
+
+// Zod Schema for Golf Feedback
+const PhaseAnalysisSchema = z.object({
+    analysis: z.string(),
+    tips: z.array(z.string()),
+    drills: z.array(z.string())
+});
+
+const FeedbackResponseSchema = z.object({
+    aiInsights: z.string(),
+    strengths: z.array(z.string()),
+    improvements: z.array(z.string()),
+    phases: z.object({
+        address: PhaseAnalysisSchema.optional(),
+        takeaway: PhaseAnalysisSchema.optional(),
+        backswing: PhaseAnalysisSchema.optional(),
+        top: PhaseAnalysisSchema.optional(),
+        downswing: PhaseAnalysisSchema.optional(),
+        impact: PhaseAnalysisSchema.optional(),
+        followThrough: PhaseAnalysisSchema.optional(),
+        finish: PhaseAnalysisSchema.optional(),
+    })
+});
+
 
 // Updated to 8 phases
 function detectSwingPhase(frame: number, totalFrames: number): string {
@@ -301,9 +327,7 @@ export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | n
   let phaseDetails: PhaseFeedbackMap = {}
 
   try {
-    if (window.spark && window.spark.llm && window.spark.llmPrompt) {
-      // Prompt engineering for JSON structure
-      const prompt = window.spark.llmPrompt`You are an elite golf coach analyzing a student's swing.
+      const prompt = `You are an elite golf coach analyzing a student's swing.
 
       METRICS:
       - Club: ${club || 'Unknown'}
@@ -337,42 +361,29 @@ export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | n
            "followThrough": { "analysis": "string", "tips": ["string", "string"], "drills": ["string"] },
            "finish": { "analysis": "string", "tips": ["string", "string"], "drills": ["string"] }
         }
+      }`;
+
+      const gemini = new GeminiCore();
+      const parsed = await gemini.generateJSON(prompt, FeedbackResponseSchema);
+
+      aiInsights = parsed.aiInsights || aiInsights
+      if (Array.isArray(parsed.strengths)) strengths.push(...parsed.strengths)
+      if (Array.isArray(parsed.improvements)) improvements.push(...parsed.improvements)
+
+      if (parsed.phases) {
+         // Map AI response keys to internal interface
+         phaseDetails = Object.entries(parsed.phases).reduce((acc, [key, val]: [string, any]) => {
+             if (val) {
+                acc[key] = {
+                    aiAnalysis: val.analysis || val.aiAnalysis || '',
+                    tips: val.tips || [],
+                    drills: val.drills || []
+                }
+             }
+             return acc
+         }, {} as PhaseFeedbackMap)
       }
-      `
 
-      // Ensure we request JSON mode or rely on prompt instruction.
-      // Since generateJSON isn't available in standard window.spark.llm shim (it's in the service),
-      // we'll use standard generate and try to parse.
-      // Ideally we would use the z.object() schema from the service, but we are in lib/ here.
-      // We will trust the prompt.
-
-      const rawResponse = await callAIWithRetry(prompt, 'gemini-2.5-pro', false)
-
-      if (rawResponse) {
-        // Attempt to clean markdown code blocks if present
-        const jsonString = rawResponse.replace(/```json\n?|\n?```/g, '')
-        try {
-          const data = JSON.parse(jsonString)
-          aiInsights = data.aiInsights || aiInsights
-          if (Array.isArray(data.strengths)) strengths.push(...data.strengths)
-          if (Array.isArray(data.improvements)) improvements.push(...data.improvements)
-          if (data.phases) {
-             // Map AI response keys to internal interface
-             phaseDetails = Object.entries(data.phases).reduce((acc, [key, val]: [string, any]) => {
-                 acc[key] = {
-                     aiAnalysis: val.analysis || val.aiAnalysis || '',
-                     tips: val.tips || [],
-                     drills: val.drills || []
-                 }
-                 return acc
-             }, {} as PhaseFeedbackMap)
-          }
-        } catch (e) {
-          console.warn('Failed to parse AI JSON response', e)
-          aiInsights = rawResponse // Fallback to raw text
-        }
-      }
-    }
   } catch (error) {
     console.warn('AI Feedback unavailable', error)
   }
