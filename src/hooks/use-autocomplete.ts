@@ -20,7 +20,6 @@ export function useAutocomplete(
     debounceMs = 150,
   } = options
 
-  const [suggestions, setSuggestions] = useState<string[]>([])
   const debouncedInput = useDebounce(currentInput, debounceMs)
 
   const uniqueData = useMemo(() => {
@@ -54,11 +53,7 @@ export function useAutocomplete(
     return matches
   }, [debouncedInput, uniqueData, maxSuggestions, minInputLength, caseSensitive])
 
-  useEffect(() => {
-    setSuggestions(filteredSuggestions)
-  }, [filteredSuggestions])
-
-  return suggestions
+  return filteredSuggestions
 }
 
 export function useInputWithAutocomplete(historicalData: string[], options?: AutocompleteOptions) {

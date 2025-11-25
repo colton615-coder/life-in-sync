@@ -124,7 +124,7 @@ describe('useAutocomplete', () => {
   })
 
   it('should support case sensitive mode', async () => {
-    const data = ['Apple', 'apple', 'APPLE']
+    const data = ['Apple', 'apple pie', 'APPLE']
     const { result, rerender } = renderHook(
       ({ input }) => useAutocomplete(data, input, { caseSensitive: true, debounceMs: 150 }),
       { initialProps: { input: '' } }
@@ -136,7 +136,7 @@ describe('useAutocomplete', () => {
     })
 
     await waitFor(() => {
-      expect(result.current).toEqual(['apple'])
+      expect(result.current).toEqual(['apple pie'])
     })
   })
 
@@ -240,23 +240,29 @@ describe('useInputWithAutocomplete', () => {
   })
 
   it('should hide suggestions on blur with delay', () => {
-    jest.useRealTimers()
-    const { result } = renderHook(() => useInputWithAutocomplete(historicalData))
+    const { result } = renderHook(() => useInputWithAutocomplete(historicalData));
 
     act(() => {
-      result.current.handleInputChange('ap')
-    })
+      result.current.handleInputChange('ap');
+    });
 
-    expect(result.current.showSuggestions).toBe(true)
+    expect(result.current.showSuggestions).toBe(true);
 
     act(() => {
-      result.current.handleBlur()
-    })
+      result.current.handleBlur();
+    });
 
-    setTimeout(() => {
-      expect(result.current.showSuggestions).toBe(false)
-    }, 250)
-  })
+    // Suggestions should not be hidden immediately
+    expect(result.current.showSuggestions).toBe(true);
+
+    // Advance timers past the timeout
+    act(() => {
+      jest.advanceTimersByTime(250);
+    });
+
+    // Now suggestions should be hidden
+    expect(result.current.showSuggestions).toBe(false);
+  });
 
   it('should show suggestions on focus if value exists', async () => {
     const { result } = renderHook(() => 

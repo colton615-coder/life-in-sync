@@ -33,6 +33,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    document.title = 'LiFE-iN-SYNC';
     // PWA Update handling
     const updateSW = registerSW({
       onNeedRefresh() {

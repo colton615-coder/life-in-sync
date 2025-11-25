@@ -4,8 +4,11 @@ test('verify ethereal ui implementation', async ({ page }) => {
   // Go to the local development server
   await page.goto('http://localhost:5173');
 
+  // Wait for the main dashboard grid to be visible, ensuring the app is loaded
+  await page.waitForSelector('div.grid', { timeout: 15000 });
+
   // 1. Verify Shell (LifeCore, Background)
-  const lifeCore = page.locator('text=LifeSync Active');
+  const lifeCore = page.locator('p:has-text("LiFE-iN-SYNC")');
   await expect(lifeCore).toBeVisible({ timeout: 10000 });
 
   // 2. Verify Dashboard Widgets (GlassCard)

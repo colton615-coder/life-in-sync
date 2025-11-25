@@ -16,17 +16,16 @@ test('verify workouts module kinetic ui', async ({ page }) => {
   });
 
   // Navigate to Dashboard
-  await page.goto('http://localhost:4173');
+  await page.goto('http://localhost:5173');
 
-  // Wait for loading screen to clear
-  await page.waitForTimeout(2500);
+  // Wait for the main dashboard grid to be visible, ensuring the app is loaded
+  await page.waitForSelector('div.grid', { timeout: 15000 });
 
-  // Click on Workouts module tile
-  // Using more specific locator to avoid ambiguity
-  await page.locator('.glass-card').filter({ hasText: 'Workouts' }).first().click();
+  // Click on the 'Workouts' button in the main navigation dock
+  await page.locator('nav[aria-label="Main Navigation"] button[aria-label="workouts"]').click();
 
-  // Wait for Workouts page to load
-  await expect(page.getByRole('heading', { name: 'Workouts' })).toBeVisible();
+  // Wait for Workouts page to load by checking for the main header
+  await expect(page.locator('h1:has-text("Workouts")')).toBeVisible({ timeout: 10000 });
 
   // Verify Grid Layout (2 columns check via class or visual)
   const grid = page.locator('.grid.grid-cols-2');

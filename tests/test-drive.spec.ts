@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Focus Group Test Drive', () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5000/');
+    await page.goto('http://localhost:5173/');
     // Wait for the loading screen to disappear or main content to appear
     // The loading screen has text "Loading your life together..."
     // We'll wait for something unique to the dashboard, e.g., the "Habits" card or similar
@@ -14,7 +14,7 @@ test.describe('Focus Group Test Drive', () => {
   test('Test Drive: Dashboard & Navigation', async ({ page }) => {
     console.log('Starting Dashboard & Navigation Test');
 
-    await expect(page).toHaveTitle(/Command Center/);
+    await expect(page).toHaveTitle(/LiFE-iN-SYNC/);
 
     // Take screenshot of Dashboard
     await page.waitForTimeout(1000);
@@ -35,7 +35,7 @@ test.describe('Focus Group Test Drive', () => {
         await habitsLink.click();
     } else {
         // Try navigating directly
-        await page.goto('http://localhost:5000/habits');
+        await page.goto('http://localhost:5173/habits');
         await page.waitForSelector('text="Loading your life together"', { state: 'detached', timeout: 15000 });
     }
 
@@ -66,7 +66,7 @@ test.describe('Focus Group Test Drive', () => {
 
   test('Test Drive: Finance Module', async ({ page }) => {
      console.log('Starting Finance Test');
-     await page.goto('http://localhost:5000/finance');
+     await page.goto('http://localhost:5173/finance');
      await page.waitForSelector('text="Loading your life together"', { state: 'detached', timeout: 15000 });
 
      await page.waitForTimeout(1000);
@@ -75,7 +75,7 @@ test.describe('Focus Group Test Drive', () => {
 
   test('Test Drive: Shopping Module', async ({ page }) => {
      console.log('Starting Shopping Test');
-     await page.goto('http://localhost:5000/shopping');
+     await page.goto('http://localhost:5173/shopping');
      await page.waitForSelector('text="Loading your life together"', { state: 'detached', timeout: 15000 });
 
      await page.waitForTimeout(1000);
