@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
 
-import { BudgetEditor } from './BudgetEditor';
-
 export function BudgetManager() {
   const [report, setReport] = useKV<FinancialReport | null>('financial-report', null);
   // TODO: Add state for chat history, user input, and loading status
@@ -23,10 +21,20 @@ export function BudgetManager() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-1 md:p-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
       {/* Column 1: Budget Editor */}
-      <div className="lg:col-span-2">
-        <BudgetEditor />
+      <div className="md:col-span-2 space-y-4">
+        <h2 className="text-2xl font-bold">Your Live Budget</h2>
+        <p className="text-muted-foreground">
+          This is your active budget. You can make adjustments here. Consult "The Accountant" for advice on any changes.
+        </p>
+        <div className="p-6 glass-card rounded-lg">
+          {/* TODO: Implement the budget editing UI here */}
+          <p className="text-center text-muted-foreground">[Budget Editor UI Placeholder]</p>
+          <pre className="mt-4 text-xs font-mono bg-black/20 p-2 rounded overflow-auto">
+            {JSON.stringify(report.proposedBudget, null, 2)}
+          </pre>
+        </div>
       </div>
 
       {/* Column 2: AI Consultation */}
