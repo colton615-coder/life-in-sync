@@ -1,14 +1,14 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useDebounce } from '../use-debounce'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals'
 
 describe('useDebounce', () => {
   beforeEach(() => {
-    vi.useFakeTimers()
+    jest.useFakeTimers()
   })
 
   afterEach(() => {
-    vi.restoreAllMocks()
+    jest.restoreAllMocks()
   })
 
   it('should return initial value immediately', () => {
@@ -28,12 +28,12 @@ describe('useDebounce', () => {
     expect(result.current).toBe('initial')
 
     act(() => {
-      vi.advanceTimersByTime(199)
+      jest.advanceTimersByTime(199)
     })
     expect(result.current).toBe('initial')
 
     act(() => {
-      vi.advanceTimersByTime(1)
+      jest.advanceTimersByTime(1)
     })
     await waitFor(() => {
       expect(result.current).toBe('updated')
@@ -48,17 +48,17 @@ describe('useDebounce', () => {
 
     rerender({ value: 'first' })
     act(() => {
-      vi.advanceTimersByTime(100)
+      jest.advanceTimersByTime(100)
     })
 
     rerender({ value: 'second' })
     act(() => {
-      vi.advanceTimersByTime(100)
+      jest.advanceTimersByTime(100)
     })
     expect(result.current).toBe('initial')
 
     act(() => {
-      vi.advanceTimersByTime(100)
+      jest.advanceTimersByTime(100)
     })
     await waitFor(() => {
       expect(result.current).toBe('second')
@@ -74,12 +74,12 @@ describe('useDebounce', () => {
     rerender({ value: 'updated', delay: 500 })
     
     act(() => {
-      vi.advanceTimersByTime(499)
+      jest.advanceTimersByTime(499)
     })
     expect(result.current).toBe('initial')
 
     act(() => {
-      vi.advanceTimersByTime(1)
+      jest.advanceTimersByTime(1)
     })
     await waitFor(() => {
       expect(result.current).toBe('updated')
@@ -96,7 +96,7 @@ describe('useDebounce', () => {
 
     rerender({ value: 100 })
     act(() => {
-      vi.advanceTimersByTime(200)
+      jest.advanceTimersByTime(200)
     })
     
     await waitFor(() => {
@@ -117,7 +117,7 @@ describe('useDebounce', () => {
 
     rerender({ value: obj2 })
     act(() => {
-      vi.advanceTimersByTime(200)
+      jest.advanceTimersByTime(200)
     })
 
     await waitFor(() => {
@@ -134,12 +134,12 @@ describe('useDebounce', () => {
     rerender({ value: 'updated' })
     
     act(() => {
-      vi.advanceTimersByTime(199)
+      jest.advanceTimersByTime(199)
     })
     expect(result.current).toBe('initial')
 
     act(() => {
-      vi.advanceTimersByTime(1)
+      jest.advanceTimersByTime(1)
     })
     await waitFor(() => {
       expect(result.current).toBe('updated')

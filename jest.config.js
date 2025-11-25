@@ -1,20 +1,36 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 export default {
   preset: 'ts-jest',
-  testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts'],
-  moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
+  testEnvironment: 'jsdom',
+  // A map from regular expressions to paths to transformers
   transform: {
-    // '^.+\\.[tj]sx?$' to process js/ts with `ts-jest`
-    // '^.+\\.m?[tj]sx?$' to process js/ts/mjs/mts with `ts-jest`
     '^.+\\.tsx?$': [
       'ts-jest',
       {
-        useESM: true,
+        diagnostics: {
+          ignoreCodes: ['TS151001'],
+        },
+        tsconfig: {
+            "allowJs": true,
+            "esModuleInterop": true,
+            "jsx": "react-jsx"
+        }
       },
     ],
+  },
+  moduleNameMapper: {
+    // Handle module aliases (if you have them in your tsconfig.json)
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  testPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/dist/',
+    '<rootDir>/tests/', // Ignore playwright tests
+  ],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  globals: {
+    'ts-jest': {
+      useESM: true,
+    },
   },
 };

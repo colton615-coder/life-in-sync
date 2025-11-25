@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeAll } from 'vitest'
+/** @jest-environment node */
+import { describe, it, expect, beforeAll } from '@jest/globals'
 import { encrypt, decrypt } from '../crypto'
 
 describe('crypto functions', () => {
