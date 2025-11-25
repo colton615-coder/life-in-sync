@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { AddHabitDialog } from './AddHabitDialog'
 import { AddShoppingItemDialog } from '@/components/shopping/AddShoppingItemDialog'
-import { AddExpenseDialog } from './AddExpenseDialog'
 import { useKV } from '@/hooks/use-kv'
 import { Habit, ShoppingItem } from '@/lib/types'
 import { toast } from 'sonner'
@@ -15,7 +14,6 @@ export function QuickActionsFab() {
   const [isOpen, setIsOpen] = useState(false)
   const [habitOpen, setHabitOpen] = useState(false)
   const [shoppingOpen, setShoppingOpen] = useState(false)
-  const [expenseOpen, setExpenseOpen] = useState(false)
 
   // We use KV hooks here just to pass the setters to the dialogs if they need them,
   // or we can implement the logic here.
@@ -60,12 +58,6 @@ export function QuickActionsFab() {
       icon: ShoppingCart,
       onClick: () => setShoppingOpen(true),
       color: 'bg-blue-500 hover:bg-blue-600 text-white'
-    },
-    {
-      label: 'Add Expense',
-      icon: Receipt,
-      onClick: () => setExpenseOpen(true),
-      color: 'bg-brand-secondary hover:bg-brand-secondary/90 text-white'
     },
   ]
 
@@ -130,11 +122,6 @@ export function QuickActionsFab() {
         open={shoppingOpen}
         onOpenChange={setShoppingOpen}
         onAdd={handleAddShoppingItem}
-      />
-
-      <AddExpenseDialog
-        open={expenseOpen}
-        onOpenChange={setExpenseOpen}
       />
     </>
   )
