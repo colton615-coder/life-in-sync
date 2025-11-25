@@ -1,100 +1,102 @@
-import { useState, useRef, useEffect } from 'react'
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
-import { Check, CaretRight } from '@phosphor-icons/react'
+import React, { useRef, useState, useEffect } from 'react'
+import { motion, useAnimation, PanInfo } from 'framer-motion'
+import { Check } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
-import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
 
 interface PowerSliderProps {
-  onComplete: () => void
+  onConfirm: () => void
   label?: string
+  resetOnRelease?: boolean
   className?: string
+  disabled?: boolean
 }
 
-export function PowerSlider({ onComplete, label = "Slide to Complete", className }: PowerSliderProps) {
+export function PowerSlider({
+  onConfirm,
+  label = "SLIDE TO LOG",
+  resetOnRelease = true,
+  className,
+  disabled = false
+}: PowerSliderProps) {
   const [completed, setCompleted] = useState(false)
+  const controls = useAnimation()
   const constraintsRef = useRef<HTMLDivElement>(null)
-  const x = useMotionValue(0)
-  const { triggerHaptic } = useHapticFeedback()
-  const widthRef = useRef(0)
-
-  // Track progress for visual effects (0 to 1)
-  const progress = useTransform(x, [0, 200], [0, 1])
-  const opacity = useTransform(x, [0, 150], [1, 0])
-  const glowOpacity = useTransform(x, [0, 200], [0, 1])
+  const [width, setWidth] = useState(0)
 
   useEffect(() => {
     if (constraintsRef.current) {
-        widthRef.current = constraintsRef.current.offsetWidth - 56 // minus handle width
+      setWidth(constraintsRef.current.offsetWidth)
     }
   }, [])
 
-  const handleDragEnd = () => {
-    const currentX = x.get()
-    const threshold = widthRef.current * 0.9 // 90% threshold
-
-    if (currentX > threshold) {
+  const handleDragEnd = async (_: any, info: PanInfo) => {
+    const threshold = width * 0.5 // 50% threshold
+    if (info.offset.x > threshold && !disabled) {
       setCompleted(true)
-      triggerHaptic('success')
-      onComplete()
-      // Lock it at the end visually for a moment before reset if needed
-      // But typically onComplete unmounts or changes state
+      await controls.start({ x: width - 56 }) // Lock to end
+      onConfirm()
+      if (resetOnRelease) {
+        setTimeout(() => reset(), 1000)
+      }
     } else {
-      animate(x, 0, { type: "spring", stiffness: 400, damping: 30 })
+      controls.start({ x: 0 })
     }
   }
 
-  const handleDrag = () => {
-      // Haptics during drag? Maybe too much.
+  const reset = () => {
+    setCompleted(false)
+    controls.start({ x: 0 })
   }
 
   return (
-    <div className={cn("relative h-14 w-full select-none touch-none", className)}>
-        {/* Track */}
-        <div
-            ref={constraintsRef}
-            className="absolute inset-0 rounded-full bg-black/40 border border-white/10 overflow-hidden backdrop-blur-md shadow-inner"
+    <div
+      ref={constraintsRef}
+      className={cn(
+        "relative h-14 rounded-full bg-white/5 border border-white/10 overflow-hidden select-none touch-none",
+        disabled && "opacity-50 cursor-not-allowed",
+        className
+      )}
+    >
+      {/* Track Background Text */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <motion.span
+          animate={{ opacity: completed ? 0 : 0.5 }}
+          className="text-xs font-bold tracking-[0.2em] text-white/50"
         >
-            {/* Progress Fill */}
-            <motion.div
-                className="absolute inset-y-0 left-0 bg-[#2E8AF7]/20"
-                style={{ width: x }}
-            />
+          {completed ? "CONFIRMED" : label}
+        </motion.span>
+      </div>
 
-            {/* Label */}
-            <motion.div
-                className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                style={{ opacity }}
-            >
-                <span className="text-sm font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
-                    {label} <CaretRight weight="bold" />
-                </span>
-            </motion.div>
+      {/* Progress Fill */}
+      <motion.div
+        className="absolute inset-y-0 left-0 bg-primary/20"
+        style={{ width: controls.bg }} // Use motion value if needed, but simplistic for now
+      />
 
-            {/* Success State Overlay */}
-            <motion.div
-                className="absolute inset-0 flex items-center justify-center bg-[#2E8AF7] z-20"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: completed ? 1 : 0 }}
-            >
-                <span className="text-white font-bold flex items-center gap-2">
-                    COMPLETED <Check weight="bold" />
-                </span>
-            </motion.div>
-        </div>
-
-        {/* Handle */}
-        <motion.div
-            drag="x"
-            dragConstraints={constraintsRef}
-            dragElastic={0.1}
-            dragMomentum={false}
-            onDrag={handleDrag}
-            onDragEnd={handleDragEnd}
-            style={{ x }}
-            className="absolute top-1 bottom-1 left-1 w-12 rounded-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)] z-10 cursor-grab active:cursor-grabbing flex items-center justify-center"
-        >
-             <CaretRight weight="bold" className="text-black" />
-        </motion.div>
+      {/* Slider Handle */}
+      <motion.div
+        drag="x"
+        dragConstraints={constraintsRef}
+        dragElastic={0.1}
+        dragMomentum={false}
+        onDragEnd={handleDragEnd}
+        animate={controls}
+        whileTap={{ scale: 1.05 }}
+        className={cn(
+          "absolute top-1 bottom-1 left-1 w-12 rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing z-10",
+          completed ? "bg-primary text-black" : "bg-white text-black"
+        )}
+      >
+        {completed ? (
+          <Check weight="bold" size={20} />
+        ) : (
+          <div className="flex gap-0.5">
+            <div className="w-0.5 h-3 bg-black/20 rounded-full" />
+            <div className="w-0.5 h-3 bg-black/20 rounded-full" />
+            <div className="w-0.5 h-3 bg-black/20 rounded-full" />
+          </div>
+        )}
+      </motion.div>
     </div>
   )
 }

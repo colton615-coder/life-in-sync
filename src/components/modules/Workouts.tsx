@@ -245,7 +245,7 @@ export function Workouts() {
               </motion.div>
             </Card>
           ) : (
-            <div className="grid gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <AnimatePresence mode="popLayout">
                 {[...(workoutPlans || [])].reverse().map((workout, index) => (
                   <motion.div
@@ -255,12 +255,12 @@ export function Workouts() {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Card className="neumorphic-card hover:glow-border group">
+                    <Card className="neumorphic-card hover:glow-border group h-full flex flex-col justify-between">
                       <div className="space-y-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                              <h3 className="font-semibold text-sm md:text-base">{workout.name}</h3>
+                              <h3 className="font-semibold text-sm md:text-base truncate">{workout.name}</h3>
                               <Badge className={cn("text-[10px] px-1.5 py-0 capitalize", difficultyColors[workout.difficulty])}>
                                 {workout.difficulty}
                               </Badge>
@@ -272,27 +272,49 @@ export function Workouts() {
                               </span>
                               <span>•</span>
                               <span>{workout.exercises.length} exercises</span>
-                              <span>•</span>
-                              <span className="flex items-center gap-1">
-                                <Timer size={12} weight="duotone" />
-                                ~{workout.estimatedDuration} min
-                              </span>
                             </div>
                           </div>
-                          <div className="flex gap-2 flex-shrink-0 items-center">
-                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        </div>
+
+                        <div className="space-y-2">
+                           <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                              Overview
+                            </h4>
+                            <span className="text-[10px] font-mono text-primary">
+                              ~{workout.estimatedDuration} MIN
+                            </span>
+                          </div>
+
+                          <div className="flex flex-wrap gap-1.5">
+                             {workout.exercises.slice(0, 3).map((ex, i) => (
+                               <Badge key={i} variant="outline" className="text-[10px] bg-black/20 border-white/5 truncate max-w-[100px]">
+                                 {ex.name}
+                               </Badge>
+                             ))}
+                             {workout.exercises.length > 3 && (
+                               <Badge variant="outline" className="text-[10px] bg-black/20 border-white/5">
+                                 +{workout.exercises.length - 3}
+                               </Badge>
+                             )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-white/5 flex gap-2">
+                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
                               <Button
                                 onClick={() => startWorkout(workout)}
                                 size="sm"
-                                className="button-glow gap-1.5"
+                                className="w-full button-glow gap-1.5 h-9"
                                 aria-label="Start workout"
                               >
                                 <Play weight="fill" size={16} />
-                                <span className="hidden sm:inline">Start</span>
+                                <span className="font-bold">START</span>
                               </Button>
                             </motion.div>
 
-                            <div className="flex items-center">
+                            <div className="flex gap-1">
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -300,7 +322,7 @@ export function Workouts() {
                                       setEditWorkout(workout)
                                       setIsEditOpen(true)
                                   }}
-                                  className="h-8 w-8 text-muted-foreground hover:text-white"
+                                  className="h-9 w-9 text-muted-foreground hover:text-white"
                                   aria-label="Edit workout"
                                 >
                                   <PencilSimple size={16} />
@@ -309,65 +331,12 @@ export function Workouts() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => deleteWorkout(workout.id)}
-                                  className="hover:bg-destructive/10 hover:text-destructive h-8 w-8 text-muted-foreground"
+                                  className="hover:bg-destructive/10 hover:text-destructive h-9 w-9 text-muted-foreground"
                                   aria-label="Delete workout"
                                 >
                                   <Trash size={16} />
                                 </Button>
                             </div>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                              Exercise Plan
-                            </h4>
-                            <Badge variant="outline" className="text-xs">
-                              {workout.exercises.filter(e => e.category.toLowerCase().includes('work')).length} work sets
-                            </Badge>
-                          </div>
-                          <div className="grid gap-1.5">
-                            {workout.exercises.map((exercise, idx) => {
-                              const isWarmup = exercise.category.toLowerCase().includes('warm')
-                              const isCooldown = exercise.category.toLowerCase().includes('cool')
-                              const isRest = exercise.category.toLowerCase().includes('rest')
-                              
-                              return (
-                                <motion.div 
-                                  key={idx}
-                                  initial={{ opacity: 0, x: -10 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: 0.3 + idx * 0.03 }}
-                                  className={cn(
-                                    "flex items-center justify-between py-1.5 px-2.5 rounded-md transition-all",
-                                    "neumorphic-inset hover:bg-muted/50",
-                                    isWarmup && "border-l-2 border-orange-500/50",
-                                    isCooldown && "border-l-2 border-brand-secondary/50",
-                                    isRest && "border-l-2 border-brand-primary/50",
-                                    !isWarmup && !isCooldown && !isRest && "border-l-2 border-brand-primary/50"
-                                  )}
-                                >
-                                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                                    <span className="text-[10px] text-muted-foreground font-mono w-4">
-                                      {(idx + 1).toString().padStart(2, '0')}
-                                    </span>
-                                    <span className="text-xs font-medium truncate">{exercise.name}</span>
-                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize ml-auto flex-shrink-0">
-                                      {exercise.category}
-                                    </Badge>
-                                  </div>
-                                  <span className="text-xs font-semibold text-primary ml-2 flex-shrink-0">
-                                    {exercise.type === 'reps' 
-                                      ? `${exercise.sets}×${exercise.reps}`
-                                      : `${exercise.duration}s`
-                                    }
-                                  </span>
-                                </motion.div>
-                              )
-                            })}
-                          </div>
-                        </div>
                       </div>
                     </Card>
                   </motion.div>
@@ -401,7 +370,11 @@ export function Workouts() {
               <AnimatePresence mode="popLayout">
                 {[...(completedWorkouts || [])].reverse().map((workout, index) => {
                   const completionRate = (workout.completedExercises / workout.totalExercises) * 100
-                  
+                  // Calculate total volume
+                  const totalVolume = workout.exercises?.reduce((acc, ex) => {
+                    return acc + ex.sets.reduce((sAcc, s) => sAcc + ((s.weight || 0) * (s.reps || 0)), 0)
+                  }, 0) || 0
+
                   return (
                     <motion.div
                       key={workout.id}
@@ -421,17 +394,33 @@ export function Workouts() {
                               <span>{workout.date}</span>
                               <span>•</span>
                               <span>{Math.ceil(workout.totalDuration / 60)} min</span>
-                              <span>•</span>
-                              <span className="text-primary font-semibold">{workout.calories} cal</span>
+                              {totalVolume > 0 && (
+                                <>
+                                  <span>•</span>
+                                  <span className="font-mono text-xs">{totalVolume.toLocaleString()} lbs vol</span>
+                                </>
+                              )}
                             </div>
-                            <div className="mt-3 space-y-2">
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">
-                                  {workout.completedExercises}/{workout.totalExercises} exercises
-                                </span>
-                                <span className="font-semibold text-primary">{Math.round(completionRate)}%</span>
+
+                            {/* Detailed Exercise Summary */}
+                            {workout.exercises && workout.exercises.length > 0 && (
+                              <div className="mt-3 space-y-1">
+                                {workout.exercises.slice(0, 3).map((ex, i) => (
+                                  <div key={i} className="flex justify-between text-xs">
+                                     <span className="text-muted-foreground">{ex.name}</span>
+                                     <span className="font-mono">{ex.sets.filter(s => s.completed).length} sets</span>
+                                  </div>
+                                ))}
+                                {workout.exercises.length > 3 && (
+                                   <div className="text-[10px] text-muted-foreground/50 pt-1">
+                                     +{workout.exercises.length - 3} more exercises
+                                   </div>
+                                )}
                               </div>
-                              <div className="slider-track h-1.5 w-full">
+                            )}
+
+                            <div className="mt-3 space-y-2">
+                              <div className="slider-track h-1 w-full">
                                 <motion.div 
                                   initial={{ width: 0 }}
                                   animate={{ width: `${completionRate}%` }}
