@@ -1,11 +1,11 @@
 export const QUOTES = [
-  { text: "The void beckons, but there are tasks to complete.", author: "The Void" },
-  { text: "Another cycle begins. Optimize accordingly.", author: "The Architect" },
-  { text: "Existence is a bug. Your task is to patch it.", author: "The System" },
-  { text: "Don't just seize the day. Subjugate it.", author: "The Strategist" },
-  { text: "Entropy is guaranteed. Your effort is not.", author: "The Universe" },
-  { text: "The abyss stared back. Good. It's paying attention.", author: "The Observer" },
-  { text: "Coffee is just a compiler for the human machine.", author: "The Developer" },
-  { text: "Your comfort zone is a beautifully decorated cage.", author: "The Liberator" },
-  { text: "Do not pray for an easy life, pray for the strength to endure a difficult one. You'll get the latter anyway.", author: "The Realist" },
+  { text: "The happiness of your life depends upon the quality of your thoughts.", author: "Marcus Aurelius" },
+  { text: "Waste no more time arguing about what a good man should be. Be one.", author: "Marcus Aurelius" },
+  { text: "It is not the man who has too little, but the man who craves more, that is poor.", author: "Seneca" },
+  { text: "It's not what happens to you, but how you react to it that matters.", author: "Epictetus" },
+  { text: "Above all, don't lie to yourself.", author: "Fyodor Dostoevsky" },
+  { text: "For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope.", author: "Jeremiah 29:11" },
+  { text: "I can do all things through him who gives me strength.", author: "Philippians 4:13" },
+  { text: "The Lord is my shepherd; I shall not want.", author: "Psalm 23:1" },
+  { text: "In the world you will have tribulation. But take heart; I have overcome the world.", author: "John 16:33" }
 ];
