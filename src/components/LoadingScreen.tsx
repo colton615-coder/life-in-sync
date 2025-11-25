@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QUOTES } from '@/lib/quotes'
-import { EarthSyncIcon } from '@/components/ui/EarthSyncIcon'
+import AiBrainIcon from '@/components/ui/AiBrainIcon'
 
 interface LoadingScreenProps {
   onLoadComplete: () => void
@@ -101,7 +101,7 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
                 }}
                 className="w-40 h-40"
               >
-                <EarthSyncIcon />
+                <AiBrainIcon />
               </motion.div>
             </motion.div>
 
