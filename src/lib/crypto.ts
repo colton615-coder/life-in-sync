@@ -30,13 +30,33 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
   )
 }
 
-function getDeviceKey(): string {
-  const userAgent = navigator.userAgent
-  const platform = navigator.platform
-  const language = navigator.language
-  const deviceSignature = `${userAgent}${platform}${language}`
-  
-  return deviceSignature
+export function getDeviceKey(): string {
+  // First, try to get the stable key from localStorage
+  let deviceKey = localStorage.getItem('deviceKey');
+  if (deviceKey) {
+    return deviceKey;
+  }
+
+  // If no stable key, try to generate the old, unstable key for migration
+  try {
+    const userAgent = window.navigator.userAgent || 'unknown';
+    const platform = window.navigator.platform || 'unknown';
+    const language = window.navigator.language || 'unknown';
+    const unstableKey = `${userAgent}${platform}${language}`
+
+    // If we successfully generate a meaningful unstable key, store it as the new stable key
+    if (unstableKey && unstableKey !== 'unknownunknownunknown') {
+      localStorage.setItem('deviceKey', unstableKey);
+      return unstableKey;
+    }
+  } catch (error) {
+    // This might fail in environments without navigator, continue to UUID
+  }
+
+  // If migration is not possible (e.g., new user), create a new stable key
+  deviceKey = crypto.randomUUID();
+  localStorage.setItem('deviceKey', deviceKey);
+  return deviceKey;
 }
 
 export async function encrypt(plaintext: string): Promise<string> {
