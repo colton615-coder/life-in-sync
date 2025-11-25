@@ -7,7 +7,7 @@ import { Sparkle, ArrowRight } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { AIButton } from '@/components/AIButton'
-import { callAIWithRetry, parseAIJsonResponse } from '@/lib/ai-utils'
+import { GeminiCore } from '@/services/gemini_core'
 import { z } from 'zod'
 
 const BudgetRecommendationSchema = z.object({
@@ -17,12 +17,14 @@ const BudgetRecommendationSchema = z.object({
 });
 
 const GeneratedBudgetSchema = z.object({
-  totalBudget: z.number(),
-  recommendations: z.array(BudgetRecommendationSchema),
-  tips: z.array(z.string()),
+  budget: z.object({
+    totalBudget: z.number(),
+    recommendations: z.array(BudgetRecommendationSchema),
+    tips: z.array(z.string()),
+  })
 });
 
-type GeneratedBudget = z.infer<typeof GeneratedBudgetSchema>;
+type GeneratedBudget = z.infer<typeof GeneratedBudgetSchema>['budget'];
 
 export function AIBudgetGenerator() {
   const [income, setIncome] = useState('')
@@ -44,7 +46,7 @@ export function AIBudgetGenerator() {
     setIsGenerating(true)
     
     try {
-      const promptText = window.spark.llmPrompt`You are a financial advisor helping create a realistic budget.
+      const promptText = `You are a financial advisor helping create a realistic budget.
 
 User's monthly income: $${income}
 Budget scenario: ${scenario}
@@ -80,19 +82,12 @@ Return ONLY valid JSON in this exact format (no markdown, no code blocks):
   }
 }
 
-Ensure all recommended amounts sum to the total budget. Be realistic and practical based on the user's scenario.`
+Ensure all recommended amounts sum to the total budget. Be realistic and practical based on the user's scenario.`;
 
-      const response = await callAIWithRetry(promptText, 'gpt-4o', true)
-      const parsed = parseAIJsonResponse<{ budget: GeneratedBudget }>(response, 'budget structure')
+      const gemini = new GeminiCore();
+      const parsed = await gemini.generateJSON(promptText, GeneratedBudgetSchema);
 
-      const validationResult = GeneratedBudgetSchema.safeParse(parsed.budget)
-
-      if (!validationResult.success) {
-        console.error("Zod validation error:", validationResult.error.flatten());
-        throw new Error('AI returned data in an unexpected format.');
-      }
-
-      setGeneratedBudget(validationResult.data)
+      setGeneratedBudget(parsed.budget)
       toast.success('Budget generated successfully!')
     } catch (error) {
       console.error('[Budget] Generation error:', error)

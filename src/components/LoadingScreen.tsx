@@ -40,6 +40,9 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [loadingMessage, setLoadingMessage] = useState('')
 
+  // Direct KV access
+  const [storedAffirmation, setStoredAffirmation] = useKV<DailyAffirmation | null>('daily-affirmation', null)
+
   useEffect(() => {
     const randomMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]
     setLoadingMessage(randomMessage)
@@ -86,8 +89,7 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
 
     loadAffirmation()
 
-    // Reduced artificial delay from 3800ms to 1000ms for first load feel,
-    // or faster if affirmation loads earlier.
+    // Default load time if API is slow
     const timer = setTimeout(() => {
       if (isMounted) {
           setIsLoading(false)
@@ -97,7 +99,7 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
       }
     }, 1500)
 
-    // Safety valve: Force completion after 5 seconds no matter what
+    // Safety valve
     const safetyTimer = setTimeout(() => {
         if (isMounted && isLoading) {
             console.warn('LoadingScreen safety valve triggered');
@@ -111,7 +113,7 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
         clearTimeout(timer);
         clearTimeout(safetyTimer);
     }
-  }, [onLoadComplete]) // Removed isLoading from dependency to avoid re-triggering
+  }, [onLoadComplete, storedAffirmation, setStoredAffirmation]) // Added dependencies
 
   return (
     <AnimatePresence>

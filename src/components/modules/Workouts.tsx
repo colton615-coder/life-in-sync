@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise, PencilSimple, Trash } from '@phosphor-icons/react'
+import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise, PencilSimple, Trash, Lightning } from '@phosphor-icons/react'
 import { useKV } from '@/hooks/use-kv'
 import { WorkoutPlan, CompletedWorkout } from '@/lib/types'
 import { toast } from 'sonner'
@@ -127,13 +127,14 @@ export function Workouts() {
   }
 
   const difficultyColors = {
-    beginner: 'bg-green-500/10 text-green-500 border-green-500/20',
-    intermediate: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-    advanced: 'bg-red-500/10 text-red-500 border-red-500/20'
+    beginner: 'text-green-500 border-green-500/20 bg-green-500/10',
+    intermediate: 'text-amber-500 border-amber-500/20 bg-amber-500/10',
+    advanced: 'text-red-500 border-red-500/20 bg-red-500/10'
   }
 
   return (
     <div className="pt-3 md:pt-5 space-y-3 md:space-y-4 px-1 md:px-0">
+      {/* Header Area */}
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
@@ -142,6 +143,7 @@ export function Workouts() {
           </h1>
           <p className="text-muted-foreground mt-1 text-xs md:text-sm">Build strength, one rep at a time</p>
         </div>
+
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -150,7 +152,7 @@ export function Workouts() {
                 className="gap-2 h-11 md:h-9 px-5 md:px-4 button-glow"
               >
                 <Sparkle weight="fill" size={18} className="md:w-4 md:h-4" />
-                <span>Generate</span>
+                <span className="hidden sm:inline">Generate</span>
               </Button>
             </motion.div>
           </DialogTrigger>
@@ -193,6 +195,7 @@ export function Workouts() {
         </Dialog>
       </div>
 
+      {/* Stats Area */}
       <Card>
         <StatCard 
           stats={[
@@ -254,6 +257,7 @@ export function Workouts() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: index * 0.05 }}
+                    className="h-full"
                   >
                     <Card className="neumorphic-card hover:glow-border group h-full flex flex-col justify-between">
                       <div className="space-y-3">
@@ -318,14 +322,16 @@ export function Workouts() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  onClick={() => {
+                                  className="h-6 w-6 text-muted-foreground hover:text-white rounded-full hover:bg-white/10"
+                                  onClick={(e) => {
+                                      e.stopPropagation()
                                       setEditWorkout(workout)
                                       setIsEditOpen(true)
                                   }}
                                   className="h-9 w-9 text-muted-foreground hover:text-white"
                                   aria-label="Edit workout"
                                 >
-                                  <PencilSimple size={16} />
+                                  <PencilSimple size={12} />
                                 </Button>
                                 <Button
                                   variant="ghost"
@@ -334,7 +340,7 @@ export function Workouts() {
                                   className="hover:bg-destructive/10 hover:text-destructive h-9 w-9 text-muted-foreground"
                                   aria-label="Delete workout"
                                 >
-                                  <Trash size={16} />
+                                  <Trash size={12} />
                                 </Button>
                             </div>
                       </div>

@@ -8,7 +8,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { SwingAnalysis } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { callAIWithRetry, parseAIJsonResponse, validateAIResponse } from '@/lib/ai-utils'
 import { 
   Sparkle, 
   CheckCircle, 
@@ -23,6 +22,8 @@ import {
 } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
+import { GeminiCore } from '@/services/gemini_core'
+import { z } from 'zod'
 
 interface ComparisonReport {
   summary: string
@@ -53,54 +54,28 @@ interface SwingComparisonDialogProps {
   analyses: SwingAnalysis[]
 }
 
-const toRecord = (value: unknown): Record<string, unknown> | null =>
-  typeof value === 'object' && value !== null ? value as Record<string, unknown> : null
-
-const VALID_IMPACT_VALUES = new Set(['High', 'Medium', 'Low'])
-
-const normalizeMetricChanges = (items: unknown): ComparisonReport['improvements'] => {
-  if (!Array.isArray(items)) return []
-
-  return items.map((item) => {
-    const record = toRecord(item)
-    const rawImpact = typeof record?.impact === 'string' ? record.impact : null
-    const impact = rawImpact && VALID_IMPACT_VALUES.has(rawImpact) ? rawImpact : 'Medium'
-
-    return {
-      metric: typeof record?.metric === 'string' ? record.metric : 'Metric',
-      change: typeof record?.change === 'string' ? record.change : 'N/A',
-      impact,
-      reason: typeof record?.reason === 'string' ? record.reason : 'Details unavailable.'
-    }
-  })
-}
-
-const normalizeUnchangedMetrics = (items: unknown): ComparisonReport['unchanged'] => {
-  if (!Array.isArray(items)) return []
-
-  return items.map((item) => {
-    const record = toRecord(item)
-
-    return {
-      metric: typeof record?.metric === 'string' ? record.metric : 'Metric',
-      note: typeof record?.note === 'string' ? record.note : 'No additional notes.'
-    }
-  })
-}
-
-const normalizeRecommendations = (items: unknown): string[] => {
-  if (!Array.isArray(items)) return []
-  return items
-    .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
-    .map((item) => item.trim())
-}
-
-const normalizeProgressScore = (value: unknown): number => {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
-    return 0
-  }
-  return Math.min(100, Math.max(0, Math.round(value)))
-}
+const ComparisonSchema = z.object({
+  summary: z.string(),
+  improvements: z.array(z.object({
+    metric: z.string(),
+    change: z.string(),
+    impact: z.string(),
+    reason: z.string()
+  })),
+  regressions: z.array(z.object({
+    metric: z.string(),
+    change: z.string(),
+    impact: z.string(),
+    reason: z.string()
+  })),
+  unchanged: z.array(z.object({
+    metric: z.string(),
+    note: z.string()
+  })),
+  recommendations: z.array(z.string()),
+  progressScore: z.number(),
+  keyTakeaway: z.string()
+});
 
 export function SwingComparisonDialog({ open, onOpenChange, analyses }: SwingComparisonDialogProps) {
   const [selectedSwing1, setSelectedSwing1] = useState<SwingAnalysis | null>(null)
@@ -131,11 +106,7 @@ export function SwingComparisonDialog({ open, onOpenChange, analyses }: SwingCom
     }, 200)
 
     try {
-      if (!window.spark || !window.spark.llm || !window.spark.llmPrompt) {
-        throw new Error('Spark AI is unavailable. Please reload the page and try again.')
-      }
-
-      const prompt = window.spark.llmPrompt`You are an expert golf instructor analyzing two golf swings to provide detailed, actionable feedback on progress.
+      const prompt = `You are an expert golf instructor analyzing two golf swings to provide detailed, actionable feedback on progress.
 
 Swing 1 (Earlier):
 - Upload Date: ${selectedSwing1.uploadedAt}
@@ -205,38 +176,15 @@ Provide a detailed comparison report in JSON format with the following structure
   "keyTakeaway": "One powerful sentence summarizing the most important finding from this comparison"
 }
 
-Focus on biomechanical relationships - explain HOW one change affects another (e.g., "The 12° increase in hip rotation created more torque, which naturally improved head stability by reducing compensatory movements"). Be specific with numbers and causality.`
+Focus on biomechanical relationships - explain HOW one change affects another (e.g., "The 12° increase in hip rotation created more torque, which naturally improved head stability by reducing compensatory movements"). Be specific with numbers and causality.`;
 
-      const response = await callAIWithRetry(prompt, 'gpt-4o', true)
-      const parsedReport = parseAIJsonResponse<Partial<ComparisonReport>>(response, 'Comparison report object with summary, improvements, regressions, unchanged, recommendations, progressScore, keyTakeaway')
+      const gemini = new GeminiCore();
+      const parsedReport = await gemini.generateJSON(prompt, ComparisonSchema);
 
-      validateAIResponse(parsedReport, [
-        'summary',
-        'improvements',
-        'regressions',
-        'unchanged',
-        'recommendations',
-        'progressScore',
-        'keyTakeaway'
-      ])
-
-      const normalizedReport: ComparisonReport = {
-        summary: typeof parsedReport.summary === 'string' ? parsedReport.summary : 'No summary provided.',
-        improvements: normalizeMetricChanges(parsedReport.improvements),
-        regressions: normalizeMetricChanges(parsedReport.regressions),
-        unchanged: normalizeUnchangedMetrics(parsedReport.unchanged),
-        recommendations: normalizeRecommendations(parsedReport.recommendations),
-        progressScore: normalizeProgressScore(parsedReport.progressScore),
-        keyTakeaway: typeof parsedReport.keyTakeaway === 'string' ? parsedReport.keyTakeaway : 'Keep refining the fundamentals for more consistent swings.'
-      }
-
+      setComparisonReport(parsedReport)
       clearInterval(progressInterval)
       setComparisonProgress(100)
-
-      setTimeout(() => {
-        setComparisonReport(normalizedReport)
-        setIsComparing(false)
-      }, 300)
+      setIsComparing(false)
 
       toast.success('Comparison complete!', {
         description: 'Your detailed swing analysis is ready'
