@@ -15,20 +15,8 @@ export async function generateWorkoutPlan(workoutPrompt: string): Promise<Workou
     }
 
     try {
-      console.log('[Workout Generation] Step 0: Checking spark API availability')
-      
-      if (!window.spark) {
-        throw new Error('Spark API not available - window.spark is undefined')
-      }
-      if (!window.spark.llm) {
-        throw new Error('Spark LLM API not available - window.spark.llm is undefined')
-      }
-      if (!window.spark.llmPrompt) {
-        throw new Error('Spark llmPrompt API not available - window.spark.llmPrompt is undefined')
-      }
-      
       console.log('[Workout Generation] Step 1: Creating LLM prompt')
-      const promptText = window.spark.llmPrompt`You are a fitness expert. Generate a complete workout plan based on this request: "${workoutPrompt}".
+      const promptText = `You are a fitness expert. Generate a complete workout plan based on this request: "${workoutPrompt}".
 
 CRITICAL: If the user specifies a time duration (e.g., "15 minute", "30 min", etc.), you MUST create exercises that add up to approximately that duration.
 - For time-based exercises (type: "time"), the "duration" field is in SECONDS
@@ -75,9 +63,8 @@ Categories: "Warm-up", "Work", "Cool-down"
 Difficulty levels: "beginner", "intermediate", "advanced"`
 
       console.log('[Workout Generation] Step 2: Calling AI with retry mechanism')
-      console.log('[Workout Generation] Using model: gpt-4o, JSON mode: true')
       
-      const response = await callAIWithRetry(promptText, 'gpt-4o', true)
+      const response = await callAIWithRetry(promptText, true)
       
       console.log('[Workout Generation] Step 3: AI response received')
       const data = parseAIJsonResponse<{ workoutPlan: Record<string, unknown> }>(response, 'workoutPlan structure')
