@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkle } from '@phosphor-icons/react'
 import { getTodayKey } from '@/lib/utils'
+import { useKV } from '@/hooks/use-kv'
+import { GeminiCore } from '@/services/gemini_core'
+import { z } from 'zod'
 
 interface LoadingScreenProps {
   onLoadComplete: () => void
@@ -14,14 +17,11 @@ export interface DailyAffirmation {
 }
 
 const staticAffirmations = [
-  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
-  { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
-  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
-  { text: "I can do all things through Christ who strengthens me.", author: "Philippians 4:13" },
-  { text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you.", author: "Jeremiah 29:11" },
-  { text: "Be strong and courageous. Do not be afraid; do not be discouraged.", author: "Joshua 1:9" },
-  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
-  { text: "Trust in the Lord with all your heart and lean not on your own understanding.", author: "Proverbs 3:5" },
+    { text: "The void beckons, but there are tasks to complete.", author: "The Void" },
+    { text: "Another cycle begins. Optimize accordingly.", author: "The Architect" },
+    { text: "Existence is a bug. Your task is to patch it.", author: "The System" },
+    { text: "Don't just seize the day. Subjugate it.", author: "The Strategist" },
+    { text: "Entropy is guaranteed. Your effort is not.", author: "The Universe" },
 ]
 
 const LOADING_MESSAGES = [
@@ -36,7 +36,7 @@ const LOADING_MESSAGES = [
 ]
 
 export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
-  const [affirmation, setAffirmation] = useState<{ text: string; author: string } | null>(null)
+  const [affirmation, setAffirmation] = useKV<DailyAffirmation | null>('daily-affirmation', null)
   const [isLoading, setIsLoading] = useState(true)
   const [loadingMessage, setLoadingMessage] = useState('')
 
@@ -44,87 +44,47 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
     const randomMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]
     setLoadingMessage(randomMessage)
 
-    let isMounted = true;
+    let isMounted = true
 
     const loadAffirmation = async () => {
-      // Safety check for spark runtime
-      if (typeof window.spark === 'undefined') {
-        const fallback = staticAffirmations[Math.floor(Math.random() * staticAffirmations.length)]
-        if (isMounted) setAffirmation(fallback)
+      const todayKey = getTodayKey()
+
+      if (affirmation && affirmation.date === todayKey) {
+        // Already have a valid affirmation for today
         return
       }
 
-      // Try to load existing affirmation from KV first for instant display
+      // Fetch a new one
       try {
-        const todayKey = getTodayKey()
-        let existing: DailyAffirmation | null = null
-        if (window.spark.kv) {
-            existing = await window.spark.kv.get('daily-affirmation') as DailyAffirmation | null
-        }
+        const gemini = new GeminiCore()
+        const AffirmationSchema = z.object({
+          text: z.string().max(120),
+          author: z.string(),
+        })
 
-        if (existing && existing.date === todayKey) {
-             if (isMounted) setAffirmation({ text: existing.text, author: existing.author })
-             // If we have an existing affirmation, we can load faster
-             setTimeout(() => {
-                 if (isMounted) {
-                     setIsLoading(false)
-                     onLoadComplete()
-                 }
-             }, 800)
-             return;
-        }
-      } catch {
-          // ignore error
-      }
-
-      // If no existing affirmation or different day, fetch new one in background
-      try {
-        if (!window.spark.llmPrompt || !window.spark.llm) {
-            throw new Error('Spark LLM not available');
-        }
-
-        const promptText = window.spark.llmPrompt`Generate a single inspirational quote or Bible verse for daily motivation. Return the result as valid JSON in the following format:
-{
-  "text": "the quote or verse text",
-  "author": "author name or Bible reference"
-}
-Keep the text under 120 characters. Make it profound and uplifting. Generate a different quote each time.`
+        const prompt = `Generate a single, edgy, dark humor, or fatalistic but motivational quote for a dashboard. Return as JSON: { "text": "...", "author": "..." }. Keep it under 120 characters.`
         
-        const response = await window.spark.llm(promptText, "gpt-4o-mini", true)
-        
-        if (!response || typeof response !== 'string') {
-          throw new Error('Invalid response from AI service')
-        }
+        const data = await gemini.generateJSON(prompt, AffirmationSchema)
 
-        let data
-        try {
-          data = JSON.parse(response)
-        } catch (parseError) {
-          console.error('JSON parse error:', parseError)
-          throw new Error('Failed to parse affirmation')
-        }
-        
-        if (data.text && data.author) {
-          const todayKey = getTodayKey()
-          const affirmationData: DailyAffirmation = {
-            text: data.text,
-            author: data.author,
-            date: todayKey
+        if (isMounted && data) {
+          const newAffirmation: DailyAffirmation = {
+            ...data,
+            date: todayKey,
           }
-          if (isMounted) setAffirmation({ text: data.text, author: data.author })
-          if (window.spark.kv) {
-              await window.spark.kv.set('daily-affirmation', affirmationData)
-          }
+          setAffirmation(newAffirmation)
         }
       } catch (error) {
-        console.error('Failed to load affirmation:', error)
-        const fallback = staticAffirmations[Math.floor(Math.random() * staticAffirmations.length)]
-        if (isMounted) setAffirmation(fallback)
+        console.error('Failed to load new affirmation:', error)
+        // Set a static fallback if API fails
+        if (isMounted) {
+            const fallback = staticAffirmations[Math.floor(Math.random() * staticAffirmations.length)];
+            const fallbackAffirmation: DailyAffirmation = { ...fallback, date: todayKey };
+            setAffirmation(fallbackAffirmation);
+        }
       }
     }
 
-    // Start loading affirmation
-    loadAffirmation();
+    loadAffirmation()
 
     // Reduced artificial delay from 3800ms to 1000ms for first load feel,
     // or faster if affirmation loads earlier.

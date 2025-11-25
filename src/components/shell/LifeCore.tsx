@@ -36,9 +36,9 @@ export const LifeCore = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="mt-4 text-xs tracking-[0.2em] text-cyan-200/60 font-sans uppercase"
+        className="mt-4 text-xs tracking-[0.2em] text-cyan-200/60 font-sans"
       >
-        LifeSync Active
+        LiFE-iN-SYNC
       </motion.p>
     </div>
   );

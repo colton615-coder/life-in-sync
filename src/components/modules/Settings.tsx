@@ -7,11 +7,12 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { Sparkle, Vibrate, SpeakerHigh, ShieldCheck, Trash, Warning, Key, LinkSimple } from '@phosphor-icons/react'
+import { Sparkle, Vibrate, SpeakerHigh, ShieldCheck, Trash, Warning, Key, LinkSimple, WifiHigh, WifiSlash } from '@phosphor-icons/react'
 import { getUsageStats, resetUsageStats } from '@/lib/completion-tracker'
 import type { AIUsageStats } from '@/lib/types'
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
 import { useSoundEffects } from '@/hooks/use-sound-effects'
+import { GeminiCore } from '@/services/gemini_core'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,7 @@ export function Settings() {
   const [soundEnabled, setSoundEnabled] = useKV<boolean>('settings-sound-enabled', false)
   const [safeModeEnabled, setSafeModeEnabled] = useKV<boolean>('settings-safe-mode-enabled', true)
   const [apiKey, setApiKey] = useKV<string>('gemini-api-key', '')
+  const [isTestingConnection, setIsTestingConnection] = useState(false)
   const [isOwner, setIsOwner] = useState(false)
   const [usageStats, setUsageStats] = useState<AIUsageStats | null>(null)
   
@@ -36,8 +38,8 @@ export function Settings() {
   const { playSound } = useSoundEffects()
 
   const checkOwnership = async () => {
-    const user = await spark.user()
-    setIsOwner(user.isOwner)
+    // TODO: Replace with actual ownership check
+    setIsOwner(true)
   }
 
   const loadUsageStats = useCallback(async () => {
@@ -65,6 +67,39 @@ export function Settings() {
     setTimeout(() => window.location.reload(), 1500)
   }
 
+  const handleTestConnection = async () => {
+    if (!apiKey) {
+      toast.error('API Key is empty', {
+        description: 'Please paste your API key before testing.',
+      });
+      return;
+    }
+
+    setIsTestingConnection(true);
+    const toastId = toast.loading('Testing connection...');
+
+    try {
+      // Use the key from the input field directly for the test
+      const testGemini = new GeminiCore(apiKey);
+      await testGemini.generateContent('test'); // A minimal request
+
+      toast.success('Connection Successful', {
+        id: toastId,
+        description: 'Your API key is valid and working.',
+        icon: <WifiHigh size={16} />,
+      });
+    } catch (error: any) {
+      console.error('API Connection Test Failed:', error);
+      toast.error('Connection Failed', {
+        id: toastId,
+        description: error.message || 'Please check the key and try again.',
+        icon: <WifiSlash size={16} />,
+      });
+    } finally {
+      setIsTestingConnection(false);
+    }
+  };
+
   const handleClearAllData = async () => {
     if (safeModeEnabled) {
       const confirmation = prompt('To disable safe mode and delete all data, type "DELETE" and click OK.')
@@ -82,8 +117,10 @@ export function Settings() {
         'workouts-list', 'workouts-history', 'knox-messages',
         'shopping-list', 'calendar-events', 'golf-swings'
       ]
+      // This is a client-side app, so we can clear localStorage directly
+      // This is a simplified approach. A more robust solution would use the useKV hook's clear method if it existed.
       for (const key of dataKeys) {
-        await spark.kv.delete(key)
+        localStorage.removeItem(key)
       }
       triggerHaptic('success')
       playSound('success')
@@ -235,6 +272,13 @@ export function Settings() {
                 onChange={(e) => setApiKey(e.target.value)}
                 className="font-mono"
               />
+              <Button
+                onClick={handleTestConnection}
+                disabled={isTestingConnection}
+                variant="outline"
+              >
+                {isTestingConnection ? 'Testing...' : 'Test'}
+              </Button>
               <Button onClick={handleSaveApiKey}>Save</Button>
             </div>
             <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -264,7 +308,7 @@ export function Settings() {
             <div className="p-4 border rounded-lg space-y-2">
               <div className="flex items-center gap-2 mb-2">
                 <Sparkle className="text-primary" size={20} />
-                <h4 className="font-semibold">Spark LLM</h4>
+                <h4 className="font-semibold">{GeminiCore.getModelName()}</h4>
               </div>
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
