@@ -116,11 +116,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [tasks] = useKV<Task[]>('tasks', [])
   const [completedWorkouts] = useKV<CompletedWorkout[]>('completed-workouts', [])
   const [knoxMessages] = useKV<ChatMessage[]>('knox-messages', [])
-  const [greeting, setGreeting] = useState({ text: '', author: '' });
-
-  useEffect(() => {
-    setGreeting(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
-  }, []);
 
   const today = useMemo(() => new Date().toISOString().split('T')[0], [])
 
@@ -198,9 +193,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
       {/* Greeting / Context */}
       <div className="space-y-1 mb-8 px-2">
-         <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Command Center</h2>
-         <p className="text-xl text-white font-bold tracking-tight">"{greeting.text}"</p>
-         <p className="text-xs text-slate-500 font-mono">- {greeting.author}</p>
+        <h2 className="text-2xl text-white font-bold tracking-tight">Welcome Back, Colton</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
