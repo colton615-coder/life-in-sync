@@ -19,7 +19,7 @@ export class GeminiCore {
     this.apiKey = apiKey ?? this.getApiKey();
     if (!this.apiKey) {
       console.error("Gemini API Key is not available. Connection will fail.");
-      // throw new Error("API Key is missing."); // Or handle gracefully
+      throw new Error("API Key is missing. Please set it in the application settings or via the VITE_GEMINI_API_KEY environment variable.");
     }
     this.genAI = new GoogleGenerativeAI(this.apiKey);
     this.model = this.genAI.getGenerativeModel({
