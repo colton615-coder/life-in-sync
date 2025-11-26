@@ -17,7 +17,6 @@ export default {
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
     '<rootDir>/dist/',
-    '<rootDir>/tests/',
   ],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };

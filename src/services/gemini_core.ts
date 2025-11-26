@@ -50,8 +50,10 @@ export class GeminiCore {
     }
 
     // 2. Priority: Vite Environment Variable
-    const viteKey = import.meta.env?.VITE_GEMINI_API_KEY;
-    if (viteKey) return viteKey;
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      const viteKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (viteKey) return viteKey;
+    }
 
     // 3. Fallback for non-Vite environments (e.g. running scripts via tsx)
     if (typeof process !== 'undefined' && process.env.GEMINI_API_KEY) {

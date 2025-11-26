@@ -113,7 +113,9 @@ export function Finance() {
         <Card className="glass-card text-center p-8">
           <h2 className="text-2xl font-bold mb-4 text-gradient-cyan">Audit Submitted</h2>
            <p className="text-muted-foreground mb-6">Your financial data has been sent to "The Accountant". Generate your report to continue.</p>
-          <Button onClick={generateReport}>Generate Report</Button>
+          <Button onClick={generateReport} disabled={isLoading}>
+            {isLoading ? 'Generating...' : 'Generate Report'}
+          </Button>
         </Card>
       );
     }
