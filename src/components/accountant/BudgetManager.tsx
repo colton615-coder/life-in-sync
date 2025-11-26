@@ -9,11 +9,11 @@ import { v4 as uuidv4 } from 'uuid';
 // Mock Data based on user specification
 const MOCK_BUDGET = 5000;
 const MOCK_EXPENSES: Expense[] = [
-  { id: '1', category: 'Housing', amount: 1500, date: '2025-11-01', description: 'Rent' },
-  { id: '2', category: 'Transportation', amount: 300, date: '2025-11-05', description: 'Gas & Car Payment' },
-  { id: '3', category: 'Food', amount: 600, date: '2025-11-10', description: 'Groceries' },
-  { id: '4', category: 'Entertainment', amount: 150, date: '2025-11-12', description: 'Movie night' },
-  { id: '5', category: 'Hobbies', amount: 250, date: '2025-11-20', description: 'Golf supplies' },
+  { id: uuidv4(), category: 'Housing', amount: 1500, date: '2025-11-01', description: 'Rent' },
+  { id: uuidv4(), category: 'Transportation', amount: 300, date: '2025-11-05', description: 'Gas & Car Payment' },
+  { id: uuidv4(), category: 'Food', amount: 600, date: '2025-11-10', description: 'Groceries' },
+  { id: uuidv4(), category: 'Entertainment', amount: 150, date: '2025-11-12', description: 'Movie night' },
+  { id: uuidv4(), category: 'Hobbies', amount: 250, date: '2025-11-20', description: 'Golf supplies' },
 ];
 
 import { cn } from '@/lib/utils';
