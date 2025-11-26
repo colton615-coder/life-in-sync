@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useKV } from '@/hooks/use-kv';
 import { FinancialAudit, ACCOUNTANT_CATEGORIES } from '@/types/accountant';
 import { FinancialReport } from '@/types/financial_report';
@@ -42,6 +42,13 @@ export function Finance() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // DEV: Log error state changes for debugging purposes
+  useEffect(() => {
+    if (error) {
+      console.error('Finance component error state updated:', error);
+    }
+  }, [error]);
+
   const auditSteps = [
     'monthlyIncome',
     ...Object.keys(ACCOUNTANT_CATEGORIES),
@@ -58,8 +65,12 @@ export function Finance() {
       setReport(generatedReport);
     } catch (err) {
       console.error("Failed to generate financial report:", err);
-      if (err instanceof Error && err.message.includes("API Key is missing")) {
+      const errorMessage = err instanceof Error ? err.message.toLowerCase() : '';
+
+      if (errorMessage.includes("api key is missing")) {
         setError("A Gemini API Key is required. Please add it in the Settings module to use The Accountant.");
+      } else if (errorMessage.includes('api key not valid') || errorMessage.includes('permission denied')) {
+        setError('Your API Key is invalid. Please check it in the Settings module.');
       } else {
         setError("The Accountant's analysis could not be processed. This can be a temporary issue. Please try again.");
       }
@@ -90,6 +101,7 @@ export function Finance() {
       return <SarcasticLoader text="Analyzing your questionable life choices..." />;
     }
 
+    // Prioritize showing the error message
     if (error) {
       return (
         <Card className="glass-card text-center p-8 border-red-500/50">
