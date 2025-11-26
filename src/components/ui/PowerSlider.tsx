@@ -29,7 +29,7 @@ export function PowerSlider({
     }
   }, [])
 
-  const handleDragEnd = async (_: any, info: PanInfo) => {
+  const handleDragEnd = async (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const threshold = width * 0.5 // 50% threshold
     if (info.offset.x > threshold && !disabled) {
       setCompleted(true)

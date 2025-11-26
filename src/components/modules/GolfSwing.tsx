@@ -1,262 +1,35 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   Upload, 
   Video, 
-  Target,
-  CheckCircle,
-  ChartBar,
   Sparkle,
   Trash,
   ArrowsLeftRight,
   List,
   Warning
 } from '@phosphor-icons/react'
-import { SwingAnalysis, GolfClub, SwingMetrics } from '@/lib/types'
+import { SwingAnalysis, GolfClub } from '@/lib/types'
 import { useKV } from '@/hooks/use-kv'
 import { toast } from 'sonner'
 import { processVideo, analyzePoseData, generateFeedback } from '@/lib/golf/swing-analyzer'
 import { validateVideoFile } from '@/lib/golf/video-utils'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { VideoPlayerContainer } from '@/components/VideoPlayerContainer'
-import { KnoxHUD } from '@/components/KnoxHUD'
 import { SwingComparisonDialog } from '@/components/SwingComparisonDialog'
 import { ClubSelectionDialog } from '@/components/ClubSelectionDialog'
 import { GolfSwingState } from '@/lib/golf/state'
 import { AnalysisCockpit } from '@/components/golf/AnalysisCockpit'
 
-/**
- * MetricCard: High-density visualization for a single data point.
- * Refactored for Midnight Glass aesthetic.
- */
-function MetricCard({
-  label,
-  value,
-  subValue,
-  score,
-  type = 'value',
-  delay = 0
-}: {
-  label: string
-  value: string | number
-  subValue?: string
-  score: number | 'excellent' | 'good' | 'fair' | 'poor'
-  type?: 'value' | 'rating'
-  delay?: number
-}) {
-  const isGood = typeof score === 'number'
-    ? score >= 70
-    : ['excellent', 'good'].includes(score)
-
-  const progressColor = isGood ? 'bg-[#2E8AF7]' : 'bg-orange-500' // Electric Blue vs Warning Orange
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4, delay, ease: "easeOut" }}
-    >
-      <div className="bg-white/5 backdrop-blur-md border border-white/5 rounded-xl p-4 relative overflow-hidden group hover:bg-white/10 transition-colors">
-        <div className="flex justify-between items-start mb-2">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-semibold">{label}</span>
-          {typeof score === 'string' && (
-               <Badge variant="outline" className={cn("text-[10px] px-1 py-0 h-5 border-0 bg-black/20 backdrop-blur font-mono", isGood ? "text-[#2E8AF7]" : "text-orange-500")}>
-                 {score.toUpperCase()}
-               </Badge>
-            )}
-        </div>
-
-        <div className="space-y-2">
-          <div className={cn("text-2xl font-bold tabular-nums tracking-tight font-mono text-[#2E8AF7] drop-shadow-[0_0_8px_rgba(46,138,247,0.5)]")}>
-            {value}
-          </div>
-
-          {type === 'value' && typeof score === 'number' && (
-             <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-               <motion.div
-                 initial={{ width: 0 }}
-                 animate={{ width: `${Math.min(100, score)}%` }}
-                 transition={{ duration: 1, delay: delay + 0.2, ease: "circOut" }}
-                 className={cn("h-full shadow-[0_0_10px_currentColor]", progressColor)}
-               />
-             </div>
-          )}
-
-          {subValue && (
-            <div className="text-[10px] text-slate-500 truncate font-mono opacity-80 group-hover:opacity-100 transition-opacity">
-              {subValue}
-            </div>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
-function MetricsGrid({ metrics }: { metrics: SwingMetrics }) {
-  const hipScore = Math.min(100, (metrics.hipRotation.total / 90) * 100)
-  const shoulderScore = Math.min(100, (metrics.shoulderRotation.total / 100) * 100)
-  const tempoScore = Math.abs(metrics.tempo.ratio - 2.0) < 0.3 ? 100 : 40
-
-  return (
-    <div className="grid grid-cols-2 gap-3 md:gap-4">
-      <MetricCard
-        label="Hip Rot."
-        value={`${metrics.hipRotation.total.toFixed(0)}°`}
-        subValue={`Impact: ${metrics.hipRotation.impact.toFixed(0)}°`}
-        score={hipScore}
-        delay={0.1}
-      />
-      <MetricCard
-        label="Shldr Turn"
-        value={`${metrics.shoulderRotation.total.toFixed(0)}°`}
-        subValue={`Back: ${metrics.shoulderRotation.backswing.toFixed(0)}°`}
-        score={shoulderScore}
-        delay={0.2}
-      />
-      <MetricCard
-        label="Head Stab."
-        value={metrics.headMovement.stability}
-        subValue={`Lat: ${(metrics.headMovement.lateral * 100).toFixed(1)}cm`}
-        score={metrics.headMovement.stability}
-        type="rating"
-        delay={0.3}
-      />
-      <MetricCard
-        label="Tempo"
-        value={`${metrics.tempo.ratio.toFixed(2)}`}
-        subValue="Target 2.0:1"
-        score={tempoScore}
-        delay={0.4}
-      />
-      <MetricCard
-        label="Weight Tr."
-        value={metrics.weightTransfer.rating}
-        subValue={`Shift: ${metrics.weightTransfer.impactShift}%`}
-        score={metrics.weightTransfer.rating}
-        type="rating"
-        delay={0.5}
-      />
-      <MetricCard
-        label="Plane"
-        value={`${(metrics.swingPlane.consistency * 100).toFixed(0)}%`}
-        subValue="Consistency"
-        score={metrics.swingPlane.consistency * 100}
-        delay={0.6}
-      />
-    </div>
-  )
-}
-
-function ProgressChart({ analyses, selectedClubFilter, setSelectedClubFilter }: { analyses: SwingAnalysis[], selectedClubFilter: string, setSelectedClubFilter: (v: string) => void }) {
-    const completedAnalyses = (analyses || []).filter(a => a.status === 'completed' && a.feedback)
-
-    const filteredAnalyses = selectedClubFilter === 'all'
-      ? completedAnalyses
-      : completedAnalyses.filter(a => a.club === selectedClubFilter)
-
-    const availableClubs = Array.from(new Set(
-      completedAnalyses.map(a => a.club).filter((club): club is GolfClub => !!club)
-    )).sort()
-
-    if (completedAnalyses.length === 0) {
-      return (
-        <Alert className="mt-6 bg-transparent border border-dashed border-white/10 text-slate-400">
-          <ChartBar size={18} />
-          <AlertDescription>
-            Complete at least one swing analysis to see your progress over time
-          </AlertDescription>
-        </Alert>
-      )
-    }
-
-    const chartData = filteredAnalyses
-      .sort((a, b) => new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime())
-      .map((analysis, idx) => ({
-        index: idx + 1,
-        score: analysis.feedback!.overallScore,
-        date: new Date(analysis.uploadedAt).toLocaleDateString(),
-        club: analysis.club || 'Untagged'
-      }))
-
-    const avgScore = chartData.length > 0
-      ? Math.round(chartData.reduce((sum, d) => sum + d.score, 0) / chartData.length)
-      : 0
-
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <h3 className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-semibold">Score History</h3>
-          <Select value={selectedClubFilter} onValueChange={setSelectedClubFilter}>
-            <SelectTrigger className="w-[140px] h-8 text-xs bg-white/5 border-white/10 text-white rounded-lg font-mono">
-              <SelectValue placeholder="Filter Club" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#151925] border-white/10 text-white">
-              <SelectItem value="all">All Clubs</SelectItem>
-              {availableClubs.map(club => (
-                <SelectItem key={club} value={club}>{club}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="glass-card p-4 border border-white/5">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-semibold">Average</div>
-            <div className="text-2xl font-bold text-[#2E8AF7] font-mono tracking-tight drop-shadow-[0_0_8px_rgba(46,138,247,0.5)]">{avgScore}</div>
-          </div>
-           <div className="glass-card p-4 border border-white/5">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-semibold">Total Swings</div>
-            <div className="text-2xl font-bold text-[#2E8AF7] font-mono tracking-tight drop-shadow-[0_0_8px_rgba(46,138,247,0.5)]">{filteredAnalyses.length}</div>
-          </div>
-        </div>
-
-        <div className="glass-card p-4 border border-white/5">
-          {chartData.length > 0 ? (
-              <div className="h-[150px] flex items-end justify-between gap-2 pt-4">
-                {chartData.map((data, idx) => {
-                  const height = (data.score / 100) * 100
-                  return (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-1 group">
-                      <div className="relative w-full flex flex-col items-center">
-                        <div
-                          className="w-full max-w-[20px] bg-[#2E8AF7]/80 rounded-t-sm transition-all group-hover:bg-[#2E8AF7] hover:shadow-[0_0_15px_rgba(46,138,247,0.5)]"
-                          style={{ height: `${height}%`, minHeight: '4px' }}
-                        />
-                         <div className="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 bg-[#151925]/90 backdrop-blur border border-white/10 px-2 py-1 rounded text-[10px] whitespace-nowrap z-10 transition-opacity font-mono text-white">
-                            {data.score} | {data.date}
-                         </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <div className="h-[150px] flex items-center justify-center text-slate-500 text-xs font-mono">
-                No data available
-              </div>
-            )}
-        </div>
-      </div>
-    )
-}
-
 export function GolfSwing() {
   const [analyses, setAnalyses] = useKV<SwingAnalysis[]>('golf-swing-analyses', [])
   const [viewState, setViewState] = useState<GolfSwingState>({ status: 'IDLE' })
   const [comparisonDialogOpen, setComparisonDialogOpen] = useState(false)
-  const [selectedClubFilter, setSelectedClubFilter] = useState<string>('all')
   const [historyOpen, setHistoryOpen] = useState(false)
-  const [showOverlay, setShowOverlay] = useState(true)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const selectionMadeRef = useRef(false)
@@ -366,7 +139,7 @@ export function GolfSwing() {
 
       setAnalyses(current => (current || []).map(a => a.id === analysisId ? completedAnalysis : a))
       setViewState({ status: 'VIEWING_RESULT', analysis: completedAnalysis })
-      toast.success('Swing analysis completed!', { description: `Overall score: ${feedback.overallScore}/100` })
+      toast.success('Swing analysis completed!', { description: `Overall score: ${globalFeedback.overallScore}/100` })
 
     } catch (error) {
       if (!isMounted.current) return
@@ -514,8 +287,6 @@ export function GolfSwing() {
       </>
     )
   }
-
-  const analysis = viewState.status === 'VIEWING_RESULT' ? viewState.analysis : null
 
   // Refactor 2.0: If viewing result, show AnalysisCockpit
   if (viewState.status === 'VIEWING_RESULT' && viewState.analysis) {

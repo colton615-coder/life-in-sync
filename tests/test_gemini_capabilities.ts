@@ -1,7 +1,5 @@
 
 import { aiManager } from '../src/services/ai_manager';
-import * as fs from 'fs';
-import * as path from 'path';
 
 // Mock Environment for testing
 if (!process.env.GEMINI_API_KEY) {

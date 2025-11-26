@@ -1,7 +1,7 @@
 // src/components/accountant/SpendingAnalysisReport.tsx
 import { FinancialReport } from '@/types/financial_report';
 import { motion } from 'framer-motion';
-import { BarChart, TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface SpendingAnalysisReportProps {
   analysis: FinancialReport['spendingAnalysis'];

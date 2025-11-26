@@ -1,7 +1,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, CheckSquare, ShoppingCart, Receipt } from '@phosphor-icons/react'
+import { Plus, CheckSquare, ShoppingCart } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { AddHabitDialog } from './AddHabitDialog'

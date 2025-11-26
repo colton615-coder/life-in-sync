@@ -1,4 +1,4 @@
-import type { AIProvider, AIRequest, AIResponse } from './types';
+import type { AIRequest, AIResponse } from './types';
 import { GeminiCore } from '@/services/gemini_core';
 
 export class AIRouter {

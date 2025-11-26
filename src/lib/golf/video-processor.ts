@@ -1,4 +1,4 @@
-import { Pose, PoseOptions, Results } from '@mediapipe/pose'
+import { Pose, Results } from '@mediapipe/pose'
 import { SwingPoseData, SwingLandmark } from '@/lib/types'
 
 /**
@@ -112,7 +112,6 @@ export class SwingVideoProcessor {
           this.canvas.height = height
 
           const duration = video.duration
-          const fps = 30 // Assumption if we can't detect it. most phones are 30 or 60.
           // We will step by a fixed interval to be safe, e.g., 33ms (approx 30fps)
           // or we can try to use requestVideoFrameCallback if supported.
 
@@ -165,7 +164,7 @@ export class SwingVideoProcessor {
         }
       }
 
-      video.onerror = (e) => reject(new Error('Video load error'))
+      video.onerror = () => reject(new Error('Video load error'))
     })
   }
 }

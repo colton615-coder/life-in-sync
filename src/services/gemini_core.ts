@@ -68,8 +68,7 @@ export class GeminiCore {
    * Generates content with retry logic for rate limits.
    */
   async generateContent(
-    prompt: string | Array<string | Part>,
-    config?: GenerationConfig
+    prompt: string | Array<string | Part>
   ): Promise<string> {
     if (!this.apiKey) {
       throw new Error('Gemini API Key is missing. Please set VITE_GEMINI_API_KEY.');
@@ -83,9 +82,10 @@ export class GeminiCore {
         const result = await this.model.generateContent(prompt);
         const response = await result.response;
         return response.text();
-      } catch (error: any) {
-        if (error.status === 429 || error.status === 503) {
-          console.warn(`Gemini API rate limit/unavailable (${error.status}). Retrying in ${delay}ms...`);
+      } catch (error: unknown) {
+        const apiError = error as { status?: number };
+        if (apiError.status === 429 || apiError.status === 503) {
+          console.warn(`Gemini API rate limit/unavailable (${apiError.status}). Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
           retries--;
           delay *= 2; // Exponential backoff

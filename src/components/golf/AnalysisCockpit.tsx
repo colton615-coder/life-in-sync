@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Play, Pause, ChevronLeft, BarChart3, SkipForward, SkipBack, Scan } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { SwingAnalysis, SwingPoseData } from '@/lib/types'
+import { SwingAnalysis } from '@/lib/types'
 import { VideoPlayerContainer, VideoPlayerController } from '@/components/VideoPlayerContainer'
-import { calculateInstantaneousMetrics, InstantMetrics } from '@/lib/golf/swing-analyzer'
+import { calculateInstantaneousMetrics } from '@/lib/golf/swing-analyzer'
 import { PhaseList } from '@/components/golf/PhaseList'
 import { VirtualJogDial } from '@/components/golf/VirtualJogDial'
 
@@ -33,10 +33,6 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isJogMode, setIsJogMode] = useState(false)
-
-  // We still calculate instant metrics for internal logic if needed,
-  // but the primary display is now the PhaseList
-  const [instantMetrics, setInstantMetrics] = useState<InstantMetrics | null>(null)
 
   const videoControllerRef = useRef<VideoPlayerController>(null)
   const scrubberRef = useRef<HTMLDivElement>(null)

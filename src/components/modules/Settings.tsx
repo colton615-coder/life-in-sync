@@ -88,7 +88,7 @@ export function Settings() {
         description: 'Your API key is valid and working.',
         icon: <WifiHigh size={16} />,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('API Connection Test Failed:', error);
       toast.error('Connection Failed', {
         id: toastId,

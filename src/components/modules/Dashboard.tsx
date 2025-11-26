@@ -11,12 +11,10 @@ import {
 } from '@phosphor-icons/react'
 import { Module, Habit, Expense, Task, CompletedWorkout, ChatMessage } from '@/lib/types'
 import { useKV } from '@/hooks/use-kv'
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { GlassCard } from '@/components/shell/GlassCard'
-import { QUOTES } from '@/lib/quotes'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Sparkline, TrendIndicator } from '@/components/Sparkline'
+import { Sparkline } from '@/components/Sparkline'
 import { QuickActionsFab } from '@/components/QuickActionsFab'
 
 interface DashboardProps {

@@ -127,7 +127,7 @@ export function EditHabitDialog({ open, onOpenChange, habit, onSave }: EditHabit
           <div>
             <label className="text-sm font-medium text-slate-400 mb-2 block">Tracking Method</label>
             <div className="grid gap-2">
-              {trackingTypeOptions.map(({ value, icon: Icon, label, description }) => (
+              {trackingTypeOptions.map(({ value, icon: Icon, label }) => (
                 <button
                   key={value}
                   onClick={() => setEditedHabit({ ...editedHabit, trackingType: value })}

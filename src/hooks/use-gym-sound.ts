@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 export function useGymSound() {
   const playBuzzer = useCallback(() => {
     // Check if AudioContext is supported
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
 
     const ctx = new AudioContext();
@@ -27,7 +27,7 @@ export function useGymSound() {
   }, []);
 
   const playSuccess = useCallback(() => {
-     const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
 
     const ctx = new AudioContext();

@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState } from 'react'
 import { motion, useDragControls, PanInfo } from 'framer-motion'
 import { cn } from '@/lib/utils'
 

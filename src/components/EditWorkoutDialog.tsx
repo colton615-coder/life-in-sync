@@ -3,8 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { WorkoutPlan, Exercise } from '@/lib/types'
 import { useState, useEffect } from 'react'
-import { Trash, Plus, PencilSimple } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { Trash } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -44,7 +43,7 @@ export function EditWorkoutDialog({ open, onOpenChange, workout, onSave }: EditW
     onOpenChange(false)
   }
 
-  const updateExercise = (index: number, field: keyof Exercise, value: any) => {
+  const updateExercise = (index: number, field: keyof Exercise, value: string | number) => {
     const updated = [...exercises]
     updated[index] = { ...updated[index], [field]: value }
     setExercises(updated)

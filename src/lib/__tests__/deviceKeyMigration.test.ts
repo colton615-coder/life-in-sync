@@ -7,7 +7,7 @@ describe('getDeviceKey migration', () => {
 
   beforeEach(() => {
     // Mock localStorage for jsdom environment
-    let store: { [key: string]: string } = {};
+    const store: { [key: string]: string } = {};
     Object.defineProperty(window, 'localStorage', {
       value: {
         getItem: jest.fn((key: string) => store[key] || null),

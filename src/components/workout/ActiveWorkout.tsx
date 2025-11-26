@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { WorkoutPlan, Exercise, CompletedExercise, WorkoutSet, PersonalRecord } from '@/lib/types'
-import { Card } from '@/components/Card'
+import { WorkoutPlan, CompletedExercise, WorkoutSet, PersonalRecord } from '@/lib/types'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Play, Pause, X, Check, Timer, Barbell, ArrowLeft, ArrowRight, SkipForward } from '@phosphor-icons/react'
+import { Play, Pause, X, Check, ArrowLeft, ArrowRight, SkipForward } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { GlassKeypad } from '@/components/ui/GlassKeypad'
 import { PowerSlider } from '@/components/ui/PowerSlider'
@@ -151,13 +149,6 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
     setKeypadFocus({ setIndex: index, field })
     setKeypadValue(field === 'weight' ? (set.weight || 0).toString() : (set.reps || 0).toString())
     setKeypadOpen(true)
-  }
-
-  const handleKeypadSubmit = (val: string) => {
-    if (keypadFocus) {
-      handleSetUpdate(keypadFocus.setIndex, keypadFocus.field!, parseFloat(val))
-    }
-    setKeypadOpen(false)
   }
 
   const nextExercise = () => {

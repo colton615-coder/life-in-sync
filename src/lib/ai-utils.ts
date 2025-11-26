@@ -27,7 +27,7 @@ export async function callAIWithRetry(
  * Re-implements the logic using standard JSON.parse after cleaning,
  * similar to GeminiCore's internal logic but exposed for external use.
  */
-export function parseAIJsonResponse<T>(response: string, expectedStructure?: string): T {
+export function parseAIJsonResponse<T>(response: string): T {
   try {
     let cleanedResponse = response.trim();
     
@@ -54,12 +54,12 @@ export function validateAIResponse(data: unknown, requiredFields: string[]): voi
 
   for (const field of requiredFields) {
     const fieldPath = field.split('.');
-    let current: any = data;
+    let current: unknown = data;
     let fieldExists = true;
     
     for (const part of fieldPath) {
       if (current && typeof current === 'object' && part in current) {
-        current = current[part];
+        current = (current as Record<string, unknown>)[part];
       } else {
         fieldExists = false;
         break;

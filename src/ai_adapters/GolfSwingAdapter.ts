@@ -25,7 +25,7 @@ export class GolfSwingAdapter {
    *                   if it's complex, or passes the Part object directly.
    *                   However, to keep it simple for the caller, we'll accept a standardized object or description.
    */
-  async analyze_swing_mechanics(mediaInput: any): Promise<string> {
+  async analyze_swing_mechanics(mediaInput: unknown): Promise<string> {
     // In a real app, we would convert File/Blob to the format Gemini expects (inlineData with mimeType and base64)
     // For now, we assume mediaInput is properly formatted or we wrap it.
     // If mediaInput is just a string (path) for testing, we handle that.

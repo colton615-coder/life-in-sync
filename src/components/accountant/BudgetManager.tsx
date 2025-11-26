@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
 
 export function BudgetManager() {
-  const [report, setReport] = useKV<FinancialReport | null>('financial-report', null);
+  const [report] = useKV<FinancialReport | null>('financial-report', null);
   // TODO: Add state for chat history, user input, and loading status
 
   if (!report) {

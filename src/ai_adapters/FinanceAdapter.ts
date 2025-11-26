@@ -15,7 +15,7 @@ export class FinanceAdapter {
     this.core = core;
   }
 
-  async analyze_market_data(textData: string, chartImage?: any): Promise<string> {
+  async analyze_market_data(textData: string, chartImage?: unknown): Promise<string> {
     const prompt = [
       FinanceAdapter.SYSTEM_PROMPT,
       `Analyze the following market data and provide a structured JSON output summarizing key metrics and trends:`,

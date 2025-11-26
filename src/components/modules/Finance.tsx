@@ -7,8 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card } from '@/components/Card';
-import { ArrowLeft, ArrowRight, BrainCircuit } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { SarcasticLoader } from '@/components/SarcasticLoader';
 import { FirstMeeting } from '../accountant/FirstMeeting';
 import { BudgetManager } from '../accountant/BudgetManager';
@@ -18,10 +17,10 @@ const createNewAudit = (): FinancialAudit => {
   const expenses = {} as FinancialAudit['expenses'];
   for (const catKey in ACCOUNTANT_CATEGORIES) {
     const category = catKey as keyof typeof ACCOUNTANT_CATEGORIES;
-    // @ts-ignore
+    // @ts-expect-error - The type of expenses is too complex to type correctly
     expenses[category] = {};
     for (const subcatKey in ACCOUNTANT_CATEGORIES[category].subcategories) {
-      // @ts-ignore
+      // @ts-expect-error - The type of expenses is too complex to type correctly
       expenses[category][subcatKey] = null;
     }
   }
@@ -156,7 +155,7 @@ export function Finance() {
                   const value = parseFloat(e.target.value);
                   setAudit(prev => {
                     const newExpenses = { ...prev.expenses };
-                    // @ts-ignore
+                    // @ts-expect-error - The type of newExpenses is too complex to type correctly
                     newExpenses[categoryKey][subcatKey] = isNaN(value) ? null : value;
                     return { ...prev, expenses: newExpenses };
                   });

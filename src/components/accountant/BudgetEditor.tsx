@@ -29,7 +29,7 @@ export function BudgetEditor() {
     const updatedBudget = { ...report.proposedBudget };
     const category = updatedBudget[categoryKey];
     if (category && typeof category === 'object' && 'subcategories' in category) {
-      // @ts-ignore
+      // @ts-expect-error - The type of category.subcategories is too complex to type correctly
       category.subcategories[subcategoryKey] = newValue;
       handleBudgetUpdate(updatedBudget);
     }

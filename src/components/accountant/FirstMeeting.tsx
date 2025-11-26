@@ -6,14 +6,12 @@ import { SarcasticLoader } from '@/components/SarcasticLoader';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card } from '@/components/Card';
 
 import { SpendingAnalysisReport } from './SpendingAnalysisReport';
 import { ProposedBudgetReport } from './ProposedBudgetReport';
 import { AdviceReport } from './AdviceReport';
 
 const MEETING_STEPS = ['introduction', 'spendingAnalysis', 'proposedBudget', 'moneyManagementAdvice', 'conclusion'] as const;
-type MeetingStep = typeof MEETING_STEPS[number];
 
 interface FirstMeetingProps {
   onComplete: () => void;

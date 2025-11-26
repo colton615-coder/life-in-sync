@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion'
+import { motion, useMotionValue, PanInfo } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
 

@@ -17,7 +17,7 @@ export class WorkoutAdapter {
     this.core = core;
   }
 
-  async generate_routine(userStats: any, goals: any): Promise<string> {
+  async generate_routine(userStats: unknown, goals: unknown): Promise<string> {
     const statsStr = JSON.stringify(userStats);
     const goalsStr = JSON.stringify(goals);
 

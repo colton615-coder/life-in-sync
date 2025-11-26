@@ -19,7 +19,7 @@ export class KnoxAdapter {
    * STRICTLY NO RETENTION: This method does not save input or output to any local storage.
    * It relies on the ephemeral nature of the function call.
    */
-  async audit_security_log(logData: any): Promise<string> {
+  async audit_security_log(logData: unknown): Promise<string> {
     // Privacy guard: ensure we are not logging this data to console or disk within this application layer.
     // The GeminiCore does not log payloads by default.
 
@@ -32,7 +32,7 @@ export class KnoxAdapter {
     return this.core.generateContent(prompt);
   }
 
-  async validate_transaction(transactionData: any): Promise<string> {
+  async validate_transaction(transactionData: unknown): Promise<string> {
       return this.audit_security_log(transactionData);
   }
 }

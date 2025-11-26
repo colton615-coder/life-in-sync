@@ -1,4 +1,4 @@
-import { SwingPoseData, SwingMetrics, SwingFeedback, GolfClub, PhaseMetric, SwingLandmark } from '@/lib/types'
+import { SwingPoseData, SwingMetrics, SwingFeedback, GolfClub, PhaseMetric } from '@/lib/types'
 import { SwingVideoProcessor } from './video-processor'
 import { GeminiCore } from '@/services/gemini_core'
 import { z } from 'zod'
@@ -371,7 +371,7 @@ export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | n
 
       if (parsed.phases) {
          // Map AI response keys to internal interface
-         phaseDetails = Object.entries(parsed.phases).reduce((acc, [key, val]: [string, any]) => {
+         phaseDetails = Object.entries(parsed.phases).reduce((acc, [key, val]) => {
              if (val) {
                 acc[key] = {
                     aiAnalysis: val.analysis || val.aiAnalysis || '',

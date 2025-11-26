@@ -49,7 +49,7 @@ export function getDeviceKey(): string {
       localStorage.setItem('deviceKey', unstableKey);
       return unstableKey;
     }
-  } catch (error) {
+  } catch {
     // This might fail in environments without navigator, continue to UUID
   }
 
@@ -90,7 +90,7 @@ export async function encrypt(plaintext: string): Promise<string> {
     
     const base64 = btoa(String.fromCharCode(...combined))
     return base64
-  } catch (error) {
+  } catch {
     throw new Error('Failed to encrypt data')
   }
 }
@@ -117,7 +117,7 @@ export async function decrypt(encryptedData: string): Promise<string> {
     
     const decoder = new TextDecoder()
     return decoder.decode(decryptedData)
-  } catch (error) {
+  } catch {
     throw new Error('Failed to decrypt data')
   }
 }

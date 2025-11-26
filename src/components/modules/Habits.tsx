@@ -22,9 +22,7 @@ const trackingTypeOptions = [
 export function Habits() {
   const [habits, setHabits] = useKV<Habit[]>('habits', [])
   const [creationStep, setCreationStep] = useState(0)
-  const [filterTab, setFilterTab] = useState('all')
   const [showConfetti, setShowConfetti] = useState(false)
-  const [animatingStreak, setAnimatingStreak] = useState<string | null>(null)
   const [editHabit, setEditHabit] = useState<Habit | null>(null)
   const [isEditOpen, setIsEditOpen] = useState(false)
   
@@ -123,54 +121,12 @@ export function Habits() {
           setShowConfetti(true)
           setTimeout(() => setShowConfetti(false), 4000)
           
-          setAnimatingStreak(habitId)
-          setTimeout(() => setAnimatingStreak(null), 600)
-          
           if (newStreak === 7 || newStreak === 30 || newStreak === 100) {
             toast.success(`🎉 ${newStreak} day streak! Amazing!`)
           } else {
             toast.success('🎉 Goal completed!')
           }
         }
-
-        return { ...habit, entries, streak: newStreak }
-      })
-      return updated
-    })
-  }
-
-  const decrementNumerical = (habitId: string) => {
-    setHabits((current) => {
-      if (!current) return []
-      
-      const updated = current.map(habit => {
-        if (habit.id !== habitId) return habit
-
-        const entries = [...(habit.entries || [])]
-        const todayIndex = entries.findIndex(e => e.date === today)
-        
-        if (todayIndex === -1) return habit
-        
-        const currentValue = habit.trackingType === 'numerical' 
-          ? (entries[todayIndex].value || 0) 
-          : (entries[todayIndex].minutes || 0)
-        
-        if (currentValue <= 0) return habit
-        
-        const newValue = currentValue - 1
-
-        if (newValue === 0) {
-          entries.splice(todayIndex, 1)
-        } else {
-          const newEntry: HabitEntry = {
-            date: today,
-            ...(habit.trackingType === 'numerical' ? { value: newValue } : {}),
-            ...(habit.trackingType === 'time' ? { minutes: newValue } : {})
-          }
-          entries[todayIndex] = newEntry
-        }
-
-        const newStreak = calculateStreak(entries, habit)
 
         return { ...habit, entries, streak: newStreak }
       })
@@ -197,9 +153,6 @@ export function Habits() {
           setTimeout(() => setShowConfetti(false), 4000)
           
           const newStreak = calculateStreak([...entries, { date: today, completed: true }], habit)
-          
-          setAnimatingStreak(habitId)
-          setTimeout(() => setAnimatingStreak(null), 600)
           
           if (newStreak === 7 || newStreak === 30 || newStreak === 100) {
             toast.success(`🎉 ${newStreak} day streak! Amazing!`)
@@ -263,11 +216,11 @@ export function Habits() {
     toast.success('Habit updated')
   }
 
-  const getTodayEntry = (habit: Habit): HabitEntry | undefined => {
+  const getTodayEntry = useCallback((habit: Habit): HabitEntry | undefined => {
     return habit.entries?.find(e => e.date === today)
-  }
+  }, [today])
 
-  const isCompletedToday = (habit: Habit): boolean => {
+  const isCompletedToday = useCallback((habit: Habit): boolean => {
     const todayEntry = getTodayEntry(habit)
     if (!todayEntry) return false
 
@@ -279,9 +232,9 @@ export function Habits() {
       return (todayEntry.minutes || 0) >= (habit.target || 0)
     }
     return false
-  }
+  }, [getTodayEntry])
 
-  const getIconComponent = (iconName: HabitIcon, habitName?: string) => {
+  const getIconComponent = (iconName: HabitIcon) => {
     const IconComponent = HabitIcons[iconName]
     if (IconComponent) return IconComponent
     return HabitIcons.Target
@@ -300,14 +253,11 @@ export function Habits() {
     })
     
     return { activeHabits: active, completedHabits: completed }
-  }, [habits, today])
+  }, [habits, isCompletedToday])
 
   const filteredHabits = useMemo(() => {
-    if (filterTab === 'all') return [...activeHabits, ...completedHabits]
-    if (filterTab === 'active') return activeHabits
-    if (filterTab === 'completed') return completedHabits
-    return habits || []
-  }, [filterTab, activeHabits, completedHabits, habits])
+    return [...activeHabits, ...completedHabits]
+  }, [activeHabits, completedHabits])
 
   const container = {
     hidden: { opacity: 0 },

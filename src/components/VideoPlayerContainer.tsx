@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
 import { Play, Pause, CornersIn, ArrowsOutSimple } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
@@ -53,7 +52,7 @@ export function VideoPlayerContainer({
   // Expose controller methods
   useEffect(() => {
     if (controllerRef) {
-      // @ts-ignore - rewriting ref current
+      // @ts-expect-error - rewriting ref current
       controllerRef.current = {
         play: () => videoRef.current?.play(),
         pause: () => videoRef.current?.pause(),

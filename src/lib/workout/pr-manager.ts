@@ -1,6 +1,4 @@
-import { PersonalRecord, Exercise, WorkoutSet } from '@/lib/types'
-
-const KEY = 'personal-records'
+import { PersonalRecord, WorkoutSet } from '@/lib/types'
 
 // Epley Formula: 1RM = Weight * (1 + Reps/30)
 export function calculateOneRepMax(weight: number, reps: number): number {
