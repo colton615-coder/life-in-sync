@@ -71,8 +71,7 @@ export function Finance() {
         setError("A Gemini API Key is required. Please add it in the Settings module to use The Accountant.");
       } else if (errorMessage.includes('api key not valid') || errorMessage.includes('permission denied')) {
         setError('Your API Key is invalid. Please check it in the Settings module.');
-      }
-      else {
+      } else {
         setError("The Accountant is currently unavailable. Please try again later.");
       }
     } finally {
