@@ -1,8 +1,8 @@
 import { useState, useEffect, Suspense, lazy } from 'react'
-import { Toaster } from '@/components/ui/sonner'
+import { Toaster } from '@/components/shell/Toaster'
 import { toast } from 'sonner'
 import { Module } from '@/lib/types'
-import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { GlobalErrorBoundary } from '@/components/shell/GlobalErrorBoundary'
 import { clearAllAppData } from '@/lib/clear-data'
 import { LoadingScreen } from './components/LoadingScreen'
 import { SarcasticLoader } from './components/SarcasticLoader'
@@ -84,36 +84,34 @@ function App() {
 
     return (
       <Suspense fallback={<ModuleLoader />}>
-        <ErrorBoundary>
-          {(() => {
-            switch (activeModule) {
-              case 'dashboard':
-                return <Dashboard onNavigate={handleModuleChange} />
-              case 'habits':
-                return <Habits />
-              case 'finance':
-                return <Finance />
-              case 'tasks':
-                return <Tasks />
-              case 'workouts':
-                return <Workouts />
-              case 'knox':
-                return <Knox />
-              case 'shopping':
-                return <Shopping />
-              case 'calendar':
-                return <Calendar />
-              case 'golf':
-                return <GolfSwing />
-              case 'connections':
-                return <Connections />
-              case 'settings':
-                return <Settings />
-              default:
-                return <Dashboard onNavigate={handleModuleChange} />
-            }
-          })()}
-        </ErrorBoundary>
+        {(() => {
+          switch (activeModule) {
+            case 'dashboard':
+              return <Dashboard onNavigate={handleModuleChange} />
+            case 'habits':
+              return <Habits />
+            case 'finance':
+              return <Finance />
+            case 'tasks':
+              return <Tasks />
+            case 'workouts':
+              return <Workouts />
+            case 'knox':
+              return <Knox />
+            case 'shopping':
+              return <Shopping />
+            case 'calendar':
+              return <Calendar />
+            case 'golf':
+              return <GolfSwing />
+            case 'connections':
+              return <Connections />
+            case 'settings':
+              return <Settings />
+            default:
+              return <Dashboard onNavigate={handleModuleChange} />
+          }
+        })()}
       </Suspense>
     )
   }
@@ -127,30 +125,32 @@ function App() {
   const isGolfModule = activeModule === 'golf';
 
   return (
-    <AppBackground>
-      <div className="min-h-screen">
-        <a href="#main-content" className="skip-to-content text-white">
-          Skip to main content
-        </a>
+    <GlobalErrorBoundary>
+      <AppBackground>
+        <div className="min-h-screen">
+          <a href="#main-content" className="skip-to-content text-white">
+            Skip to main content
+          </a>
 
-        {/* Global Header (LifeCore) - Conditional */}
-        {!isGolfModule && <LifeCore />}
+          {/* Global Header (LifeCore) - Conditional */}
+          {!isGolfModule && <LifeCore />}
 
-        {/* Main Content Area */}
-        {/* Adjusted padding to account for the Floating Dock at bottom */}
-        <main id="main-content" className="md:px-8 pb-32">
-          {renderModule()}
-        </main>
+          {/* Main Content Area */}
+          {/* Adjusted padding to account for the Floating Dock at bottom */}
+          <main id="main-content" className="md:px-8 pb-32">
+            {renderModule()}
+          </main>
 
-        {/* Floating Dock Navigation */}
-        <FloatingDock
-            activeModule={activeModule}
-            onNavigate={handleModuleChange}
-        />
+          {/* Floating Dock Navigation */}
+          <FloatingDock
+              activeModule={activeModule}
+              onNavigate={handleModuleChange}
+          />
 
-        <Toaster position="top-right" richColors />
-      </div>
-    </AppBackground>
+          <Toaster />
+        </div>
+      </AppBackground>
+    </GlobalErrorBoundary>
   );
 }
 
