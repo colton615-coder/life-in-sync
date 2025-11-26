@@ -1,7 +1,7 @@
 // src/components/accountant/AccountantChat.tsx
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send } from 'lucide-react';
+import { PaperPlaneRight } from '@phosphor-icons/react';
 import { useRef, useEffect, useState } from 'react';
 
 // Define the structure for a chat message
@@ -23,13 +23,15 @@ export interface Expense {
 
 interface AccountantChatProps {
   messages: ChatMessage[];
+  // budget and expenses are reserved for future AI integration
   budget: number;
   expenses: Expense[];
   onSendMessage: (message: string) => void;
   isLoading: boolean;
 }
 
-export function AccountantChat({ messages, budget, expenses, onSendMessage, isLoading }: AccountantChatProps) {
+export function AccountantChat({ messages, onSendMessage, isLoading }: AccountantChatProps) {
+  // Note: budget and expenses are passed via props for future AI integration
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
@@ -87,7 +89,7 @@ export function AccountantChat({ messages, budget, expenses, onSendMessage, isLo
           }}
         />
         <Button type="submit" size="icon" className="h-full" disabled={isLoading} aria-label="Send message">
-          <Send className="h-5 w-5" />
+          <PaperPlaneRight className="h-5 w-5" />
         </Button>
       </form>
     </div>

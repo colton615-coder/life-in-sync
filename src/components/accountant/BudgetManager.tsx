@@ -1,14 +1,18 @@
 // src/components/accountant/BudgetManager.tsx
+import { useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { useKV } from '@/hooks/use-kv';
 import { FinancialReport } from '@/types/financial_report';
 import { SarcasticLoader } from '@/components/SarcasticLoader';
 import { AccountantChat, ChatMessage, Expense } from './AccountantChat';
-import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 // Mock Data based on user specification
 const MOCK_BUDGET = 5000;
-const MOCK_EXPENSES: Expense[] = [
+
+// Function to create mock expenses with unique IDs
+const createMockExpenses = (): Expense[] => [
   { id: uuidv4(), category: 'Housing', amount: 1500, date: '2025-11-01', description: 'Rent' },
   { id: uuidv4(), category: 'Transportation', amount: 300, date: '2025-11-05', description: 'Gas & Car Payment' },
   { id: uuidv4(), category: 'Food', amount: 600, date: '2025-11-10', description: 'Groceries' },
@@ -16,11 +20,9 @@ const MOCK_EXPENSES: Expense[] = [
   { id: uuidv4(), category: 'Hobbies', amount: 250, date: '2025-11-20', description: 'Golf supplies' },
 ];
 
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-
 export function BudgetManager() {
   const [report, setReport] = useKV<FinancialReport | null>('financial-report', null);
+  const mockExpenses = useMemo(() => createMockExpenses(), []);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'initial-welcome-message',
@@ -48,7 +50,7 @@ export function BudgetManager() {
 
     // Mock AI response with a delay
     setTimeout(() => {
-      const totalExpenses = MOCK_EXPENSES.reduce((sum, expense) => sum + expense.amount, 0);
+      const totalExpenses = mockExpenses.reduce((sum, expense) => sum + expense.amount, 0);
       const remainingBudget = MOCK_BUDGET - totalExpenses;
 
       const aiResponse: ChatMessage = {
@@ -84,7 +86,7 @@ export function BudgetManager() {
       <AccountantChat
         messages={messages}
         budget={MOCK_BUDGET}
-        expenses={MOCK_EXPENSES}
+        expenses={mockExpenses}
         onSendMessage={handleSendMessage}
         isLoading={isLoading}
       />
