@@ -10,14 +10,12 @@ import { Button } from '@/components/ui/button';
 
 // Mock Data based on user specification
 const MOCK_BUDGET = 5000;
-
-// Function to create mock expenses with unique IDs
-const createMockExpenses = (): Expense[] => [
-  { id: uuidv4(), category: 'Housing', amount: 1500, date: '2025-11-01', description: 'Rent' },
-  { id: uuidv4(), category: 'Transportation', amount: 300, date: '2025-11-05', description: 'Gas & Car Payment' },
-  { id: uuidv4(), category: 'Food', amount: 600, date: '2025-11-10', description: 'Groceries' },
-  { id: uuidv4(), category: 'Entertainment', amount: 150, date: '2025-11-12', description: 'Movie night' },
-  { id: uuidv4(), category: 'Hobbies', amount: 250, date: '2025-11-20', description: 'Golf supplies' },
+const MOCK_EXPENSES: Expense[] = [
+  { id: '1', category: 'Housing', amount: 1500, date: '2025-11-01', description: 'Rent' },
+  { id: '2', category: 'Transportation', amount: 300, date: '2025-11-05', description: 'Gas & Car Payment' },
+  { id: '3', category: 'Food', amount: 600, date: '2025-11-10', description: 'Groceries' },
+  { id: '4', category: 'Entertainment', amount: 150, date: '2025-11-12', description: 'Movie night' },
+  { id: '5', category: 'Hobbies', amount: 250, date: '2025-11-20', description: 'Golf supplies' },
 ];
 
 export function BudgetManager() {
@@ -25,7 +23,7 @@ export function BudgetManager() {
   const mockExpenses = useMemo(() => createMockExpenses(), []);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
-      id: 'initial-welcome-message',
+      id: uuidv4(),
       sender: 'ai',
       text: "How can I assist you with your budget today? For example, you could ask: \"How can I free up an extra $100 for my hobbies?\"",
       timestamp: new Date(),
