@@ -121,6 +121,9 @@ export class GeminiCore {
       console.error('Failed to parse or validate JSON from Gemini response:', error);
       console.debug('Raw response:', rawText);
       console.debug('Cleaned JSON:', cleanedJson);
+      if (error instanceof z.ZodError) {
+        console.error('Zod validation issues:', JSON.stringify(error.issues, null, 2));
+      }
       throw new Error(`Gemini response was not valid JSON${schema ? ' or did not match schema' : ''}: ${(error as Error).message}`);
     }
   }
@@ -160,7 +163,10 @@ export class GeminiCore {
     const financialReportSchema = z.object({
       executiveSummary: z.string().min(50),
       spendingAnalysis: z.array(z.object({
-        category: z.nativeEnum(Object.keys(ACCOUNTANT_CATEGORIES)),
+        category: z.preprocess(
+          (val) => String(val).toLowerCase(),
+          z.nativeEnum(Object.keys(ACCOUNTANT_CATEGORIES))
+        ),
         totalSpent: z.number(),
         aiSummary: z.string().min(20),
         healthScore: z.number().min(1).max(10),
@@ -182,7 +188,10 @@ export class GeminiCore {
       moneyManagementAdvice: z.array(z.object({
         title: z.string(),
         description: z.string(),
-        relatedCategory: z.nativeEnum(Object.keys(ACCOUNTANT_CATEGORIES)),
+        relatedCategory: z.preprocess(
+            (val) => String(val).toLowerCase(),
+            z.nativeEnum(Object.keys(ACCOUNTANT_CATEGORIES))
+        ),
       })),
       reportGeneratedAt: z.string().datetime(),
       version: z.literal('1.0'),
