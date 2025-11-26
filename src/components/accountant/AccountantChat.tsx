@@ -86,7 +86,7 @@ export function AccountantChat({ messages, budget, expenses, onSendMessage, isLo
             }
           }}
         />
-        <Button type="submit" size="icon" className="h-full" disabled={isLoading}>
+        <Button type="submit" size="icon" className="h-full" disabled={isLoading} aria-label="Send message">
           <Send className="h-5 w-5" />
         </Button>
       </form>
