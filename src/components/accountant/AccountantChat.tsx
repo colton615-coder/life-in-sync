@@ -49,7 +49,12 @@ export function AccountantChat({ messages, budget, expenses, onSendMessage, isLo
 
   return (
     <div className="p-4 glass-card rounded-lg flex flex-col h-[500px]">
-      <div className="flex-grow space-y-4 overflow-y-auto pr-2">
+      <div
+        className="flex-grow space-y-4 overflow-y-auto pr-2"
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions"
+      >
         {messages.map((msg) => (
           <div key={msg.id} className={`p-3 rounded-lg ${msg.sender === 'ai' ? 'bg-white/5' : 'bg-cyan-500/10'}`}>
             <p className={`font-bold ${msg.sender === 'ai' ? 'text-cyan-400' : 'text-slate-200'}`}>
