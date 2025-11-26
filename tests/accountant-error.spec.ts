@@ -26,7 +26,7 @@ const createCompletedAudit = (): FinancialAudit => {
 test.describe('Accountant Feature Error Handling', () => {
   test('should display a specific error message for an invalid API key', async ({ page }) => {
     // 1. Mock the API endpoint to return a 400 Bad Request
-    await page.route('**/v1beta/models/gemini-2.5-pro:generateContent**', async (route) => {
+    await page.route('**/v1beta/models/gemini-*:generateContent*', async (route) => {
       await route.fulfill({
         status: 400,
         contentType: 'application/json',
