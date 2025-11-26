@@ -23,7 +23,7 @@ export function BudgetManager() {
   const [report, setReport] = useKV<FinancialReport | null>('financial-report', null);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
-      id: uuidv4(),
+      id: 'initial-welcome-message',
       sender: 'ai',
       text: "How can I assist you with your budget today? For example, you could ask: \"How can I free up an extra $100 for my hobbies?\"",
       timestamp: new Date(),
