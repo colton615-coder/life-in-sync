@@ -6,12 +6,13 @@ const createCompletedAudit = (): FinancialAudit => {
   const expenses = {} as FinancialAudit['expenses'];
   for (const catKey in ACCOUNTANT_CATEGORIES) {
     const category = catKey as keyof typeof ACCOUNTANT_CATEGORIES;
-    // @ts-ignore
-    expenses[category] = {};
+    // Properly type the category expenses object
+    const subcategoryObj = {} as FinancialAudit['expenses'][typeof category];
     for (const subcatKey in ACCOUNTANT_CATEGORIES[category].subcategories) {
-      // @ts-ignore
-      expenses[category][subcatKey] = Math.floor(Math.random() * 200) + 50; // Random value
+      // Properly type the subcategory value
+      subcategoryObj[subcatKey as keyof typeof ACCOUNTANT_CATEGORIES[typeof category]['subcategories']] = Math.floor(Math.random() * 200) + 50; // Random value
     }
+    expenses[category] = subcategoryObj;
   }
 
   return {
