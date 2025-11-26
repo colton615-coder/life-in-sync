@@ -72,7 +72,7 @@ export function Finance() {
       } else if (errorMessage.includes('api key not valid') || errorMessage.includes('permission denied')) {
         setError('Your API Key is invalid. Please check it in the Settings module.');
       } else {
-        setError("The Accountant is currently unavailable. Please try again later.");
+        setError("The Accountant's analysis could not be processed. This can be a temporary issue. Please try again.");
       }
     } finally {
       setIsLoading(false);

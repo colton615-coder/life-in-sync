@@ -29,7 +29,7 @@ interface AccountantChatProps {
   isLoading: boolean;
 }
 
-export function AccountantChat({ messages, budget, expenses, onSendMessage, isLoading }: AccountantChatProps) {
+export function AccountantChat({ messages, onSendMessage, isLoading }: AccountantChatProps) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
@@ -49,12 +49,7 @@ export function AccountantChat({ messages, budget, expenses, onSendMessage, isLo
 
   return (
     <div className="p-4 glass-card rounded-lg flex flex-col h-[500px]">
-      <div
-        className="flex-grow space-y-4 overflow-y-auto pr-2"
-        role="log"
-        aria-live="polite"
-        aria-relevant="additions"
-      >
+      <div className="flex-grow space-y-4 overflow-y-auto pr-2">
         {messages.map((msg) => (
           <div key={msg.id} className={`p-3 rounded-lg ${msg.sender === 'ai' ? 'bg-white/5' : 'bg-cyan-500/10'}`}>
             <p className={`font-bold ${msg.sender === 'ai' ? 'text-cyan-400' : 'text-slate-200'}`}>
@@ -86,7 +81,7 @@ export function AccountantChat({ messages, budget, expenses, onSendMessage, isLo
             }
           }}
         />
-        <Button type="submit" size="icon" className="h-full" disabled={isLoading} aria-label="Send message">
+        <Button type="submit" size="icon" className="h-full" disabled={isLoading}>
           <Send className="h-5 w-5" />
         </Button>
       </form>
