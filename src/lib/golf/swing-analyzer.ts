@@ -1,4 +1,3 @@
-import { callAIWithRetry } from '@/lib/ai-utils'
 import { SwingPoseData, SwingMetrics, SwingFeedback, GolfClub, PhaseMetric, SwingLandmark } from '@/lib/types'
 import { SwingVideoProcessor } from './video-processor'
 import { GeminiCore } from '@/services/gemini_core'

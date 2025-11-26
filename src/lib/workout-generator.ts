@@ -92,11 +92,10 @@ Muscle groups can include: chest, back, legs, arms, core, shoulders, cardio
 Categories: "Warm-up", "Work", "Cool-down"
 Difficulty levels: "beginner", "intermediate", "advanced"`;
 
-      console.log('[Workout Generation] Step 2: Calling AI with retry mechanism')
-      
-      const response = await callAIWithRetry(promptText, true)
+      console.log('[Workout Generation] Step 2: Calling AI')
       
       // Use generateJSON with Zod schema validation
+      const gemini = new GeminiCore();
       const data = await gemini.generateJSON(promptText, ResponseSchema);
       
       console.log('[Workout Generation] Step 3: AI response received and validated')
