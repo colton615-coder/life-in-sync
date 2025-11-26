@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QUOTES } from '@/lib/quotes'
-import AiBrainIcon from '@/components/ui/AiBrainIcon'
 
 interface LoadingScreenProps {
   onLoadComplete: () => void
@@ -92,17 +91,15 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
               }}
               className="flex justify-center mb-8"
             >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{
-                  duration: 20,
-                  repeat: Infinity,
-                  ease: 'linear',
-                }}
+              <div
                 className="w-40 h-40"
-              >
-                <AiBrainIcon />
-              </motion.div>
+                style={{
+                  backgroundImage: 'url(/assets/logo-brain.jpg)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center 30%',
+                  backgroundRepeat: 'no-repeat',
+                }}
+              />
             </motion.div>
 
             <AnimatePresence mode="wait">
