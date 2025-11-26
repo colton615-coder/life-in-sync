@@ -30,7 +30,7 @@ interface AccountantChatProps {
   isLoading: boolean;
 }
 
-export function AccountantChat({ messages, onSendMessage, isLoading }: AccountantChatProps) {
+export function AccountantChat({ messages, onSendMessage, isLoading, budget, expenses }: AccountantChatProps) {
   // Note: budget and expenses are passed via props for future AI integration
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
