@@ -2,6 +2,8 @@ import { GoogleGenerativeAI, GenerativeModel, GenerationConfig, Part } from '@go
 import { z } from 'zod';
 import { FinancialAudit, ACCOUNTANT_CATEGORIES } from '../types/accountant';
 import { FinancialReport } from '../types/financial_report';
+import { handleApiError, AppError } from './api-error-handler';
+import { logger } from './logger';
 
 /**
  * Core service for interacting with Google Gemini API.
@@ -70,9 +72,13 @@ export class GeminiCore {
   async generateContent(
     prompt: string | Array<string | Part>,
     config?: GenerationConfig
-  ): Promise<string> {
+  ): Promise<{ success: true; data: string } | AppError> {
     if (!this.apiKey) {
-      throw new Error('Gemini API Key is missing. Please set VITE_GEMINI_API_KEY.');
+      return {
+        success: false,
+        code: 'MISSING_API_KEY',
+        message: 'Gemini API Key is missing. Please configure it in Settings.',
+      };
     }
 
     let retries = GeminiCore.MAX_RETRIES;
@@ -82,7 +88,7 @@ export class GeminiCore {
       try {
         const result = await this.model.generateContent(prompt);
         const response = await result.response;
-        return response.text();
+        return { success: true, data: response.text() };
       } catch (error: any) {
         if (error.status === 429 || error.status === 503) {
           console.warn(`Gemini API rate limit/unavailable (${error.status}). Retrying in ${delay}ms...`);
@@ -90,12 +96,12 @@ export class GeminiCore {
           retries--;
           delay *= 2; // Exponential backoff
         } else {
-          console.error('Gemini API Error:', error);
-          throw error;
+          return handleApiError(error, 'GeminiCore.generateContent');
         }
       }
     }
-    throw new Error('Gemini API request failed after retries.');
+    const finalError = new Error('Gemini API request failed after multiple retries.');
+    return handleApiError(finalError, 'GeminiCore.generateContent');
   }
 
   /**
@@ -106,25 +112,38 @@ export class GeminiCore {
     prompt: string | Array<string | Part>,
     schema?: z.ZodType<T>,
     config?: GenerationConfig
-  ): Promise<T> {
-    const rawText = await this.generateContent(prompt, config);
+  ): Promise<{ success: true; data: T } | AppError> {
+    const contentResult = await this.generateContent(prompt, config);
+    if (!contentResult.success) {
+      return contentResult;
+    }
+
+    const rawText = contentResult.data;
     const cleanedJson = this.cleanJsonString(rawText);
 
     try {
       const parsed = JSON.parse(cleanedJson);
 
       if (schema) {
-        return schema.parse(parsed);
+        const result = schema.safeParse(parsed);
+        if (!result.success) {
+          logger.error('GeminiCore.generateJSON', 'Zod validation failed.', {
+            issues: result.error.issues,
+            rawData: rawText,
+          });
+          const validationError = new Error('The data structure from the AI was invalid.');
+          return handleApiError(validationError, 'GeminiCore.generateJSON');
+        }
+        return { success: true, data: result.data };
       }
-      return parsed as T;
+
+      return { success: true, data: parsed as T };
     } catch (error) {
-      console.error('Failed to parse or validate JSON from Gemini response:', error);
-      console.debug('Raw response:', rawText);
-      console.debug('Cleaned JSON:', cleanedJson);
-      if (error instanceof z.ZodError) {
-        console.error('Zod validation issues:', JSON.stringify(error.issues, null, 2));
-      }
-      throw new Error(`Gemini response was not valid JSON${schema ? ' or did not match schema' : ''}: ${(error as Error).message}`);
+      logger.error('GeminiCore.generateJSON', 'Failed to parse JSON from Gemini response.', {
+        rawData: cleanedJson,
+      });
+      const parseError = new Error('The response from the AI was not valid JSON.');
+      return handleApiError(parseError, 'GeminiCore.generateJSON');
     }
   }
 
@@ -158,7 +177,7 @@ export class GeminiCore {
    * @param auditData The user's completed financial audit.
    * @returns A structured FinancialReport object.
    */
-  async generateFinancialReport(auditData: FinancialAudit): Promise<FinancialReport> {
+  async generateFinancialReport(auditData: FinancialAudit): Promise<{ success: true; data: FinancialReport } | AppError> {
     // Dynamically create a Zod schema for the report for runtime validation.
     const financialReportSchema = z.object({
       executiveSummary: z.string().min(50),
@@ -200,7 +219,13 @@ export class GeminiCore {
     const prompt = this.constructFinancialReportPrompt(auditData);
 
     // Use generateJSON with the schema to get a validated object
-    return this.generateJSON(prompt, financialReportSchema);
+    const reportResult = await this.generateJSON(prompt, financialReportSchema);
+
+    if (!reportResult.success) {
+      return reportResult;
+    }
+
+    return { success: true, data: reportResult.data };
   }
 
   private constructFinancialReportPrompt(auditData: FinancialAudit): string {
