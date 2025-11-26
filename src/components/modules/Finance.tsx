@@ -45,7 +45,7 @@ export function Finance() {
   // DEV: Log error state changes for debugging purposes
   useEffect(() => {
     if (error) {
-      console.log('Finance component error state updated:', error);
+      console.error('Finance component error state updated:', error);
     }
   }, [error]);
 
