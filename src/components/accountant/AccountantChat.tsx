@@ -1,7 +1,7 @@
 // src/components/accountant/AccountantChat.tsx
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send } from 'lucide-react';
+import { PaperPlaneRight } from '@phosphor-icons/react';
 import { useRef, useEffect, useState } from 'react';
 
 // Define the structure for a chat message
@@ -23,6 +23,7 @@ export interface Expense {
 
 interface AccountantChatProps {
   messages: ChatMessage[];
+  // budget and expenses are reserved for future AI integration
   budget: number;
   expenses: Expense[];
   onSendMessage: (message: string) => void;
