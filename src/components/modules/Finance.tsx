@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useKV } from '@/hooks/use-kv';
-import { FinancialAudit, ACCOUNTANT_CATEGORIES } from '@/types/accountant';
+import { FinancialAudit, DEFAULT_ACCOUNTANT_CATEGORIES, UserCategory } from '@/types/accountant';
 import { FinancialReport } from '@/types/financial_report';
 import { GeminiCore } from '@/services/gemini_core';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,51 +8,72 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/Card';
-import { ArrowLeft, ArrowRight, BrainCircuit } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, Trash2 } from 'lucide-react';
 import { SarcasticLoader } from '@/components/SarcasticLoader';
-import { FirstMeeting } from '../accountant/FirstMeeting';
+import { TheAudit } from '../accountant/TheAudit';
 import { BudgetManager } from '../accountant/BudgetManager';
+import { IntakeForm } from './finance/IntakeForm';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 
-// Define the initial state for a new audit
+// Helper to convert the default const to the new flexible array format
+const createInitialCategories = (): UserCategory[] => {
+  return Object.values(DEFAULT_ACCOUNTANT_CATEGORIES).map(cat => ({
+    id: cat.id,
+    label: cat.label,
+    subcategories: Object.entries(cat.subcategories).map(([id, label]) => ({ id, label }))
+  }));
+};
+
 const createNewAudit = (): FinancialAudit => {
-  const expenses = {} as FinancialAudit['expenses'];
-  for (const catKey in ACCOUNTANT_CATEGORIES) {
-    const category = catKey as keyof typeof ACCOUNTANT_CATEGORIES;
-    // @ts-ignore
-    expenses[category] = {};
-    for (const subcatKey in ACCOUNTANT_CATEGORIES[category].subcategories) {
-      // @ts-ignore
-      expenses[category][subcatKey] = null;
-    }
-  }
+  const categories = createInitialCategories();
+  const expenses: FinancialAudit['expenses'] = {};
+
+  // Initialize empty expenses for default categories
+  categories.forEach(cat => {
+    expenses[cat.id] = {};
+    cat.subcategories.forEach(sub => {
+      expenses[cat.id][sub.id] = null;
+    });
+  });
 
   return {
     monthlyIncome: null,
+    categories,
     expenses,
     auditCompletedAt: null,
-    version: '1.0',
+    version: '2.0',
   };
 };
 
 export function Finance() {
   const [audit, setAudit] = useKV<FinancialAudit>('financial-audit', createNewAudit());
   const [report, setReport] = useKV<FinancialReport | null>('financial-report', null);
-  const [meetingCompleted, setMeetingCompleted] = useKV<boolean>('meeting-completed', false);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [auditCompleted, setAuditCompleted] = useKV<boolean>('audit-completed', false);
+  const [hasStarted, setHasStarted] = useKV<boolean>('finance-has-started', false);
+
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(-1); // -1 for income step
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // DEV: Log error state changes for debugging purposes
+  // Dialog states for editing categories
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newSubcategoryName, setNewSubcategoryName] = useState('');
+
+  // DEV: Log error state changes
   useEffect(() => {
     if (error) {
       console.error('Finance component error state updated:', error);
     }
   }, [error]);
 
-  const auditSteps = [
-    'monthlyIncome',
-    ...Object.keys(ACCOUNTANT_CATEGORIES),
-  ] as const;
+  // Migration logic for old data (simplified: just reset if version mismatch)
+  useEffect(() => {
+    if (audit && audit.version !== '2.0') {
+      console.warn('Migrating old audit data...');
+      setAudit(createNewAudit());
+    }
+  }, [audit, setAudit]);
 
   const generateReport = async () => {
     setIsLoading(true);
@@ -80,103 +101,189 @@ export function Finance() {
   };
 
   const handleNext = () => {
-    if (currentStep < auditSteps.length - 1) {
-      setCurrentStep(currentStep + 1);
+    if (currentCategoryIndex < audit.categories.length - 1) {
+      setCurrentCategoryIndex(currentCategoryIndex + 1);
     } else {
-      // Final step: complete the audit and generate the report
       generateReport();
     }
   };
 
   const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+    if (currentCategoryIndex > -1) {
+      setCurrentCategoryIndex(currentCategoryIndex - 1);
     }
   };
 
-  const renderCurrentStep = () => {
-    const stepKey = auditSteps[currentStep];
+  // --- Dynamic Category Management ---
 
+  const addCategory = () => {
+    if (!newCategoryName.trim()) return;
+    const newId = newCategoryName.toLowerCase().replace(/\s+/g, '-');
+
+    setAudit(prev => {
+      const newCat: UserCategory = {
+        id: newId,
+        label: newCategoryName,
+        subcategories: []
+      };
+      return {
+        ...prev,
+        categories: [...prev.categories, newCat],
+        expenses: { ...prev.expenses, [newId]: {} }
+      };
+    });
+    setNewCategoryName('');
+    setIsEditMode(false);
+    // Jump to the new category
+    setCurrentCategoryIndex(audit.categories.length);
+  };
+
+  const addSubcategory = (categoryId: string) => {
+      if (!newSubcategoryName.trim()) return;
+      const newId = newSubcategoryName.toLowerCase().replace(/\s+/g, '-');
+
+      setAudit(prev => {
+          const updatedCategories = prev.categories.map(cat => {
+              if (cat.id === categoryId) {
+                  return {
+                      ...cat,
+                      subcategories: [...cat.subcategories, { id: newId, label: newSubcategoryName }]
+                  };
+              }
+              return cat;
+          });
+
+          const updatedExpenses = { ...prev.expenses };
+          if (!updatedExpenses[categoryId]) updatedExpenses[categoryId] = {};
+          updatedExpenses[categoryId][newId] = null;
+
+          return { ...prev, categories: updatedCategories, expenses: updatedExpenses };
+      });
+      setNewSubcategoryName('');
+  };
+
+  const deleteCategory = (categoryId: string) => {
+      setAudit(prev => {
+          const updatedCategories = prev.categories.filter(c => c.id !== categoryId);
+          const updatedExpenses = { ...prev.expenses };
+          delete updatedExpenses[categoryId];
+          return { ...prev, categories: updatedCategories, expenses: updatedExpenses };
+      });
+      // Adjust index if needed
+      if (currentCategoryIndex >= audit.categories.length - 1) {
+          setCurrentCategoryIndex(Math.max(-1, audit.categories.length - 2));
+      }
+  };
+
+  // --- Rendering ---
+
+  if (!hasStarted) {
+      return <IntakeForm onStart={() => setHasStarted(true)} />;
+  }
+
+  const renderCurrentStep = () => {
     if (isLoading) {
-      return <SarcasticLoader text="Analyzing your questionable life choices..." />;
+      return <SarcasticLoader text="Conducting forensic analysis of your spending..." />;
     }
 
-    // Prioritize showing the error message
     if (error) {
       return (
         <Card className="glass-card text-center p-8 border-red-500/50">
-          <h2 className="text-2xl font-bold mb-4 text-red-400">Error</h2>
+          <h2 className="text-2xl font-bold mb-4 text-red-400">System Failure</h2>
           <p className="text-muted-foreground mb-6">{error}</p>
-          <Button onClick={generateReport}>Try Again</Button>
+          <Button onClick={generateReport}>Retry Analysis</Button>
         </Card>
       );
     }
 
-    if (meetingCompleted && report) {
+    if (auditCompleted && report) {
       return <BudgetManager />;
     }
 
     if (report) {
-       return <FirstMeeting onComplete={() => setMeetingCompleted(true)} />;
+       // This replaces the old FirstMeeting
+       return <TheAudit onComplete={() => setAuditCompleted(true)} />;
     }
 
-    if (audit?.auditCompletedAt && !report) {
-       return (
-        <Card className="glass-card text-center p-8">
-          <h2 className="text-2xl font-bold mb-4 text-gradient-cyan">Audit Submitted</h2>
-           <p className="text-muted-foreground mb-6">Your financial data has been sent to "The Accountant". Generate your report to continue.</p>
-          <Button onClick={generateReport} disabled={isLoading}>
-            {isLoading ? 'Generating...' : 'Generate Report'}
-          </Button>
-        </Card>
-      );
-    }
-
-    if (stepKey === 'monthlyIncome') {
+    // -- Step: Monthly Income --
+    if (currentCategoryIndex === -1) {
       return (
-        <Card className="glass-card p-6">
-          <Label htmlFor="monthly-income" className="text-lg font-semibold">What is your total monthly income?</Label>
-          <p className="text-sm text-muted-foreground mt-1 mb-4">This helps establish your baseline budget.</p>
+        <Card className="glass-card p-6 border-cyan-500/20">
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold tracking-tight text-white">Monthly Inflow</h2>
+                <p className="text-slate-400">Establish the baseline capital available for allocation.</p>
+            </div>
+          <Label htmlFor="monthly-income" className="text-xs font-mono uppercase tracking-widest text-cyan-400">Total Net Income</Label>
           <Input
             id="monthly-income"
             type="number"
-            placeholder="e.g., 5000"
+            placeholder="0.00"
             value={audit.monthlyIncome || ''}
             onChange={(e) => setAudit(prev => ({ ...prev, monthlyIncome: parseFloat(e.target.value) || null }))}
-            className="h-12 text-lg glass-morphic"
+            className="h-16 text-3xl font-mono glass-morphic mt-2 bg-black/20"
           />
         </Card>
       );
     }
 
-    const categoryKey = stepKey as keyof typeof ACCOUNTANT_CATEGORIES;
-    const category = ACCOUNTANT_CATEGORIES[categoryKey];
+    // -- Step: Categories --
+    const category = audit.categories[currentCategoryIndex];
+    if (!category) return null; // Should not happen
 
     return (
-      <Card className="glass-card p-6">
-        <h3 className="text-xl font-bold mb-4">{category.label}</h3>
-        <div className="space-y-4">
-          {Object.entries(category.subcategories).map(([subcatKey, subcatLabel]) => (
-            <div key={subcatKey}>
-              <Label htmlFor={`${categoryKey}-${subcatKey}`} className="font-semibold">{subcatLabel}</Label>
+      <Card className="glass-card p-6 border-white/10 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-4 opacity-10 font-black text-6xl text-cyan-500 select-none pointer-events-none">
+            {currentCategoryIndex + 1}
+        </div>
+
+        <div className="flex justify-between items-start mb-6">
+            <div>
+                <h3 className="text-2xl font-bold text-white">{category.label}</h3>
+                <p className="text-slate-400 text-sm">Input all monthly liabilities for this sector.</p>
+            </div>
+            <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-red-950/20" onClick={() => deleteCategory(category.id)}>
+                <Trash2 className="w-4 h-4" />
+            </Button>
+        </div>
+
+        <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+          {category.subcategories.map((subcat) => (
+            <div key={subcat.id}>
+              <Label htmlFor={`${category.id}-${subcat.id}`} className="text-xs font-mono uppercase text-slate-500">{subcat.label}</Label>
               <Input
-                id={`${categoryKey}-${subcatKey}`}
+                id={`${category.id}-${subcat.id}`}
                 type="number"
                 placeholder="0.00"
-                value={audit.expenses[categoryKey][subcatKey as keyof typeof audit.expenses[typeof categoryKey]] || ''}
+                value={audit.expenses[category.id]?.[subcat.id] ?? ''}
                 onChange={(e) => {
                   const value = parseFloat(e.target.value);
                   setAudit(prev => {
                     const newExpenses = { ...prev.expenses };
-                    // @ts-ignore
-                    newExpenses[categoryKey][subcatKey] = isNaN(value) ? null : value;
+                    if (!newExpenses[category.id]) newExpenses[category.id] = {};
+                    newExpenses[category.id][subcat.id] = isNaN(value) ? null : value;
                     return { ...prev, expenses: newExpenses };
                   });
                 }}
-                className="h-12 glass-morphic mt-1"
+                className="h-12 font-mono glass-morphic mt-1 bg-white/5"
               />
             </div>
           ))}
+
+          {/* Add Subcategory Inline */}
+          <div className="pt-4 flex gap-2">
+              <Input
+                placeholder="Add new item..."
+                className="h-10 text-sm glass-morphic"
+                value={newSubcategoryName}
+                onChange={(e) => setNewSubcategoryName(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') addSubcategory(category.id);
+                }}
+              />
+              <Button size="icon" variant="outline" onClick={() => addSubcategory(category.id)} disabled={!newSubcategoryName}>
+                  <Plus className="w-4 h-4" />
+              </Button>
+          </div>
         </div>
       </Card>
     );
@@ -186,46 +293,86 @@ export function Finance() {
     return <SarcasticLoader />;
   }
 
+  // Calculate Progress
+  const totalSteps = audit.categories.length + 1; // +1 for Income
+  const progress = ((currentCategoryIndex + 1) / totalSteps) * 100;
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 px-1 md:px-0 pt-4">
-       <div className="text-center">
-         <h1 className="text-4xl font-bold tracking-tight text-gradient-cyan">The Accountant</h1>
-         <p className="text-lg text-muted-foreground/80 mt-2">Your personal AI financial advisor.</p>
-       </div>
+    <div className="space-y-6 animate-in fade-in duration-500 px-1 md:px-0 pt-4 max-w-xl mx-auto">
+
+       {/* Header is hidden during The Audit or Budget Manager phases usually, but let's keep it minimal */}
+       {!report && (
+        <div className="flex justify-between items-end border-b border-white/10 pb-4">
+            <div>
+                <h1 className="text-2xl font-bold tracking-tight text-white">Data Entry Protocol</h1>
+                <p className="text-xs font-mono text-cyan-500">SESSION ID: {new Date().toLocaleDateString()}</p>
+            </div>
+            {/* Add Category Trigger */}
+             <Dialog open={isEditMode} onOpenChange={setIsEditMode}>
+                <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-950/30">
+                        <Plus className="w-4 h-4 mr-2" /> New Category
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="glass-card border-white/10">
+                    <DialogHeader>
+                        <DialogTitle>Add Custom Category</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Category Name</Label>
+                            <Input
+                                placeholder="e.g. Crypto, Project X"
+                                value={newCategoryName}
+                                onChange={(e) => setNewCategoryName(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={addCategory}>Create Category</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+       )}
 
       {/* Progress Bar */}
-      <div className="w-full bg-white/10 rounded-full h-2.5">
-        <motion.div
-          className="bg-cyan-400 h-2.5 rounded-full"
-          initial={{ width: '0%' }}
-          animate={{ width: `${((currentStep + 1) / auditSteps.length) * 100}%` }}
-          transition={{ duration: 0.5, ease: 'easeInOut' }}
-        />
-      </div>
+      {!report && (
+        <div className="w-full bg-white/5 h-1">
+            <motion.div
+            className="bg-cyan-500 h-1 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+            initial={{ width: '0%' }}
+            animate={{ width: `${Math.max(5, progress)}%` }}
+            transition={{ duration: 0.5, ease: 'circOut' }}
+            />
+        </div>
+      )}
 
       <AnimatePresence mode="wait">
         <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, x: 50 }}
+          key={currentCategoryIndex}
+          initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -50 }}
-          transition={{ duration: 0.3 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.2 }}
         >
           {renderCurrentStep()}
         </motion.div>
       </AnimatePresence>
 
       {!audit.auditCompletedAt && !report && (
-        <div className="flex justify-between items-center mt-6">
-            <Button variant="outline" onClick={handleBack} disabled={currentStep === 0}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+        <div className="flex justify-between items-center mt-8">
+            <Button variant="ghost" onClick={handleBack} disabled={currentCategoryIndex === -1} className="text-slate-400 hover:text-white">
+                <ArrowLeft className="mr-2 h-4 w-4" /> PREV
             </Button>
-            <p className="text-sm text-muted-foreground">
-            Step {currentStep + 1} of {auditSteps.length}
-            </p>
-            <Button onClick={handleNext} disabled={isLoading}>
-            {currentStep === auditSteps.length - 1 ? 'Finish & Analyze' : 'Next'}
-            <ArrowRight className="ml-2 h-4 w-4" />
+
+            <div className="text-xs font-mono text-slate-600">
+                STEP {currentCategoryIndex + 2} / {totalSteps}
+            </div>
+
+            <Button onClick={handleNext} disabled={isLoading} className="bg-cyan-600 hover:bg-cyan-500 text-white min-w-[120px]">
+            {currentCategoryIndex === audit.categories.length - 1 ? 'INITIATE AUDIT' : 'NEXT'}
+            {currentCategoryIndex !== audit.categories.length - 1 && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
         </div>
       )}

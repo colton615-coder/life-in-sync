@@ -1,12 +1,10 @@
 // src/types/financial_report.ts
 
-import { AccountantCategory, AccountantSubcategory } from './accountant';
-
 /**
  * A breakdown of spending for a single category.
  */
 export interface SpendingAnalysisCategory {
-  category: AccountantCategory;
+  category: string; // Category ID or Label
   /** The total amount spent in this category according to the user's audit. */
   totalSpent: number;
   /** A brief, insightful summary (1-2 sentences) from the AI about this category. */
@@ -18,16 +16,14 @@ export interface SpendingAnalysisCategory {
 /**
  * The proposed budget for a single category, broken down by subcategories.
  */
-export type ProposedBudgetCategory = {
-  [K in AccountantCategory]: {
+export interface ProposedBudgetCategoryItem {
     /** The AI-recommended monthly budget for this main category. */
     allocatedAmount: number;
     /** A breakdown of the budget for each subcategory. */
-    subcategories: {
-      [SK in AccountantSubcategory<K>]: number;
-    };
-  };
-};
+    subcategories: Record<string, number>;
+}
+
+export type ProposedBudgetCategory = Record<string, ProposedBudgetCategoryItem>;
 
 /**
  * A single piece of actionable advice from the AI.
@@ -38,7 +34,7 @@ export interface MoneyManagementTip {
   /** A detailed explanation of the tip and how to implement it. */
   description: string;
   /** The primary category this tip relates to. */
-  relatedCategory: AccountantCategory;
+  relatedCategory: string;
 }
 
 /**
@@ -59,5 +55,5 @@ export interface FinancialReport {
 
   /** Metadata for the report. */
   reportGeneratedAt: string; // ISO 8601
-  version: '1.0';
+  version: '2.0';
 }
