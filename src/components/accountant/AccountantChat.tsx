@@ -10,7 +10,6 @@ export interface ChatMessage {
   text: string;
   sender: 'user' | 'ai';
   timestamp: Date;
-  widget?: any; // To support future widget passing if needed
 }
 
 // Define the structure for an expense
