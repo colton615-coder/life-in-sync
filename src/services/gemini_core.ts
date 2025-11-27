@@ -64,19 +64,16 @@ export class GeminiCore {
     // Direct access to import.meta is causing issues in Jest, so we fallback to process.env
     // or we'd need to assume the build system handles replacement.
 
+    // Access import.meta.env safely for Vite environments
+    // This is wrapped in try-catch to handle environments where import.meta isn't available
     try {
-        // import.meta is not available in all environments (e.g. Node without ESM)
-        if (
-            typeof import !== 'undefined' &&
-            typeof import.meta !== 'undefined' &&
-            typeof import.meta.env !== 'undefined' &&
-            typeof import.meta.env.VITE_GEMINI_API_KEY === 'string' &&
-            import.meta.env.VITE_GEMINI_API_KEY.length > 0
-        ) {
-            return import.meta.env.VITE_GEMINI_API_KEY;
+        // @ts-expect-error - import.meta.env may not exist in all environments
+        const env = import.meta?.env;
+        if (env?.VITE_GEMINI_API_KEY && typeof env.VITE_GEMINI_API_KEY === 'string' && env.VITE_GEMINI_API_KEY.length > 0) {
+            return env.VITE_GEMINI_API_KEY;
         }
     } catch {
-        // SyntaxError or ReferenceError in Jest
+        // import.meta not available (e.g., Jest without ESM)
     }
 
     if (typeof process !== 'undefined' && process.env.GEMINI_API_KEY) {

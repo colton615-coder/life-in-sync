@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useKV } from '@/hooks/use-kv';
 import { FinancialAudit, DEFAULT_ACCOUNTANT_CATEGORIES, UserCategory } from '@/types/accountant';
 import { FinancialReport } from '@/types/financial_report';
@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card } from '@/components/Card';
+import { NeumorphicCard } from '@/components/NeumorphicCard';
 import { ArrowLeft, ArrowRight, Plus, Trash } from '@phosphor-icons/react';
 import { SarcasticLoader } from '@/components/SarcasticLoader';
 import { TheAudit } from '../accountant/TheAudit';
@@ -74,6 +74,17 @@ export function Finance() {
       setAudit(createNewAudit());
     }
   }, [audit, setAudit]);
+
+  // Calculate Progress - memoized to avoid recalculation on every render
+  // Must be called before any early returns to comply with React hooks rules
+  const { totalSteps, progress } = useMemo(() => {
+    if (!audit) {
+      return { totalSteps: 1, progress: 0 };
+    }
+    const steps = audit.categories.length + 1; // +1 for Income
+    const progressValue = ((currentCategoryIndex + 1) / steps) * 100;
+    return { totalSteps: steps, progress: progressValue };
+  }, [audit, currentCategoryIndex]);
 
   const generateReport = async () => {
     setIsLoading(true);
@@ -146,6 +157,7 @@ export function Finance() {
     });
     setNewCategoryName('');
     setIsEditMode(false);
+  };
 
   const addSubcategory = (categoryId: string) => {
       if (!newSubcategoryName.trim()) return;
@@ -197,11 +209,11 @@ export function Finance() {
 
     if (error) {
       return (
-        <Card className="glass-card text-center p-8 border-red-500/50">
+        <NeumorphicCard className="glass-card text-center p-8 border-red-500/50" animate={false}>
           <h2 className="text-2xl font-bold mb-4 text-red-400">System Failure</h2>
           <p className="text-muted-foreground mb-6">{error}</p>
           <Button onClick={generateReport}>Retry Analysis</Button>
-        </Card>
+        </NeumorphicCard>
       );
     }
 
@@ -217,7 +229,7 @@ export function Finance() {
     // -- Step: Monthly Income --
     if (currentCategoryIndex === -1) {
       return (
-        <Card className="glass-card p-6 border-cyan-500/20">
+        <NeumorphicCard className="glass-card p-6 border-cyan-500/20" animate={false}>
             <div className="mb-6">
                 <h2 className="text-2xl font-bold tracking-tight text-white">Monthly Inflow</h2>
                 <p className="text-slate-400">Establish the baseline Capital available for allocation.</p>
@@ -231,7 +243,7 @@ export function Finance() {
             onChange={(e) => setAudit(prev => ({ ...prev, monthlyIncome: parseFloat(e.target.value) || null }))}
             className="h-16 text-3xl font-mono glass-morphic mt-2 bg-black/20"
           />
-        </Card>
+        </NeumorphicCard>
       );
     }
 
@@ -240,7 +252,7 @@ export function Finance() {
     if (!category) return null; // Should not happen
 
     return (
-      <Card className="glass-card p-6 border-white/10 relative overflow-hidden">
+      <NeumorphicCard className="glass-card p-6 border-white/10 relative overflow-hidden" animate={false}>
         <div className="absolute top-0 right-0 p-4 opacity-10 font-black text-6xl text-cyan-500 select-none pointer-events-none">
             {currentCategoryIndex + 1}
         </div>
@@ -310,17 +322,13 @@ export function Finance() {
             );
           })()}
         </div>
-      </Card>
+      </NeumorphicCard>
     );
   };
 
   if (!audit) {
     return <SarcasticLoader />;
   }
-
-  // Calculate Progress
-  const totalSteps = audit.categories.length + 1; // +1 for Income
-  const progress = ((currentCategoryIndex + 1) / totalSteps) * 100;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 px-1 md:px-0 pt-4 max-w-xl mx-auto">

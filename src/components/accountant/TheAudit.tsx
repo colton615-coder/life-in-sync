@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useKV } from '@/hooks/use-kv';
 import { FinancialReport, SpendingAnalysisCategory, ProposedBudgetCategoryItem, MoneyManagementTip } from '@/types/financial_report';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/Card';
+import { NeumorphicCard } from '@/components/NeumorphicCard';
 import { motion } from 'framer-motion';
 import { PaperPlaneTilt as Send, ShieldCheck } from '@phosphor-icons/react';
 import { Textarea } from '@/components/ui/textarea';
@@ -127,7 +127,7 @@ export function TheAudit({ onComplete }: TheAuditProps) {
         if (widget.type === 'spending_analysis') {
             const data = widget.data as SpendingAnalysisCategory;
             return (
-                <Card className="mt-3 bg-white/5 border-l-4 border-l-red-500 p-4">
+                <NeumorphicCard className="mt-3 bg-white/5 border-l-4 border-l-red-500 p-4" animate={false}>
                     <div className="flex justify-between items-center mb-2">
                         <h4 className="font-bold uppercase text-red-400">{data.category}</h4>
                         <span className="font-mono text-xl">${data.totalSpent}</span>
@@ -136,7 +136,7 @@ export function TheAudit({ onComplete }: TheAuditProps) {
                         <div className={`h-full ${data.healthScore < 5 ? 'bg-red-500' : 'bg-amber-500'}`} style={{ width: `${data.healthScore * 10}%` }} />
                     </div>
                     <p className="text-xs text-right mt-1 text-muted-foreground">Health Score: {data.healthScore}/10</p>
-                </Card>
+                </NeumorphicCard>
             );
         }
         return null;
@@ -163,7 +163,7 @@ export function TheAudit({ onComplete }: TheAuditProps) {
              </div>
 
              {/* Chat Stream */}
-             <div className="flex-grow overflow-y-auto space-y-6 pr-4 custom-scrollbar pb-4">
+             <div className="flex-grow overflow-y-auto space-y-6 pr-4 custom-scrollbar pb-4" aria-live="polite" aria-label="Chat messages with The Accountant">
                 {messages.map((msg) => (
                     <motion.div
                         key={msg.id}
@@ -207,6 +207,7 @@ export function TheAudit({ onComplete }: TheAuditProps) {
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Reply to The Accountant..."
+                        aria-label="Your message to The Accountant"
                         className="min-h-[60px] max-h-[120px] bg-transparent border-none focus-visible:ring-0 resize-none font-mono text-sm"
                     />
                     <Button
@@ -214,6 +215,7 @@ export function TheAudit({ onComplete }: TheAuditProps) {
                         onClick={handleSendMessage}
                         disabled={!input.trim() || isTyping}
                         className="mb-1 bg-cyan-600 hover:bg-cyan-500"
+                        aria-label="Send message"
                     >
                         <Send className="w-4 h-4" />
                     </Button>
