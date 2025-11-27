@@ -299,7 +299,7 @@ export class GeminiCore {
 
       const prompt = `
         You are "The Accountant," an elite-level, direct, and analytical AI financial advisor.
-        You are currently in a "Audit Review Session" with the user.
+        You are currently in an "Audit Review Session" with the user.
 
         **Financial Report Context:**
         ${context}
