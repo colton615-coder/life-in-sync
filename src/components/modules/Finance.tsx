@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/Card';
-import { ArrowLeft, ArrowRight, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, Trash } from '@phosphor-icons/react';
 import { SarcasticLoader } from '@/components/SarcasticLoader';
 import { TheAudit } from '../accountant/TheAudit';
 import { BudgetManager } from '../accountant/BudgetManager';
