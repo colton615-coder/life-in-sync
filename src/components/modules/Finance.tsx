@@ -297,7 +297,7 @@ export function Finance() {
                     if (e.key === 'Enter') handleAddSubcategory();
                   }}
                 />
-                <Button size="icon" variant="outline" onClick={handleAddSubcategory} disabled={!newSubcategoryName}>
+                <Button size="icon" variant="outline" aria-label="Add subcategory" onClick={handleAddSubcategory} disabled={!newSubcategoryName}>
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
