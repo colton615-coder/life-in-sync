@@ -96,7 +96,22 @@ export const DEFAULT_ACCOUNTANT_CATEGORIES = {
   },
 };
 
-// --- New Dynamic Structure ---
+/**
+ * Dynamic Category Structure (v2.0)
+ *
+ * Migration overview:
+ * - Previously, categories and subcategories were defined statically in DEFAULT_ACCOUNTANT_CATEGORIES.
+ * - In v2.0, categories are now user-definable at runtime, allowing users to create, edit, and remove categories and subcategories.
+ * - The static DEFAULT_ACCOUNTANT_CATEGORIES object is retained as a source of initial/default values for new users.
+ * - On first use, DEFAULT_ACCOUNTANT_CATEGORIES is converted to the dynamic UserCategory[] format via a utility (e.g., createInitialCategories()).
+ * - This enables backward compatibility and a smooth migration path, while supporting full customization.
+ * - All new data and user actions operate on the dynamic UserCategory[] structure.
+ *
+ * Relationship:
+ * - DEFAULT_ACCOUNTANT_CATEGORIES: Static, hardcoded initial values.
+ * - UserCategory[]: Dynamic, user-managed list of categories/subcategories.
+ * - Conversion: Use createInitialCategories() to transform static to dynamic format.
+ */
 
 export interface UserSubcategory {
   id: string;
