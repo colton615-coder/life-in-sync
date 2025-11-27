@@ -1,121 +1,70 @@
 // src/types/accountant.ts
 
-export const ACCOUNTANT_CATEGORIES = {
-  housing: {
-    label: 'Housing',
-    subcategories: {
-      rentMortgage: 'Rent/Mortgage',
-      utilities: 'Utilities',
-    },
-  },
-  transportation: {
-    label: 'Transportation',
-    subcategories: {
-      carPayment: 'Car Payment',
-      insurance: 'Insurance',
-      fuel: 'Fuel',
-      maintenance: 'Maintenance',
-    },
-  },
-  food: {
-    label: 'Food',
-    subcategories: {
-      groceries: 'Groceries',
-      diningOut: 'Dining Out',
-    },
-  },
-  household: {
-    label: 'Household',
-    subcategories: {
-      supplies: 'Supplies',
-      consumables: 'Consumables',
-    },
-  },
-  healthAndSelf: {
-    label: 'Health & Self',
-    subcategories: {
-      medical: 'Medical',
-      grooming: 'Grooming',
-      gym: 'Gym',
-    },
-  },
-  techDigital: {
-    label: 'Tech/Digital',
-    subcategories: {
-      subscriptions: 'Subscriptions',
-      services: 'Services',
-    },
-  },
-  lifestyle: {
-    label: 'Lifestyle',
-    subcategories: {
-      gifts: 'Gifts',
-      vices: 'Vices',
-      apparel: 'Apparel',
-    },
-  },
-  recreation: {
-    label: 'Recreation',
-    subcategories: {
-      hobbies: 'Hobbies',
-      travel: 'Travel',
-    },
-  },
-  growth: {
-    label: 'Growth',
-    subcategories: {
-      education: 'Education',
-      business: 'Business',
-    },
-  },
-  pets: {
-    label: 'Pets',
-    subcategories: {
-      vet: 'Vet',
-      food: 'Food',
-    },
-  },
-  debtAndFees: {
-    label: 'Debt/Fees',
-    subcategories: {
-      interest: 'Interest',
-      loans: 'Loans',
-      lateFees: 'Late Fees',
-    },
-  },
-} as const; // 'as const' makes it readonly and specific
+// --- Data Model 2.0: Dynamic & Flexible ---
 
-// Type definitions based on the categories object
-export type AccountantCategory = keyof typeof ACCOUNTANT_CATEGORIES;
-export type AccountantSubcategory<T extends AccountantCategory> = keyof (typeof ACCOUNTANT_CATEGORIES)[T]['subcategories'];
+// A single expense subcategory (e.g., "Rent", "Groceries")
+export interface Subcategory {
+  id: string; // Unique ID (UUID)
+  name: string; // User-defined or template name
+  amount: number | null; // Monthly spend (null if not yet entered)
+}
 
-// Represents a single logged transaction after the audit
-export interface AccountantTransaction {
+// A main category containing subcategories (e.g., "Housing", "Food")
+export interface Category {
+  id: string; // Unique ID (UUID)
+  name: string; // User-defined or template name
+  subcategories: Subcategory[];
+}
+
+// --- The Audit Process Types ---
+
+// The severity of an issue identified by The Accountant
+export type AuditSeverity = 'critical' | 'warning' | 'observation' | 'praise';
+
+// A specific critique or question from the AI about a line item
+export interface AuditFlag {
   id: string;
-  amount: number;
-  date: string; // ISO 8601
-  description: string;
-  category: AccountantCategory;
-  subcategory: string; // This can't be strongly typed easily here, string is fine.
+  categoryId: string; // ID of the category being flagged
+  subcategoryId?: string; // ID of the specific subcategory (optional)
+  severity: AuditSeverity;
+  title: string; // e.g., "Excessive Dining Spend"
+  message: string; // The AI's direct comment
+  suggestedAction?: string; // e.g., "Reduce to $400"
 }
 
-// Dynamically create the audit expense structure from the categories object
-type AuditExpenses = {
-  [K in AccountantCategory]: {
-    [SK in AccountantSubcategory<K>]: number | null; // Use null for unanswered
-  };
-};
+// The user's response to an Audit Flag
+export interface AuditResolution {
+  flagId: string;
+  action: 'accept' | 'justify' | 'ignore';
+  justification?: string; // If 'justify' is chosen
+  adjustedAmount?: number; // If 'accept' involves a value change
+}
 
+// --- The Core Financial Document ---
 
-// Represents the user's financial profile from the initial audit
 export interface FinancialAudit {
-  // Basic income info
-  monthlyIncome: number | null;
-
-  // Detailed expense breakdown based on the audit
-  expenses: AuditExpenses;
-
   // Metadata
-  auditCompletedAt: string | null; // ISO 8601, null if not completed
-  version: '1.0'; // For future migrations
+  version: '2.0';
+  lastUpdated: string; // ISO 8601
+  status: 'intake' | 'data_entry' | 'audit_review' | 'completed';
+
+  // Core Data
+  monthlyIncome: number | null;
+  categories: Category[]; // Dynamic list
+
+  // The Audit Phase
+  flags: AuditFlag[]; // Issues raised by AI
+  resolutions: AuditResolution[]; // User responses
 }
+
+// --- Initial Templates ---
+// Helper to generate the initial "Option A" structure
+export const INITIAL_TEMPLATE_CATEGORIES = [
+  { name: 'Housing', subcategories: ['Rent/Mortgage', 'Utilities', 'Maintenance'] },
+  { name: 'Transportation', subcategories: ['Car Payment', 'Insurance', 'Fuel', 'Public Transit'] },
+  { name: 'Food', subcategories: ['Groceries', 'Dining Out', 'Coffee/Snacks'] },
+  { name: 'Health & Self', subcategories: ['Medical', 'Gym/Fitness', 'Personal Care'] },
+  { name: 'Subscriptions', subcategories: ['Streaming', 'Software', 'Memberships'] },
+  { name: 'Lifestyle', subcategories: ['Shopping', 'Entertainment', 'Hobbies'] },
+  { name: 'Savings & Debt', subcategories: ['Emergency Fund', 'Investments', 'Loan Repayment'] },
+];
