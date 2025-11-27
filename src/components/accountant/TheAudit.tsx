@@ -173,7 +173,11 @@ export function TheAudit({ onComplete }: TheAuditProps) {
              </div>
 
              {/* Chat Stream */}
-             <div className="flex-grow overflow-y-auto space-y-6 pr-4 custom-scrollbar pb-4">
+             <div
+                className="flex-grow overflow-y-auto space-y-6 pr-4 custom-scrollbar pb-4"
+                role="log"
+                aria-label="Conversation area"
+             >
                 {messages.map((msg) => (
                     <motion.div
                         key={msg.id}
