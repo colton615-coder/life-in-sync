@@ -77,7 +77,7 @@ export function BudgetManager() {
                 </div>
 
                 {/* Visual bar just for effect, assuming 100% allocation for now since we don't have 'actuals' here yet */}
-                <Progress value={100} className="h-1 bg-white/10" indicatorClassName="bg-cyan-500/50" />
+                <Progress value={100} className="h-1 bg-white/10" />
 
                 <div className="mt-3 space-y-1">
                     {Object.entries(catData.subcategories).map(([subId, amount]) => {
