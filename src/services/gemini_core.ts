@@ -65,10 +65,15 @@ export class GeminiCore {
     // or we'd need to assume the build system handles replacement.
 
     try {
-        // @ts-expect-error - import.meta is not available in all environments (e.g. Node without ESM)
-        if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) {
-             // @ts-expect-error - import.meta is not available in all environments
-             return import.meta.env.VITE_GEMINI_API_KEY;
+        // import.meta is not available in all environments (e.g. Node without ESM)
+        if (
+            typeof import !== 'undefined' &&
+            typeof import.meta !== 'undefined' &&
+            typeof import.meta.env !== 'undefined' &&
+            typeof import.meta.env.VITE_GEMINI_API_KEY === 'string' &&
+            import.meta.env.VITE_GEMINI_API_KEY.length > 0
+        ) {
+            return import.meta.env.VITE_GEMINI_API_KEY;
         }
     } catch {
         // SyntaxError or ReferenceError in Jest
