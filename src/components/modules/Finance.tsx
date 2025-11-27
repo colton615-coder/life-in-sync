@@ -251,7 +251,7 @@ export function Finance() {
                 <p className="text-slate-400 text-sm">Input all monthly liabilities for this sector.</p>
             </div>
             <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-red-950/20" onClick={() => deleteCategory(category.id)}>
-                <Trash2 className="w-4 h-4" />
+                <Trash className="w-4 h-4" />
             </Button>
         </div>
 
