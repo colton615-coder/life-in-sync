@@ -29,7 +29,7 @@ export class GeminiCore {
     if (!this.apiKey) {
       console.warn("Gemini API Key is missing. AI financial analysis and audit conversation features will not work. Please set VITE_GEMINI_API_KEY or GEMINI_API_KEY in your environment.");
     }
-    // We initiate even without key to allow graceful failure in methods
+    // We initialize even without key to allow graceful failure in methods
     // But GoogleGenerativeAI constructor requires a key, so we pass a dummy if missing to avoid crash,
     // and handle the error in generateContent.
     this.genAI = new GoogleGenerativeAI(this.apiKey || 'dummy_key');
