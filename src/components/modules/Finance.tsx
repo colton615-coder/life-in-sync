@@ -118,18 +118,27 @@ export function Finance() {
 
   const addCategory = () => {
     if (!newCategoryName.trim()) return;
-    const newId = newCategoryName.toLowerCase().replace(/\s+/g, '-');
+    // Generate base ID
+    const baseId = newCategoryName.toLowerCase().replace(/\s+/g, '-');
+    let categoryId = baseId;
+    let counter = 1;
+    // Check for duplicates
+    const existingIds = audit.categories.map(cat => cat.id);
+    while (existingIds.includes(categoryId)) {
+      categoryId = `${baseId}-${counter}`;
+      counter++;
+    }
 
     setAudit(prev => {
       const newCat: UserCategory = {
-        id: newId,
+        id: categoryId,
         label: newCategoryName,
         subcategories: []
       };
       return {
         ...prev,
         categories: [...prev.categories, newCat],
-        expenses: { ...prev.expenses, [newId]: {} }
+        expenses: { ...prev.expenses, [categoryId]: {} }
       };
     });
     setNewCategoryName('');
