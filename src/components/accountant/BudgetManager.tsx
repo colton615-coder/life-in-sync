@@ -70,7 +70,9 @@ export function BudgetManager() {
         {Object.entries(report.proposedBudget).map(([catId, catData]) => (
             <Card key={catId} className="glass-card p-4 border-white/5">
                 <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-bold uppercase text-slate-200 text-sm tracking-wider">{catId.replace(/-/g, ' ')}</h3>
+                    <h3 className="font-bold uppercase text-slate-200 text-sm tracking-wider">
+                        {report.categories.find(c => c.id === catId)?.label || catId.replace(/-/g, ' ')}
+                    </h3>
                     <span className="font-mono text-cyan-400">${catData.allocatedAmount.toLocaleString()}</span>
                 </div>
 
