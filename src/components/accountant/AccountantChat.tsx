@@ -51,7 +51,7 @@ export function AccountantChat({ messages, onSendMessage, isLoading }: Accountan
 
   return (
     <div className="p-4 glass-card rounded-lg flex flex-col h-full bg-black/20">
-      <div className="flex-grow space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+      <div className="flex-grow space-y-4 overflow-y-auto pr-2 scrollbar scrollbar-thumb-cyan-500 scrollbar-track-transparent">
         {messages.map((msg) => (
           <div key={msg.id} className={`p-3 rounded-lg ${msg.sender === 'ai' ? 'bg-white/5 border border-white/5' : 'bg-cyan-500/10 border border-cyan-500/20 ml-auto'}`}>
             <p className={`font-bold text-xs uppercase mb-1 ${msg.sender === 'ai' ? 'text-cyan-400' : 'text-slate-400'}`}>
