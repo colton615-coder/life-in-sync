@@ -279,30 +279,30 @@ export function Finance() {
           ))}
 
           {/* Add Subcategory Inline */}
-          <div className="pt-4 flex gap-2">
-              <Input
-                placeholder="Add new item..."
-                className="h-10 text-sm glass-morphic"
-                value={newSubcategoryName}
-                onChange={(e) => setNewSubcategoryName(e.target.value)}
-                onKeyDown={(e) => {
+          {(() => {
+            // Handler for adding subcategory, hoisted before JSX
+            const handleAddSubcategory = () => {
+              if (newSubcategoryName.trim()) {
+                addSubcategory(category.id);
+              }
+            };
+            return (
+              <div className="pt-4 flex gap-2">
+                <Input
+                  placeholder="Add new item..."
+                  className="h-10 text-sm glass-morphic"
+                  value={newSubcategoryName}
+                  onChange={(e) => setNewSubcategoryName(e.target.value)}
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter') handleAddSubcategory();
-                }}
-              />
-              <Button size="icon" variant="outline" onClick={handleAddSubcategory} disabled={!newSubcategoryName}>
+                  }}
+                />
+                <Button size="icon" variant="outline" onClick={handleAddSubcategory} disabled={!newSubcategoryName}>
                   <Plus className="w-4 h-4" />
-              </Button>
-          </div>
-
-        {/* Handler for adding subcategory */}
-        {/* Place this inside renderCurrentStep, above the return statement */}
-        {/* This ensures access to category, newSubcategoryName, and addSubcategory */}
-        {/* Handler definition: */}
-        const handleAddSubcategory = () => {
-          if (newSubcategoryName.trim()) {
-            addSubcategory(category.id);
-          }
-        };
+                </Button>
+              </div>
+            );
+          })()}
         </div>
       </Card>
     );
