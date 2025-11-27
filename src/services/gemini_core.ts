@@ -67,7 +67,6 @@ export class GeminiCore {
     try {
         // import.meta is not available in all environments (e.g. Node without ESM)
         if (
-            typeof import !== 'undefined' &&
             typeof import.meta !== 'undefined' &&
             typeof import.meta.env !== 'undefined' &&
             typeof import.meta.env.VITE_GEMINI_API_KEY === 'string' &&
