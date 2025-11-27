@@ -220,7 +220,7 @@ export function Finance() {
         <Card className="glass-card p-6 border-cyan-500/20">
             <div className="mb-6">
                 <h2 className="text-2xl font-bold tracking-tight text-white">Monthly Inflow</h2>
-                <p className="text-slate-400">Establish the baseline capital available for allocation.</p>
+                <p className="text-slate-400">Establish the baseline Capital available for allocation.</p>
             </div>
           <Label htmlFor="monthly-income" className="text-xs font-mono uppercase tracking-widest text-cyan-400">Total Net Income</Label>
           <Input
