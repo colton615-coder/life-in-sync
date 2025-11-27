@@ -4,6 +4,7 @@ import { FinancialAudit, ACCOUNTANT_CATEGORIES } from '../types/accountant';
 import { FinancialReport } from '../types/financial_report';
 import { handleApiError, AppError } from './api-error-handler';
 import { logger } from './logger';
+import { cleanAndParseJSON } from '../lib/ai-utils';
 
 /**
  * Core service for interacting with Google Gemini API.
@@ -119,11 +120,18 @@ export class GeminiCore {
     }
 
     const rawText = contentResult.data;
-    const cleanedJson = this.cleanJsonString(rawText);
+    // Use the robust parsing function from ai-utils
+    const parsed = cleanAndParseJSON(rawText);
+
+    if (parsed === null) {
+      logger.error('GeminiCore.generateJSON', 'Failed to extract or parse JSON from Gemini response.', {
+        rawData: rawText,
+      });
+      const parseError = new Error('The response from the AI did not contain valid JSON.');
+      return handleApiError(parseError, 'GeminiCore.generateJSON');
+    }
 
     try {
-      const parsed = JSON.parse(cleanedJson);
-
       if (schema) {
         const result = schema.safeParse(parsed);
         if (!result.success) {
@@ -139,20 +147,22 @@ export class GeminiCore {
 
       return { success: true, data: parsed as T };
     } catch (error) {
-      logger.error('GeminiCore.generateJSON', 'Failed to parse JSON from Gemini response.', {
-        rawData: cleanedJson,
+      // Should technically be covered by Zod check or cleanAndParseJSON, but safe to keep
+      logger.error('GeminiCore.generateJSON', 'Unexpected validation error.', {
+        rawData: rawText,
+        error
       });
-      const parseError = new Error('The response from the AI was not valid JSON.');
-      return handleApiError(parseError, 'GeminiCore.generateJSON');
+      return handleApiError(error, 'GeminiCore.generateJSON');
     }
   }
 
   /**
    * Helper to clean markdown code blocks from JSON strings.
+   * @deprecated logic moved to ai-utils.ts/cleanAndParseJSON
    */
   private cleanJsonString(text: string): string {
+    // Kept briefly for backward compatibility if needed internally, but generatedJSON uses cleanAndParseJSON now.
     let cleaned = text.trim();
-    // Remove markdown code blocks
     if (cleaned.startsWith('```json')) {
       cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
     } else if (cleaned.startsWith('```')) {
