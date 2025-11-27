@@ -151,9 +151,20 @@ export function Finance() {
 
   const addSubcategory = (categoryId: string) => {
       if (!newSubcategoryName.trim()) return;
-      const newId = newSubcategoryName.toLowerCase().replace(/\s+/g, '-');
+      // Generate base ID
+      const baseId = newSubcategoryName.toLowerCase().replace(/\s+/g, '-');
+      let newId = baseId;
+      let counter = 1;
 
       setAudit(prev => {
+          // Find the target category
+          const targetCategory = prev.categories.find(cat => cat.id === categoryId);
+          const existingIds = targetCategory ? targetCategory.subcategories.map(sub => sub.id) : [];
+          // Ensure unique subcategory ID
+          while (existingIds.includes(newId)) {
+              newId = `${baseId}-${counter}`;
+              counter++;
+          }
           const updatedCategories = prev.categories.map(cat => {
               if (cat.id === categoryId) {
                   return {
