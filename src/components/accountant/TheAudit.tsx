@@ -5,7 +5,7 @@ import { FinancialReport, SpendingAnalysisCategory, ProposedBudgetCategoryItem, 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/Card';
 import { motion } from 'framer-motion';
-import { Send, ShieldCheck } from 'lucide-react';
+import { PaperPlaneTilt as Send, ShieldCheck } from '@phosphor-icons/react';
 import { Textarea } from '@/components/ui/textarea';
 import { GeminiCore } from '@/services/gemini_core';
 import { SarcasticLoader } from '@/components/SarcasticLoader';
