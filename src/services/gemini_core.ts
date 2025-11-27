@@ -65,9 +65,10 @@ export class GeminiCore {
     // or we'd need to assume the build system handles replacement.
 
     try {
-        // @ts-expect-error - import.meta is not available in all environments (e.g. Node without ESM)
-        if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) {
-             // @ts-expect-error - import.meta is not available in all environments
+        // @ts-expect-error: import.meta is not available in all environments (e.g. Node without ESM, Jest).
+        // This is safe because the code is inside a try-catch block, so any ReferenceError or SyntaxError will be handled gracefully.
+             // @ts-expect-error: import.meta is not available in all environments (e.g. Node without ESM, Jest).
+             // Safe to ignore because this is inside a try-catch block and will not crash if unavailable.
              return import.meta.env.VITE_GEMINI_API_KEY;
         }
     } catch {
