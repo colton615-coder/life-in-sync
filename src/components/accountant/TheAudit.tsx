@@ -228,6 +228,7 @@ export function TheAudit({ onComplete }: TheAuditProps) {
                         onClick={handleSendMessage}
                         disabled={!input.trim() || isTyping}
                         className="mb-1 bg-cyan-600 hover:bg-cyan-500"
+                        aria-label="Send message"
                     >
                         <Send className="w-4 h-4" />
                     </Button>
