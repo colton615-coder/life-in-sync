@@ -146,6 +146,7 @@ export function Finance() {
     });
     setNewCategoryName('');
     setIsEditMode(false);
+  };
 
   const addSubcategory = (categoryId: string) => {
       if (!newSubcategoryName.trim()) return;
