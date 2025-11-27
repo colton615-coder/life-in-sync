@@ -1,8 +1,5 @@
 import { GeminiCore } from '../services/gemini_core';
 
-// Instantiate a local core for these utilities
-const gemini = new GeminiCore();
-
 /**
  * Robust AI call, backed by the GeminiCore service which includes built-in retries.
  */
@@ -10,6 +7,8 @@ export async function callAIWithRetry(
   promptText: string,
   jsonMode: boolean = false
 ): Promise<string> {
+  // Instantiate locally to avoid circular dependency issues at module load time
+  const gemini = new GeminiCore();
   try {
     if (jsonMode) {
       const jsonPrompt = `${promptText}\n\nIMPORTANT: Respond with only valid JSON.`;
@@ -73,5 +72,30 @@ export function validateAIResponse(data: unknown, requiredFields: string[]): voi
   
   if (missingFields.length > 0) {
     throw new Error(`AI response missing required fields: ${missingFields.join(', ')}`);
+  }
+}
+
+/**
+ * Clean and parse JSON from a string using a robust regex strategy.
+ * Extracts content between the first '{' and the last '}'.
+ *
+ * @param text The string containing JSON
+ * @returns The parsed object or null if parsing fails
+ */
+export function cleanAndParseJSON(text: string): any | null {
+  try {
+    // Regex to find the first curly brace { and the last curly brace }
+    // [\s\S]* matches any character including newlines (greedy match)
+    const match = text.match(/\{[\s\S]*\}/);
+
+    if (!match) {
+      return null;
+    }
+
+    const jsonString = match[0];
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error('[cleanAndParseJSON] Failed:', error);
+    return null;
   }
 }
