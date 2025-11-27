@@ -108,8 +108,6 @@ export function BudgetManager() {
       <div className="flex-grow overflow-hidden">
         <AccountantChat
             messages={messages}
-            budget={0} // Deprecated prop
-            expenses={[]} // Deprecated prop
             onSendMessage={handleSendMessage}
             isLoading={isLoading}
         />
