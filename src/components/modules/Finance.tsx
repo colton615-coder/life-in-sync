@@ -246,7 +246,7 @@ export function Finance() {
             </Button>
         </div>
 
-        <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+        <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 scrollbar scrollbar-thin scrollbar-thumb-cyan-500/40 scrollbar-track-transparent">
           {category.subcategories.map((subcat) => (
             <div key={subcat.id}>
               <Label htmlFor={`${category.id}-${subcat.id}`} className="text-xs font-mono uppercase text-slate-500">{subcat.label}</Label>
