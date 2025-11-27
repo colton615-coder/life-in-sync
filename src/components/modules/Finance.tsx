@@ -241,7 +241,13 @@ export function Finance() {
                 <h3 className="text-2xl font-bold text-white">{category.label}</h3>
                 <p className="text-slate-400 text-sm">Input all monthly liabilities for this sector.</p>
             </div>
-            <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-red-950/20" onClick={() => deleteCategory(category.id)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-red-400 hover:text-red-300 hover:bg-red-950/20"
+              onClick={() => deleteCategory(category.id)}
+              aria-label={`Delete ${category.label} category`}
+            >
                 <Trash2 className="w-4 h-4" />
             </Button>
         </div>
