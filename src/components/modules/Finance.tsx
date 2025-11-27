@@ -136,14 +136,15 @@ export function Finance() {
         subcategories: []
       };
       const updatedCategories = [...prev.categories, newCat];
-      // Jump to the new category using the new array length
-      setCurrentCategoryIndex(updatedCategories.length - 1);
+      // Do NOT update currentCategoryIndex here
       return {
         ...prev,
         categories: updatedCategories,
         expenses: { ...prev.expenses, [categoryId]: {} }
       };
     });
+    // Jump to the new category using the new array length
+    setCurrentCategoryIndex(audit.categories.length); // The new category will be at the end
     setNewCategoryName('');
     setIsEditMode(false);
   };
