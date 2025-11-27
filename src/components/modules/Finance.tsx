@@ -176,12 +176,12 @@ export function Finance() {
           const updatedCategories = prev.categories.filter(c => c.id !== categoryId);
           const updatedExpenses = { ...prev.expenses };
           delete updatedExpenses[categoryId];
+          // Adjust index after deletion using the new length
+          if (currentCategoryIndex >= updatedCategories.length) {
+              setCurrentCategoryIndex(Math.max(-1, updatedCategories.length - 1));
+          }
           return { ...prev, categories: updatedCategories, expenses: updatedExpenses };
       });
-      // Adjust index if needed
-      if (currentCategoryIndex >= audit.categories.length - 1) {
-          setCurrentCategoryIndex(Math.max(-1, audit.categories.length - 2));
-      }
   };
 
   // --- Rendering ---
