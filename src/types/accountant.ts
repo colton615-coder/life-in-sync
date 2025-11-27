@@ -1,7 +1,8 @@
 // src/types/accountant.ts
 
-export const ACCOUNTANT_CATEGORIES = {
+export const DEFAULT_ACCOUNTANT_CATEGORIES = {
   housing: {
+    id: 'housing',
     label: 'Housing',
     subcategories: {
       rentMortgage: 'Rent/Mortgage',
@@ -9,6 +10,7 @@ export const ACCOUNTANT_CATEGORIES = {
     },
   },
   transportation: {
+    id: 'transportation',
     label: 'Transportation',
     subcategories: {
       carPayment: 'Car Payment',
@@ -18,6 +20,7 @@ export const ACCOUNTANT_CATEGORIES = {
     },
   },
   food: {
+    id: 'food',
     label: 'Food',
     subcategories: {
       groceries: 'Groceries',
@@ -25,6 +28,7 @@ export const ACCOUNTANT_CATEGORIES = {
     },
   },
   household: {
+    id: 'household',
     label: 'Household',
     subcategories: {
       supplies: 'Supplies',
@@ -32,6 +36,7 @@ export const ACCOUNTANT_CATEGORIES = {
     },
   },
   healthAndSelf: {
+    id: 'healthAndSelf',
     label: 'Health & Self',
     subcategories: {
       medical: 'Medical',
@@ -40,6 +45,7 @@ export const ACCOUNTANT_CATEGORIES = {
     },
   },
   techDigital: {
+    id: 'techDigital',
     label: 'Tech/Digital',
     subcategories: {
       subscriptions: 'Subscriptions',
@@ -47,6 +53,7 @@ export const ACCOUNTANT_CATEGORIES = {
     },
   },
   lifestyle: {
+    id: 'lifestyle',
     label: 'Lifestyle',
     subcategories: {
       gifts: 'Gifts',
@@ -55,6 +62,7 @@ export const ACCOUNTANT_CATEGORIES = {
     },
   },
   recreation: {
+    id: 'recreation',
     label: 'Recreation',
     subcategories: {
       hobbies: 'Hobbies',
@@ -62,6 +70,7 @@ export const ACCOUNTANT_CATEGORIES = {
     },
   },
   growth: {
+    id: 'growth',
     label: 'Growth',
     subcategories: {
       education: 'Education',
@@ -69,6 +78,7 @@ export const ACCOUNTANT_CATEGORIES = {
     },
   },
   pets: {
+    id: 'pets',
     label: 'Pets',
     subcategories: {
       vet: 'Vet',
@@ -76,6 +86,7 @@ export const ACCOUNTANT_CATEGORIES = {
     },
   },
   debtAndFees: {
+    id: 'debtAndFees',
     label: 'Debt/Fees',
     subcategories: {
       interest: 'Interest',
@@ -83,39 +94,50 @@ export const ACCOUNTANT_CATEGORIES = {
       lateFees: 'Late Fees',
     },
   },
-} as const; // 'as const' makes it readonly and specific
+};
 
-// Type definitions based on the categories object
-export type AccountantCategory = keyof typeof ACCOUNTANT_CATEGORIES;
-export type AccountantSubcategory<T extends AccountantCategory> = keyof (typeof ACCOUNTANT_CATEGORIES)[T]['subcategories'];
+// --- New Dynamic Structure ---
 
-// Represents a single logged transaction after the audit
+export interface UserSubcategory {
+  id: string;
+  label: string;
+}
+
+export interface UserCategory {
+  id: string;
+  label: string;
+  subcategories: UserSubcategory[];
+}
+
+// Represents a single logged transaction
 export interface AccountantTransaction {
   id: string;
   amount: number;
   date: string; // ISO 8601
   description: string;
-  category: AccountantCategory;
-  subcategory: string; // This can't be strongly typed easily here, string is fine.
+  category: string; // ID
+  subcategory: string; // ID
 }
 
-// Dynamically create the audit expense structure from the categories object
-type AuditExpenses = {
-  [K in AccountantCategory]: {
-    [SK in AccountantSubcategory<K>]: number | null; // Use null for unanswered
-  };
-};
+/**
+ * The flexible expenses object.
+ * Key: Category ID
+ * Value: Map of Subcategory ID -> Amount (or null if not set)
+ */
+export type UserExpenses = Record<string, Record<string, number | null>>;
 
-
-// Represents the user's financial profile from the initial audit
+// Represents the user's financial profile from the audit
 export interface FinancialAudit {
   // Basic income info
   monthlyIncome: number | null;
 
-  // Detailed expense breakdown based on the audit
-  expenses: AuditExpenses;
+  // The definitions of categories (including user-added ones)
+  categories: UserCategory[];
+
+  // Detailed expense breakdown
+  expenses: UserExpenses;
 
   // Metadata
   auditCompletedAt: string | null; // ISO 8601, null if not completed
-  version: '1.0'; // For future migrations
+  version: '2.0';
 }

@@ -1,9 +1,15 @@
+// src/services/gemini_core.ts
 import { GoogleGenerativeAI, GenerativeModel, GenerationConfig, Part } from '@google/generative-ai';
 import { z } from 'zod';
-import { FinancialAudit, ACCOUNTANT_CATEGORIES } from '../types/accountant';
+import { FinancialAudit } from '../types/accountant';
 import { FinancialReport } from '../types/financial_report';
 import { handleApiError, AppError } from './api-error-handler';
 import { logger } from './logger';
+
+export interface AuditChatHistoryItem {
+    sender: 'ai' | 'user';
+    content: string;
+}
 
 /**
  * Core service for interacting with Google Gemini API.
@@ -19,11 +25,14 @@ export class GeminiCore {
 
   constructor(apiKey?: string) {
     this.apiKey = apiKey ?? this.getApiKey();
+    // Allow empty key for testing instantiation, but warn
     if (!this.apiKey) {
-      console.error("Gemini API Key is not available. Connection will fail.");
-      throw new Error("API Key is missing. Please set it in the application settings or via the VITE_GEMINI_API_KEY environment variable.");
+      console.warn("Gemini API Key is missing. Some features will fail.");
     }
-    this.genAI = new GoogleGenerativeAI(this.apiKey);
+    // We initiate even without key to allow graceful failure in methods
+    // But GoogleGenerativeAI constructor requires a key, so we pass a dummy if missing to avoid crash,
+    // and handle the error in generateContent.
+    this.genAI = new GoogleGenerativeAI(this.apiKey || 'dummy_key');
     this.model = this.genAI.getGenerativeModel({
       model: GeminiCore.MODEL_NAME,
     });
@@ -51,18 +60,24 @@ export class GeminiCore {
       }
     }
 
-    // 2. Priority: Vite Environment Variable
-    if (typeof import.meta !== 'undefined' && import.meta.env) {
-      const viteKey = import.meta.env.VITE_GEMINI_API_KEY;
-      if (viteKey) return viteKey;
+    // 2. Priority: Environment Variables (Vite or Node)
+    // Direct access to import.meta is causing issues in Jest, so we fallback to process.env
+    // or we'd need to assume the build system handles replacement.
+
+    try {
+        // @ts-expect-error - import.meta is not available in all environments (e.g. Node without ESM)
+        if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) {
+             // @ts-expect-error - import.meta is not available in all environments
+             return import.meta.env.VITE_GEMINI_API_KEY;
+        }
+    } catch {
+        // SyntaxError or ReferenceError in Jest
     }
 
-    // 3. Fallback for non-Vite environments (e.g. running scripts via tsx)
     if (typeof process !== 'undefined' && process.env.GEMINI_API_KEY) {
       return process.env.GEMINI_API_KEY;
     }
 
-    console.warn('Gemini API Key not found in environment variables (VITE_GEMINI_API_KEY or GEMINI_API_KEY). calls will fail.');
     return '';
   }
 
@@ -71,9 +86,10 @@ export class GeminiCore {
    */
   async generateContent(
     prompt: string | Array<string | Part>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     config?: GenerationConfig
   ): Promise<{ success: true; data: string } | AppError> {
-    if (!this.apiKey) {
+    if (!this.apiKey || this.apiKey === 'dummy_key') {
       return {
         success: false,
         code: 'MISSING_API_KEY',
@@ -89,7 +105,7 @@ export class GeminiCore {
         const result = await this.model.generateContent(prompt);
         const response = await result.response;
         return { success: true, data: response.text() };
-      } catch (error: any) {
+      } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
         if (error.status === 429 || error.status === 503) {
           console.warn(`Gemini API rate limit/unavailable (${error.status}). Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
@@ -138,7 +154,7 @@ export class GeminiCore {
       }
 
       return { success: true, data: parsed as T };
-    } catch (error) {
+    } catch (error) { // eslint-disable-line @typescript-eslint/no-unused-vars
       logger.error('GeminiCore.generateJSON', 'Failed to parse JSON from Gemini response.', {
         rawData: cleanedJson,
       });
@@ -177,43 +193,31 @@ export class GeminiCore {
    * @param auditData The user's completed financial audit.
    * @returns A structured FinancialReport object.
    */
-  async generateFinancialReport(auditData: FinancialAudit): Promise<{ success: true; data: FinancialReport } | AppError> {
+  async generateFinancialReport(auditData: FinancialAudit): Promise<FinancialReport> {
     // Dynamically create a Zod schema for the report for runtime validation.
+    // NOTE: Because categories are dynamic now, we cannot enforce strict enum keys in Zod.
+    // We trust the AI to return keys that match the Input IDs, or we handle mismatches in UI.
     const financialReportSchema = z.object({
       executiveSummary: z.string().min(50),
       spendingAnalysis: z.array(z.object({
-        category: z.preprocess(
-          (val) => String(val).toLowerCase(),
-          z.nativeEnum(Object.keys(ACCOUNTANT_CATEGORIES))
-        ),
+        category: z.string(), // Flexible category ID or Label
         totalSpent: z.number(),
         aiSummary: z.string().min(20),
         healthScore: z.number().min(1).max(10),
       })),
-      proposedBudget: z.object(
-        Object.keys(ACCOUNTANT_CATEGORIES).reduce((acc, cat) => {
-          acc[cat] = z.object({
-            allocatedAmount: z.number(),
-            subcategories: z.object(
-              Object.keys(ACCOUNTANT_CATEGORIES[cat].subcategories).reduce((subAcc, subCat) => {
-                subAcc[subCat] = z.number();
-                return subAcc;
-              }, {})
-            ),
-          });
-          return acc;
-        }, {})
+      proposedBudget: z.record( // Flexible record for categories
+        z.object({
+          allocatedAmount: z.number(),
+          subcategories: z.record(z.number()), // Flexible record for subcategories
+        })
       ),
       moneyManagementAdvice: z.array(z.object({
         title: z.string(),
         description: z.string(),
-        relatedCategory: z.preprocess(
-            (val) => String(val).toLowerCase(),
-            z.nativeEnum(Object.keys(ACCOUNTANT_CATEGORIES))
-        ),
+        relatedCategory: z.string(),
       })),
       reportGeneratedAt: z.string().datetime(),
-      version: z.literal('1.0'),
+      version: z.literal('2.0'),
     });
 
     const prompt = this.constructFinancialReportPrompt(auditData);
@@ -222,15 +226,14 @@ export class GeminiCore {
     const reportResult = await this.generateJSON(prompt, financialReportSchema);
 
     if (!reportResult.success) {
-      return reportResult;
+      throw new Error(reportResult.message);
     }
 
-    return { success: true, data: reportResult.data };
+    return reportResult.data;
   }
 
   private constructFinancialReportPrompt(auditData: FinancialAudit): string {
     const auditJson = JSON.stringify(auditData, null, 2);
-    const categoriesJson = JSON.stringify(ACCOUNTANT_CATEGORIES, null, 2);
 
     return `
       You are "The Accountant," an elite-level, direct, and analytical AI financial advisor.
@@ -240,14 +243,10 @@ export class GeminiCore {
       **User's Financial Audit Data:**
       ${auditJson}
 
-      **Budgeting Categories:**
-      Use the following category structure for your analysis and budget proposal.
-      ${categoriesJson}
-
       **Instructions:**
       1.  **Analyze Spending:** Scrutinize the user's income and expenses. Identify areas of high spending, potential savings, and financial strengths or weaknesses.
       2.  **Create a Budget:** Propose a detailed monthly budget. The total allocated budget must not exceed the user's monthly income. Be realistic but firm in your recommendations.
-      3.  **Provide Advice:** Offer actionable, specific money management advice. Each piece of advice should be linked to a specific financial category.
+      3.  **Provide Advice:** Offer actionable, specific money management advice. Each piece of advice should be linked to a specific financial category ID.
       4.  **Format Output:** You MUST respond with a valid JSON object that strictly adheres to the defined 'FinancialReport' schema. Do not include any text, markdown, or commentary outside of the JSON object itself.
 
       **Output Schema (reminder):**
@@ -256,28 +255,69 @@ export class GeminiCore {
         "executiveSummary": "string",
         "spendingAnalysis": [
           {
-            "category": "string (must be a key from ACCOUNTANT_CATEGORIES)",
+            "category": "string (Use the Category ID/Label from input)",
             "totalSpent": "number",
             "aiSummary": "string",
             "healthScore": "number (1-10)"
           }
         ],
         "proposedBudget": {
-          // Dynamically structured based on ACCOUNTANT_CATEGORIES
+          "category_id": {
+             "allocatedAmount": number,
+             "subcategories": { "subcategory_id": number }
+          }
         },
         "moneyManagementAdvice": [
           {
             "title": "string",
             "description": "string",
-            "relatedCategory": "string (must be a key from ACCOUNTANT_CATEGORIES)"
+            "relatedCategory": "string"
           }
         ],
         "reportGeneratedAt": "string (ISO 8601 format)",
-        "version": "1.0"
+        "version": "2.0"
       }
       \`\`\`
 
       Now, generate the financial report based on the user's data.
     `;
+  }
+
+  /**
+   * Continues the "The Audit" conversation.
+   * @param history The chat history so far.
+   * @param newMessage The user's new message.
+   * @param reportContext The full financial report for reference.
+   */
+  async continueAuditConversation(history: AuditChatHistoryItem[], newMessage: string, reportContext: FinancialReport): Promise<string> {
+      const historyText = history.map(m => `${m.sender === 'ai' ? 'The Accountant' : 'User'}: ${m.content}`).join('\n');
+      const context = JSON.stringify(reportContext, null, 2);
+
+      const prompt = `
+        You are "The Accountant," an elite-level, direct, and analytical AI financial advisor.
+        You are currently in a "Audit Review Session" with the user.
+
+        **Financial Report Context:**
+        ${context}
+
+        **Conversation History:**
+        ${historyText}
+
+        **User's New Message:**
+        ${newMessage}
+
+        **Instructions:**
+        - Respond to the user's message directly.
+        - Maintain the "Elite/Analytical" persona. Be concise, firm, but helpful.
+        - Reference specific numbers from the report if relevant.
+        - If the user asks for justification of the budget, explain the logic based on the analysis.
+        - Do NOT include JSON or markdown code blocks in your response, just plain text (or markdown text formatting).
+      `;
+
+      const result = await this.generateContent(prompt);
+      if (!result.success) {
+          throw new Error(result.message);
+      }
+      return result.data;
   }
 }
