@@ -27,7 +27,7 @@ export class GeminiCore {
     this.apiKey = apiKey ?? this.getApiKey();
     // Allow empty key for testing instantiation, but warn
     if (!this.apiKey) {
-      console.warn("Gemini API Key is missing. Some features will fail.");
+      console.warn("Gemini API Key is missing. AI financial analysis and audit conversation features will not work. Please set VITE_GEMINI_API_KEY or GEMINI_API_KEY in your environment.");
     }
     // We initiate even without key to allow graceful failure in methods
     // But GoogleGenerativeAI constructor requires a key, so we pass a dummy if missing to avoid crash,
