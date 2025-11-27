@@ -286,13 +286,23 @@ export function Finance() {
                 value={newSubcategoryName}
                 onChange={(e) => setNewSubcategoryName(e.target.value)}
                 onKeyDown={(e) => {
-                    if (e.key === 'Enter') addSubcategory(category.id);
+                    if (e.key === 'Enter') handleAddSubcategory();
                 }}
               />
-              <Button size="icon" variant="outline" onClick={() => addSubcategory(category.id)} disabled={!newSubcategoryName}>
+              <Button size="icon" variant="outline" onClick={handleAddSubcategory} disabled={!newSubcategoryName}>
                   <Plus className="w-4 h-4" />
               </Button>
           </div>
+
+        {/* Handler for adding subcategory */}
+        {/* Place this inside renderCurrentStep, above the return statement */}
+        {/* This ensures access to category, newSubcategoryName, and addSubcategory */}
+        {/* Handler definition: */}
+        const handleAddSubcategory = () => {
+          if (newSubcategoryName.trim()) {
+            addSubcategory(category.id);
+          }
+        };
         </div>
       </Card>
     );
