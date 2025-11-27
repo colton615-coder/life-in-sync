@@ -90,7 +90,7 @@ export function TheAudit({ onComplete }: TheAuditProps) {
         try {
             // Call Gemini to get the next response
             // We pass the conversation history and the full report context
-            const responseText = await geminiRef.current.continueAuditConversation(messages, userMsg.content, report);
+            const responseText = await geminiRef.current.continueAuditConversation([...messages, userMsg], userMsg.content, report);
 
             const aiMsg: ChatMessage = {
                 id: (Date.now() + 1).toString(),
