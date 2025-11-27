@@ -50,11 +50,35 @@ export function FirstMeeting({ onComplete }: FirstMeetingProps) {
           </div>
         );
       case 'spendingAnalysis':
-        return <SpendingAnalysisReport analysis={report!.spendingAnalysis} />;
+        if (!report?.spendingAnalysis) {
+          return (
+            <div className="text-center text-red-400">
+              <h3 className="font-bold text-lg">Report Error</h3>
+              <p className="text-sm">The AI-generated report is missing the 'spendingAnalysis' section. Unable to proceed.</p>
+            </div>
+          );
+        }
+        return <SpendingAnalysisReport analysis={report.spendingAnalysis} />;
       case 'proposedBudget':
-        return <ProposedBudgetReport budget={report!.proposedBudget} />;
+        if (!report?.proposedBudget) {
+          return (
+            <div className="text-center text-red-400">
+              <h3 className="font-bold text-lg">Report Error</h3>
+              <p className="text-sm">The AI-generated report is missing the 'proposedBudget' section. Unable to proceed.</p>
+            </div>
+          );
+        }
+        return <ProposedBudgetReport budget={report.proposedBudget} />;
       case 'moneyManagementAdvice':
-        return <AdviceReport advice={report!.moneyManagementAdvice} />;
+        if (!report?.moneyManagementAdvice) {
+          return (
+            <div className="text-center text-red-400">
+              <h3 className="font-bold text-lg">Report Error</h3>
+              <p className="text-sm">The AI-generated report is missing the 'moneyManagementAdvice' section. Unable to proceed.</p>
+            </div>
+          );
+        }
+        return <AdviceReport advice={report.moneyManagementAdvice} />;
       case 'conclusion':
         return (
           <div className="text-center">

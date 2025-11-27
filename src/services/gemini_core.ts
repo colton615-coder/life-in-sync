@@ -192,6 +192,11 @@ export class GeminiCore {
       })),
       proposedBudget: z.object(
         Object.keys(ACCOUNTANT_CATEGORIES).reduce((acc, cat) => {
+          if (!ACCOUNTANT_CATEGORIES[cat] || !ACCOUNTANT_CATEGORIES[cat].subcategories) {
+            logger.error('GeminiCore.generateFinancialReport', 'Missing subcategories for category', { category: cat });
+            // Skip this category in the schema if it's invalid
+            return acc;
+          }
           acc[cat] = z.object({
             allocatedAmount: z.number(),
             subcategories: z.object(
