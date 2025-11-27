@@ -190,9 +190,9 @@ export function TheAudit({ onComplete }: TheAuditProps) {
 
                 {isTyping && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-cyan-500/70 ml-4">
-                        <span className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}/>
-                        <span className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}/>
-                        <span className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}/>
+                        <span className="w-1 h-1 bg-cyan-500 rounded-full audit-dot" style={{ '--delay': '0ms' } as React.CSSProperties} />
+                        <span className="w-1 h-1 bg-cyan-500 rounded-full audit-dot" style={{ '--delay': '150ms' } as React.CSSProperties} />
+                        <span className="w-1 h-1 bg-cyan-500 rounded-full audit-dot" style={{ '--delay': '300ms' } as React.CSSProperties} />
                         ANALYZING RESPONSE
                     </motion.div>
                 )}
