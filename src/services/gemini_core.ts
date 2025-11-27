@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI, GenerativeModel, GenerationConfig, Part } from '@google/generative-ai';
 import { z } from 'zod';
-import { FinancialAudit, ACCOUNTANT_CATEGORIES } from '../types/accountant';
+import { FinancialAudit, AuditFlag, Category } from '../types/accountant';
 import { FinancialReport } from '../types/financial_report';
 import { handleApiError, AppError } from './api-error-handler';
 import { logger } from './logger';
@@ -32,43 +32,33 @@ export class GeminiCore {
 
   /**
    * Retrieves the API key from environment variables.
-   * Supports VITE_GEMINI_API_KEY (frontend) and GEMINI_API_KEY (script/backend).
    */
   private getApiKey(): string {
-    // 1. Priority: LocalStorage (User overrides)
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('gemini-api-key');
       if (stored) {
         try {
-          // useKV stores strings as JSON strings (e.g., "\"abc\"")
           const parsed = JSON.parse(stored);
           if (parsed && typeof parsed === 'string' && parsed.length > 0) {
             return parsed;
           }
         } catch {
-          // Fallback if not JSON stringified
           if (stored.length > 0) return stored;
         }
       }
     }
-
-    // 2. Priority: Vite Environment Variable
     if (typeof import.meta !== 'undefined' && import.meta.env) {
       const viteKey = import.meta.env.VITE_GEMINI_API_KEY;
       if (viteKey) return viteKey;
     }
-
-    // 3. Fallback for non-Vite environments (e.g. running scripts via tsx)
     if (typeof process !== 'undefined' && process.env.GEMINI_API_KEY) {
       return process.env.GEMINI_API_KEY;
     }
-
-    console.warn('Gemini API Key not found in environment variables (VITE_GEMINI_API_KEY or GEMINI_API_KEY). calls will fail.');
     return '';
   }
 
   /**
-   * Generates content with retry logic for rate limits.
+   * Generates content with retry logic.
    */
   async generateContent(
     prompt: string | Array<string | Part>,
@@ -95,7 +85,7 @@ export class GeminiCore {
           console.warn(`Gemini API rate limit/unavailable (${error.status}). Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
           retries--;
-          delay *= 2; // Exponential backoff
+          delay *= 2;
         } else {
           return handleApiError(error, 'GeminiCore.generateContent');
         }
@@ -106,8 +96,7 @@ export class GeminiCore {
   }
 
   /**
-   * Generates content and parses it as JSON, validating against a Zod schema if provided.
-   * Handles markdown code block stripping and basic JSON repair.
+   * Generates content and parses it as JSON.
    */
   async generateJSON<T>(
     prompt: string | Array<string | Part>,
@@ -120,15 +109,13 @@ export class GeminiCore {
     }
 
     const rawText = contentResult.data;
-    // Use the robust parsing function from ai-utils
     const parsed = cleanAndParseJSON(rawText);
 
     if (parsed === null) {
       logger.error('GeminiCore.generateJSON', 'Failed to extract or parse JSON from Gemini response.', {
         rawData: rawText,
       });
-      const parseError = new Error('The response from the AI did not contain valid JSON.');
-      return handleApiError(parseError, 'GeminiCore.generateJSON');
+      return handleApiError(new Error('The response from the AI did not contain valid JSON.'), 'GeminiCore.generateJSON');
     }
 
     try {
@@ -139,160 +126,144 @@ export class GeminiCore {
             issues: result.error.issues,
             rawData: rawText,
           });
-          const validationError = new Error('The data structure from the AI was invalid.');
-          return handleApiError(validationError, 'GeminiCore.generateJSON');
+          return handleApiError(new Error('The data structure from the AI was invalid.'), 'GeminiCore.generateJSON');
         }
         return { success: true, data: result.data };
       }
-
       return { success: true, data: parsed as T };
     } catch (error) {
-      // Should technically be covered by Zod check or cleanAndParseJSON, but safe to keep
-      logger.error('GeminiCore.generateJSON', 'Unexpected validation error.', {
-        rawData: rawText,
-        error
-      });
       return handleApiError(error, 'GeminiCore.generateJSON');
     }
   }
 
-  /**
-   * Helper to clean markdown code blocks from JSON strings.
-   * @deprecated logic moved to ai-utils.ts/cleanAndParseJSON
-   */
-  private cleanJsonString(text: string): string {
-    // Kept briefly for backward compatibility if needed internally, but generatedJSON uses cleanAndParseJSON now.
-    let cleaned = text.trim();
-    if (cleaned.startsWith('```json')) {
-      cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (cleaned.startsWith('```')) {
-      cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
-    return cleaned.trim();
-  }
+  // --- Finance 2.0 Methods ---
 
   /**
-   * Exposes the underlying model instance if direct access is needed for streaming etc.
+   * Phase 1: The Audit (Review)
+   * Analyzes the raw audit data and generates flags/critiques.
    */
-  getModel(): GenerativeModel {
-    return this.model;
-  }
+  async performFinancialAudit(auditData: FinancialAudit): Promise<{ success: true; data: AuditFlag[] } | AppError> {
+    // Schema for the Audit Flags
+    const flagSchema = z.object({
+      flags: z.array(z.object({
+        categoryId: z.string(),
+        subcategoryId: z.string().optional(),
+        severity: z.enum(['critical', 'warning', 'observation', 'praise']),
+        title: z.string(),
+        message: z.string(),
+        suggestedAction: z.string().optional()
+      }))
+    });
 
-  public static getModelName(): string {
-    return GeminiCore.MODEL_NAME;
-  }
+    const prompt = `
+      You are "The Accountant," an elite-level financial auditor.
+      Your job is to ruthlessly review the user's submitted financial data for a "Finance 2.0" audit.
 
-  /**
-   * Generates a comprehensive financial report using "The Accountant" persona.
-   * @param auditData The user's completed financial audit.
-   * @returns A structured FinancialReport object.
-   */
-  async generateFinancialReport(auditData: FinancialAudit): Promise<{ success: true; data: FinancialReport } | AppError> {
-    // Dynamically create a Zod schema for the report for runtime validation.
-    const financialReportSchema = z.object({
-      executiveSummary: z.string().min(50),
-      spendingAnalysis: z.array(z.object({
-        category: z.preprocess(
-          (val) => String(val).toLowerCase(),
-          z.nativeEnum(Object.keys(ACCOUNTANT_CATEGORIES))
-        ),
-        totalSpent: z.number(),
-        aiSummary: z.string().min(20),
-        healthScore: z.number().min(1).max(10),
-      })),
-      proposedBudget: z.object(
-        Object.keys(ACCOUNTANT_CATEGORIES).reduce((acc, cat) => {
-          if (!ACCOUNTANT_CATEGORIES[cat] || !ACCOUNTANT_CATEGORIES[cat].subcategories) {
-            logger.error('GeminiCore.generateFinancialReport', 'Missing subcategories for category', { category: cat });
-            // Skip this category in the schema if it's invalid
-            return acc;
+      **Data to Review:**
+      Income: ${auditData.monthlyIncome}
+      Categories: ${JSON.stringify(auditData.categories, null, 2)}
+
+      **Instructions:**
+      1. Analyze the data for excessive spending, missing critical categories (like Savings/Investment), or impressive discipline.
+      2. Generate "Flags" for items that require attention.
+      3. Be specific. If they spend $500 on "Coffee", flag it as 'critical' or 'warning'.
+      4. If the budget looks solid, provide 'praise' flags.
+      5. The output must be a valid JSON object matching the schema.
+      6. IMPORTANT: You MUST use the exact 'id' from the categories/subcategories provided in the data to link your flags.
+
+      **Output Schema:**
+      {
+        "flags": [
+          {
+            "categoryId": "UUID from data",
+            "subcategoryId": "UUID from data (optional)",
+            "severity": "critical" | "warning" | "observation" | "praise",
+            "title": "Short Title",
+            "message": "Direct, professional critique.",
+            "suggestedAction": "e.g., Reduce to $100"
           }
-          acc[cat] = z.object({
-            allocatedAmount: z.number(),
-            subcategories: z.object(
-              Object.keys(ACCOUNTANT_CATEGORIES[cat].subcategories).reduce((subAcc, subCat) => {
-                subAcc[subCat] = z.number();
-                return subAcc;
-              }, {})
-            ),
-          });
-          return acc;
-        }, {})
-      ),
+        ]
+      }
+    `;
+
+    const result = await this.generateJSON(prompt, flagSchema);
+
+    if (!result.success) return result;
+
+    // Map the result to include IDs generated here (though the schema doesn't have ID, we need to add one for the frontend)
+    // We can't add it in the Zod schema easily if it's not in the AI response, so we map after.
+    const flagsWithIds: AuditFlag[] = result.data.flags.map((flag: any) => ({
+      ...flag,
+      id: crypto.randomUUID()
+    }));
+
+    return { success: true, data: flagsWithIds };
+  }
+
+  /**
+   * Phase 2: Final Report Generation
+   * Takes the audit data AND the resolutions (user's answers to flags) to build the final plan.
+   */
+  async generateFinalReport(auditData: FinancialAudit): Promise<{ success: true; data: FinancialReport } | AppError> {
+    const reportSchema = z.object({
+      executiveSummary: z.string(),
+      spendingAnalysis: z.array(z.object({
+        categoryId: z.string(),
+        categoryName: z.string(),
+        totalSpent: z.number(),
+        aiSummary: z.string(),
+        healthScore: z.number().min(1).max(10)
+      })),
+      proposedBudget: z.array(z.object({
+        categoryId: z.string(),
+        categoryName: z.string(),
+        allocatedAmount: z.number(),
+        subcategories: z.array(z.object({
+          subcategoryId: z.string(),
+          subcategoryName: z.string(),
+          allocatedAmount: z.number()
+        }))
+      })),
       moneyManagementAdvice: z.array(z.object({
         title: z.string(),
         description: z.string(),
-        relatedCategory: z.preprocess(
-            (val) => String(val).toLowerCase(),
-            z.nativeEnum(Object.keys(ACCOUNTANT_CATEGORIES))
-        ),
+        relatedCategoryName: z.string().optional(),
+        priority: z.enum(['high', 'medium', 'low'])
       })),
-      reportGeneratedAt: z.string().datetime(),
-      version: z.literal('1.0'),
+      reportGeneratedAt: z.string(),
+      version: z.literal('2.0')
     });
 
-    const prompt = this.constructFinancialReportPrompt(auditData);
+    const prompt = `
+      You are "The Accountant." The user has completed their financial audit and resolved any flagged issues.
+      Now, generate the Final Financial Blueprint (Version 2.0).
 
-    // Use generateJSON with the schema to get a validated object
-    const reportResult = await this.generateJSON(prompt, financialReportSchema);
+      **User Data:**
+      Income: ${auditData.monthlyIncome}
+      Categories (Actual Spend): ${JSON.stringify(auditData.categories)}
 
-    if (!reportResult.success) {
-      return reportResult;
-    }
-
-    return { success: true, data: reportResult.data };
-  }
-
-  private constructFinancialReportPrompt(auditData: FinancialAudit): string {
-    const auditJson = JSON.stringify(auditData, null, 2);
-    const categoriesJson = JSON.stringify(ACCOUNTANT_CATEGORIES, null, 2);
-
-    return `
-      You are "The Accountant," an elite-level, direct, and analytical AI financial advisor.
-      Your task is to analyze the user's financial audit data and generate a comprehensive, structured financial report.
-      The tone must be professional, insightful, and highly analytical. Avoid generic encouragement.
-
-      **User's Financial Audit Data:**
-      ${auditJson}
-
-      **Budgeting Categories:**
-      Use the following category structure for your analysis and budget proposal.
-      ${categoriesJson}
+      **Audit History:**
+      Flags Raised: ${JSON.stringify(auditData.flags)}
+      User Resolutions: ${JSON.stringify(auditData.resolutions)}
 
       **Instructions:**
-      1.  **Analyze Spending:** Scrutinize the user's income and expenses. Identify areas of high spending, potential savings, and financial strengths or weaknesses.
-      2.  **Create a Budget:** Propose a detailed monthly budget. The total allocated budget must not exceed the user's monthly income. Be realistic but firm in your recommendations.
-      3.  **Provide Advice:** Offer actionable, specific money management advice. Each piece of advice should be linked to a specific financial category.
-      4.  **Format Output:** You MUST respond with a valid JSON object that strictly adheres to the defined 'FinancialReport' schema. Do not include any text, markdown, or commentary outside of the JSON object itself.
+      1. Create a Proposed Budget. Take the user's actuals and their resolutions into account. If they accepted a reduction, use that lower number.
+      2. Ensure the total proposed budget is <= Monthly Income. If not, cut discretionary categories aggressively.
+      3. Generate the Executive Summary and Spending Analysis.
+      4. Provide 3-5 high-impact Money Management Tips.
 
-      **Output Schema (reminder):**
-      \`\`\`json
+      **Output Schema:**
+      (Must match FinancialReport interface strictly)
       {
-        "executiveSummary": "string",
-        "spendingAnalysis": [
-          {
-            "category": "string (must be a key from ACCOUNTANT_CATEGORIES)",
-            "totalSpent": "number",
-            "aiSummary": "string",
-            "healthScore": "number (1-10)"
-          }
-        ],
-        "proposedBudget": {
-          // Dynamically structured based on ACCOUNTANT_CATEGORIES
-        },
-        "moneyManagementAdvice": [
-          {
-            "title": "string",
-            "description": "string",
-            "relatedCategory": "string (must be a key from ACCOUNTANT_CATEGORIES)"
-          }
-        ],
-        "reportGeneratedAt": "string (ISO 8601 format)",
-        "version": "1.0"
+        "executiveSummary": "...",
+        "spendingAnalysis": [ ... ],
+        "proposedBudget": [ ... ],
+        "moneyManagementAdvice": [ ... ],
+        "reportGeneratedAt": "${new Date().toISOString()}",
+        "version": "2.0"
       }
-      \`\`\`
-
-      Now, generate the financial report based on the user's data.
     `;
+
+    return await this.generateJSON(prompt, reportSchema);
   }
 }

@@ -25,22 +25,30 @@ const SARCASTIC_PROGRESS_MESSAGES = [
     "Simulating stock market crashes...",
 ]
 
-export function SarcasticLoader() {
-  const [message, setMessage] = useState('')
+interface SarcasticLoaderProps {
+  text?: string;
+}
+
+export function SarcasticLoader({ text }: SarcasticLoaderProps) {
+  const [message, setMessage] = useState(text || '')
 
   useEffect(() => {
-    setMessage(SARCASTIC_MESSAGES[Math.floor(Math.random() * SARCASTIC_MESSAGES.length)])
-  }, [])
+    if (!text) {
+        setMessage(SARCASTIC_MESSAGES[Math.floor(Math.random() * SARCASTIC_MESSAGES.length)])
+    } else {
+        setMessage(text)
+    }
+  }, [text])
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 p-8">
+    <div className="flex flex-col items-center justify-center gap-4 p-8 min-h-[40vh]">
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
       >
-        <Spinner size={48} className="text-primary" />
+        <Spinner size={48} className="text-cyan-400" />
       </motion.div>
-      <p className="text-muted-foreground text-sm animate-pulse">{message}</p>
+      <p className="text-muted-foreground text-sm animate-pulse font-mono">{message}</p>
     </div>
   )
 }
