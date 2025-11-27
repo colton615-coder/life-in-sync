@@ -141,7 +141,7 @@ export function Finance() {
       return {
         ...prev,
         categories: updatedCategories,
-        expenses: { ...prev.expenses, [newId]: {} }
+        expenses: { ...prev.expenses, [categoryId]: {} }
       };
     });
     setNewCategoryName('');
