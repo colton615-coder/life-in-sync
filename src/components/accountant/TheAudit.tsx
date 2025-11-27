@@ -51,18 +51,28 @@ export function TheAudit({ onComplete }: TheAuditProps) {
             timestamp: new Date()
         };
 
-        // Queue the first specific analysis
-        const firstAnalysis = report.spendingAnalysis[0]; // Usually the worst or first one
-        const analysisMessage: ChatMessage = {
-            id: 'init-2',
-            sender: 'ai',
-            content: `Let's look at **${firstAnalysis.category}**. You've spent **$${firstAnalysis.totalSpent.toFixed(2)}**. \n\n${firstAnalysis.aiSummary}`,
-            timestamp: new Date(Date.now() + 1000),
-            widget: {
-                type: 'spending_analysis',
-                data: firstAnalysis
-            }
-        };
+        // Queue the first specific analysis, if available
+        let analysisMessage: ChatMessage;
+        if (Array.isArray(report.spendingAnalysis) && report.spendingAnalysis.length > 0) {
+            const firstAnalysis = report.spendingAnalysis[0]; // Usually the worst or first one
+            analysisMessage = {
+                id: 'init-2',
+                sender: 'ai',
+                content: `Let's look at **${firstAnalysis.category}**. You've spent **$${firstAnalysis.totalSpent.toFixed(2)}**. \n\n${firstAnalysis.aiSummary}`,
+                timestamp: new Date(Date.now() + 1000),
+                widget: {
+                    type: 'spending_analysis',
+                    data: firstAnalysis
+                }
+            };
+        } else {
+            analysisMessage = {
+                id: 'init-2',
+                sender: 'ai',
+                content: `I could not find any spending analysis data in your report. Please check your financial data or try again.`,
+                timestamp: new Date(Date.now() + 1000)
+            };
+        }
 
         setMessages([initialMessage, analysisMessage]);
         // eslint-disable-next-line react-hooks/exhaustive-deps
