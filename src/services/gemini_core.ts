@@ -294,7 +294,7 @@ export class GeminiCore {
    * @param reportContext The full financial report for reference.
    */
   async continueAuditConversation(history: AuditChatHistoryItem[], newMessage: string, reportContext: FinancialReport): Promise<string> {
-      const historyText = history.map(m => `${m.sender === 'ai' ? 'The Accountant' : 'User'}: ${m.content ?? m.text ?? ''}`).join('\n');
+      const historyText = history.map(m => `${m.sender === 'ai' ? 'The Accountant' : 'User'}: ${m.content ?? ''}`).join('\n');
       const context = JSON.stringify(reportContext, null, 2);
 
       const prompt = `
