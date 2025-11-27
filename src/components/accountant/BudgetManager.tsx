@@ -80,12 +80,18 @@ export function BudgetManager() {
                 <Progress value={100} className="h-1 bg-white/10" indicatorClassName="bg-cyan-500/50" />
 
                 <div className="mt-3 space-y-1">
-                    {Object.entries(catData.subcategories).map(([subId, amount]) => (
-                        <div key={subId} className="flex justify-between text-xs text-slate-400 font-mono">
-                            <span>{subId.replace(/-/g, ' ')}</span>
-                            <span>${amount}</span>
-                        </div>
-                    ))}
+                    {Object.entries(catData.subcategories).map(([subId, amount]) => {
+                        // Use the actual subcategory label from the audit data if available
+                        const subLabel = catData.subcategoryLabels && catData.subcategoryLabels[subId]
+                            ? catData.subcategoryLabels[subId]
+                            : subId.replace(/-/g, ' ');
+                        return (
+                            <div key={subId} className="flex justify-between text-xs text-slate-400 font-mono">
+                                <span>{subLabel}</span>
+                                <span>${amount}</span>
+                            </div>
+                        );
+                    })}
                 </div>
             </Card>
         ))}
