@@ -126,17 +126,17 @@ export function Finance() {
         label: newCategoryName,
         subcategories: []
       };
+      const updatedCategories = [...prev.categories, newCat];
+      // Jump to the new category using the updated categories length
+      setCurrentCategoryIndex(updatedCategories.length - 1);
       return {
         ...prev,
-        categories: [...prev.categories, newCat],
+        categories: updatedCategories,
         expenses: { ...prev.expenses, [newId]: {} }
       };
     });
     setNewCategoryName('');
     setIsEditMode(false);
-    // Jump to the new category
-    setCurrentCategoryIndex(audit.categories.length);
-  };
 
   const addSubcategory = (categoryId: string) => {
       if (!newSubcategoryName.trim()) return;
