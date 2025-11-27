@@ -82,9 +82,9 @@ export function BudgetManager() {
                 <div className="mt-3 space-y-1">
                     {Object.entries(catData.subcategories).map(([subId, amount]) => {
                         // Use the actual subcategory label from the audit data if available
-                        const subLabel = catData.subcategoryLabels && catData.subcategoryLabels[subId]
-                            ? catData.subcategoryLabels[subId]
-                            : subId.replace(/-/g, ' ');
+                        const category = report.categories.find(c => c.id === catId);
+                        const subcategory = category?.subcategories?.find(sc => sc.id === subId);
+                        const subLabel = subcategory?.label || subId.replace(/-/g, ' ');
                         return (
                             <div key={subId} className="flex justify-between text-xs text-slate-400 font-mono">
                                 <span>{subLabel}</span>
