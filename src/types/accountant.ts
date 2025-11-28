@@ -61,7 +61,6 @@ export interface FinancialAudit {
 // Helper to generate the initial "Option A" structure
 export const INITIAL_TEMPLATE_CATEGORIES = [
   { name: 'Housing', subcategories: ['Rent/Mortgage', 'Utilities', 'Maintenance'] },
-  { name: 'Transportation', subcategories: ['Car Payment', 'Insurance', 'Fuel', 'Public Transit'] },
   { name: 'Food', subcategories: ['Groceries', 'Dining Out', 'Coffee/Snacks'] },
   { name: 'Health & Self', subcategories: ['Medical', 'Gym/Fitness', 'Personal Care'] },
   { name: 'Subscriptions', subcategories: ['Streaming', 'Software', 'Memberships'] },

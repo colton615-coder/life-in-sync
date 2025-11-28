@@ -34,9 +34,18 @@ export function Finance() {
 
   // Migration/Reset Logic: If we detect version mismatch or explicit reset
   useEffect(() => {
-    if (audit && audit.version !== '2.0') {
+    if (audit) {
+      if (audit.version !== '2.0') {
         console.log('Migrating to Finance 2.0...');
         setAudit(INITIAL_AUDIT);
+      } else if (audit.categories.some(c => c.name === 'Transportation')) {
+        // Fix for backend crash: Remove Transportation category if present
+        console.log('Sanitizing audit data: Removing Transportation category...');
+        setAudit(prev => ({
+          ...prev,
+          categories: prev.categories.filter(c => c.name !== 'Transportation')
+        }));
+      }
     }
   }, [audit, setAudit]);
 
