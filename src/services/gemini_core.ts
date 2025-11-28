@@ -298,11 +298,12 @@ export class GeminiCore {
       })),
       // Robust Advice Schema: Handles both structured objects AND simple string arrays
       moneyManagementAdvice: z.preprocess((val) => {
-        // If the AI returns an array of strings, convert them to objects
-        if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'string') {
-          return val.map((str: string) => {
-            // Try to split "Title: Description" format
-            const parts = str.split(':');
+        if (!Array.isArray(val)) return val;
+
+        return val.map((item: any) => {
+          // Case 1: Simple string
+          if (typeof item === 'string') {
+            const parts = item.split(':');
             if (parts.length > 1) {
               return {
                 title: parts[0].trim(),
@@ -311,13 +312,29 @@ export class GeminiCore {
               };
             }
             return {
-              title: 'Advice',
-              description: str,
+              title: 'Financial Tip',
+              description: item,
               priority: 'medium'
             };
-          });
-        }
-        return val;
+          }
+
+          // Case 2: Object but missing keys or using wrong keys (from AI hallucinations)
+          if (typeof item === 'object' && item !== null) {
+            // Map common aliases to 'description'
+            const description = item.description || item.advice || item.text || item.body || item.message || '';
+
+            // Default priority if missing
+            const priority = item.priority || 'medium';
+
+            return {
+              ...item,
+              description,
+              priority
+            };
+          }
+
+          return item;
+        });
       }, z.array(z.object({
         title: z.string(),
         description: z.string(),
@@ -374,7 +391,13 @@ export class GeminiCore {
             ]
           }
         ],
-        "moneyManagementAdvice": [ ... ],
+        "moneyManagementAdvice": [
+          {
+            "title": "Tip Title",
+            "description": "Actionable advice...",
+            "priority": "high"
+          }
+        ],
         "reportGeneratedAt": "${new Date().toISOString()}",
         "version": "2.0"
       }
