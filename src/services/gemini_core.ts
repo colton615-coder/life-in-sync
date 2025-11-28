@@ -207,8 +207,8 @@ export class GeminiCore {
     // Schema for the Audit Flags
     const flagSchema = z.object({
       flags: z.array(z.object({
-        categoryId: z.string(),
-        subcategoryId: z.string().optional(),
+        categoryId: z.string().nullable().optional(),
+        subcategoryId: z.string().nullable().optional(),
         severity: z.enum(['critical', 'warning', 'observation', 'praise']),
         title: z.string(),
         message: z.string(),
@@ -280,28 +280,50 @@ export class GeminiCore {
     const looseReportSchema = z.object({
       executiveSummary: z.string(),
       spendingAnalysis: z.array(z.object({
-        categoryId: z.string().optional(),
+        categoryId: z.string().nullable().optional(),
         categoryName: z.string(),
         totalSpent: z.number(),
         aiSummary: z.string(),
         healthScore: z.number().min(1).max(10)
       })),
       proposedBudget: z.array(z.object({
-        categoryId: z.string().optional(),
+        categoryId: z.string().nullable().optional(),
         categoryName: z.string(),
         allocatedAmount: z.number(),
         subcategories: z.array(z.object({
-          subcategoryId: z.string().optional(),
+          subcategoryId: z.string().nullable().optional(),
           subcategoryName: z.string(),
           allocatedAmount: z.number()
         }))
       })),
-      moneyManagementAdvice: z.array(z.object({
+      // Robust Advice Schema: Handles both structured objects AND simple string arrays
+      moneyManagementAdvice: z.preprocess((val) => {
+        // If the AI returns an array of strings, convert them to objects
+        if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'string') {
+          return val.map((str: string) => {
+            // Try to split "Title: Description" format
+            const parts = str.split(':');
+            if (parts.length > 1) {
+              return {
+                title: parts[0].trim(),
+                description: parts.slice(1).join(':').trim(),
+                priority: 'medium'
+              };
+            }
+            return {
+              title: 'Advice',
+              description: str,
+              priority: 'medium'
+            };
+          });
+        }
+        return val;
+      }, z.array(z.object({
         title: z.string(),
         description: z.string(),
-        relatedCategoryName: z.string().optional(),
+        relatedCategoryName: z.string().nullable().optional(),
         priority: z.enum(['high', 'medium', 'low'])
-      })),
+      }))),
       reportGeneratedAt: z.string(),
       version: z.literal('2.0')
     });
