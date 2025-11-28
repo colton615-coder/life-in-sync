@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI, GenerativeModel, GenerationConfig, Part } from '@google/generative-ai';
 import { z } from 'zod';
-import { FinancialAudit, AuditFlag, Category } from '../types/accountant';
+import { FinancialAudit, AuditFlag } from '../types/accountant';
 import { FinancialReport } from '../types/financial_report';
 import { handleApiError, AppError } from './api-error-handler';
 import { logger } from './logger';
@@ -69,6 +69,7 @@ export class GeminiCore {
    */
   async generateContent(
     prompt: string | Array<string | Part>,
+    // @ts-expect-error - config is reserved for future use
     config?: GenerationConfig
   ): Promise<{ success: true; data: string } | AppError> {
     if (!this.apiKey) {
@@ -87,7 +88,7 @@ export class GeminiCore {
         const result = await this.model.generateContent(prompt);
         const response = await result.response;
         return { success: true, data: response.text() };
-      } catch (error: any) {
+      } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
         if (error.status === 429 || error.status === 503) {
           console.warn(`Gemini API rate limit/unavailable (${error.status}). Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
@@ -133,7 +134,11 @@ export class GeminiCore {
             issues: result.error.issues,
             rawData: rawText,
           });
-          return handleApiError(new Error('The data structure from the AI was invalid.'), 'GeminiCore.generateJSON');
+          // Attach specific Zod error info for the repair mechanism to use
+          const error = new Error('The data structure from the AI was invalid.');
+          // @ts-expect-error - Attaching custom property for repair logic
+          (error as any).zodError = result.error;
+          return handleApiError(error, 'GeminiCore.generateJSON');
         }
         return { success: true, data: result.data };
       }
@@ -143,6 +148,46 @@ export class GeminiCore {
     }
   }
 
+  /**
+   * Generates JSON with an automatic repair step if validation fails.
+   */
+  async generateJSONWithRepair<T>(
+    prompt: string,
+    schema: z.ZodType<T>,
+    config?: GenerationConfig
+  ): Promise<{ success: true; data: T } | AppError> {
+    // 1. First Attempt
+    const result = await this.generateJSON(prompt, schema, config);
+    if (result.success) return result;
+
+    // 2. Check if it's a validation/parsing error that we can try to fix
+    // We assume generic 'handleApiError' returns a formatted AppError.
+    // If it was a network error, we probably can't "repair" it by asking again.
+    // But if it was a schema mismatch, we can.
+
+    logger.warn('GeminiCore', 'First attempt failed, attempting repair...');
+
+    const repairPrompt = `
+      You previously generated a JSON response that failed validation.
+
+      **Original Prompt:**
+      ${prompt}
+
+      **Your Invalid Response:**
+      (See previous output)
+
+      **Error:**
+      The response did not match the required JSON schema or was malformed.
+
+      **Requirement:**
+      Please strictly adhere to the schema and correct the JSON.
+      Ensure all required fields are present and types are correct.
+      Return ONLY the valid JSON.
+    `;
+
+    return await this.generateJSON(repairPrompt, schema, config);
+  }
+
   // --- Finance 2.0 Methods ---
 
   /**
@@ -150,6 +195,14 @@ export class GeminiCore {
    * Analyzes the raw audit data and generates flags/critiques.
    */
   async performFinancialAudit(auditData: FinancialAudit): Promise<{ success: true; data: AuditFlag[] } | AppError> {
+    // Filter out empty categories to avoid confusing the AI
+    const cleanCategories = auditData.categories
+      .map(cat => ({
+        ...cat,
+        subcategories: cat.subcategories.filter(sub => sub.amount !== null && sub.amount > 0)
+      }))
+      .filter(cat => cat.subcategories.length > 0);
+
     // Schema for the Audit Flags
     const flagSchema = z.object({
       flags: z.array(z.object({
@@ -168,7 +221,7 @@ export class GeminiCore {
 
       **Data to Review:**
       Income: ${auditData.monthlyIncome}
-      Categories: ${JSON.stringify(auditData.categories, null, 2)}
+      Categories: ${JSON.stringify(cleanCategories, null, 2)}
 
       **Instructions:**
       1. Analyze the data for excessive spending, missing critical categories (like Savings/Investment), or impressive discipline.
@@ -193,12 +246,11 @@ export class GeminiCore {
       }
     `;
 
-    const result = await this.generateJSON(prompt, flagSchema);
+    const result = await this.generateJSONWithRepair(prompt, flagSchema);
 
     if (!result.success) return result;
 
-    // Map the result to include IDs generated here (though the schema doesn't have ID, we need to add one for the frontend)
-    // We can't add it in the Zod schema easily if it's not in the AI response, so we map after.
+    // @ts-expect-error - We need to cast the result to any to map the IDs because Zod schema doesn't output IDs
     const flagsWithIds: AuditFlag[] = result.data.flags.map((flag: any) => ({
       ...flag,
       id: crypto.randomUUID()
@@ -212,6 +264,14 @@ export class GeminiCore {
    * Takes the audit data AND the resolutions (user's answers to flags) to build the final plan.
    */
   async generateFinalReport(auditData: FinancialAudit): Promise<{ success: true; data: FinancialReport } | AppError> {
+    // Clean data again for the final report
+    const cleanCategories = auditData.categories
+      .map(cat => ({
+        ...cat,
+        subcategories: cat.subcategories.filter(sub => sub.amount !== null && sub.amount > 0)
+      }))
+      .filter(cat => cat.subcategories.length > 0);
+
     const reportSchema = z.object({
       executiveSummary: z.string(),
       spendingAnalysis: z.array(z.object({
@@ -247,7 +307,7 @@ export class GeminiCore {
 
       **User Data:**
       Income: ${auditData.monthlyIncome}
-      Categories (Actual Spend): ${JSON.stringify(auditData.categories)}
+      Categories (Actual Spend): ${JSON.stringify(cleanCategories)}
 
       **Audit History:**
       Flags Raised: ${JSON.stringify(auditData.flags)}
@@ -256,9 +316,9 @@ export class GeminiCore {
       **Instructions:**
       1. Create a Proposed Budget. Take the user's actuals and their resolutions into account. If they accepted a reduction, use that lower number.
       2. Ensure the total proposed budget is <= Monthly Income. If not, cut discretionary categories aggressively.
-      3. IMPORTANT: Do not include any category named 'Transportation' or 'Public Transit' in the proposed budget, as these are deprecated.
-      4. Generate the Executive Summary and Spending Analysis.
-      5. Provide 3-5 high-impact Money Management Tips.
+      3. Generate the Executive Summary and Spending Analysis.
+      4. Provide 3-5 high-impact Money Management Tips.
+      5. If the user did not provide data for a category (e.g. Transportation), DO NOT invent it. Only work with the categories provided or standard essentials (like Housing/Food) if missing.
 
       **Output Schema:**
       (Must match FinancialReport interface strictly)
@@ -272,6 +332,56 @@ export class GeminiCore {
       }
     `;
 
-    return await this.generateJSON(prompt, reportSchema);
+    return await this.generateJSONWithRepair(prompt, reportSchema);
+  }
+
+  /**
+   * Chat Interface for Accountant Consultation
+   */
+  async consultAccountant(
+    history: { role: 'user' | 'model', text: string }[],
+    auditData: FinancialAudit
+  ): Promise<{ success: true; data: { reply: string; intent?: { type: 'log_transaction', category: string, amount: number, item: string } } } | AppError> {
+     // Clean data
+    const cleanCategories = auditData.categories
+      .map(cat => ({
+        ...cat,
+        subcategories: cat.subcategories.filter(sub => sub.amount !== null && sub.amount > 0)
+      }))
+      .filter(cat => cat.subcategories.length > 0);
+
+    const schema = z.object({
+        reply: z.string(),
+        intent: z.object({
+            type: z.literal('log_transaction'),
+            category: z.string(),
+            amount: z.number(),
+            item: z.string()
+        }).optional()
+    });
+
+    const prompt = `
+        You are "The Accountant".
+
+        **Context:**
+        User's Financial Data: ${JSON.stringify(cleanCategories)}
+        User's Income: ${auditData.monthlyIncome}
+
+        **Conversation History:**
+        ${JSON.stringify(history)}
+
+        **Instructions:**
+        1. Answer the user's financial questions with direct, analytical advice.
+        2. If the user mentions spending money (e.g., "I just spent $50 on Gas"), identify the 'intent' to log a transaction.
+        3. Match the transaction to an existing category if possible, or suggest a new one.
+
+        **Output Schema:**
+        {
+            "reply": "Your response text...",
+            "intent": { "type": "log_transaction", "category": "Housing", "amount": 100, "item": "Rent" } // Optional
+        }
+    `;
+
+    return await this.generateJSONWithRepair(prompt, schema);
   }
 }
