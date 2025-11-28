@@ -265,6 +265,8 @@ export class GeminiCore {
    * Takes the audit data AND the resolutions (user's answers to flags) to build the final plan.
    */
   async generateFinalReport(auditData: FinancialAudit): Promise<{ success: true; data: FinancialReport } | AppError> {
+    logger.info('GeminiCore.generateFinalReport', 'Starting Report Generation', { auditId: auditData.lastUpdated });
+
     // Clean data again for the final report
     const cleanCategories = auditData.categories
       .map(cat => ({
@@ -358,12 +360,16 @@ export class GeminiCore {
 
     const result = await this.generateJSONWithRepair(prompt, looseReportSchema);
 
-    if (!result.success) return result;
+    if (!result.success) {
+      logger.error('GeminiCore.generateFinalReport', 'Failed to generate valid JSON Report', { error: result });
+      return result;
+    }
 
     // Post-Processing: Hydrate Missing IDs
     // We map the Names back to the original UUIDs from 'auditData' to ensure the application works correctly.
     const hydratedReport = hydrateReportIds(result.data, auditData);
 
+    logger.info('GeminiCore.generateFinalReport', 'Report Generation Completed Successfully');
     return { success: true, data: hydratedReport };
   }
 
