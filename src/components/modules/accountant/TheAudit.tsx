@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { FinancialAudit, AuditFlag, AuditResolution } from '@/types/accountant';
+import { FinancialAudit, AuditResolution } from '@/types/accountant';
 import { FinancialReport } from '@/types/financial_report';
 import { GeminiCore } from '@/services/gemini_core';
 import { useKV } from '@/hooks/use-kv';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/ui/button';
 import { SarcasticLoader } from '@/components/SarcasticLoader';
-import { AlertTriangle, CheckCircle, XCircle, ArrowRight, BrainCircuit } from 'lucide-react';
+import { AlertTriangle, CheckCircle, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -18,7 +18,7 @@ interface TheAuditProps {
 }
 
 export function TheAudit({ audit, setAudit, onComplete }: TheAuditProps) {
-  const [report, setReport] = useKV<FinancialReport | null>('finance-report-v2', null);
+  const [, setReport] = useKV<FinancialReport | null>('finance-report-v2', null);
   const [isLoading, setIsLoading] = useState(false);
   const [analyzingStep, setAnalyzingStep] = useState<'scanning' | 'generating_report'>('scanning');
   const [currentFlagIndex, setCurrentFlagIndex] = useState(0);
@@ -42,7 +42,7 @@ export function TheAudit({ audit, setAudit, onComplete }: TheAuditProps) {
           } else {
             toast.error("Audit Protocol Failed: " + result.message);
           }
-        } catch (e) {
+        } catch {
             toast.error("Connection Interrupted.");
         } finally {
           setIsLoading(false);
@@ -50,7 +50,13 @@ export function TheAudit({ audit, setAudit, onComplete }: TheAuditProps) {
       }
     };
     initAudit();
-  }, [audit.flags.length]); // Only run if flags are empty
+    // We only want this to run when the audit flags length changes to 0 (reset/init)
+    // or on mount if it's 0. We specifically want to avoid adding 'audit' as a full dep
+    // because it changes on every resolution, which would re-trigger this logic if not careful.
+    // However, eslint demands it. We can disable the rule or be more specific.
+    // For safety, disabling the rule for this effect as it is a specific initialization logic.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audit.flags.length]);
 
   // 2. Resolve a Flag
   const handleResolve = (resolution: AuditResolution) => {
@@ -98,7 +104,7 @@ export function TheAudit({ audit, setAudit, onComplete }: TheAuditProps) {
         } else {
             toast.error("Failed to generate final report: " + result.message);
         }
-    } catch (e) {
+    } catch {
         toast.error("Failed to generate report.");
     } finally {
         setIsLoading(false);
@@ -142,8 +148,6 @@ export function TheAudit({ audit, setAudit, onComplete }: TheAuditProps) {
   }
 
   const currentFlag = audit.flags[currentFlagIndex];
-  const isResolved = audit.resolutions.some(r => r.flagId === currentFlag.id);
-
   // If the user navigates back/forth manually (optional future feature), we need to check status.
   // For now, we just show the current un-resolved one effectively due to the index increment logic,
   // but if we wanted to show reviewed ones, we'd need logic here.

@@ -5,8 +5,9 @@ import { useKV } from '@/hooks/use-kv';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingDown, TrendingUp, AlertCircle, RefreshCw, ChevronRight, BrainCircuit } from 'lucide-react';
+import { RefreshCw, ChevronRight, BrainCircuit } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AccountantConsultation } from './AccountantConsultation';
 
 interface BudgetManagerProps {
   audit: FinancialAudit;
@@ -16,6 +17,7 @@ interface BudgetManagerProps {
 export function BudgetManager({ audit, setAudit }: BudgetManagerProps) {
   const [report] = useKV<FinancialReport | null>('finance-report-v2', null);
   const [activeTab, setActiveTab] = useState<'overview' | 'budget' | 'advice'>('overview');
+  const [showConsultation, setShowConsultation] = useState(false);
 
   // If report is missing but audit is 'completed', something is wrong.
   if (!report) {
@@ -167,11 +169,25 @@ export function BudgetManager({ audit, setAudit }: BudgetManagerProps) {
 
        {/* Footer / Consult Action */}
        <div className="pt-8 text-center">
-           <p className="text-xs text-muted-foreground mb-4">Need to adjust your strategy?</p>
-           <Button variant="outline" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
+           <p className="text-xs text-muted-foreground mb-4">Need to adjust your strategy or log a transaction?</p>
+           <Button
+               variant="outline"
+               className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
+               onClick={() => setShowConsultation(true)}
+            >
                Consult The Accountant <ChevronRight className="ml-1 h-3 w-3" />
            </Button>
        </div>
+
+       <AnimatePresence>
+         {showConsultation && (
+            <AccountantConsultation
+                audit={audit}
+                setAudit={setAudit}
+                onClose={() => setShowConsultation(false)}
+            />
+         )}
+       </AnimatePresence>
     </div>
   );
 }
