@@ -31,6 +31,13 @@ export class GeminiCore {
   }
 
   /**
+   * Returns the model name used by the core.
+   */
+  public static getModelName(): string {
+    return GeminiCore.MODEL_NAME;
+  }
+
+  /**
    * Retrieves the API key from environment variables.
    */
   private getApiKey(): string {
