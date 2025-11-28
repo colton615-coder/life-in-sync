@@ -249,8 +249,9 @@ export class GeminiCore {
       **Instructions:**
       1. Create a Proposed Budget. Take the user's actuals and their resolutions into account. If they accepted a reduction, use that lower number.
       2. Ensure the total proposed budget is <= Monthly Income. If not, cut discretionary categories aggressively.
-      3. Generate the Executive Summary and Spending Analysis.
-      4. Provide 3-5 high-impact Money Management Tips.
+      3. IMPORTANT: Do not include any category named 'Transportation' or 'Public Transit' in the proposed budget, as these are deprecated.
+      4. Generate the Executive Summary and Spending Analysis.
+      5. Provide 3-5 high-impact Money Management Tips.
 
       **Output Schema:**
       (Must match FinancialReport interface strictly)
