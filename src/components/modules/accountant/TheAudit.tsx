@@ -10,6 +10,7 @@ import { AlertTriangle, CheckCircle, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { logger } from '@/services/logger';
 
 interface TheAuditProps {
   audit: FinancialAudit;
@@ -92,20 +93,46 @@ export function TheAudit({ audit, setAudit, onComplete }: TheAuditProps) {
 
   // 3. Finalize: Generate the Blueprint
   const handleFinalize = async () => {
+    const auditId = audit.lastUpdated || 'unknown-audit-id';
+    const userId = 'GuestUser'; // Placeholder until auth is implemented
+
+    logger.info('TheAudit', 'Finalize button clicked', { userId, auditId });
+
+    // Data Validation
+    if (audit.monthlyIncome === null || audit.monthlyIncome === undefined) {
+        logger.error('TheAudit', 'Validation Failed: monthlyIncome is missing', { audit });
+        toast.error("Audit data is incomplete (missing income).");
+        return;
+    }
+
+    logger.info('TheAudit', 'Payload Validation Passed', {
+        monthlyIncome: audit.monthlyIncome,
+        categoriesCount: audit.categories.length,
+        flagsCount: audit.flags.length
+    });
+
     setIsLoading(true);
     setAnalyzingStep('generating_report');
     try {
+        logger.info('TheAudit', 'Sending request to Report Generator (GeminiCore)...');
         const gemini = new GeminiCore();
         const result = await gemini.generateFinalReport(audit);
 
         if (result.success) {
+            logger.info('TheAudit', 'Report Generation Success');
             setReport(result.data);
             onComplete(audit); // This moves status to 'completed'
         } else {
+            logger.error('TheAudit', 'Report Generation Failed (API Error)', { message: result.message, code: result.code });
             toast.error("Failed to generate final report: " + result.message);
         }
-    } catch {
-        toast.error("Failed to generate report.");
+    } catch (error: any) {
+        logger.error('TheAudit', 'CRITICAL FAILURE: Report Generation threw an exception', {
+            error: error.message,
+            stack: error.stack
+        });
+        toast.error("Failed to generate report. Check logs.");
+        console.error(error);
     } finally {
         setIsLoading(false);
     }
