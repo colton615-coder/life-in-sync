@@ -11,6 +11,7 @@ export default {
       'ts-jest',
       {
         useESM: true,
+        diagnostics: false, // Turn off type checking diagnostics to speed up test and avoid TS151001
       },
     ],
   },

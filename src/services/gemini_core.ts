@@ -5,6 +5,7 @@ import { FinancialReport } from '../types/financial_report';
 import { handleApiError, AppError } from './api-error-handler';
 import { logger } from './logger';
 import { cleanAndParseJSON } from '../lib/ai-utils';
+import { hydrateReportIds } from '../lib/finance_hydration';
 
 /**
  * Core service for interacting with Google Gemini API.
@@ -272,21 +273,23 @@ export class GeminiCore {
       }))
       .filter(cat => cat.subcategories.length > 0);
 
-    const reportSchema = z.object({
+    // Loose Schema: Allows missing IDs during initial generation to prevent validation failure
+    // IDs will be hydrated in post-processing
+    const looseReportSchema = z.object({
       executiveSummary: z.string(),
       spendingAnalysis: z.array(z.object({
-        categoryId: z.string(),
+        categoryId: z.string().optional(),
         categoryName: z.string(),
         totalSpent: z.number(),
         aiSummary: z.string(),
         healthScore: z.number().min(1).max(10)
       })),
       proposedBudget: z.array(z.object({
-        categoryId: z.string(),
+        categoryId: z.string().optional(),
         categoryName: z.string(),
         allocatedAmount: z.number(),
         subcategories: z.array(z.object({
-          subcategoryId: z.string(),
+          subcategoryId: z.string().optional(),
           subcategoryName: z.string(),
           allocatedAmount: z.number()
         }))
@@ -318,21 +321,50 @@ export class GeminiCore {
       2. Ensure the total proposed budget is <= Monthly Income. If not, cut discretionary categories aggressively.
       3. Generate the Executive Summary and Spending Analysis.
       4. Provide 3-5 high-impact Money Management Tips.
-      5. If the user did not provide data for a category (e.g. Transportation), DO NOT invent it. Only work with the categories provided or standard essentials (like Housing/Food) if missing.
+      5. IMPORTANT: You MUST output the exact 'categoryName' and 'subcategoryName' from the provided data.
+      6. Try to include the 'categoryId' and 'subcategoryId' from the data if possible, but matching the NAME is the most important requirement.
 
       **Output Schema:**
-      (Must match FinancialReport interface strictly)
       {
         "executiveSummary": "...",
-        "spendingAnalysis": [ ... ],
-        "proposedBudget": [ ... ],
+        "spendingAnalysis": [
+          {
+            "categoryId": "UUID (optional but preferred)",
+            "categoryName": "Housing",
+            "totalSpent": 2000,
+            "aiSummary": "...",
+            "healthScore": 8
+          }
+        ],
+        "proposedBudget": [
+          {
+            "categoryId": "UUID (optional but preferred)",
+            "categoryName": "Housing",
+            "allocatedAmount": 1800,
+            "subcategories": [
+              {
+                 "subcategoryId": "UUID (optional but preferred)",
+                 "subcategoryName": "Rent",
+                 "allocatedAmount": 1800
+              }
+            ]
+          }
+        ],
         "moneyManagementAdvice": [ ... ],
         "reportGeneratedAt": "${new Date().toISOString()}",
         "version": "2.0"
       }
     `;
 
-    return await this.generateJSONWithRepair(prompt, reportSchema);
+    const result = await this.generateJSONWithRepair(prompt, looseReportSchema);
+
+    if (!result.success) return result;
+
+    // Post-Processing: Hydrate Missing IDs
+    // We map the Names back to the original UUIDs from 'auditData' to ensure the application works correctly.
+    const hydratedReport = hydrateReportIds(result.data, auditData);
+
+    return { success: true, data: hydratedReport };
   }
 
   /**
