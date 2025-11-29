@@ -250,7 +250,7 @@ export function Workouts() {
                     disabled={generating || !workoutPrompt.trim()}
                     loading={generating}
                   >
-                    {!generating && 'Generate Workout'}
+                    Generate Workout
                   </AIButton>
                 </motion.div>
               )}
