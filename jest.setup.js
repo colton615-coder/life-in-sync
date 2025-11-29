@@ -14,6 +14,9 @@ Object.defineProperty(global, 'crypto', {
     // Safe spread for webcrypto
     ...(crypto.webcrypto || {}),
 
+    // Explicitly expose subtle if missing
+    subtle: crypto.webcrypto?.subtle || crypto.subtle,
+
     // Add randomUUID
     randomUUID: crypto.randomUUID || (() => "test-uuid-" + Math.random()),
 

@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach } from '@jest/globals'
 import { encrypt, decrypt } from '../crypto'
 
 // TODO: Fix the test environment to support Web Crypto API and re-enable these tests.
-describe.skip('crypto functions', () => {
+describe('crypto functions', () => {
   beforeEach(() => {
     // Mock localStorage for jsdom environment
     let store: { [key: string]: string } = {};
