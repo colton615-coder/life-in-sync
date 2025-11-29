@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FinancialAudit, AuditResolution } from '@/types/accountant';
 import { FinancialReport } from '@/types/financial_report';
-import { GeminiCore } from '@/services/gemini_core';
+import { AccountantService } from '@/services/accountant/accountant-service';
 import { useKV } from '@/hooks/use-kv';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/ui/button';
@@ -18,8 +18,10 @@ interface TheAuditProps {
   onComplete: (audit: FinancialAudit) => void;
 }
 
+import { APP_CONFIG } from '@/lib/constants';
+
 export function TheAudit({ audit, setAudit, onComplete }: TheAuditProps) {
-  const [, setReport] = useKV<FinancialReport | null>('finance-report-v2', null);
+  const [, setReport] = useKV<FinancialReport | null>(APP_CONFIG.STORAGE_KEYS.FINANCE.REPORT, null);
   const [isLoading, setIsLoading] = useState(false);
   const [analyzingStep, setAnalyzingStep] = useState<'scanning' | 'generating_report'>('scanning');
   const [currentFlagIndex, setCurrentFlagIndex] = useState(0);
@@ -31,8 +33,8 @@ export function TheAudit({ audit, setAudit, onComplete }: TheAuditProps) {
         setIsLoading(true);
         setAnalyzingStep('scanning');
         try {
-          const gemini = new GeminiCore();
-          const result = await gemini.performFinancialAudit(audit);
+          const accountant = new AccountantService();
+          const result = await accountant.performFinancialAudit(audit);
 
           if (result.success) {
             setAudit({
@@ -114,9 +116,9 @@ export function TheAudit({ audit, setAudit, onComplete }: TheAuditProps) {
     setIsLoading(true);
     setAnalyzingStep('generating_report');
     try {
-        logger.info('TheAudit', 'Sending request to Report Generator (GeminiCore)...');
-        const gemini = new GeminiCore();
-        const result = await gemini.generateFinalReport(audit);
+        logger.info('TheAudit', 'Sending request to Report Generator (AccountantService)...');
+        const accountant = new AccountantService();
+        const result = await accountant.generateFinalReport(audit);
 
         if (result.success) {
             logger.info('TheAudit', 'Report Generation Success');

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { FinancialAudit } from '@/types/accountant';
-import { GeminiCore } from '@/services/gemini_core';
+import { AccountantService } from '@/services/accountant/accountant-service';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/Card';
@@ -49,13 +49,13 @@ export function AccountantConsultation({ audit, setAudit, onClose }: AccountantC
     setIsLoading(true);
 
     try {
-      const gemini = new GeminiCore();
+      const accountant = new AccountantService();
 
       // Prepare history for API
       const history = messages.map(m => ({ role: m.role, text: m.text }));
       history.push({ role: 'user', text: userMsg.text });
 
-      const result = await gemini.consultAccountant(history, audit);
+      const result = await accountant.consultAccountant(history, audit);
 
       if (result.success) {
         let responseText = result.data.reply;

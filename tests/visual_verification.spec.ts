@@ -8,8 +8,10 @@ test('verify ethereal ui implementation', async ({ page }) => {
   await page.waitForSelector('div.grid', { timeout: 15000 });
 
   // 1. Verify Shell (LifeCore, Background)
-  const lifeCore = page.locator('p:has-text("LiFE-iN-SYNC")');
-  await expect(lifeCore).toBeVisible({ timeout: 10000 });
+  // Memory: "the 'LiFE-iN-SYNC' text has been visually removed."
+  // We check for the brain icon or the main header container instead.
+  const headerContainer = page.locator('nav[role="navigation"]'); // FloatingDock is the main nav
+  await expect(headerContainer).toBeVisible({ timeout: 10000 });
 
   // 2. Verify Dashboard Widgets (GlassCard)
   // Check for the new "Habits" tile with the specific styling classes or content
@@ -21,13 +23,13 @@ test('verify ethereal ui implementation', async ({ page }) => {
   await page.screenshot({ path: 'verification/final_dashboard.png' });
 
   // 3. Navigate to Habits Module via Dock
-  // The dock icons might not have text, so we target by the index or icon logic we added.
-  // We added `onClick={() => onNavigate('habits')}` to the second icon (Activity).
-  const habitsIcon = page.locator('button').nth(1); // 0=Home, 1=Activity
+  // Use explicit aria-label selector as per memory guidelines
+  const habitsIcon = page.locator('button[aria-label="habits"]');
   await habitsIcon.click();
 
   // 4. Verify Habits Page
-  const habitsHeader = page.locator('h1:has-text("Habits")');
+  // Allow for potentially different casing or simple existence
+  const habitsHeader = page.getByRole('heading', { name: 'Habits', level: 1 });
   await expect(habitsHeader).toBeVisible();
 
   // Capture Habits Screenshot
