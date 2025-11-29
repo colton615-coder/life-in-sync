@@ -16,6 +16,7 @@ export const ExerciseSchema = z.object({
   durationSeconds: z.number().optional(), // For timed moves
   restSeconds: z.number().default(60),
   tempo: z.string().optional(), // e.g., "3-0-1-0"
+  weight: z.number().optional(),
 });
 
 /**
