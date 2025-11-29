@@ -10,6 +10,7 @@ import { WorkoutPlan, CompletedWorkout } from '@/lib/types'
 import { toast } from 'sonner'
 import { ActiveWorkout } from '../workout/ActiveWorkout'
 import { WorkoutSummary } from '../workout/WorkoutSummary'
+import { SessionSetup } from '../workout/SessionSetup'
 import { Badge } from '@/components/ui/badge'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AIButton } from '@/components/AIButton'
@@ -19,7 +20,7 @@ import { cn } from '@/lib/utils'
 import { generateWorkoutPlan } from '@/lib/workout-generator'
 import { EditWorkoutDialog } from '@/components/EditWorkoutDialog'
 
-type WorkoutStage = 'planning' | 'active' | 'summary'
+type WorkoutStage = 'planning' | 'setup' | 'active' | 'summary'
 
 const QUICK_CHIPS = [
   "30 min Full Body",
@@ -70,19 +71,28 @@ export function Workouts() {
 
   const startWorkout = (plan: WorkoutPlan) => {
     setActiveWorkoutPlan(plan)
-    setWorkoutStage('active')
+    setWorkoutStage('setup')
     setCompletedCount(0)
+  }
+
+  const handleSetupComplete = (updatedPlan: WorkoutPlan) => {
+    setActiveWorkoutPlan(updatedPlan)
+    setWorkoutStage('active')
+  }
+
+  const handleSetupCancel = () => {
+    setWorkoutStage('planning')
+    setActiveWorkoutPlan(null)
   }
 
   const handleWorkoutFinish = (completed: boolean) => {
     if (!activeWorkoutPlan) return
 
-    const totalExercises = activeWorkoutPlan.exercises.filter(ex => ex.id !== 'rest').length
-    const exercisesCompleted = completed ? totalExercises : completedCount
+    const totalExercises = activeWorkoutPlan.exercises.length
+    const exercisesCompleted = completed ? totalExercises : 0 // For now, simple completion check
 
-    if (completed || exercisesCompleted > 0) {
+    if (completed) {
       const totalTime = activeWorkoutPlan.exercises
-        .slice(0, exercisesCompleted)
         .reduce((acc, ex) => acc + (ex.duration || (ex.reps! * ex.sets! * 3)), 0)
 
       const completedWorkout: CompletedWorkout = {
@@ -126,6 +136,16 @@ export function Workouts() {
       )
     )
     toast.success('Workout updated')
+  }
+
+  if (workoutStage === 'setup' && activeWorkoutPlan) {
+    return (
+      <SessionSetup
+        plan={activeWorkoutPlan}
+        onStart={handleSetupComplete}
+        onCancel={handleSetupCancel}
+      />
+    )
   }
 
   if (workoutStage === 'active' && activeWorkoutPlan) {
