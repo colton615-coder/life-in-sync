@@ -21,8 +21,8 @@ jest.mock('@google/generative-ai', () => {
 });
 
 // Import AFTER mocking
-import { GeminiCore } from '../src/services/gemini_core';
-import { callAIWithRetry } from '../src/lib/ai-utils';
+import { GeminiCore } from '../gemini_core';
+import { callAIWithRetry } from '../../lib/ai-utils';
 
 describe('Nervous System Verification', () => {
   beforeEach(() => {
@@ -46,7 +46,7 @@ describe('Nervous System Verification', () => {
       });
 
     const result = await core.generateContent('test prompt');
-    expect(result).toBe('Success');
+    expect(result).toEqual({ success: true, data: 'Success' });
     expect(mockGenerateContent).toHaveBeenCalledTimes(2);
   });
 
@@ -59,7 +59,7 @@ describe('Nervous System Verification', () => {
     const schema = z.object({ foo: z.string() });
     const result = await core.generateJSON('prompt', schema);
 
-    expect(result).toEqual({ foo: 'bar' });
+    expect(result).toEqual({ success: true, data: { foo: 'bar' } });
   });
 
   test('ai-utils delegates to GeminiCore', async () => {
@@ -72,6 +72,6 @@ describe('Nervous System Verification', () => {
     });
 
     const result = await callAIWithRetry('test');
-    expect(result).toBe('Delegated Response');
+    expect(result).toEqual({ success: true, data: 'Delegated Response' });
   });
 });

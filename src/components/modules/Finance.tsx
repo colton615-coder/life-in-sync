@@ -1,53 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useKV } from '@/hooks/use-kv';
-import { FinancialAudit, INITIAL_TEMPLATE_CATEGORIES } from '@/types/accountant';
+import { FinancialAudit } from '@/types/accountant';
 import { AnimatePresence, motion } from 'framer-motion';
 import { SarcasticLoader } from '@/components/SarcasticLoader';
 import { IntakeForm } from './accountant/IntakeForm';
 import { DataEntry } from './accountant/DataEntry';
 import { TheAudit } from './accountant/TheAudit';
 import { BudgetManager } from './accountant/BudgetManager';
-import { v4 as uuidv4 } from 'uuid';
-
-// Initial state for Finance 2.0
-const INITIAL_AUDIT: FinancialAudit = {
-  version: '2.0',
-  lastUpdated: new Date().toISOString(),
-  status: 'intake',
-  monthlyIncome: null,
-  categories: INITIAL_TEMPLATE_CATEGORIES.map(c => ({
-    id: uuidv4(),
-    name: c.name,
-    subcategories: c.subcategories.map(s => ({
-      id: uuidv4(),
-      name: s,
-      amount: null
-    }))
-  })),
-  flags: [],
-  resolutions: []
-};
+import { useFinanceMigration } from '@/hooks/use-finance-migration';
 
 export function Finance() {
-  const [audit, setAudit] = useKV<FinancialAudit>('finance-audit-v2', INITIAL_AUDIT);
-  const [isResetting, setIsResetting] = useState(false);
-
-  // Migration/Reset Logic: If we detect version mismatch or explicit reset
-  useEffect(() => {
-    if (audit) {
-      if (audit.version !== '2.0') {
-        console.log('Migrating to Finance 2.0...');
-        setAudit(INITIAL_AUDIT);
-      } else if (audit.categories.some(c => c.name === 'Transportation')) {
-        // Fix for backend crash: Remove Transportation category if present
-        console.log('Sanitizing audit data: Removing Transportation category...');
-        setAudit(prev => ({
-          ...prev,
-          categories: prev.categories.filter(c => c.name !== 'Transportation')
-        }));
-      }
-    }
-  }, [audit, setAudit]);
+  const { audit, setAudit, isResetting } = useFinanceMigration();
 
   const handleIntakeComplete = (income: number) => {
     setAudit(prev => ({

@@ -35,3 +35,6 @@ global.atob = (b64) => Buffer.from(b64, 'base64').toString('binary');
 // Ideally, Jest would handle this via a transform, but since we are running TS via ts-jest without Babel for ES modules:
 // We can't easily polyfill `import.meta` globally in a way that syntax errors are avoided at PARSE time if the transform is missing.
 // However, we can use a Jest transform to handle it.
+
+// Mocking Vite environment variables
+process.env.VITE_GEMINI_API_KEY = 'test-api-key';
