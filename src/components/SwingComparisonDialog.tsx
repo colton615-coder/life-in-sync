@@ -182,7 +182,7 @@ Focus on biomechanical relationships - explain HOW one change affects another (e
       const result = await gemini.generateJSON(prompt, ComparisonSchema);
 
       if (!result.success) {
-        throw new Error(result.message);
+        throw new Error(result.message || 'AI generation failed');
       }
 
       setComparisonReport(result.data)
