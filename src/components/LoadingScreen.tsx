@@ -95,7 +95,7 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
                 className="w-40 h-40"
                 style={{
                   backgroundImage: 'url(/assets/logo-brain.jpg)',
-                  backgroundSize: 'cover',
+                  backgroundSize: '135%',
                   backgroundPosition: 'center 30%',
                   backgroundRepeat: 'no-repeat',
                 }}
