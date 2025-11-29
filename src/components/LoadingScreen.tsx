@@ -89,17 +89,25 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
                 damping: 20,
                 duration: 0.8,
               }}
-              className="flex justify-center mb-8"
+              className="flex flex-col items-center mb-8"
             >
               <div
-                className="w-40 h-40"
+                className="w-48 h-48 mix-blend-screen"
                 style={{
-                  backgroundImage: 'url(/assets/logo-brain.jpg)',
-                  backgroundSize: '135%',
-                  backgroundPosition: 'center 30%',
+                  backgroundImage: 'url(/assets/logo-brain-transparent.jpg)',
+                  backgroundSize: 'contain',
+                  backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
                 }}
               />
+              <motion.h1
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="mt-4 text-3xl font-bold text-white tracking-widest drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
+              >
+                LiFE-iN-SYNC
+              </motion.h1>
             </motion.div>
 
             <AnimatePresence mode="wait">
