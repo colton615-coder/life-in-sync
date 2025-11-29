@@ -179,9 +179,13 @@ Provide a detailed comparison report in JSON format with the following structure
 Focus on biomechanical relationships - explain HOW one change affects another (e.g., "The 12° increase in hip rotation created more torque, which naturally improved head stability by reducing compensatory movements"). Be specific with numbers and causality.`;
 
       const gemini = new GeminiCore();
-      const parsedReport = await gemini.generateJSON(prompt, ComparisonSchema);
+      const result = await gemini.generateJSON(prompt, ComparisonSchema);
 
-      setComparisonReport(parsedReport)
+      if (!result.success) {
+        throw new Error(result.message || 'AI generation failed');
+      }
+
+      setComparisonReport(result.data)
       clearInterval(progressInterval)
       setComparisonProgress(100)
       setIsComparing(false)

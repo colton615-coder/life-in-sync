@@ -363,24 +363,29 @@ export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | n
       }`;
 
       const gemini = new GeminiCore();
-      const parsed = await gemini.generateJSON(prompt, FeedbackResponseSchema);
+      const result = await gemini.generateJSON(prompt, FeedbackResponseSchema);
 
-      aiInsights = parsed.aiInsights || aiInsights
-      if (Array.isArray(parsed.strengths)) strengths.push(...parsed.strengths)
-      if (Array.isArray(parsed.improvements)) improvements.push(...parsed.improvements)
+      if (result.success) {
+        const parsed = result.data;
+        aiInsights = parsed.aiInsights || aiInsights
+        if (Array.isArray(parsed.strengths)) strengths.push(...parsed.strengths)
+        if (Array.isArray(parsed.improvements)) improvements.push(...parsed.improvements)
 
-      if (parsed.phases) {
-         // Map AI response keys to internal interface
-         phaseDetails = Object.entries(parsed.phases).reduce((acc, [key, val]: [string, any]) => {
-             if (val) {
-                acc[key] = {
-                    aiAnalysis: val.analysis || val.aiAnalysis || '',
-                    tips: val.tips || [],
-                    drills: val.drills || []
-                }
-             }
-             return acc
-         }, {} as PhaseFeedbackMap)
+        if (parsed.phases) {
+           // Map AI response keys to internal interface
+           phaseDetails = Object.entries(parsed.phases).reduce((acc, [key, val]: [string, any]) => {
+              if (val) {
+                  acc[key] = {
+                      aiAnalysis: val.analysis || val.aiAnalysis || '',
+                      tips: val.tips || [],
+                      drills: val.drills || []
+                  }
+              }
+              return acc
+           }, {} as PhaseFeedbackMap)
+        }
+      } else {
+        console.warn('AI Feedback generation failed:', result.message);
       }
 
   } catch (error) {
