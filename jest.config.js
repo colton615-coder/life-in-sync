@@ -19,6 +19,11 @@ export default {
       },
     ],
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(uuid|@google/generative-ai)/)',
+    '<rootDir>/dist/',
+    '<rootDir>/tests/',
+  ],
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
     '<rootDir>/dist/',
