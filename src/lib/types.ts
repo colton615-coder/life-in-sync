@@ -155,6 +155,8 @@ export interface Exercise {
   reps?: number
   duration?: number
   weight?: number
+  rest?: number
+  tempo?: string
   targetSets?: WorkoutSet[] // Granular target sets
   muscleGroups: string[]
   difficulty: 'beginner' | 'intermediate' | 'advanced'

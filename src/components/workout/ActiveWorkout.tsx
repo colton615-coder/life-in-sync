@@ -27,8 +27,8 @@ function adaptLegacyWorkoutToSession(plan: WorkoutPlan): WorkoutSession {
     sets: ex.sets || 3,
     reps: ex.reps,
     durationSeconds: ex.duration,
-    restSeconds: 60, // Default rest if not in legacy
-    tempo: undefined,
+    restSeconds: ex.rest ?? 60, // Use AI-generated rest or default to 60s
+    tempo: ex.tempo,
     weight: ex.weight // Pass through weight
   }))
 
