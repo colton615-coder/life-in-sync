@@ -20,7 +20,7 @@ import {
   List,
   Warning
 } from '@phosphor-icons/react'
-import { SwingAnalysis, GolfClub, SwingMetrics } from '@/lib/types'
+import { SwingAnalysis, GolfClub, SwingMetrics, SwingPoseData } from '@/lib/types'
 import { useKV } from '@/hooks/use-kv'
 import { toast } from 'sonner'
 import { processVideo, analyzePoseData, generateFeedback } from '@/lib/golf/swing-analyzer'
@@ -261,6 +261,7 @@ export function GolfSwing() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const selectionMadeRef = useRef(false)
   const isMounted = useRef(true)
+  const processingTaskRef = useRef<Promise<SwingPoseData[]> | null>(null)
 
   useEffect(() => {
     return () => { isMounted.current = false }
@@ -279,6 +280,21 @@ export function GolfSwing() {
         return
       }
 
+      // Start processing immediately in the background
+      const analysisId = `swing-${Date.now()}` // Temporary ID for tracking if needed, though we use a new one in finalize
+
+      processingTaskRef.current = processVideo(file, (progress, status) => {
+        if (!isMounted.current) return
+
+        // Only update UI if we are in the ANALYZING state
+        setViewState(prev => {
+          if (prev.status === 'ANALYZING') {
+            return { ...prev, progress, step: status }
+          }
+          return prev
+        })
+      })
+
       selectionMadeRef.current = false
       setViewState({ status: 'SELECTING_CLUB', file: file })
 
@@ -292,16 +308,18 @@ export function GolfSwing() {
   const handleClubSelectionComplete = (club: GolfClub | null) => {
     if (viewState.status !== 'SELECTING_CLUB') return
     selectionMadeRef.current = true
-    startAnalysis(viewState.file, club)
+    finalizeAnalysis(viewState.file, club)
   }
 
   const handleDialogClose = (open: boolean) => {
     if (!open && viewState.status === 'SELECTING_CLUB' && !selectionMadeRef.current) {
+      // If we cancel, we should probably ignore the background task result
+      processingTaskRef.current = null
       setViewState({ status: 'IDLE' })
     }
   }
 
-  const startAnalysis = async (file: File, club: GolfClub | null) => {
+  const finalizeAnalysis = async (file: File, club: GolfClub | null) => {
     const analysisId = `swing-${Date.now()}`
     const videoUrl = URL.createObjectURL(file)
 
@@ -326,11 +344,21 @@ export function GolfSwing() {
     })
 
     try {
-      const poseData = await processVideo(file, (progress, status) => {
-        if (!isMounted.current) return
-        setViewState(prev => prev.status === 'ANALYZING' ? { ...prev, progress, step: status } : prev)
-        setAnalyses(current => (current || []).map(a => a.id === analysisId ? { ...a, processingProgress: progress, status: progress < 100 ? 'processing' : 'analyzing' } : a))
-      })
+      let poseData: SwingPoseData[]
+
+      if (processingTaskRef.current) {
+        // Await the already-running task
+        poseData = await processingTaskRef.current
+      } else {
+        // Fallback if not started
+        poseData = await processVideo(file, (progress, status) => {
+          if (!isMounted.current) return
+          setViewState(prev => prev.status === 'ANALYZING' ? { ...prev, progress, step: status } : prev)
+        })
+      }
+
+      // Update analysis list status
+      setAnalyses(current => (current || []).map(a => a.id === analysisId ? { ...a, processingProgress: 100, status: 'analyzing' } : a))
 
       if (!isMounted.current) return
       setViewState(prev => prev.status === 'ANALYZING' ? { ...prev, step: 'Calculating metrics...' } : prev)
@@ -366,7 +394,7 @@ export function GolfSwing() {
 
       setAnalyses(current => (current || []).map(a => a.id === analysisId ? completedAnalysis : a))
       setViewState({ status: 'VIEWING_RESULT', analysis: completedAnalysis })
-      toast.success('Swing analysis completed!', { description: `Overall score: ${feedback.overallScore}/100` })
+      toast.success('Swing analysis completed!', { description: `Overall score: ${globalFeedback.overallScore}/100` })
 
     } catch (error) {
       if (!isMounted.current) return
@@ -374,6 +402,8 @@ export function GolfSwing() {
       setAnalyses(current => (current || []).map(a => a.id === analysisId ? { ...a, status: 'failed', error: errorMessage } : a))
       setViewState({ status: 'ERROR', message: 'Analysis failed', error })
       toast.error('Analysis failed', { description: errorMessage })
+    } finally {
+       processingTaskRef.current = null
     }
   }
 
