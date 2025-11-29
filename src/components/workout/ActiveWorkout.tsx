@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { WorkoutPlan, CompletedExercise, WorkoutSet, PersonalRecord } from '@/lib/types'
+import { WorkoutPlan, CompletedExercise, WorkoutSet, PersonalRecord, Exercise as LegacyExercise } from '@/lib/types'
+import { WorkoutSession, WorkoutBlock, Exercise as NewExercise } from '@/types/workout'
 import { generateSessionQueue, SessionStep, WorkStep } from '@/lib/workout/session-queue'
 import { Button } from '@/components/ui/button'
 import { Play, Pause, X, Check, Timer, SkipForward, ArrowRight } from '@phosphor-icons/react'
@@ -9,17 +10,62 @@ import { useGymSound } from '@/hooks/use-gym-sound'
 import { useKV } from '@/hooks/use-kv'
 import { updatePersonalRecords } from '@/lib/workout/pr-manager'
 import { toast } from 'sonner'
+import { v4 as uuidv4 } from 'uuid'
 
 interface ActiveWorkoutProps {
   workout: WorkoutPlan
   onFinish: (completed: boolean) => void
 }
 
+function adaptLegacyWorkoutToSession(plan: WorkoutPlan): WorkoutSession {
+  // Convert Legacy exercises to New exercises
+  const newExercises: NewExercise[] = plan.exercises.map((ex: LegacyExercise) => ({
+    id: ex.id || uuidv4(),
+    name: ex.name,
+    type: ex.type === 'time' ? 'cardio' : 'strength',
+    notes: ex.instructions?.summary,
+    sets: ex.sets || 3,
+    reps: ex.reps,
+    durationSeconds: ex.duration,
+    restSeconds: 60, // Default rest if not in legacy
+    tempo: undefined,
+    weight: ex.weight // Pass through weight
+  }))
+
+  // Create a single standard block containing all exercises
+  const defaultBlock: WorkoutBlock = {
+    id: 'default-block',
+    type: 'strength',
+    rounds: 1,
+    exercises: newExercises
+  }
+
+  // Determine valid difficulty level
+  let difficulty: 'beginner' | 'intermediate' | 'advanced' | 'elite' = 'intermediate'
+  if (plan.difficulty === 'beginner') difficulty = 'beginner'
+  if (plan.difficulty === 'advanced') difficulty = 'advanced'
+  // 'elite' is not in legacy, so we don't map to it unless we wanted to upgrade 'advanced'
+
+  return {
+    id: plan.id,
+    title: plan.name,
+    description: plan.focus,
+    totalDurationMin: plan.estimatedDuration,
+    difficulty: difficulty,
+    blocks: [defaultBlock]
+  }
+}
+
 export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
   // ---------------------------------------------------------------------------
   // State
   // ---------------------------------------------------------------------------
-  const [queue] = useState<SessionStep[]>(() => generateSessionQueue(workout))
+  const [queue] = useState<SessionStep[]>(() => {
+    // Adapter logic to convert Legacy WorkoutPlan to New WorkoutSession
+    const session = adaptLegacyWorkoutToSession(workout)
+    return generateSessionQueue(session)
+  })
+
   const [currentIndex, setCurrentIndex] = useState(0)
   const currentStep = queue[currentIndex]
 
@@ -236,7 +282,7 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
                 >
                     <h1 className="text-2xl font-bold tracking-tight">{currentStep.exercise.name}</h1>
                     <p className="text-muted-foreground text-sm font-medium leading-relaxed max-w-xs mx-auto">
-                        {currentStep.exercise.instructions?.summary || "Focus on form and controlled movements."}
+                        {currentStep.exercise.notes || "Focus on form and controlled movements."}
                     </p>
                 </motion.div>
             )}

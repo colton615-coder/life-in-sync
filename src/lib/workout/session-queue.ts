@@ -176,7 +176,7 @@ function resolveTarget(exercise: Exercise): { type: 'reps' | 'time', value: numb
     return {
       type: 'time',
       value: exercise.durationSeconds,
-      weight: 0 // Weight doesn't usually apply to timed cardio, but could.
+      weight: exercise.weight || 0
     };
   }
 
@@ -184,12 +184,6 @@ function resolveTarget(exercise: Exercise): { type: 'reps' | 'time', value: numb
   return {
     type: 'reps',
     value: exercise.reps || 0,
-    // Note: 'weight' is not on the Exercise schema in src/types/workout.ts?
-    // Let me check the schema.
-    // ExerciseSchema has: sets, reps, durationSeconds, restSeconds, tempo.
-    // It does NOT have 'weight'.
-    // However, the interface might need it for tracking.
-    // I will return undefined or 0.
-    weight: 0
+    weight: exercise.weight || 0
   };
 }
