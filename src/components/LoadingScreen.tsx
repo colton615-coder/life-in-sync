@@ -91,14 +91,16 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
               }}
               className="flex flex-col items-center mb-8"
             >
-              <div
-                className="w-48 h-48 mix-blend-screen"
-                style={{
-                  backgroundImage: 'url(/assets/logo-brain-transparent.jpg)',
-                  backgroundSize: 'contain',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
+              <motion.img
+                src="/assets/loading-visual.jpeg"
+                alt="Loading"
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
                 }}
+                className="w-64 h-auto mx-auto rounded-xl shadow-2xl"
               />
               <motion.h1
                 initial={{ opacity: 0, y: 10 }}
