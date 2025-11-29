@@ -9,6 +9,7 @@ import { cleanAndParseJSON } from '../lib/ai-utils';
  * Handles initialization, model configuration, and error handling.
  */
 import { APP_CONFIG } from '@/lib/constants';
+import { InstructionGuideSchema, InstructionGuide } from '@/types/workout';
 
 export class GeminiCore {
   private genAI: GoogleGenerativeAI;
@@ -51,8 +52,7 @@ export class GeminiCore {
         }
       }
     }
-    // @ts-ignore
-    // eslint-disable-next-line
+    // @ts-expect-error - process is not available in browser but might be in tests
     if (typeof process !== 'undefined' && process.env.VITE_GEMINI_API_KEY) {
       return process.env.VITE_GEMINI_API_KEY;
     }
@@ -68,6 +68,7 @@ export class GeminiCore {
   async generateContent(
     prompt: string | Array<string | Part>,
     // @ts-expect-error - config is reserved for future use
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     config?: GenerationConfig
   ): Promise<{ success: true; data: string } | AppError> {
     if (!this.apiKey) {
@@ -135,7 +136,7 @@ export class GeminiCore {
           // Attach specific Zod error info for the repair mechanism to use
           const error = new Error('The data structure from the AI was invalid.');
           // @ts-expect-error - Attaching custom property for repair logic
-          (error as any).zodError = result.error;
+          (error as unknown as { zodError: unknown }).zodError = result.error;
           return handleApiError(error, 'GeminiCore.generateJSON');
         }
         return { success: true, data: result.data };
@@ -184,5 +185,24 @@ export class GeminiCore {
     `;
 
     return await this.generateJSON(repairPrompt, schema, config);
+  }
+
+  /**
+   * Generates detailed instructions for a given exercise.
+   */
+  async generateExerciseInstructions(exerciseName: string): Promise<{ success: true; data: InstructionGuide } | AppError> {
+    const prompt = `
+      Create a detailed instructional guide for the exercise: "${exerciseName}".
+
+      Output a JSON object with one field:
+      1. "steps": An array of 3-5 short, punchy instructional strings explaining how to perform the movement safely and correctly.
+
+      Example structure:
+      {
+        "steps": ["Step 1...", "Step 2...", "Step 3..."]
+      }
+    `;
+
+    return this.generateJSONWithRepair(prompt, InstructionGuideSchema);
   }
 }

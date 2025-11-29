@@ -146,6 +146,10 @@ export interface WorkoutSet {
   completedAt?: string
 }
 
+export interface InstructionGuide {
+  steps: string[]
+}
+
 export interface Exercise {
   id: string
   name: string
@@ -165,6 +169,7 @@ export interface Exercise {
     keyPoints: string[]
   }
   asset?: string
+  instructionGuide?: InstructionGuide
 }
 
 export interface WorkoutPlan {
