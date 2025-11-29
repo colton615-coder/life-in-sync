@@ -32,7 +32,10 @@ const ResponseSchema = z.object({
   workoutPlan: WorkoutPlanSchema
 })
 
-export async function generateWorkoutPlan(workoutPrompt: string): Promise<WorkoutPlan | null> {
+export async function generateWorkoutPlan(
+  workoutPrompt: string,
+  onProgress?: (step: string) => void
+): Promise<WorkoutPlan | null> {
     console.log('====================================')
     console.log('[Workout Generation] Starting new workout generation (Gemini)')
     console.log('[Workout Generation] User prompt:', workoutPrompt)
@@ -46,6 +49,8 @@ export async function generateWorkoutPlan(workoutPrompt: string): Promise<Workou
 
     try {
       console.log('[Workout Generation] Step 1: Creating LLM prompt')
+      if (onProgress) onProgress('Analyzing request...')
+
       const promptText = `You are a fitness expert. Generate a complete workout plan based on this request: "${workoutPrompt}".
 
 CRITICAL: If the user specifies a time duration (e.g., "15 minute", "30 min", etc.), you MUST create exercises that add up to approximately that duration.
@@ -93,12 +98,20 @@ Categories: "Warm-up", "Work", "Cool-down"
 Difficulty levels: "beginner", "intermediate", "advanced"`;
 
       console.log('[Workout Generation] Step 2: Calling AI')
+      if (onProgress) onProgress('Designing circuit...')
       
       // Use generateJSON with Zod schema validation
       const gemini = new GeminiCore();
-      const data = await gemini.generateJSON(promptText, ResponseSchema);
+      const result = await gemini.generateJSON(promptText, ResponseSchema);
+
+      if (!result.success) {
+        throw new Error(result.message || 'AI generation failed');
+      }
+
+      const data = result.data;
       
       console.log('[Workout Generation] Step 3: AI response received and validated')
+      if (onProgress) onProgress('Finalizing plan...')
 
       console.log('[Workout Generation] Step 4: Calculating total duration')
       const totalDuration = data.workoutPlan.exercises.reduce((acc, ex) => {
@@ -140,6 +153,7 @@ Difficulty levels: "beginner", "intermediate", "advanced"`;
       }
 
       console.log('[Workout Generation] Step 6: Cleanup and success')
+      if (onProgress) onProgress('Done!')
       toast.success('Workout generated successfully!')
       
       return workout

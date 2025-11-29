@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise, PencilSimple, Trash, Lightning } from '@phosphor-icons/react'
+import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise, PencilSimple, Trash, Lightning, CircleNotch } from '@phosphor-icons/react'
 import { useKV } from '@/hooks/use-kv'
 import { WorkoutPlan, CompletedWorkout } from '@/lib/types'
 import { toast } from 'sonner'
@@ -21,12 +21,22 @@ import { EditWorkoutDialog } from '@/components/EditWorkoutDialog'
 
 type WorkoutStage = 'planning' | 'active' | 'summary'
 
+const QUICK_CHIPS = [
+  "30 min Full Body",
+  "15 min Core",
+  "Upper Body Strength",
+  "HIIT Cardio",
+  "Leg Day",
+  "Morning Stretch"
+]
+
 export function Workouts() {
   const [workoutPlans, setWorkoutPlans] = useKV<WorkoutPlan[]>('workout-plans', [])
   const [completedWorkouts, setCompletedWorkouts] = useKV<CompletedWorkout[]>('completed-workouts', [])
   
   const [dialogOpen, setDialogOpen] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const [generationStep, setGenerationStep] = useState<string>('')
   const [workoutPrompt, setWorkoutPrompt] = useState('')
   
   const [workoutStage, setWorkoutStage] = useState<WorkoutStage>('planning')
@@ -38,7 +48,12 @@ export function Workouts() {
 
   const generateWorkout = async () => {
     setGenerating(true)
-    const workout = await generateWorkoutPlan(workoutPrompt)
+    setGenerationStep('Initializing...')
+
+    // Pass the progress callback to the generator
+    const workout = await generateWorkoutPlan(workoutPrompt, (step) => {
+      setGenerationStep(step)
+    })
     
     if (workout) {
       setWorkoutPlans((current) => {
@@ -50,6 +65,7 @@ export function Workouts() {
     }
     
     setGenerating(false)
+    setGenerationStep('')
   }
 
   const startWorkout = (plan: WorkoutPlan) => {
@@ -127,9 +143,9 @@ export function Workouts() {
   }
 
   const difficultyColors = {
-    beginner: 'text-green-500 border-green-500/20 bg-green-500/10',
-    intermediate: 'text-amber-500 border-amber-500/20 bg-amber-500/10',
-    advanced: 'text-red-500 border-red-500/20 bg-red-500/10'
+    beginner: 'text-green-400 border-green-500/30 bg-green-500/10',
+    intermediate: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+    advanced: 'text-red-400 border-red-500/30 bg-red-500/10'
   }
 
   return (
@@ -150,13 +166,14 @@ export function Workouts() {
               <Button 
                 size="default"
                 className="gap-2 h-11 md:h-9 px-5 md:px-4 button-glow"
+                aria-label="Generate Workout"
               >
                 <Sparkle weight="fill" size={18} className="md:w-4 md:h-4" />
                 <span className="hidden sm:inline">Generate</span>
               </Button>
             </motion.div>
           </DialogTrigger>
-          <DialogContent className="neumorphic-card">
+          <DialogContent className="neumorphic-card sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Sparkle weight="fill" className="text-primary" />
@@ -166,31 +183,78 @@ export function Workouts() {
                 Describe your ideal workout and let AI create a personalized plan
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label htmlFor="workout-prompt">What type of workout?</Label>
-                <Input
-                  id="workout-prompt"
-                  placeholder="e.g., 30 min full body HIIT, upper body strength..."
-                  value={workoutPrompt}
-                  onChange={(e) => setWorkoutPrompt(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !generating) {
-                      generateWorkout()
-                    }
-                  }}
-                  className="neumorphic-inset"
-                />
-              </div>
-              <AIButton 
-                onClick={generateWorkout} 
-                className="w-full"
-                disabled={generating || !workoutPrompt.trim()}
-                loading={generating}
-              >
-                {!generating && 'Generate Workout'}
-              </AIButton>
-            </div>
+
+            <AnimatePresence mode="wait">
+              {generating ? (
+                <motion.div
+                  key="generating"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="py-12 flex flex-col items-center justify-center space-y-6"
+                >
+                   <div className="relative">
+                     <motion.div
+                       animate={{ rotate: 360 }}
+                       transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                       className="rounded-full border-2 border-primary/20 border-t-primary w-16 h-16"
+                     />
+                     <div className="absolute inset-0 flex items-center justify-center">
+                       <Sparkle weight="fill" className="text-primary animate-pulse" size={24} />
+                     </div>
+                   </div>
+                   <div className="text-center space-y-1">
+                     <h3 className="text-lg font-bold text-white tracking-wide">{generationStep}</h3>
+                     <p className="text-sm text-muted-foreground">This may take a few seconds...</p>
+                   </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                   key="input"
+                   initial={{ opacity: 0, x: -20 }}
+                   animate={{ opacity: 1, x: 0 }}
+                   exit={{ opacity: 0, x: 20 }}
+                   className="space-y-4 pt-4"
+                >
+                  <div className="space-y-3">
+                    <Label htmlFor="workout-prompt">What type of workout?</Label>
+                    <Input
+                      id="workout-prompt"
+                      placeholder="e.g., 30 min full body HIIT, upper body strength..."
+                      value={workoutPrompt}
+                      onChange={(e) => setWorkoutPrompt(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !generating) {
+                          generateWorkout()
+                        }
+                      }}
+                      className="neumorphic-inset font-mono text-sm"
+                    />
+
+                    <div className="flex flex-wrap gap-2">
+                      {QUICK_CHIPS.map((chip) => (
+                        <button
+                          key={chip}
+                          onClick={() => setWorkoutPrompt(chip)}
+                          className="text-[10px] px-2 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-primary/20 hover:border-primary/30 transition-colors text-muted-foreground hover:text-primary"
+                        >
+                          {chip}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <AIButton
+                    onClick={generateWorkout}
+                    className="w-full"
+                    disabled={generating || !workoutPrompt.trim()}
+                    loading={generating}
+                  >
+                    {!generating && 'Generate Workout'}
+                  </AIButton>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </DialogContent>
         </Dialog>
       </div>
@@ -259,13 +323,18 @@ export function Workouts() {
                     transition={{ delay: index * 0.05 }}
                     className="h-full"
                   >
-                    <Card className="neumorphic-card hover:glow-border group h-full flex flex-col justify-between">
-                      <div className="space-y-3">
+                    <Card className="neumorphic-card hover:glow-border group h-full flex flex-col justify-between border-l-4 border-l-primary/50 relative overflow-hidden">
+                      {/* Tech decoration */}
+                      <div className="absolute top-0 right-0 p-2 opacity-10">
+                        <Lightning weight="fill" size={48} />
+                      </div>
+
+                      <div className="space-y-3 relative z-10">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                              <h3 className="font-semibold text-sm md:text-base truncate">{workout.name}</h3>
-                              <Badge className={cn("text-[10px] px-1.5 py-0 capitalize", difficultyColors[workout.difficulty])}>
+                              <h3 className="font-bold text-base md:text-lg truncate tracking-tight">{workout.name}</h3>
+                              <Badge className={cn("text-[10px] px-1.5 py-0 capitalize font-mono border-dashed", difficultyColors[workout.difficulty])}>
                                 {workout.difficulty}
                               </Badge>
                             </div>
@@ -274,30 +343,30 @@ export function Workouts() {
                                 <Barbell size={12} weight="duotone" />
                                 {workout.focus}
                               </span>
-                              <span>•</span>
-                              <span>{workout.exercises.length} exercises</span>
+                              <span className="text-white/20">|</span>
+                              <span className="font-mono">{workout.exercises.length} EXERCISES</span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2 bg-black/20 rounded-md p-2 border border-white/5">
                            <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                              Overview
+                            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                              Estimated Time
                             </h4>
-                            <span className="text-[10px] font-mono text-primary">
-                              ~{workout.estimatedDuration} MIN
+                            <span className="text-sm font-mono font-bold text-primary tabular-nums">
+                              {workout.estimatedDuration} MIN
                             </span>
                           </div>
 
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-1.5 pt-1">
                              {workout.exercises.slice(0, 3).map((ex, i) => (
-                               <Badge key={i} variant="outline" className="text-[10px] bg-black/20 border-white/5 truncate max-w-[100px]">
+                               <Badge key={i} variant="outline" className="text-[10px] bg-white/5 border-white/10 truncate max-w-[100px] hover:bg-white/10">
                                  {ex.name}
                                </Badge>
                              ))}
                              {workout.exercises.length > 3 && (
-                               <Badge variant="outline" className="text-[10px] bg-black/20 border-white/5">
+                               <Badge variant="outline" className="text-[10px] bg-white/5 border-white/10 font-mono text-muted-foreground">
                                  +{workout.exercises.length - 3}
                                </Badge>
                              )}
@@ -305,16 +374,16 @@ export function Workouts() {
                         </div>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-white/5 flex gap-2">
+                      <div className="mt-4 pt-3 flex gap-2">
                             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
                               <Button
                                 onClick={() => startWorkout(workout)}
                                 size="sm"
-                                className="w-full button-glow gap-1.5 h-9"
+                                className="w-full button-glow gap-1.5 h-9 font-bold tracking-wide"
                                 aria-label="Start workout"
                               >
                                 <Play weight="fill" size={16} />
-                                <span className="font-bold">START</span>
+                                START ENGINE
                               </Button>
                             </motion.div>
 
@@ -322,25 +391,24 @@ export function Workouts() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-6 w-6 text-muted-foreground hover:text-white rounded-full hover:bg-white/10"
+                                  className="h-9 w-9 text-muted-foreground hover:text-white rounded-md hover:bg-white/10"
                                   onClick={(e) => {
                                       e.stopPropagation()
                                       setEditWorkout(workout)
                                       setIsEditOpen(true)
                                   }}
-                                  className="h-9 w-9 text-muted-foreground hover:text-white"
                                   aria-label="Edit workout"
                                 >
-                                  <PencilSimple size={12} />
+                                  <PencilSimple size={14} />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => deleteWorkout(workout.id)}
-                                  className="hover:bg-destructive/10 hover:text-destructive h-9 w-9 text-muted-foreground"
+                                  className="hover:bg-destructive/10 hover:text-destructive h-9 w-9 text-muted-foreground rounded-md"
                                   aria-label="Delete workout"
                                 >
-                                  <Trash size={12} />
+                                  <Trash size={14} />
                                 </Button>
                             </div>
                       </div>
@@ -397,13 +465,13 @@ export function Workouts() {
                               <h3 className="font-semibold truncate">{workout.workoutName}</h3>
                             </div>
                             <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                              <span>{workout.date}</span>
-                              <span>•</span>
-                              <span>{Math.ceil(workout.totalDuration / 60)} min</span>
+                              <span className="font-mono">{workout.date}</span>
+                              <span className="text-white/20">•</span>
+                              <span className="font-mono">{Math.ceil(workout.totalDuration / 60)} min</span>
                               {totalVolume > 0 && (
                                 <>
-                                  <span>•</span>
-                                  <span className="font-mono text-xs">{totalVolume.toLocaleString()} lbs vol</span>
+                                  <span className="text-white/20">•</span>
+                                  <span className="font-mono text-xs text-primary">{totalVolume.toLocaleString()} lbs</span>
                                 </>
                               )}
                             </div>
@@ -414,7 +482,7 @@ export function Workouts() {
                                 {workout.exercises.slice(0, 3).map((ex, i) => (
                                   <div key={i} className="flex justify-between text-xs">
                                      <span className="text-muted-foreground">{ex.name}</span>
-                                     <span className="font-mono">{ex.sets.filter(s => s.completed).length} sets</span>
+                                     <span className="font-mono text-xs">{ex.sets.filter(s => s.completed).length} sets</span>
                                   </div>
                                 ))}
                                 {workout.exercises.length > 3 && (
