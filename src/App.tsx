@@ -11,6 +11,7 @@ import { SarcasticLoader } from './components/SarcasticLoader'
 import { AppBackground } from '@/components/shell/AppBackground'
 import { LifeCore } from '@/components/shell/LifeCore'
 import { FloatingDock } from '@/components/shell/FloatingDock'
+import { WorkoutProvider } from '@/context/WorkoutContext'
 
 // @ts-expect-error virtual:pwa-register is dynamically generated
 import { registerSW } from 'virtual:pwa-register'
@@ -126,30 +127,32 @@ function App() {
 
   return (
     <GlobalErrorBoundary>
-      <AppBackground>
-        <div className="min-h-screen">
-          <a href="#main-content" className="skip-to-content text-white">
-            Skip to main content
-          </a>
+      <WorkoutProvider>
+        <AppBackground>
+          <div className="min-h-screen">
+            <a href="#main-content" className="skip-to-content text-white">
+              Skip to main content
+            </a>
 
-          {/* Global Header (LifeCore) - Conditional */}
-          {!isGolfModule && <LifeCore />}
+            {/* Global Header (LifeCore) - Conditional */}
+            {!isGolfModule && <LifeCore />}
 
-          {/* Main Content Area */}
-          {/* Adjusted padding to account for the Floating Dock at bottom */}
-          <main id="main-content" className="md:px-8 pb-32">
-            {renderModule()}
-          </main>
+            {/* Main Content Area */}
+            {/* Adjusted padding to account for the Floating Dock at bottom */}
+            <main id="main-content" className="md:px-8 pb-32">
+              {renderModule()}
+            </main>
 
-          {/* Floating Dock Navigation */}
-          <FloatingDock
-              activeModule={activeModule}
-              onNavigate={handleModuleChange}
-          />
+            {/* Floating Dock Navigation */}
+            <FloatingDock
+                activeModule={activeModule}
+                onNavigate={handleModuleChange}
+            />
 
-          <Toaster />
-        </div>
-      </AppBackground>
+            <Toaster />
+          </div>
+        </AppBackground>
+      </WorkoutProvider>
     </GlobalErrorBoundary>
   );
 }
