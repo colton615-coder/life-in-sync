@@ -29,7 +29,11 @@ export class KnoxAdapter {
       JSON.stringify(logData)
     ];
 
-    return this.core.generateContent(prompt);
+    const result = await this.core.generateContent(prompt);
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result.data;
   }
 
   async validate_transaction(transactionData: any): Promise<string> {

@@ -28,8 +28,12 @@ export class AIRouter {
     // The GeminiCore.generateJSON method should be used directly if typed JSON is needed.
     // If request.jsonMode is true, we assume the caller handles parsing or the prompt ensures JSON.
 
+    if (!response.success) {
+      throw new Error(response.message || 'AI Provider failed to generate content');
+    }
+
     return {
-      text: response,
+      text: response.data,
       provider: 'gemini',
       model: 'gemini-2.5-pro',
     };
