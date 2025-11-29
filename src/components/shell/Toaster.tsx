@@ -8,16 +8,29 @@ export const Toaster = () => {
       toastOptions={{
         classNames: {
           toast:
-            'group toast holographic-deep-glass border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] bg-white/5 backdrop-blur-xl text-slate-200',
-          description: 'group-[.toast]:text-slate-400',
+            'group toast font-sans backdrop-blur-2xl border bg-slate-950/90 text-white shadow-lg border-white/10',
+          description: 'group-[.toast]:text-slate-300',
           actionButton:
-            'group-[.toast]:bg-cyan-400/20 group-[.toast]:text-cyan-300',
+            'group-[.toast]:bg-cyan-500 group-[.toast]:text-black group-[.toast]:font-bold group-[.toast]:shadow-[0_0_10px_rgba(6,182,212,0.5)]',
           cancelButton:
-            'group-[.toast]:bg-white/5 group-[.toast]:text-slate-400',
-          error: '!bg-red-500/10 !border-red-500/30',
-          success: '!bg-green-500/10 !border-green-500/30',
-          warning: '!bg-yellow-500/10 !border-yellow-500/30',
-          info: '!bg-blue-500/10 !border-blue-500/30',
+            'group-[.toast]:bg-white/10 group-[.toast]:text-white hover:group-[.toast]:bg-white/20',
+
+          // Neon / Glowing States
+          // Success: Emerald Glow
+          success:
+            '!bg-emerald-950/90 !border-emerald-500 !text-emerald-50 !shadow-[0_0_25px_-5px_rgba(16,185,129,0.6)]',
+
+          // Error: Rose/Red Glow
+          error:
+            '!bg-rose-950/90 !border-rose-500 !text-rose-50 !shadow-[0_0_25px_-5px_rgba(244,63,94,0.6)]',
+
+          // Warning: Amber Glow
+          warning:
+            '!bg-amber-950/90 !border-amber-500 !text-amber-50 !shadow-[0_0_25px_-5px_rgba(245,158,11,0.6)]',
+
+          // Info: Cyan Glow
+          info:
+            '!bg-cyan-950/90 !border-cyan-500 !text-cyan-50 !shadow-[0_0_25px_-5px_rgba(6,182,212,0.6)]',
         },
       }}
     />
