@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise, PencilSimple, Trash, Lightning } from '@phosphor-icons/react'
+import { Barbell, Trophy, Sparkle, Play, Timer, ClockCounterClockwise, PencilSimple, Trash, Lightning, Plus, Copy } from '@phosphor-icons/react'
 import { useKV } from '@/hooks/use-kv'
 import { WorkoutPlan, CompletedWorkout } from '@/lib/types'
 import { toast } from 'sonner'
@@ -129,13 +129,21 @@ export function Workouts() {
     toast.success('Workout deleted')
   }
 
-  const updateWorkoutPlan = (workoutId: string, updates: Partial<WorkoutPlan>) => {
-    setWorkoutPlans((current) =>
-      (current || []).map(w =>
-        w.id === workoutId ? { ...w, ...updates } : w
-      )
-    )
-    toast.success('Workout updated')
+  const saveWorkoutPlan = (workout: WorkoutPlan) => {
+    setWorkoutPlans((current) => {
+      const plans = current || []
+      const index = plans.findIndex(w => w.id === workout.id)
+      if (index >= 0) {
+        // Update existing
+        const newPlans = [...plans]
+        newPlans[index] = workout
+        return newPlans
+      } else {
+        // Create new
+        return [...plans, workout]
+      }
+    })
+    toast.success('Workout saved')
   }
 
   if (workoutStage === 'setup' && activeWorkoutPlan) {
@@ -180,20 +188,37 @@ export function Workouts() {
           <p className="text-muted-foreground mt-1 text-xs md:text-sm">Build strength, one rep at a time</p>
         </div>
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button 
-                size="default"
-                className="gap-2 h-11 md:h-9 px-5 md:px-4 button-glow"
-                aria-label="Generate Workout"
-              >
-                <Sparkle weight="fill" size={18} className="md:w-4 md:h-4" />
-                <span className="hidden sm:inline">Generate</span>
-              </Button>
-            </motion.div>
-          </DialogTrigger>
-          <DialogContent className="neumorphic-card sm:max-w-md">
+        <div className="flex gap-2">
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              size="default"
+              variant="outline"
+              className="gap-2 h-11 md:h-9 px-3 md:px-4 border-white/10 hover:bg-white/10"
+              onClick={() => {
+                setEditWorkout(null)
+                setIsEditOpen(true)
+              }}
+              aria-label="Create Manual Workout"
+            >
+              <Plus weight="bold" size={18} className="md:w-4 md:h-4" />
+              <span className="hidden sm:inline">Create</span>
+            </Button>
+          </motion.div>
+
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  size="default"
+                  className="gap-2 h-11 md:h-9 px-5 md:px-4 button-glow"
+                  aria-label="Generate Workout"
+                >
+                  <Sparkle weight="fill" size={18} className="md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Generate</span>
+                </Button>
+              </motion.div>
+            </DialogTrigger>
+            <DialogContent className="neumorphic-card sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Sparkle weight="fill" className="text-primary" />
@@ -277,6 +302,7 @@ export function Workouts() {
             </AnimatePresence>
           </DialogContent>
         </Dialog>
+      </div>
       </div>
 
       {/* Stats Area */}
@@ -424,6 +450,23 @@ export function Workouts() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
+                                  className="h-9 w-9 text-muted-foreground hover:text-white rounded-md hover:bg-white/10"
+                                  onClick={(e) => {
+                                      e.stopPropagation()
+                                      // Clone logic: create deep copy, strip ID
+                                      const cloned = JSON.parse(JSON.stringify(workout))
+                                      delete cloned.id
+                                      cloned.name = `${cloned.name} (Copy)`
+                                      setEditWorkout(cloned)
+                                      setIsEditOpen(true)
+                                  }}
+                                  aria-label="Duplicate workout"
+                                >
+                                  <Copy size={14} />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
                                   onClick={() => deleteWorkout(workout.id)}
                                   className="hover:bg-destructive/10 hover:text-destructive h-9 w-9 text-muted-foreground rounded-md"
                                   aria-label="Delete workout"
@@ -539,7 +582,7 @@ export function Workouts() {
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
         workout={editWorkout}
-        onSave={updateWorkoutPlan}
+        onSave={saveWorkoutPlan}
       />
     </div>
   )
