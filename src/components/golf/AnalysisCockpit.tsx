@@ -117,6 +117,17 @@ export function AnalysisCockpit({ analysis, onBack }: AnalysisCockpitProps) {
   }
 
   // -- RENDER --
+  // Critical Guard: Ensure data exists before rendering cockpit
+  if (!analysis.metrics || !analysis.feedback) {
+     return (
+        <div className="h-[100dvh] w-full flex flex-col items-center justify-center bg-[#0B0E14] text-slate-200">
+           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2E8AF7] mb-4" />
+           <p className="text-sm text-slate-400 font-mono">Loading telemetry...</p>
+           <button onClick={onBack} className="mt-8 text-xs text-slate-500 hover:text-white underline">Cancel</button>
+        </div>
+     )
+  }
+
   return (
     <div className="h-[100dvh] w-full flex flex-col bg-[#0B0E14] text-slate-200 font-sans overflow-hidden relative">
 
