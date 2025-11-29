@@ -387,16 +387,6 @@ export async function generateFeedback(metrics: SwingMetrics, club: GolfClub | n
       } else {
         console.warn('AI Feedback generation failed:', result.message);
       }
-             if (val) {
-                acc[key] = {
-                    aiAnalysis: val.analysis || val.aiAnalysis || '',
-                    tips: val.tips || [],
-                    drills: val.drills || []
-                }
-             }
-             return acc
-         }, {} as PhaseFeedbackMap)
-      }
 
   } catch (error) {
     console.warn('AI Feedback unavailable', error)
