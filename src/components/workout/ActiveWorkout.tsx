@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { WorkoutPlan, CompletedExercise, WorkoutSet, PersonalRecord, Exercise as LegacyExercise } from '@/lib/types'
+import { WorkoutPlan, WorkoutSet, PersonalRecord, Exercise as LegacyExercise } from '@/lib/types'
 import { WorkoutSession, WorkoutBlock, Exercise as NewExercise } from '@/types/workout'
 import { generateSessionQueue, SessionStep, WorkStep } from '@/lib/workout/session-queue'
 import { Button } from '@/components/ui/button'
-import { Play, Pause, X, Check, Timer, SkipForward, ArrowRight } from '@phosphor-icons/react'
+import { Play, X, Check, Timer, Info } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { useGymSound } from '@/hooks/use-gym-sound'
 import { useKV } from '@/hooks/use-kv'
 import { updatePersonalRecords } from '@/lib/workout/pr-manager'
 import { toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
+import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog'
 
 interface ActiveWorkoutProps {
   workout: WorkoutPlan
@@ -29,7 +30,8 @@ function adaptLegacyWorkoutToSession(plan: WorkoutPlan): WorkoutSession {
     durationSeconds: ex.duration,
     restSeconds: ex.rest ?? 60, // Use AI-generated rest or default to 60s
     tempo: ex.tempo,
-    weight: ex.weight // Pass through weight
+    weight: ex.weight, // Pass through weight
+    instructionGuide: ex.instructionGuide // Pass through instructions
   }))
 
   // Create a single standard block containing all exercises
@@ -73,6 +75,9 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
   const [timeRemaining, setTimeRemaining] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   
+  // Instruction Guide
+  const [showInfo, setShowInfo] = useState(false)
+
   // Data Collection (accumulate results as we go)
   const [completedExercises, setCompletedExercises] = useState<Map<string, WorkoutSet[]>>(new Map())
   const [personalRecords, setPersonalRecords] = useKV<PersonalRecord[]>('personal-records', [])
@@ -123,6 +128,7 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPaused, timeRemaining, currentStep])
 
   // ---------------------------------------------------------------------------
@@ -169,17 +175,6 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
       map.set(step.exercise.id, updatedSets)
       return map
     })
-
-    // Update PRs
-    const updatedRecs = updatePersonalRecords(
-      personalRecords || [],
-      step.exercise.id,
-      step.exercise.name,
-      [newSet], // Pass as a single-set update for now, or accumulate?
-                // updatePersonalRecords usually takes all sets for an exercise to calculate volume/1RM.
-                // We should probably grab the existing sets from state + this new one.
-      new Date().toISOString()
-    )
 
     // Check if we need to pass the *cumulative* sets for this exercise
     // Since we just updated the map in the functional update, we don't have the new map yet in this scope.
@@ -238,12 +233,6 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
     return 0
   }
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
   // ---------------------------------------------------------------------------
   // UI
   // ---------------------------------------------------------------------------
@@ -257,13 +246,12 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
   // Theme Colors
   const accentColor = isRest ? 'text-blue-500' : 'text-amber-500'
   const ringColor = isRest ? 'stroke-blue-500' : 'stroke-amber-500'
-  const shadowColor = isRest ? 'shadow-blue-500/20' : 'shadow-amber-500/20'
 
   return (
     <div className="fixed inset-0 bg-[#0a0a0a] z-[9999] flex flex-col text-white overflow-hidden font-sans">
 
       {/* 1. Header (Instructional) */}
-      <div className="pt-safe px-6 pb-4 text-center z-10">
+      <div className="pt-safe px-6 pb-4 text-center z-10 relative">
         <div className="flex justify-between items-start absolute top-4 left-4 right-4 z-20">
              <Button variant="ghost" size="icon" onClick={() => onFinish(false)} className="text-white/30 hover:text-white">
                 <X size={24} />
@@ -273,14 +261,27 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
              </div>
         </div>
 
-        <div className="mt-12 space-y-2">
+        <div className="mt-12 space-y-2 flex flex-col items-center">
             {isWork && (
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     key={`header-${currentStep.id}`}
+                    className="flex flex-col items-center gap-2"
                 >
-                    <h1 className="text-2xl font-bold tracking-tight">{currentStep.exercise.name}</h1>
+                    <div className="flex items-center gap-2">
+                      <h1 className="text-2xl font-bold tracking-tight">{currentStep.exercise.name}</h1>
+                      {currentStep.exercise.instructionGuide && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-cyan-400"
+                          onClick={() => setShowInfo(true)}
+                        >
+                          <Info weight="fill" size={18} />
+                        </Button>
+                      )}
+                    </div>
                     <p className="text-muted-foreground text-sm font-medium leading-relaxed max-w-xs mx-auto">
                         {currentStep.exercise.notes || "Focus on form and controlled movements."}
                     </p>
@@ -329,10 +330,7 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
                             className={cn("transition-all duration-1000 ease-linear drop-shadow-lg", ringColor)}
                             strokeWidth="12"
                             strokeLinecap="round"
-                            strokeDasharray="283" // 2 * pi * 45(%) approx? No, viewbox is unitless usually.
-                                                  // Let's rely on standard pathLength 1 for simpler math if supported,
-                                                  // but standard SVG math: r=45% of 256px = ~115px. C = 2*pi*115 = 722.
-                                                  // Actually simpler to just use pathLength="100"
+                            strokeDasharray="283"
                             pathLength="100"
                             strokeDashoffset={100 - getProgress()} // Inverse logic for countdown?
                         />
@@ -445,6 +443,38 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
         </div>
 
       </div>
+
+      {/* 4. Instruction Guide Overlay */}
+      <Dialog open={showInfo} onOpenChange={setShowInfo}>
+        <DialogContent className="fixed z-[10000] top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] max-w-md bg-zinc-950 border border-white/10 p-0 overflow-hidden shadow-2xl rounded-3xl">
+           {currentStep.type === 'work' && currentStep.exercise.instructionGuide && (
+             <div className="flex flex-col h-full relative">
+                <div className="absolute top-4 right-4 z-20">
+                    <DialogClose className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
+                      <X size={20} />
+                   </DialogClose>
+                </div>
+
+                <div className="p-6 bg-zinc-900/50 pt-12">
+                   <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                      <Info weight="duotone" className="text-cyan-400" size={28} />
+                      {currentStep.exercise.name}
+                   </h3>
+                   <ul className="space-y-4">
+                      {currentStep.exercise.instructionGuide.steps.map((step, i) => (
+                        <li key={i} className="flex gap-4 text-sm text-zinc-300">
+                           <span className="flex-shrink-0 w-8 h-8 rounded-full bg-cyan-500/10 text-cyan-400 font-bold font-mono text-sm flex items-center justify-center border border-cyan-500/20 shadow-[0_0_10px_rgba(34,211,238,0.2)]">
+                             {i + 1}
+                           </span>
+                           <span className="leading-relaxed pt-1">{step}</span>
+                        </li>
+                      ))}
+                   </ul>
+                </div>
+             </div>
+           )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

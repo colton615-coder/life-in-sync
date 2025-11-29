@@ -2,6 +2,14 @@ import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
+ * Exercise Instructions Schema
+ * Step-by-step instructions.
+ */
+export const InstructionGuideSchema = z.object({
+  steps: z.array(z.string()),
+});
+
+/**
  * Exercise Schema
  * Represents a single exercise within a workout block.
  * Unknown keys are automatically stripped.
@@ -17,6 +25,7 @@ export const ExerciseSchema = z.object({
   restSeconds: z.number().default(60),
   tempo: z.string().optional(), // e.g., "3-0-1-0"
   weight: z.number().optional(),
+  instructionGuide: InstructionGuideSchema.optional(),
 });
 
 /**
@@ -46,6 +55,7 @@ export const WorkoutSessionSchema = z.object({
 });
 
 // Export inferred TypeScript types
+export type InstructionGuide = z.infer<typeof InstructionGuideSchema>;
 export type Exercise = z.infer<typeof ExerciseSchema>;
 export type WorkoutBlock = z.infer<typeof WorkoutBlockSchema>;
 export type WorkoutSession = z.infer<typeof WorkoutSessionSchema>;
