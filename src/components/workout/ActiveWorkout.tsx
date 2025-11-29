@@ -63,8 +63,27 @@ export function ActiveWorkout({ workout, onFinish }: ActiveWorkoutProps) {
   // State
   // ---------------------------------------------------------------------------
   const [queue] = useState<SessionStep[]>(() => {
-    // Adapter logic to convert Legacy WorkoutPlan to New WorkoutSession
-    const session = adaptLegacyWorkoutToSession(workout)
+    let session: WorkoutSession;
+
+    // Check if the workout has modern blocks structure (Superset/Circuit support)
+    if (workout.blocks && workout.blocks.length > 0) {
+      let difficulty: 'beginner' | 'intermediate' | 'advanced' | 'elite' = 'intermediate'
+      if (workout.difficulty === 'beginner') difficulty = 'beginner'
+      if (workout.difficulty === 'advanced') difficulty = 'advanced'
+
+      session = {
+        id: workout.id,
+        title: workout.name,
+        description: workout.focus,
+        totalDurationMin: workout.estimatedDuration,
+        difficulty: difficulty,
+        blocks: workout.blocks
+      }
+    } else {
+      // Fallback: Adapt Legacy WorkoutPlan to New WorkoutSession
+      session = adaptLegacyWorkoutToSession(workout)
+    }
+
     return generateSessionQueue(session)
   })
 

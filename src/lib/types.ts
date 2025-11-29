@@ -1,3 +1,5 @@
+import { WorkoutBlock } from '@/types/workout'
+
 export type HabitIcon = string
 
 export type Module = 
@@ -177,6 +179,7 @@ export interface WorkoutPlan {
   name: string
   focus: string
   exercises: Exercise[]
+  blocks?: WorkoutBlock[]
   estimatedDuration: number
   difficulty: 'beginner' | 'intermediate' | 'advanced'
   createdAt: string
