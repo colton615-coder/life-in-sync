@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { Sparkle, Vibrate, SpeakerHigh, ShieldCheck, Trash, Warning, Key, LinkSimple, WifiHigh, WifiSlash } from '@phosphor-icons/react'
+import { Sparkle, Vibrate, SpeakerHigh, ShieldCheck, Trash, Warning, Key, LinkSimple, WifiHigh, WifiSlash, Database, ArrowCounterClockwise } from '@phosphor-icons/react'
 import { getUsageStats, resetUsageStats } from '@/lib/completion-tracker'
 import type { AIUsageStats } from '@/lib/types'
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback'
@@ -22,8 +22,42 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+
+const MODULE_DATA_KEYS: Record<string, { label: string, keys: string[] }> = {
+  finance: {
+    label: 'Finance (The Accountant)',
+    keys: ['finance-audit-v2', 'finance-report-v2', 'financial-report', 'financial-audit', 'expenses', 'financial-transactions', 'financial-profile']
+  },
+  habits: {
+    label: 'Habits',
+    keys: ['habits', 'habits-list']
+  },
+  workouts: {
+    label: 'Workouts',
+    keys: ['workout-plans', 'completed-workouts', 'personal-records', 'workouts-list', 'workouts-history']
+  },
+  golf: {
+    label: 'Golf Swing',
+    keys: ['golf-swing-analyses', 'golf-swings']
+  },
+  tasks: {
+    label: 'Tasks',
+    keys: ['tasks', 'tasks-list']
+  },
+  shopping: {
+    label: 'Shopping',
+    keys: ['shopping-items', 'shopping-list']
+  },
+  knox: {
+    label: 'Knox AI',
+    keys: ['knox-messages']
+  },
+  calendar: {
+    label: 'Calendar',
+    keys: ['calendar-events']
+  }
+}
 
 export function Settings() {
   const [hapticEnabled, setHapticEnabled] = useKV<boolean>('settings-haptic-enabled', true)
@@ -34,6 +68,10 @@ export function Settings() {
   const [isOwner, setIsOwner] = useState(false)
   const [usageStats, setUsageStats] = useState<AIUsageStats | null>(null)
   
+  // Dialog State
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleteContext, setDeleteContext] = useState<{ type: 'all' | 'module', moduleKey?: string } | null>(null)
+
   const { triggerHaptic } = useHapticFeedback()
   const { playSound } = useSoundEffects()
 
@@ -100,40 +138,72 @@ export function Settings() {
     }
   };
 
-  const handleClearAllData = async () => {
-    if (safeModeEnabled) {
-      const confirmation = prompt('To disable safe mode and delete all data, type "DELETE" and click OK.')
-      if (confirmation !== 'DELETE') {
-        toast.warning('Data deletion cancelled', {
-          description: 'You must type "DELETE" to confirm.'
-        })
-        return
+  const initiateDelete = (type: 'all' | 'module', moduleKey?: string) => {
+    setDeleteContext({ type, moduleKey })
+    setDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!deleteContext) return
+
+    if (deleteContext.type === 'all') {
+      if (safeModeEnabled) {
+        const confirmation = prompt('To disable safe mode and delete all data, type "DELETE" and click OK.')
+        if (confirmation !== 'DELETE') {
+          toast.warning('Data deletion cancelled', {
+            description: 'You must type "DELETE" to confirm.'
+          })
+          setDeleteDialogOpen(false)
+          return
+        }
       }
+
+      try {
+        // Collect all keys from modules plus unlisted ones
+        const allModuleKeys = Object.values(MODULE_DATA_KEYS).flatMap(m => m.keys)
+        const extraKeys = ['daily-affirmation']
+        const allKeys = [...allModuleKeys, ...extraKeys]
+
+        // Remove duplicates just in case
+        const uniqueKeys = [...new Set(allKeys)]
+
+        for (const key of uniqueKeys) {
+          localStorage.removeItem(key)
+        }
+
+        triggerHaptic('success')
+        playSound('success')
+        toast.success('All data cleared', {
+          description: 'Your app has been reset to a fresh state (API Key preserved).'
+        })
+        setTimeout(() => window.location.reload(), 1500)
+      } catch (error) {
+        console.error('Failed to clear data:', error)
+        triggerHaptic('error')
+        toast.error('Failed to clear data')
+      }
+    } else if (deleteContext.type === 'module' && deleteContext.moduleKey) {
+       // Module delete doesn't require "DELETE" typing, just the dialog confirmation
+       try {
+         const keys = MODULE_DATA_KEYS[deleteContext.moduleKey].keys
+         for (const key of keys) {
+           localStorage.removeItem(key)
+         }
+         triggerHaptic('success')
+         playSound('success')
+         toast.success(`${MODULE_DATA_KEYS[deleteContext.moduleKey].label} reset`, {
+           description: 'Module data has been cleared.'
+         })
+         // We might not need a full reload for individual modules, but it's safer to ensure state clears
+         setTimeout(() => window.location.reload(), 1000)
+       } catch (error) {
+         console.error('Failed to clear module data:', error)
+         triggerHaptic('error')
+         toast.error('Failed to reset module')
+       }
     }
 
-    try {
-      const dataKeys = [
-        'habits-list', 'financial-transactions', 'financial-profile', 'tasks-list',
-        'workouts-list', 'workouts-history', 'knox-messages',
-        'shopping-list', 'calendar-events', 'golf-swings'
-      ]
-      // This is a client-side app, so we can clear localStorage directly
-      // This is a simplified approach. A more robust solution would use the useKV hook's clear method if it existed.
-      for (const key of dataKeys) {
-        localStorage.removeItem(key)
-      }
-      triggerHaptic('success')
-      playSound('success')
-      toast.success('All data cleared', {
-        description: 'Your app has been reset to a fresh state'
-      })
-      setTimeout(() => window.location.reload(), 1500)
-    } catch (error) {
-      console.error('Failed to clear data:', error)
-      triggerHaptic('error')
-      playSound('error')
-      toast.error('Failed to clear data', { description: 'Please try again' })
-    }
+    setDeleteDialogOpen(false)
   }
 
   if (!isOwner) {
@@ -148,7 +218,7 @@ export function Settings() {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="container mx-auto p-4 space-y-6 pb-24">
       <h1 className="text-3xl font-bold text-foreground">⚙️ Settings</h1>
       <p className="text-muted-foreground">
         Configure the machinery of your digital existence.
@@ -338,6 +408,35 @@ export function Settings() {
         </Card>
       )}
 
+      {/* Module Data Management Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Database className="text-primary" size={24} />
+            <CardTitle>Module Data</CardTitle>
+          </div>
+          <CardDescription>
+            Manage data for individual modules. Resetting a module will clear only its specific data.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {Object.entries(MODULE_DATA_KEYS).map(([key, config]) => (
+            <div key={key} className="flex items-center justify-between py-2 border-b last:border-0 border-border/50">
+              <span className="font-medium">{config.label}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => initiateDelete('module', key)}
+                className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
+              >
+                <ArrowCounterClockwise className="mr-2" size={14} />
+                Reset
+              </Button>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
       <Card className="border-destructive/50">
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -355,40 +454,47 @@ export function Settings() {
               Clear All Data
             </h4>
             <p className="text-sm text-muted-foreground">
-              This will permanently delete all module data. This action cannot be undone.
+              This will permanently delete ALL module data. This action cannot be undone.
+              <br/>
+              <span className="font-bold opacity-80">Note: API Keys will be preserved.</span>
             </p>
           </div>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="w-full mt-4 gap-2">
-                <Trash size={16} />
-                Clear All Data
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="flex items-center gap-2">
-                  <Warning className="text-destructive" size={24} />
-                  Are you absolutely sure?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. All data for all modules will be permanently deleted.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleClearAllData}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Yes, delete everything
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button
+            variant="destructive"
+            className="w-full mt-4 gap-2"
+            onClick={() => initiateDelete('all')}
+          >
+            <Trash size={16} />
+            Clear All Data
+          </Button>
         </CardContent>
       </Card>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Warning className="text-destructive" size={24} />
+              {deleteContext?.type === 'all' ? 'Clear All Data?' : `Reset ${deleteContext?.moduleKey ? MODULE_DATA_KEYS[deleteContext.moduleKey].label : 'Module'}?`}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteContext?.type === 'all'
+                ? 'This action cannot be undone. All data for all modules will be permanently deleted. API keys will be preserved.'
+                : `This will permanently delete all data associated with ${deleteContext?.moduleKey ? MODULE_DATA_KEYS[deleteContext.moduleKey].label : 'this module'}. This action cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>Cancel</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+            >
+              {deleteContext?.type === 'all' ? 'Yes, Delete Everything' : 'Yes, Reset Module'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
