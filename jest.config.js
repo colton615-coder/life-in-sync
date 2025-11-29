@@ -12,12 +12,17 @@ export default {
       {
         useESM: true,
         diagnostics: false, // Turn off type checking diagnostics to speed up test and avoid TS151001
+        tsconfig: {
+          module: 'esnext',
+        },
+        isolatedModules: true,
       },
     ],
   },
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
     '<rootDir>/dist/',
+    '<rootDir>/tests/',
   ],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };

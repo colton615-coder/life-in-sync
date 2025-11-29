@@ -55,9 +55,10 @@ export class GeminiCore {
         }
       }
     }
-    if (typeof import.meta !== 'undefined' && import.meta.env) {
-      const viteKey = import.meta.env.VITE_GEMINI_API_KEY;
-      if (viteKey) return viteKey;
+    // @ts-ignore
+    // eslint-disable-next-line
+    if (typeof process !== 'undefined' && process.env.VITE_GEMINI_API_KEY) {
+      return process.env.VITE_GEMINI_API_KEY;
     }
     if (typeof process !== 'undefined' && process.env.GEMINI_API_KEY) {
       return process.env.GEMINI_API_KEY;
