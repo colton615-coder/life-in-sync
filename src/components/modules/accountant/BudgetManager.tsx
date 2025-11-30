@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, ChevronRight, BrainCircuit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AccountantConsultation } from './AccountantConsultation';
+import { BlueprintDashboardV3 } from './BlueprintDashboardV3';
 
 interface BudgetManagerProps {
   audit: FinancialAudit;
@@ -36,31 +37,19 @@ export function BudgetManager({ audit, setAudit }: BudgetManagerProps) {
   // --- Views ---
 
   const Overview = () => {
-      const totalBudget = report.proposedBudget.reduce((acc, cat) => acc + cat.allocatedAmount, 0);
-      const income = audit.monthlyIncome || 0;
-      const savingsRate = income > 0 ? ((income - totalBudget) / income) * 100 : 0;
-
       return (
           <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <MetricCard title="Monthly Income" value={formatCurrency(income)} color="text-white" />
-                  <MetricCard title="Target Spend" value={formatCurrency(totalBudget)} color="text-cyan-400" />
-                  <MetricCard
-                    title="Est. Savings"
-                    value={`${savingsRate.toFixed(1)}%`}
-                    subValue={formatCurrency(income - totalBudget)}
-                    color={savingsRate > 10 ? "text-green-400" : "text-amber-400"}
-                  />
-              </div>
-
-              <Card className="glass-card p-6">
-                  <h3 className="text-lg font-bold text-gradient-cyan mb-4">Executive Summary</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                      {report.executiveSummary}
-                  </p>
-              </Card>
+              {/* V3 Dashboard Integration (Sankey, Flight Path, HUD) */}
+              <BlueprintDashboardV3 audit={audit} report={report} />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="glass-card p-6 md:col-span-2">
+                      <h3 className="text-lg font-bold text-gradient-cyan mb-4">Executive Summary</h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                          {report.executiveSummary}
+                      </p>
+                  </Card>
+
                   {report.spendingAnalysis.slice(0, 4).map(analysis => (
                       <Card key={analysis.categoryId} className="glass-card p-4 border-l-2 border-l-white/10">
                           <div className="flex justify-between items-start mb-2">
@@ -190,14 +179,4 @@ export function BudgetManager({ audit, setAudit }: BudgetManagerProps) {
        </AnimatePresence>
     </div>
   );
-}
-
-function MetricCard({ title, value, subValue, color }: { title: string, value: string, subValue?: string, color: string }) {
-    return (
-        <Card className="glass-card p-4 flex flex-col justify-center">
-            <p className="text-xs text-muted-foreground uppercase mb-1">{title}</p>
-            <p className={cn("text-2xl font-mono font-bold tracking-tight", color)}>{value}</p>
-            {subValue && <p className="text-xs text-muted-foreground mt-1">{subValue}</p>}
-        </Card>
-    )
 }
