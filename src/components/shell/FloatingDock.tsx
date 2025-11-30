@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
   Home,
@@ -15,6 +14,8 @@ import {
   Settings
 } from 'lucide-react';
 import { Module } from '@/lib/types';
+import { useKeyboardAvoidance } from '@/hooks/use-keyboard-avoidance';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface FloatingDockProps {
     activeModule: Module;
@@ -52,6 +53,7 @@ const NavItem = ({ icon: Icon, isActive, onClick, id }: NavItemProps) => {
 }
 
 export const FloatingDock = ({ activeModule, onNavigate }: FloatingDockProps) => {
+    const { isKeyboardOpen } = useKeyboardAvoidance();
 
     // Helper to map modules to tab indices for the "active" indicator
     const isTabActive = (target: string) => {
@@ -73,22 +75,32 @@ export const FloatingDock = ({ activeModule, onNavigate }: FloatingDockProps) =>
     ];
 
     return (
-        <div className="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
-            <nav
-                className="pointer-events-auto bg-white/10 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] h-20 w-[90%] max-w-md rounded-3xl flex items-center px-2 overflow-x-auto no-scrollbar"
-                role="navigation"
-                aria-label="Main Navigation"
-            >
-                {modules.map((module) => (
-                    <NavItem
-                        key={module.id}
-                        id={module.id}
-                        icon={module.icon}
-                        isActive={isTabActive(module.id)}
-                        onClick={() => onNavigate(module.id as Module)}
-                    />
-                ))}
-            </nav>
-        </div>
+        <AnimatePresence>
+            {!isKeyboardOpen && (
+                <motion.div
+                    initial={{ y: 0, opacity: 1 }}
+                    exit={{ y: 100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none"
+                >
+                    <nav
+                        className="pointer-events-auto bg-white/10 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] h-20 w-[90%] max-w-md rounded-3xl flex items-center px-2 overflow-x-auto no-scrollbar"
+                        role="navigation"
+                        aria-label="Main Navigation"
+                    >
+                        {modules.map((module) => (
+                            <NavItem
+                                key={module.id}
+                                id={module.id}
+                                icon={module.icon}
+                                isActive={isTabActive(module.id)}
+                                onClick={() => onNavigate(module.id as Module)}
+                            />
+                        ))}
+                    </nav>
+                </motion.div>
+            )}
+        </AnimatePresence>
     )
 }
