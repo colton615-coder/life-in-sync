@@ -12,6 +12,7 @@ import { AppBackground } from '@/components/shell/AppBackground'
 import { LifeCore } from '@/components/shell/LifeCore'
 import { FloatingDock } from '@/components/shell/FloatingDock'
 import { WorkoutProvider } from '@/context/WorkoutContext'
+import { useKeyboardAvoidance } from '@/hooks/use-keyboard-avoidance'
 
 // @ts-expect-error virtual:pwa-register is dynamically generated
 import { registerSW } from 'virtual:pwa-register'
@@ -32,6 +33,9 @@ const Connections = lazy(() => import('@/components/modules/Connections').then(m
 function App() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
   const [isLoading, setIsLoading] = useState(true)
+
+  // Initialize global keyboard avoidance
+  useKeyboardAvoidance();
 
   useEffect(() => {
     document.title = 'LiFE-iN-SYNC';
@@ -139,7 +143,7 @@ function App() {
 
             {/* Main Content Area */}
             {/* Adjusted padding to account for the Floating Dock at bottom */}
-            <main id="main-content" className="md:px-8 pb-32">
+            <main id="main-content" className="md:px-8 pb-40">
               {renderModule()}
             </main>
 
