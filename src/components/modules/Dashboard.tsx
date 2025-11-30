@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Sparkline, TrendIndicator } from '@/components/Sparkline'
 import { QuickActionsFab } from '@/components/QuickActionsFab'
+import { motion } from 'framer-motion'
 
 interface DashboardProps {
   onNavigate: (module: Module) => void
@@ -188,7 +189,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   }, [knoxMessages])
 
   return (
-    <div className="pt-2 md:pt-4 pb-24 md:pb-16 relative">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="pt-2 md:pt-4 pb-24 md:pb-16 relative"
+    >
       <QuickActionsFab />
 
       {/* Greeting / Context */}
@@ -411,6 +417,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           </div>
         </DashboardTile>
       </div>
-    </div>
+    </motion.div>
   )
 }

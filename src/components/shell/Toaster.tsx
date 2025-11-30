@@ -15,22 +15,22 @@ export const Toaster = () => {
           cancelButton:
             'group-[.toast]:bg-white/10 group-[.toast]:text-white hover:group-[.toast]:bg-white/20',
 
-          // Neon / Glowing States
-          // Success: Emerald Glow
+          // Refined States (Less Aggressive Glow)
+          // Success
           success:
-            '!bg-emerald-950/90 !border-emerald-500 !text-emerald-50 !shadow-[0_0_25px_-5px_rgba(16,185,129,0.6)]',
+            '!bg-emerald-950/95 !border-emerald-500/50 !text-emerald-50 !shadow-lg',
 
-          // Error: Rose/Red Glow
+          // Error
           error:
-            '!bg-rose-950/90 !border-rose-500 !text-rose-50 !shadow-[0_0_25px_-5px_rgba(244,63,94,0.6)]',
+            '!bg-rose-950/95 !border-rose-500/50 !text-rose-50 !shadow-lg',
 
-          // Warning: Amber Glow
+          // Warning
           warning:
-            '!bg-amber-950/90 !border-amber-500 !text-amber-50 !shadow-[0_0_25px_-5px_rgba(245,158,11,0.6)]',
+            '!bg-amber-950/95 !border-amber-500/50 !text-amber-50 !shadow-lg',
 
-          // Info: Cyan Glow
+          // Info
           info:
-            '!bg-cyan-950/90 !border-cyan-500 !text-cyan-50 !shadow-[0_0_25px_-5px_rgba(6,182,212,0.6)]',
+            '!bg-cyan-950/95 !border-cyan-500/50 !text-cyan-50 !shadow-lg',
         },
       }}
     />

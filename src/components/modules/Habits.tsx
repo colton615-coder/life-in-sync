@@ -368,7 +368,8 @@ export function Habits() {
           <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Habits</h1>
           <p className="text-slate-400 mt-1 text-sm font-medium">Consistency is key, Architect.</p>
         </div>
-        {creationStep === 0 && (
+        {/* Only show "New Protocol" in header if we actually have habits (to avoid redundancy with empty state button) */}
+        {creationStep === 0 && (habits && habits.length > 0) && (
           <Button
             size="default"
             onClick={() => setCreationStep(1)}
