@@ -1,10 +1,9 @@
-import { useState } from 'react';
-import { FinancialAudit, Category, Subcategory } from '@/types/accountant';
-import { Card } from '@/components/Card';
+import { useState, useRef, useEffect } from 'react';
+import { FinancialAudit, Category } from '@/types/accountant';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Trash2, ChevronDown, ChevronUp, Save, BrainCircuit } from 'lucide-react';
+import { Plus, Trash2, BrainCircuit } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,12 +15,10 @@ interface DataEntryProps {
 }
 
 export function DataEntry({ audit, setAudit, onComplete }: DataEntryProps) {
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(audit.categories[0]?.id || null);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
 
   // --- Actions ---
-
   const updateSubcategoryAmount = (catId: string, subId: string, value: string) => {
     const numValue = value === '' ? null : parseFloat(value);
     setAudit({
@@ -74,7 +71,6 @@ export function DataEntry({ audit, setAudit, onComplete }: DataEntryProps) {
     });
     setNewCategoryName('');
     setIsAddingCategory(false);
-    setExpandedCategory(newId);
   };
 
   const deleteCategory = (catId: string) => {
@@ -84,8 +80,6 @@ export function DataEntry({ audit, setAudit, onComplete }: DataEntryProps) {
     });
   };
 
-  // --- Render Helpers ---
-
   const calculateTotal = () => {
     return audit.categories.reduce((total, cat) => {
       return total + cat.subcategories.reduce((subTotal, sub) => subTotal + (sub.amount || 0), 0);
@@ -93,94 +87,93 @@ export function DataEntry({ audit, setAudit, onComplete }: DataEntryProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-end border-b border-white/10 pb-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gradient-cyan">Expense Ledger</h2>
-          <p className="text-sm text-muted-foreground">Itemize your monthly outflows.</p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground uppercase">Total Declared</p>
-          <p className="text-xl font-mono text-cyan-400">${calculateTotal().toFixed(2)}</p>
-        </div>
-      </div>
-
-      <div className="grid gap-4">
-        {audit.categories.map(category => (
-          <CategoryCard
-            key={category.id}
-            category={category}
-            isExpanded={expandedCategory === category.id}
-            onToggle={() => setExpandedCategory(expandedCategory === category.id ? null : category.id)}
-            onUpdateAmount={updateSubcategoryAmount}
-            onAddSubcategory={addSubcategory}
-            onDeleteSubcategory={deleteSubcategory}
-            onDeleteCategory={deleteCategory}
-          />
-        ))}
-
-        {/* Add Category UI */}
-        {isAddingCategory ? (
-          <Card className="glass-card p-4 border-dashed border-cyan-500/30">
-            <Label>New Category Name</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                placeholder="e.g., Crypto, Golf, Projects"
-                className="glass-morphic"
-                autoFocus
-                onKeyDown={(e) => e.key === 'Enter' && addCategory()}
-              />
-              <Button onClick={addCategory} size="sm" variant="default">Add</Button>
-              <Button onClick={() => setIsAddingCategory(false)} size="sm" variant="ghost">Cancel</Button>
+    <div className="relative pb-32">
+        {/* Sticky Header: Ledger Overview */}
+        <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex justify-between items-center shadow-lg">
+            <div>
+                <h2 className="text-lg font-bold text-gradient-cyan tracking-tight">Expense Ledger</h2>
+                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Monthly Outflows</p>
             </div>
-          </Card>
-        ) : (
-          <Button
-            variant="ghost"
-            className="w-full border border-dashed border-white/10 text-muted-foreground hover:text-cyan-400 hover:border-cyan-400/50 h-12"
-            onClick={() => setIsAddingCategory(true)}
-          >
-            <Plus className="mr-2 h-4 w-4" /> Add Custom Category
-          </Button>
-        )}
-      </div>
+            <div className="text-right">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Total</p>
+                <p className="text-lg font-mono text-cyan-400 font-bold tracking-tight">${calculateTotal().toFixed(2)}</p>
+            </div>
+        </div>
 
-      <div className="pt-8 pb-32 flex justify-end">
-        <Button
-          onClick={onComplete}
-          className="w-full md:w-auto shadow-2xl shadow-cyan-500/20 bg-cyan-600 hover:bg-cyan-500 text-white font-bold h-14 px-8 rounded-full text-lg"
-        >
-          <BrainCircuit className="mr-2 h-5 w-5" /> Submit for Audit
-        </Button>
-      </div>
+        {/* High Density List Content */}
+        <div className="space-y-8 pt-4">
+            {audit.categories.map(category => (
+                <CategoryGroup
+                    key={category.id}
+                    category={category}
+                    onUpdateAmount={updateSubcategoryAmount}
+                    onAddSubcategory={addSubcategory}
+                    onDeleteSubcategory={deleteSubcategory}
+                    onDeleteCategory={deleteCategory}
+                />
+            ))}
+
+            {/* Add Category Trigger */}
+            <div className="px-4">
+                 {isAddingCategory ? (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="glass-panel p-3 rounded-lg flex gap-2"
+                    >
+                        <Input
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            placeholder="New Category Name..."
+                            className="h-10 bg-transparent border-white/10"
+                            autoFocus
+                            onKeyDown={(e) => e.key === 'Enter' && addCategory()}
+                        />
+                        <Button size="sm" onClick={addCategory}>Add</Button>
+                        <Button size="sm" variant="ghost" onClick={() => setIsAddingCategory(false)}>Cancel</Button>
+                    </motion.div>
+                ) : (
+                    <Button
+                        variant="ghost"
+                        className="w-full border border-dashed border-white/10 hover:border-cyan-500/50 hover:bg-cyan-500/5 hover:text-cyan-400 h-12 text-muted-foreground"
+                        onClick={() => setIsAddingCategory(true)}
+                    >
+                        <Plus className="mr-2 h-4 w-4" /> Add Custom Group
+                    </Button>
+                )}
+            </div>
+        </div>
+
+        {/* Floating Action Button for Submission */}
+        <div className="fixed bottom-24 inset-x-4 z-30 pointer-events-none flex justify-center">
+            <Button
+                onClick={onComplete}
+                className="pointer-events-auto shadow-[0_0_40px_-10px_rgba(6,182,212,0.5)] bg-cyan-600 hover:bg-cyan-500 text-white font-bold h-12 px-8 rounded-full text-base backdrop-blur-md border border-white/20"
+            >
+                <BrainCircuit className="mr-2 h-4 w-4" /> Finalize Audit
+            </Button>
+        </div>
     </div>
   );
 }
 
 // --- Sub-Components ---
 
-function CategoryCard({
+function CategoryGroup({
   category,
-  isExpanded,
-  onToggle,
   onUpdateAmount,
   onAddSubcategory,
   onDeleteSubcategory,
   onDeleteCategory
 }: {
   category: Category;
-  isExpanded: boolean;
-  onToggle: () => void;
   onUpdateAmount: (cid: string, sid: string, val: string) => void;
   onAddSubcategory: (cid: string, name: string) => void;
   onDeleteSubcategory: (cid: string, sid: string) => void;
   onDeleteCategory: (cid: string) => void;
 }) {
-  const [newSubName, setNewSubName] = useState('');
   const [isAdding, setIsAdding] = useState(false);
-
+  const [newSubName, setNewSubName] = useState('');
   const catTotal = category.subcategories.reduce((acc, curr) => acc + (curr.amount || 0), 0);
 
   const handleAddSub = () => {
@@ -192,98 +185,91 @@ function CategoryCard({
   };
 
   return (
-    <Card className={cn(
-      "glass-card overflow-hidden transition-all duration-300",
-      isExpanded ? "border-cyan-500/30 bg-black/40" : "border-white/5 opacity-80 hover:opacity-100"
-    )}>
-      <div
-        className="p-4 flex items-center justify-between cursor-pointer"
-        onClick={onToggle}
-      >
-        <div className="flex items-center gap-3">
-          <div className={cn("p-2 rounded-lg transition-colors", isExpanded ? "bg-cyan-500/10 text-cyan-400" : "bg-white/5 text-muted-foreground")}>
-            {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-          </div>
-          <div>
-            <h3 className="font-semibold text-lg">{category.name}</h3>
-            {!isExpanded && (
-               <p className="text-xs text-muted-foreground">{category.subcategories.length} items • ${catTotal.toFixed(2)}</p>
-            )}
-          </div>
-        </div>
-
-        {isExpanded && (
-           <Button
-             variant="ghost"
-             size="icon"
-             className="text-red-400/50 hover:text-red-400 hover:bg-red-950/30"
-             onClick={(e) => {
-               e.stopPropagation();
-               if(confirm('Delete this entire category?')) onDeleteCategory(category.id);
-             }}
-           >
-             <Trash2 className="h-4 w-4" />
-           </Button>
-        )}
-      </div>
-
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="border-t border-white/5 bg-black/20"
-          >
-            <div className="p-4 space-y-3">
-              {category.subcategories.map(sub => (
-                <div key={sub.id} className="grid grid-cols-[1fr,100px,32px] gap-3 items-center">
-                  <Label className="text-sm truncate" title={sub.name}>{sub.name}</Label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    value={sub.amount === null ? '' : sub.amount}
-                    onChange={(e) => onUpdateAmount(category.id, sub.id, e.target.value)}
-                    className="h-9 font-mono text-right glass-morphic"
-                  />
-                  <Button
+    <div className="space-y-0">
+        {/* Category Header - Sticky within parent flow context if needed, but here just distinct */}
+        <div className="px-4 py-2 flex justify-between items-end border-b border-white/10 bg-gradient-to-r from-white/5 to-transparent">
+            <h3 className="font-bold text-sm text-white/90 uppercase tracking-wide">{category.name}</h3>
+            <div className="flex items-center gap-3">
+                <span className="font-mono text-xs text-muted-foreground">${catTotal.toFixed(2)}</span>
+                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-red-400"
-                    onClick={() => onDeleteSubcategory(category.id, sub.id)}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              ))}
-
-              {isAdding ? (
-                <div className="flex gap-2 mt-4 pt-4 border-t border-white/5">
-                  <Input
-                    placeholder="Subcategory Name"
-                    value={newSubName}
-                    onChange={(e) => setNewSubName(e.target.value)}
-                    className="h-8 text-sm glass-morphic"
-                    autoFocus
-                    onKeyDown={(e) => e.key === 'Enter' && handleAddSub()}
-                  />
-                  <Button size="sm" onClick={handleAddSub}>Add</Button>
-                  <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)}>Cancel</Button>
-                </div>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full mt-2 text-xs text-muted-foreground border border-dashed border-white/10"
-                  onClick={() => setIsAdding(true)}
+                    className="h-5 w-5 text-muted-foreground/30 hover:text-red-400"
+                    onClick={() => {
+                        if(confirm('Delete Group?')) onDeleteCategory(category.id);
+                    }}
                 >
-                  <Plus className="h-3 w-3 mr-1" /> Add Item
+                    <Trash2 className="h-3 w-3" />
                 </Button>
-              )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </Card>
+        </div>
+
+        {/* High Density List Items */}
+        <div className="divide-y divide-white/5">
+            {category.subcategories.map(sub => (
+                <div key={sub.id} className="group flex items-center justify-between px-4 py-3 active:bg-white/5 transition-colors">
+                     {/* Label Area */}
+                    <div className="flex-1 min-w-0 mr-4">
+                        <Label className="text-sm font-medium text-gray-300 truncate block cursor-pointer" onClick={() => document.getElementById(`input-${sub.id}`)?.focus()}>
+                            {sub.name}
+                        </Label>
+                    </div>
+
+                    {/* Input Area - Integrated, Tabular feel */}
+                    <div className="flex items-center gap-0 w-32 relative">
+                        <span className="absolute left-2 text-muted-foreground/50 text-xs pointer-events-none">$</span>
+                        <Input
+                            id={`input-${sub.id}`}
+                            type="number"
+                            placeholder="0"
+                            value={sub.amount === null ? '' : sub.amount}
+                            onChange={(e) => onUpdateAmount(category.id, sub.id, e.target.value)}
+                            className="h-9 w-full pl-5 pr-2 text-right font-mono text-base bg-transparent border-transparent hover:bg-white/5 focus:bg-white/10 focus:border-cyan-500/30 transition-all rounded-md p-0"
+                        />
+                    </div>
+
+                     {/* Delete Action - Only visible on hover/focus within group to reduce noise */}
+                     {/* On mobile this might be tricky, so we keep it subtle always visible or use swipe. For now, subtle visibility. */}
+                    <div className="w-8 flex justify-end">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground/20 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                            onClick={() => onDeleteSubcategory(category.id, sub.id)}
+                            tabIndex={-1}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            ))}
+
+            {/* Inline Add Item Row */}
+            {isAdding ? (
+                 <div className="flex items-center px-4 py-2 gap-2 bg-white/5 animate-in fade-in slide-in-from-top-1">
+                    <Input
+                        placeholder="Item Name"
+                        value={newSubName}
+                        onChange={(e) => setNewSubName(e.target.value)}
+                        className="h-9 text-sm bg-transparent border-white/10 focus:border-cyan-500/50"
+                        autoFocus
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddSub()}
+                    />
+                    <Button size="sm" onClick={handleAddSub} className="h-9">Save</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)} className="h-9">X</Button>
+                </div>
+            ) : (
+                <div
+                    className="px-4 py-3 flex items-center gap-2 cursor-pointer hover:bg-white/5 transition-colors group"
+                    onClick={() => setIsAdding(true)}
+                >
+                    <div className="h-5 w-5 rounded-full border border-dashed border-muted-foreground/50 flex items-center justify-center group-hover:border-cyan-400 group-hover:text-cyan-400 text-muted-foreground">
+                        <Plus className="h-3 w-3" />
+                    </div>
+                    <span className="text-xs text-muted-foreground font-medium group-hover:text-cyan-400">Add Item</span>
+                </div>
+            )}
+        </div>
+    </div>
   );
 }
