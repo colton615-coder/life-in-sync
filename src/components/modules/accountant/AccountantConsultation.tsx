@@ -10,11 +10,13 @@ import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import { accountantSync } from '@/lib/finance/sync-storage';
 import { ReallocationProposal } from './ReallocationProposal';
+import { InterventionEventDetail } from '@/services/accountant/BudgetWatchdog';
 
 interface AccountantConsultationProps {
   audit: FinancialAudit;
   setAudit: (audit: FinancialAudit) => void;
   onClose: () => void;
+  intervention?: InterventionEventDetail | null;
 }
 
 type Message = {
@@ -31,7 +33,7 @@ type Message = {
   };
 };
 
-export function AccountantConsultation({ audit, setAudit, onClose }: AccountantConsultationProps) {
+export function AccountantConsultation({ audit, setAudit, onClose, intervention }: AccountantConsultationProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init',
@@ -42,6 +44,30 @@ export function AccountantConsultation({ audit, setAudit, onClose }: AccountantC
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Handle Incoming Interventions
+  useEffect(() => {
+      if (intervention) {
+          // Check if this intervention is already displayed to avoid duplication
+          const exists = messages.some(m => m.text === intervention.message);
+          if (!exists) {
+            const interventionMsg: Message = {
+                id: uuidv4(),
+                role: 'model',
+                text: intervention.message
+            };
+            // Prepend or Append?
+            // "The listener must render a new, unprompted message bubble from The Accountant at the top of the chat history"
+            // Wait, "top of the chat history" usually means "most recent".
+            // But if it means "Top" visually, that's index 0. Chat usually scrolls to bottom.
+            // "initiating a consultation" -> usually implies it's the LATEST thing said.
+            // I will append it as the latest message so the user sees it immediately at the bottom (where eyes go).
+            // If I put it at index 0, it might be hidden by scroll.
+            // "Top of the chat history" might be ambiguous. I'll assume "Newest Message".
+            setMessages(prev => [...prev, interventionMsg]);
+          }
+      }
+  }, [intervention]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -107,7 +133,12 @@ export function AccountantConsultation({ audit, setAudit, onClose }: AccountantC
                 await accountantSync.queueTransaction(amount, targetCat.name, item);
 
                 // 2. Optimistic Update (Local State)
-                const newSub = { id: uuidv4(), name: item, amount: amount };
+                const newSub = {
+                    id: uuidv4(),
+                    name: item,
+                    amount: amount,
+                    dateAdded: new Date().toISOString() // V3.0 Watchdog compliance
+                };
                 const updatedCategories = [...audit.categories];
 
                 // Update the category
