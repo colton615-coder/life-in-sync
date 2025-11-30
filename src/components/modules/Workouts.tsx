@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { generateWorkoutPlan } from '@/lib/workout-generator'
 import { EditWorkoutDialog } from '@/components/EditWorkoutDialog'
+import { SarcasticLoader } from '@/components/SarcasticLoader'
 
 type WorkoutStage = 'planning' | 'setup' | 'active' | 'summary'
 
@@ -236,22 +237,9 @@ export function Workouts() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="py-12 flex flex-col items-center justify-center space-y-6"
+                  className="w-full"
                 >
-                   <div className="relative">
-                     <motion.div
-                       animate={{ rotate: 360 }}
-                       transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                       className="rounded-full border-2 border-primary/20 border-t-primary w-16 h-16"
-                     />
-                     <div className="absolute inset-0 flex items-center justify-center">
-                       <Sparkle weight="fill" className="text-primary animate-pulse" size={24} />
-                     </div>
-                   </div>
-                   <div className="text-center space-y-1">
-                     <h3 className="text-lg font-bold text-white tracking-wide">{generationStep}</h3>
-                     <p className="text-sm text-muted-foreground">This may take a few seconds...</p>
-                   </div>
+                  <SarcasticLoader context="gym" className="py-8" />
                 </motion.div>
               ) : (
                 <motion.div

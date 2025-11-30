@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { SwingPoseData } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { Eye, EyeSlash } from '@phosphor-icons/react'
 
 interface PoseOverlayProps {
   videoRef: React.RefObject<HTMLVideoElement | null>
@@ -265,14 +266,18 @@ export function PoseOverlay({
       <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2">
         <button
           onClick={() => setIsVisible(!isVisible)}
-          className="px-3 py-1.5 bg-background/90 backdrop-blur-sm text-xs font-medium rounded-lg border border-border hover:bg-accent transition-colors"
+          className="h-12 w-12 flex items-center justify-center bg-slate-900/40 backdrop-blur-md rounded-xl border border-white/10 hover:bg-slate-800/60 transition-colors"
           aria-label={isVisible ? 'Hide pose overlay' : 'Show pose overlay'}
         >
-          {isVisible ? 'Hide Skeleton' : 'Show Skeleton'}
+          {isVisible ? (
+            <Eye className="w-6 h-6 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" weight="bold" />
+          ) : (
+            <EyeSlash className="w-6 h-6 text-muted-foreground" weight="bold" />
+          )}
         </button>
         
         {isVisible && (
-          <div className="px-3 py-1.5 bg-background/90 backdrop-blur-sm text-xs font-medium rounded-lg border border-border">
+          <div className="h-12 px-4 flex items-center justify-center bg-slate-900/40 backdrop-blur-md text-sm font-medium rounded-xl border border-white/10 font-mono text-cyan-400">
             Frame: {currentFrame + 1} / {poseData.length}
           </div>
         )}

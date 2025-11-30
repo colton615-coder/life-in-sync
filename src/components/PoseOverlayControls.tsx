@@ -49,9 +49,8 @@ export function PoseOverlayControls({
           </div>
           <Button
             variant="ghost"
-            size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="h-8"
+            className="h-12 px-4 bg-slate-900/40 backdrop-blur-md border border-white/10 hover:bg-slate-800/60 transition-colors"
           >
             {isExpanded ? 'Collapse' : 'Expand'}
           </Button>
@@ -161,14 +160,13 @@ export function PoseOverlayControls({
             <div className="pt-2 border-t border-border">
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() => {
                   onLineWidthChange(3)
                   onKeypointRadiusChange(5)
                   onShowSkeletonChange(true)
                   onShowKeypointsChange(true)
                 }}
-                className="w-full text-xs"
+                className="w-full h-12 text-sm bg-slate-900/40 backdrop-blur-md border border-white/10 hover:bg-slate-800/60 transition-colors"
               >
                 Reset to Defaults
               </Button>
