@@ -183,10 +183,10 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
                 variant="ghost"
                 size="icon"
                 onClick={handleEdit}
-                className="text-muted-foreground hover:text-success hover:bg-success/10 glass-morphic border border-transparent hover:border-success/30"
+                className="h-12 w-12 text-muted-foreground hover:text-success bg-slate-900/40 backdrop-blur-md border border-white/10 hover:border-success/30 hover:bg-success/10"
                 aria-label={`Edit ${habit.name} habit`}
               >
-                <PencilSimple size={20} weight="bold" aria-hidden="true" />
+                <PencilSimple size={24} weight="bold" aria-hidden="true" />
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
@@ -194,10 +194,10 @@ export function HabitCard({ habit, onUpdateProgress, onDelete, onOpenEditDialog,
                 variant="ghost"
                 size="icon"
                 onClick={handleDelete}
-                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 glass-morphic border border-transparent hover:border-destructive/30"
+                className="h-12 w-12 text-muted-foreground hover:text-destructive bg-slate-900/40 backdrop-blur-md border border-white/10 hover:border-destructive/30 hover:bg-destructive/10"
                 aria-label={`Delete ${habit.name} habit`}
               >
-                <Trash size={20} weight="bold" aria-hidden="true" />
+                <Trash size={24} weight="bold" aria-hidden="true" />
               </Button>
             </motion.div>
           </div>

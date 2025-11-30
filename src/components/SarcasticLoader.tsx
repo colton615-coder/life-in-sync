@@ -3,8 +3,9 @@ import { motion } from 'framer-motion'
 import { Spinner } from '@phosphor-icons/react'
 import { useState, useEffect } from 'react'
 import { Progress } from '@/components/ui/progress'
+import { cn } from '@/lib/utils'
 
-const SARCASTIC_MESSAGES = [
+const GENERIC_MESSAGES = [
   "Loading... because the internet isn't instant.",
   "Fetching your life data...",
   "Hold on, we're getting the good stuff.",
@@ -13,6 +14,36 @@ const SARCASTIC_MESSAGES = [
   "Doing the math...",
   "Waking up the hamsters...",
   "Locating the bits and bytes...",
+]
+
+const GYM_MESSAGES = [
+  "Locating your muscles...",
+  "Loading weights (they're heavy)...",
+  "Judging your skip days...",
+  "Preparing the pain cave...",
+  "Calculating protein intake...",
+  "Spotting you...",
+  "Calibrating gravity...",
+]
+
+const FINANCE_MESSAGES = [
+  "Calculating how poor you are...",
+  "Judging your Starbucks addiction...",
+  "Finding money you didn't know you lost...",
+  "Consulting the financial spirits...",
+  "Simulating stock market crashes...",
+  "Auditing your bad decisions...",
+  "Searching for your retirement fund...",
+]
+
+const GOLF_MESSAGES = [
+  "Analyzing your slice...",
+  "Finding the fairway (it's hard)...",
+  "Calculating wind speed...",
+  "Polishing the clubs...",
+  "Judging your swing mechanics...",
+  "Loading excuses...",
+  "Calibrating launch angle...",
 ]
 
 const SARCASTIC_PROGRESS_MESSAGES = [
@@ -25,23 +56,50 @@ const SARCASTIC_PROGRESS_MESSAGES = [
     "Simulating stock market crashes...",
 ]
 
+type LoaderContext = 'default' | 'finance' | 'gym' | 'golf';
+
 interface SarcasticLoaderProps {
   text?: string;
+  context?: LoaderContext;
+  className?: string;
 }
 
-export function SarcasticLoader({ text }: SarcasticLoaderProps) {
+export function SarcasticLoader({ text, context = 'default', className }: SarcasticLoaderProps) {
   const [message, setMessage] = useState(text || '')
 
   useEffect(() => {
-    if (!text) {
-        setMessage(SARCASTIC_MESSAGES[Math.floor(Math.random() * SARCASTIC_MESSAGES.length)])
-    } else {
-        setMessage(text)
+    if (text) {
+      setMessage(text);
+      return;
     }
-  }, [text])
+
+    let messages = GENERIC_MESSAGES;
+    switch (context) {
+      case 'gym':
+        messages = GYM_MESSAGES;
+        break;
+      case 'finance':
+        messages = FINANCE_MESSAGES;
+        break;
+      case 'golf':
+        messages = GOLF_MESSAGES;
+        break;
+      default:
+        messages = GENERIC_MESSAGES;
+    }
+
+    setMessage(messages[Math.floor(Math.random() * messages.length)]);
+
+    // Optional: Cycle messages if loading takes too long
+    const interval = setInterval(() => {
+        setMessage(messages[Math.floor(Math.random() * messages.length)]);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [text, context])
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 p-8 min-h-[40vh]">
+    <div className={cn("flex flex-col items-center justify-center gap-4 p-8 min-h-[40vh]", className)}>
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
