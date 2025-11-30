@@ -50,6 +50,7 @@ export interface FinancialAudit {
 
   // Core Data
   monthlyIncome: number | null;
+  liquidAssets?: number; // Added for V3.0 (The CFO) - Cash on Hand/Liquidity
   categories: Category[]; // Dynamic list
 
   // The Audit Phase
