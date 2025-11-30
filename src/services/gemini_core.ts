@@ -10,6 +10,8 @@ import { cleanAndParseJSON } from '../lib/ai-utils';
  */
 import { APP_CONFIG } from '@/lib/constants';
 import { InstructionGuideSchema, InstructionGuide } from '@/types/workout';
+import { FinancialProfile, DetailedBudget } from '@/lib/types';
+import { DetailedBudgetSchema } from '@/lib/validation/finance-validation';
 
 export class GeminiCore {
   private genAI: GoogleGenerativeAI;
@@ -204,5 +206,62 @@ export class GeminiCore {
     `;
 
     return this.generateJSONWithRepair(prompt, InstructionGuideSchema);
+  }
+
+  /**
+   * Generates a detailed financial budget based on the user's profile.
+   * Uses "The Accountant" persona to extract granular subcategory data.
+   */
+  async generateDetailedBudget(profile: FinancialProfile): Promise<{ success: true; data: DetailedBudget } | AppError> {
+    const prompt = `
+      You are "The Accountant", an elite financial advisor.
+
+      **User Profile:**
+      ${JSON.stringify(profile, null, 2)}
+
+      **Objective:**
+      Create a detailed monthly budget for this user.
+
+      **Key Instructions:**
+      1. **Sub-Categorization:** If the user mentions specific merchants or services in their "spendingHabits" (e.g., 'Netflix', 'Gym', 'Starbucks', 'Whole Foods'), you MUST categorize the broad type as the 'Category' and the specific entity as the 'Sub-category'.
+         - Example: If they say "I pay for Netflix", Category="entertainment", SubCategory="Netflix".
+         - Example: "I shop at Whole Foods", Category="food", SubCategory="Whole Foods".
+         - If no specific merchant is known, use a generic subcategory (e.g., "Groceries", "Dining Out").
+
+      2. **Allocation Logic:**
+         - Ensure 'housing' matches their stated cost.
+         - Estimate other costs based on income, location, and family size if not explicitly stated.
+         - Ensure total allocations do not exceed income (unless they are in debt/deficit, then show the reality).
+
+      3. **Structure:**
+         - 'allocations' must be an object where keys are category IDs (e.g., 'housing', 'food') and values are objects containing 'total' and 'subCategories' list.
+         - The sum of 'subCategories' amounts should equal the 'total'.
+
+      **Output Format:**
+      Return a VALID JSON object matching the DetailedBudgetSchema.
+      The 'allocations' keys should be standard: housing, utilities, food, transportation, insurance, healthcare, debtPayment, savings, retirement, entertainment, personal, miscellaneous.
+    `;
+
+    // We use a modified schema validation or cast the result because the keys in 'allocations' are dynamic
+    // but the Schema defines them as record<string, object>.
+
+    // Using generateJSONWithRepair with the imported DetailedBudgetSchema
+    const result = await this.generateJSONWithRepair(prompt, DetailedBudgetSchema);
+
+    if (result.success) {
+      // Hydrate with ID and profileId if missing (though the schema might expect them,
+      // the AI might generate random ones or we need to overwrite them)
+      return {
+        success: true,
+        data: {
+          ...result.data,
+          id: crypto.randomUUID(),
+          profileId: crypto.randomUUID(), // In a real app, this would come from the user
+          createdAt: new Date().toISOString()
+        } as DetailedBudget
+      };
+    }
+
+    return result;
   }
 }

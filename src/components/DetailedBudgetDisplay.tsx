@@ -2,10 +2,12 @@ import { Card } from './Card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Sparkle, TrendUp, Target, Lightbulb, ChartBar, CalendarBlank, ArrowsClockwise, CheckCircle } from '@phosphor-icons/react'
-import { motion } from 'framer-motion'
-import { DetailedBudget } from '@/lib/types'
+import { motion, AnimatePresence } from 'framer-motion'
+import { DetailedBudget, CategoryAllocation } from '@/lib/types'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
+import { useState } from 'react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 
 interface DetailedBudgetDisplayProps {
   budget: DetailedBudget
@@ -13,7 +15,8 @@ interface DetailedBudgetDisplayProps {
 }
 
 export function DetailedBudgetDisplay({ budget, onStartOver }: DetailedBudgetDisplayProps) {
-  const totalAllocated = Object.values(budget.allocations).reduce((sum, val) => sum + val, 0)
+  // Calculate total allocated based on the new nested structure
+  const totalAllocated = Object.values(budget.allocations).reduce((sum, val) => sum + val.total, 0)
   
   const container = {
     hidden: { opacity: 0 },
@@ -31,8 +34,8 @@ export function DetailedBudgetDisplay({ budget, onStartOver }: DetailedBudgetDis
   }
 
   const allocationEntries = Object.entries(budget.allocations)
-    .filter(([, amount]) => amount > 0)
-    .sort(([, a], [, b]) => b - a)
+    .filter(([, data]) => data.total > 0)
+    .sort(([, a], [, b]) => b.total - a.total)
 
   const getCategoryIcon = (category: string) => {
     const icons: Record<string, React.ReactNode> = {
@@ -149,32 +152,16 @@ export function DetailedBudgetDisplay({ budget, onStartOver }: DetailedBudgetDis
           animate="show"
           className="grid gap-4"
         >
-          {allocationEntries.map(([category, amount]) => {
-            const percentage = (amount / budget.totalIncome) * 100
-            return (
-              <motion.div key={category} variants={item}>
-                <Card className="glass-card hover:border-primary/40 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg">
-                        {getCategoryIcon(category)}
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-semibold text-lg mb-1">{formatCategoryName(category)}</div>
-                        <div className="text-sm text-muted-foreground font-medium">
-                          {percentage.toFixed(1)}% of income
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-2xl md:text-3xl font-bold tabular-nums text-primary">
-                      ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </div>
-                  </div>
-                  <Progress value={percentage} className="h-2.5" />
-                </Card>
-              </motion.div>
-            )
-          })}
+          {allocationEntries.map(([category, data]) => (
+             <BudgetCategoryCard
+                key={category}
+                category={category}
+                data={data}
+                totalIncome={budget.totalIncome}
+                getIcon={getCategoryIcon}
+                formatName={formatCategoryName}
+             />
+          ))}
         </motion.div>
       </motion.div>
 
@@ -376,4 +363,73 @@ export function DetailedBudgetDisplay({ budget, onStartOver }: DetailedBudgetDis
       )}
     </motion.div>
   )
+}
+
+function BudgetCategoryCard({ category, data, totalIncome, getIcon, formatName }: {
+  category: string,
+  data: CategoryAllocation,
+  totalIncome: number,
+  getIcon: (c: string) => React.ReactNode,
+  formatName: (c: string) => string
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const percentage = (data.total / totalIncome) * 100;
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
+  }
+
+  return (
+    <motion.div variants={item}>
+      <Card
+        className={`glass-card hover:border-primary/40 transition-all duration-300 cursor-pointer ${isExpanded ? 'border-primary/40' : ''}`}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg">
+              {getIcon(category)}
+            </div>
+            <div className="flex-1">
+              <div className="font-semibold text-lg mb-1 flex items-center gap-2">
+                {formatName(category)}
+                {data.subCategories.length > 0 && (
+                   isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                )}
+              </div>
+              <div className="text-sm text-muted-foreground font-medium">
+                {percentage.toFixed(1)}% of income
+              </div>
+            </div>
+          </div>
+          <div className="text-2xl md:text-3xl font-bold tabular-nums text-primary">
+            ${data.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+        </div>
+        <Progress value={percentage} className="h-2.5" />
+
+        <AnimatePresence>
+          {isExpanded && data.subCategories.length > 0 && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-4 mt-2 border-t border-white/10 space-y-2">
+                {data.subCategories.map((sub, idx) => (
+                  <div key={idx} className="flex justify-between items-center text-sm px-2 py-1 rounded hover:bg-white/5">
+                     <span className="text-muted-foreground">{sub.name}</span>
+                     <span className="font-mono tabular-nums">${sub.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Card>
+    </motion.div>
+  );
 }

@@ -32,7 +32,13 @@ export const FinancialProfileSchema = z.object({
 });
 
 export const DetailedBudgetSchema = z.object({
-  allocations: z.record(z.string(), z.number()),
+  allocations: z.record(z.string(), z.object({
+    total: z.number(),
+    subCategories: z.array(z.object({
+      name: z.string(),
+      amount: z.number()
+    }))
+  })),
   recommendations: z.array(z.object({
     category: z.string(),
     amount: z.number(),
