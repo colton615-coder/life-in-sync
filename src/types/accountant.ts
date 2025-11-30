@@ -7,6 +7,7 @@ export interface Subcategory {
   id: string; // Unique ID (UUID)
   name: string; // User-defined or template name
   amount: number | null; // Monthly spend (null if not yet entered)
+  dateAdded?: string; // ISO 8601 (Added for V3.0 Watchdog)
 }
 
 // A main category containing subcategories (e.g., "Housing", "Food")

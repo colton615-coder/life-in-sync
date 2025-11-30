@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FinancialAudit } from '@/types/accountant';
 import { FinancialReport } from '@/types/financial_report';
 import { useKV } from '@/hooks/use-kv';
@@ -9,6 +9,7 @@ import { RefreshCw, ChevronRight, BrainCircuit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AccountantConsultation } from './AccountantConsultation';
 import { BlueprintDashboardV3 } from './BlueprintDashboardV3';
+import { BudgetWatchdog, InterventionEventDetail } from '@/services/accountant/BudgetWatchdog';
 
 interface BudgetManagerProps {
   audit: FinancialAudit;
@@ -19,6 +20,25 @@ export function BudgetManager({ audit, setAudit }: BudgetManagerProps) {
   const [report] = useKV<FinancialReport | null>('finance-report-v2', null);
   const [activeTab, setActiveTab] = useState<'overview' | 'budget' | 'advice'>('overview');
   const [showConsultation, setShowConsultation] = useState(false);
+  const [activeIntervention, setActiveIntervention] = useState<InterventionEventDetail | null>(null);
+
+  // Initialize Watchdog Service
+  useEffect(() => {
+      BudgetWatchdog.start();
+
+      const handleIntervention = (e: Event) => {
+          const detail = (e as CustomEvent<InterventionEventDetail>).detail;
+          setActiveIntervention(detail);
+          setShowConsultation(true);
+      };
+
+      window.addEventListener('finance-intervention', handleIntervention);
+
+      return () => {
+          BudgetWatchdog.stop();
+          window.removeEventListener('finance-intervention', handleIntervention);
+      };
+  }, []);
 
   // If report is missing but audit is 'completed', something is wrong.
   if (!report) {
@@ -173,7 +193,11 @@ export function BudgetManager({ audit, setAudit }: BudgetManagerProps) {
             <AccountantConsultation
                 audit={audit}
                 setAudit={setAudit}
-                onClose={() => setShowConsultation(false)}
+                onClose={() => {
+                    setShowConsultation(false);
+                    setActiveIntervention(null); // Clear intervention on close
+                }}
+                intervention={activeIntervention}
             />
          )}
        </AnimatePresence>
