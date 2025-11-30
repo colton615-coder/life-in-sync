@@ -8,6 +8,7 @@ import {
   type FieldPath,
   type FieldValues,
 } from 'react-hook-form';
+import { WarningCircle } from '@phosphor-icons/react';
 
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -103,14 +104,17 @@ function FormMessage({ className, ...props }: ComponentProps<"p">) {
   }
 
   return (
-    <p
-      data-slot="form-message"
-      id={formMessageId}
-      className={cn("text-destructive text-sm", className)}
-      {...props}
-    >
-      {body}
-    </p>
+    <div className="flex items-center gap-1.5 mt-1.5">
+       <WarningCircle className="text-rose-400" size={14} weight="fill" />
+       <p
+         data-slot="form-message"
+         id={formMessageId}
+         className={cn("text-rose-400 text-xs font-medium", className)}
+         {...props}
+       >
+         {body}
+       </p>
+    </div>
   )
 }
 
