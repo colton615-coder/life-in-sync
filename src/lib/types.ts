@@ -89,24 +89,21 @@ export interface FinancialProfile {
   createdAt: string
 }
 
+export interface SubCategoryAllocation {
+  name: string
+  amount: number
+}
+
+export interface CategoryAllocation {
+  total: number
+  subCategories: SubCategoryAllocation[]
+}
+
 export interface DetailedBudget {
   id: string
   profileId: string
   totalIncome: number
-  allocations: {
-    housing: number
-    utilities: number
-    food: number
-    transportation: number
-    insurance: number
-    healthcare: number
-    debtPayment: number
-    savings: number
-    retirement: number
-    entertainment: number
-    personal: number
-    miscellaneous: number
-  }
+  allocations: Record<string, CategoryAllocation>
   recommendations: {
     category: string
     amount: number

@@ -398,9 +398,12 @@ export function FinancialAdvisorInterview({ onComplete }: FinancialAdvisorInterv
 
           <div className="space-y-2">
             <Label htmlFor="spending-habits" className="text-base">Describe your current spending habits</Label>
+            <div className="text-sm text-muted-foreground mb-2 italic">
+               Be specific! Mentioning recurring charges helps the AI. (e.g., "I pay $15 for Netflix, $120 for Gym")
+            </div>
             <Textarea
               id="spending-habits"
-              placeholder="e.g., I tend to eat out frequently, I'm frugal with clothing, I spend a lot on hobbies..."
+              placeholder="e.g., I tend to eat out frequently. I pay $15/mo for Netflix and $120 for my local Gym membership..."
               value={formData.spendingHabits}
               onChange={(e) => updateField('spendingHabits', e.target.value)}
               className="min-h-[100px] resize-none"
